@@ -33,17 +33,16 @@ for tr = 1:sampleSize
     
     %angular noise difference
     angluar_diff = theta3-alpha;
-
     %the negative loglikelihood of angle
     neg_ll_angle = log(2*pi) + log(besseli(0,nu)) - nu*cos(angluar_diff);
 
     %distance noise difference
-    l3_prime = G3*h;
-    dist_diff = l3-l3_prime;
+    dist_diff = l3-h;
     %the negative loglikelihood of distance on all trials include OoB
     %trials
     neg_ll_dist = 1/2*log(2*pi) + log(sigma) + (dist_diff^2)/(2*sigma^2);
-
+    
+    %joint distribution (negative loglikelihood)
     neg_ll = neg_ll_angle + neg_ll_dist;
 
     negloglikelihood = negloglikelihood + neg_ll;

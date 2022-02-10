@@ -11,7 +11,7 @@ disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
 %load('Data/AllDataErrors2018_V2.mat');
 %V3 including the missing participants, which should always being loaded now
 load('Data/AllDataErrors2018_V3.mat');
-savefolder = "C:/Users/Zilong/Desktop/path integration model/Andrea's matlab code/GammaModelAllReplaceWithBias/Output/";
+savefolder = "C:/Users/Zilong/Desktop/path integration model/VectorAdditionModel/Output/";
 
 %% choose the model 
 
@@ -51,9 +51,9 @@ config.NumParams = numParams;
 
 config.USEOoBTrials = true;
 if config.USEOoBTrials==true
-    resultfolder = savefolder+"AllGroupsXXX/"+Model_Name+"/OoB/";
+    resultfolder = savefolder+"AllGroups/"+Model_Name+"/OoB/";
 else
-    resultfolder = savefolder+"AllGroupsXXX/"+Model_Name+"/NoOoB/";
+    resultfolder = savefolder+"AllGroups/"+Model_Name+"/NoOoB/";
 end
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')

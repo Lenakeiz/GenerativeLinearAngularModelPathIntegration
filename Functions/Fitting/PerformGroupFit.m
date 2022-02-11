@@ -1,5 +1,5 @@
 function Results = PerformGroupFit(GroupData, config)
-%% Fit Theta parameters for a single group
+%%Fit parameters for a single group
 % GroupData is the extracted data containing the tracked positions of
 % the participants as well as the their responses
 % nsamples is the number of random samples to be taken when modelling the
@@ -9,6 +9,7 @@ function Results = PerformGroupFit(GroupData, config)
 TRIAL_FILTER = config.TrialFilter;
 numParams = config.NumParams;
 USE_OOB_TRIALS = config.USEOoBTrials;
+Model_Name = config.ModelName;
 
 % Calculating sample size
 sampleSize = size(GroupData.FlagPos,2);
@@ -87,24 +88,18 @@ for j = 1:sampleSize
 
     end
 
-%     if length(flagpos{j}) < numParams
-%         disp("%%%%%%%%%%%%%%% WARNING: " + length(flagpos{j}) + " datapoints for the current participant %%%%%%%%%%%%%%%\n");
-%         disp("%%%%%%%%%%%%%%% Skipping participant " + num2str(j) + " %%%%%%%%%%%%%%%");
-%         % NUmber of parameters in return matrix is fixed
-%         GroupParameters{j} = NaN(8,1);
-%         IC{j} = nan;
-%         flagOoB{j} = [];
-%         continue;
-%     end
-
     if length(flagpos{j}) < numParams
         disp("%%%%%%%%%%%%%%% WARNING: " + length(flagpos{j}) + " datapoints for the current participant %%%%%%%%%%%%%%%\n");
     end
 
-    if isempty(flagpos{j})
+    if isempty(flagpos{j}) %this can be empty if we remove the OoB trials. Empty coz all the trials are OoB trials
         disp("%%%%%%%%%%%%%%% Skipping participant " + num2str(j) + " because no datapoints available %%%%%%%%%%%%%%%");
         % NUmber of parameters in return matrix is fixed
-        GroupParameters{j} = NaN(7,1);
+        if Model_Name == "G1G2"%G1G2 model has 8 parameters in total
+            GroupParameters{j} = NaN(8,1);
+        else %gamma model has 7 parameters in total
+            GroupParameters{j} = NaN(7,1);
+        end
         IC{j} = nan;
         flagOoB{j} = [];
         continue;
@@ -128,17 +123,14 @@ for j = 1:sampleSize
         %THETADX{j}{tr} = ([0; anglebetween(segments{j}{tr}(1:end-1,:), segments{j}{tr}(2:end,:))]);
         outer_rad = deg2rad([0; anglebetween(segments{j}{tr}(1:end-1,:), segments{j}{tr}(2:end,:))]);
 
-        %MODIFICATION!ATTENTION!:wrap the angle to [0-2pi)
-        %THETADX{j}{tr} = outer_rad;
+        %wrap the angle into (0,2pi)
         THETADX{j}{tr} = mod(outer_rad, 2*pi);
         
     end
-    
-    disp(['%%%%%%%%%%%%%%% STARTING FIT PER PARTICIPANT ' num2str(j) ' %%%%%%%%%%%%%%%']);
 
     % Do the data fitting
+    disp(['%%%%%%%%%%%%%%% STARTING FIT PER PARTICIPANT ' num2str(j) ' %%%%%%%%%%%%%%%']);
     [GroupParameters{j}, IC{j}] = FitData(DX{j},THETADX{j},X{j},OoBLen{j},flagOoB{j},config);
-
 end
 
 %Transforming the fitted parameters to array
@@ -149,8 +141,7 @@ for i=1:rows
    estimatedParams(i,:) = GroupParameters{i}';
 end
 
-%estimatedParams = filloutliers(estimatedParams, 'nearest','mean')
-
+%put all results into a matlab structure
 Results.estimatedParams = estimatedParams;
 Results.X = X;
 Results.DX = DX;

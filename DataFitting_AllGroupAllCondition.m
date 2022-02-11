@@ -28,7 +28,7 @@ savefolder = "C:/Users/Zilong/Desktop/path integration model/VectorAdditionModel
 %Model_Name = "set_g3_1_k3_0"; numParams=5; 
 
 %no consider of the rotation gain factor in leg2, i.e., G1, G2, G3=1, g2=1, g3, k3, sigma, nu. #params=6
-Model_Name = "set_g2_1"; numParams=6;  
+Model_Name = "BaseModel"; numParams=5;  
 
 %no consider of the length gain factor in leg2, i.e., G1, G2=1, G3=1, g2, g3, k3, sigma, nu. #params=6
 %Model_Name = "set_bG2_1"; numParams=6;   
@@ -224,12 +224,12 @@ function [AllParams, AllX, AllDX, AllTheta, AllflagOoB, AllIC] = getResultsAllCo
         tic
         disp('%%%%%%%%%%%%%%% PERFORMING FITTING %%%%%%%%%%%%%%%');
         Results = PerformGroupFit(TransformedData, config);
-        AllParams{TRIAL_FILTER} = Results.estimatedParams; 
-        AllX{TRIAL_FILTER} = Results.X;
-        AllDX{TRIAL_FILTER}=Results.DX;      
-        AllTheta{TRIAL_FILTER}=Results.THETADX;
-        AllflagOoB{TRIAL_FILTER}=Results.flagOoB;
-        AllIC{TRIAL_FILTER}=Results.IC;
+%         AllParams{TRIAL_FILTER} = Results.estimatedParams; 
+%         AllX{TRIAL_FILTER} = Results.X;
+%         AllDX{TRIAL_FILTER}=Results.DX;      
+%         AllTheta{TRIAL_FILTER}=Results.THETADX;
+%         AllflagOoB{TRIAL_FILTER}=Results.flagOoB;
+%         AllIC{TRIAL_FILTER}=Results.IC;
         toc
     end
 end    

@@ -60,7 +60,12 @@ config.ModelName = "AngleErrModel";
 config.NumParams = 4;
 [~, ~, ~, ~, AllYoungIC_AngleErr] = getResultsAllConditions(YoungControls, config);
 
-%% 5,Our base model
+%% 7,the G1 G2 model
+config.ModelName = "G1G2";
+config.NumParams = 6;
+[~, ~, ~, ~, AllYoungIC_G1G2] = getResultsAllConditions(YoungControls, config);
+
+%% 8,Our base model
 %no consider of the rotation gain factor in leg2, i.e., gamma, G3=1, g2=1, g3, k3, sigma, nu. #params=6
 config.ModelName = "BaseModel";
 config.NumParams = 5;
@@ -75,18 +80,19 @@ IC_Ego = getRawIC(AllYoungIC_Ego, ICType);
 IC_EgoWeber = getRawIC(AllYoungIC_EgoWeber, ICType);
 IC_DistErr = getRawIC(AllYoungIC_DistErr, ICType);
 IC_AngleErr = getRawIC(AllYoungIC_AngleErr, ICType);
+IC_G1G2 = getRawIC(AllYoungIC_G1G2, ICType);
 IC_Base = getRawIC(AllYoungIC_Base, ICType);
 
 IC_Cond1 = [IC_Allo{1}',IC_AlloWeber{1}',IC_Ego{1}', IC_EgoWeber{1}',...
-            IC_DistErr{1}', IC_AngleErr{1}', IC_Base{1}'];
+            IC_DistErr{1}', IC_AngleErr{1}', IC_G1G2{1}', IC_Base{1}'];
 plotBoxPlot(IC_Cond1, "NoChange", ICType, resultfolder);
 
 IC_Cond2 = [IC_Allo{2}',IC_AlloWeber{2}',IC_Ego{2}', IC_EgoWeber{2}',... 
-            IC_DistErr{2}', IC_AngleErr{2}',IC_Base{2}'];
+            IC_DistErr{2}', IC_AngleErr{2}', IC_G1G2{2}', IC_Base{2}'];
 plotBoxPlot(IC_Cond2, "NoDistalCue", ICType, resultfolder);
 
 IC_Cond3 = [IC_Allo{3}',IC_AlloWeber{3}',IC_Ego{3}', IC_EgoWeber{3}',...
-            IC_DistErr{3}', IC_AngleErr{3}',IC_Base{3}'];
+            IC_DistErr{3}', IC_AngleErr{3}', IC_G1G2{3}', IC_Base{3}'];
 plotBoxPlot(IC_Cond3, "NoOpticalFlow", ICType, resultfolder);
 
 % Box Plot of BIC 
@@ -98,18 +104,19 @@ IC_Ego = getRawIC(AllYoungIC_Ego, ICType);
 IC_EgoWeber = getRawIC(AllYoungIC_EgoWeber, ICType);
 IC_DistErr = getRawIC(AllYoungIC_DistErr, ICType);
 IC_AngleErr = getRawIC(AllYoungIC_AngleErr, ICType);
+IC_G1G2 = getRawIC(AllYoungIC_G1G2, ICType);
 IC_Base = getRawIC(AllYoungIC_Base, ICType);
 
 IC_Cond1 = [IC_Allo{1}',IC_AlloWeber{1}',IC_Ego{1}', IC_EgoWeber{1}',...
-            IC_DistErr{1}', IC_AngleErr{1}', IC_Base{1}'];
+            IC_DistErr{1}', IC_AngleErr{1}', IC_G1G2{1}', IC_Base{1}'];
 plotBoxPlot(IC_Cond1, "NoChange", ICType, resultfolder);
 
 IC_Cond2 = [IC_Allo{2}',IC_AlloWeber{2}',IC_Ego{2}', IC_EgoWeber{2}',... 
-            IC_DistErr{2}', IC_AngleErr{2}',IC_Base{2}'];
+            IC_DistErr{2}', IC_AngleErr{2}', IC_G1G2{2}', IC_Base{2}'];
 plotBoxPlot(IC_Cond2, "NoDistalCue", ICType, resultfolder);
 
 IC_Cond3 = [IC_Allo{3}',IC_AlloWeber{3}',IC_Ego{3}', IC_EgoWeber{3}',...
-            IC_DistErr{3}', IC_AngleErr{3}',IC_Base{3}'];
+            IC_DistErr{3}', IC_AngleErr{3}', IC_G1G2{3}', IC_Base{3}'];
 plotBoxPlot(IC_Cond3, "NoOpticalFlow", ICType, resultfolder);
 
 % Box Plot of NegLogLikelihood
@@ -121,18 +128,19 @@ IC_Ego = getRawIC(AllYoungIC_Ego, ICType);
 IC_EgoWeber = getRawIC(AllYoungIC_EgoWeber, ICType);
 IC_DistErr = getRawIC(AllYoungIC_DistErr, ICType);
 IC_AngleErr = getRawIC(AllYoungIC_AngleErr, ICType);
+IC_G1G2 = getRawIC(AllYoungIC_G1G2, ICType);
 IC_Base = getRawIC(AllYoungIC_Base, ICType);
 
 IC_Cond1 = [IC_Allo{1}',IC_AlloWeber{1}',IC_Ego{1}', IC_EgoWeber{1}',...
-            IC_DistErr{1}', IC_AngleErr{1}', IC_Base{1}'];
+            IC_DistErr{1}', IC_AngleErr{1}', IC_G1G2{1}', IC_Base{1}'];
 plotBoxPlot(IC_Cond1, "NoChange", ICType, resultfolder);
 
 IC_Cond2 = [IC_Allo{2}',IC_AlloWeber{2}',IC_Ego{2}', IC_EgoWeber{2}',... 
-            IC_DistErr{2}', IC_AngleErr{2}',IC_Base{2}'];
+            IC_DistErr{2}', IC_AngleErr{2}', IC_G1G2{2}', IC_Base{2}'];
 plotBoxPlot(IC_Cond2, "NoDistalCue", ICType, resultfolder);
 
 IC_Cond3 = [IC_Allo{3}',IC_AlloWeber{3}',IC_Ego{3}', IC_EgoWeber{3}',...
-            IC_DistErr{3}', IC_AngleErr{3}',IC_Base{3}'];
+            IC_DistErr{3}', IC_AngleErr{3}', IC_G1G2{3}', IC_Base{3}'];
 plotBoxPlot(IC_Cond3, "NoOpticalFlow", ICType, resultfolder);
 
 %% A function for getting Results from All Conditions
@@ -228,8 +236,9 @@ function plotBoxPlot(data, CondType, ICType, resultfolder)
     %% main boxplot one box for each column in data
     bp = boxplot(data, 'whisker',whisker_value,'symbol','', ... %symbol ='' making outlier invisible
                 'color','k', ...
+                'Notch','on',...
                 'widths',box_widths_value,...
-                'labels', {'Allo', 'AlloWeber', 'Ego', 'EgoWeber', 'DistErr', 'AngleErr', 'Base'});
+                'labels', {'Allo', 'AlloWeber', 'Ego', 'EgoWeber', 'DistErr', 'AngleErr', 'G1G2', 'Base'});
     
     set(bp,'linewidth',box_lineWidth);
 
@@ -259,7 +268,7 @@ function plotBoxPlot(data, CondType, ICType, resultfolder)
         h(i).Color = median_color;
     end
 
-    %% add scatter plot of the data
+    %% add scatter plot and the mean of the data
     num_points = size(data,1);
     for i=1:size(data,2)
         hold on
@@ -269,6 +278,11 @@ function plotBoxPlot(data, CondType, ICType, resultfolder)
                 'MarkerFaceColor',box_colors(i,:), ...
                 'MarkerFaceAlpha',scatter_color_transparency,...
                 'LineWidth',scatter_marker_edgeWidth); 
+        hold on
+        scatter(i, mean(data(:,i)), 4*scatter_markerSize, 'd',...
+                'filled','MarkerEdgeColor','k', ...
+                'MarkerFaceColor','w', ...
+                'LineWidth',scatter_marker_edgeWidth);
     end
 
 %     %% Adjusting outliers

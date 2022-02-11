@@ -56,8 +56,8 @@ for tr = 1:sampleSize
     
         %considering execution turn error
         theta3_prime = g3*alpha+b;
-        %also wrap theta3_prime to (0,2pi) (We don;t have to coz of the 'cos' below, 
-        %also coz of the nonconstriant which restrict theta3_prime in [0,2pi]).
+        %also wrap theta3_prime to (0,2pi) (We don't have to coz of the 'cos' below, 
+        %also coz of the nonconstriant (if there is) which restrict theta3_prime in [0,2pi]).
         theta3_prime = mod(theta3_prime, 2*pi);
         
         %angular noise difference

@@ -23,6 +23,9 @@ if ~exist(resultfolder, 'dir')
    mkdir(resultfolder);
 end
 
+%% Setting colors
+ColorPattern; 
+
 %% 1,the allocentric PI model without weber's law
 config.UseGlobalSearch = false; %only one param, convex error func, no need for GlobalSearch
 config.ModelName = "Allo";
@@ -180,18 +183,7 @@ function plotBoxPlot(data, CondType, ICType, resultfolder)
     set(0,'DefaultAxesFontSize',12)
     set(0,'DefaultTextFontSize',12)
 
-    %%% Color definition %%%
-    color_scheme_npg = [0.9020    0.2941    0.2078; ...
-                        0.3020    0.7333    0.8353; ...
-                        0         0.6275    0.5294; ...
-                        0.2353    0.3294    0.5333; ...
-                        0.9529    0.6078    0.4980; ...
-                        0.5176    0.5686    0.7059; ...
-                        0.5686    0.8196    0.7608; ...
-                        0.8627         0         0; ...
-                        0.4941    0.3804    0.2824; ...
-                        0.6902    0.6118    0.5216 ];    
-    box_colors = color_scheme_npg(1:num_boxplots,:);
+    box_colors = config.color_scheme_npg(1:num_boxplots,:);
     
     %% main boxplot one box for each column in data
     bp = boxplot(data, 'whisker',whisker_value,'symbol','', ... %symbol ='' making outlier invisible

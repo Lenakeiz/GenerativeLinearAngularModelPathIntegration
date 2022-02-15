@@ -11,7 +11,7 @@ disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
 %load('Data/AllDataErrors2018_V2.mat');
 %V3 including the missing participants, which should always being loaded now
 load('Data/AllDataErrors2018_V3.mat');
-savefolder = "C:/Users/Zilong/Desktop/path integration model/Andrea's matlab code/PathIntegrationDataEstimationModelling/Output/";
+savefolder = pwd + "/Output/";
 
 %% choose the model 
 

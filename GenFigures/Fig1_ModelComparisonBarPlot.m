@@ -1,5 +1,5 @@
 %% FittingData 
-% This script will lo%% FittingData 
+% This script will load FittingData 
 % This script will load the data, rotate the paths and call the solver to find the parameters 
 % that minimize the mean distance to generated x3' which matchs the physical leg 3
 
@@ -11,7 +11,7 @@ disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
 %load('Data/AllDataErrors2018_V2.mat');
 %V3 including the missing participants, which should always being loaded now
 load('Data/AllDataErrors2018_V3.mat');
-savefolder = "C:/Users/Zilong/Desktop/path integration model/Andrea's matlab code/GammaModelAllReplaceWithBias/Output/";
+savefolder = pwd + "/Output/";
 
 %% setting the configuration
 config.UseGlobalSearch = true;
@@ -31,18 +31,18 @@ if ~exist(resultfolder, 'dir')
 end
 
 %% the allocentric PI model without weber's law
-config.ModelName = "allocentric";
+config.ModelName = "Allo";
 config.NumParams = 1;
 [~, ~, ~, ~, AllYoungIC_Allocentric] = getResultsAllConditions(YoungControls, config);
 
 %% the allocentric PI model with weber's law
-config.ModelName = "allocentric_weber";
+config.ModelName = "AlloWeber";
 config.NumParams = 1;
 [~, ~, ~, ~, AllYoungIC_AllocentricWeber] = getResultsAllConditions(YoungControls, config);
 
 %% Our base model
 %no consider of the rotation gain factor in leg2, i.e., gamma, G3=1, g2=1, g3, k3, sigma, nu. #params=6
-config.ModelName = "set_g2_1";
+config.ModelName = "BaseModel";
 config.NumParams = 5;
 [~, ~, ~, ~, AllYoungIC_Base] = getResultsAllConditions(YoungControls, config);
 

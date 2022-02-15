@@ -16,7 +16,7 @@ load('Data/AllDataErrors2018_V3.mat');
 % Remember to change the PLOT_FEEDBACK to 0 inside the function inside otherwise it will pause and
 % display the paths
 disp('%%%%%%%%%%%%%%% TRANSFORME DATA ... %%%%%%%%%%%%%%%');
-resultfolder = "C:/Users/Zilong/Desktop/path integration model/Andrea's matlab code/PathIntegrationDataEstimationModelling/Output/OoB/";
+resultfolder = "./Output/OoB/";
 %Note that I put "CalculateOoBErrors" into TransformPathsOoB to remove the repeat calling of "CalculateOoBErrors" here.
 YoungControls        = TransformPathsOoB(YoungControls);
 

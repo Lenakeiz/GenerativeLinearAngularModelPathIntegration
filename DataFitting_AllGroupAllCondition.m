@@ -49,12 +49,8 @@ Model_Name = "BaseModel"; numParams=5;
 config.ModelName = Model_Name;
 config.NumParams = numParams;
 
-config.USEOoBTrials = true;
-if config.USEOoBTrials==true
-    resultfolder = savefolder+"AllGroups/"+Model_Name+"/OoB/";
-else
-    resultfolder = savefolder+"AllGroups/"+Model_Name+"/NoOoB/";
-end
+resultfolder = savefolder+"AllGroups/"+Model_Name;
+
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
    mkdir(resultfolder);
@@ -76,11 +72,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% loop over three different conditions for Young participants
 %load the data
-if config.USEOoBTrials==true
-    YoungControls = TransformPathsOoB(YoungControls);
-else
-    YoungControls = TransformPaths(YoungControls);
-end
+YoungControls = TransformPaths(YoungControls);
 %get fitting results for all conditions
 [AllYoungParams, AllYoungX, AllYoungDX, AllYoungTheta, AllYoungflagOoB, AllYoungIC] = getResultsAllConditions(YoungControls, config);
 %storing IC
@@ -102,11 +94,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% loop over three different conditions for HeathyOld participants
 %load the data
-if config.USEOoBTrials==true
-    HealthyOld = TransformPathsOoB(HealthyControls);
-else
-    HealthyOld = TransformPaths(HealthyControls);
-end
+HealthyOld = TransformPaths(HealthyControls);
+
 %get fitting results for all conditions
 [AllHealthyOldParams, AllHealthyOldX, AllHealthyOldDX, AllHealthyOldTheta, AllHealthyOldflagOoB, AllHealthyOldIC] = getResultsAllConditions(HealthyOld, config);
 %storing IC
@@ -127,11 +116,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% loop over three different conditions for MCIPos participants
 %load the data
-if config.USEOoBTrials==true
-    MCIPos = TransformPathsOoB(MCIPos);
-else
-    MCIPos = TransformPaths(MCIPos);
-end
+MCIPos = TransformPaths(MCIPos);
 %get fitting results for all conditions
 [AllMCIPosParams, AllMCIPosX, AllMCIPosDX, AllMCIPosTheta, AllMCIPosflagOoB, AllMCIPosIC] = getResultsAllConditions(MCIPos, config);
 %storing IC
@@ -152,11 +137,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% loop over three different conditions for MCINeg participants
 %load the data
-if config.USEOoBTrials==true
-    MCINeg = TransformPathsOoB(MCINeg);
-else
-    MCINeg = TransformPaths(MCINeg);
-end
+MCINeg = TransformPaths(MCINeg);
 %get fitting results for all conditions
 [AllMCINegParams, AllMCINegX, AllMCINegDX, AllMCINegTheta, AllMCINegflagOoB, AllMCINegIC] = getResultsAllConditions(MCINeg, config);
 %storing IC
@@ -177,11 +158,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %% loop over three different conditions for MCIUnk participants
 %load the data
-if config.USEOoBTrials==true
-    MCIUnk= TransformPathsOoB(Unknown);
-else
-    MCIUnk = TransformPaths(Unknown);
-end
+MCIUnk = TransformPaths(Unknown);
 %get fitting results for all conditions
 [AllMCIUnkParams, AllMCIUnkX, AllMCIUnkDX, AllMCIUnkTheta, AllMCIUnkflagOoB, AllMCIUnkIC] = getResultsAllConditions(MCIUnk, config);
 %storing IC

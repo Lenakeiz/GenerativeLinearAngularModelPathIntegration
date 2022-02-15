@@ -8,7 +8,6 @@ function Results = PerformGroupFit(GroupData, config)
 %load configurations necessary for the script
 TRIAL_FILTER = config.TrialFilter;
 numParams = config.NumParams;
-USE_OOB_TRIALS = config.USEOoBTrials;
 Model_Name = config.ModelName;
 
 % Calculating sample size
@@ -34,58 +33,39 @@ IC = cell(1, sampleSize);
 anglebetween = @(va,vb) atan2d(va(:,1).*vb(:,2) - va(:,2).*vb(:,1), va(:,1).*vb(:,1) + va(:,2).*vb(:,2));
 
 for j = 1:sampleSize
-    
-    if USE_OOB_TRIALS == false
-        %Excluding out of bound trials from the data, roughly removing 30% of the total trials across all participants
-        if(TRIAL_FILTER == 0)
-            %processing the data from all conditions
-            flagpos{j}  = GroupData.FlagPos{j}(GroupData.Cond{j}(:,3) == 0);
-            finalpos{j} = GroupData.TrigPos{j}(GroupData.Cond{j}(:,3) == 0);
-            flagOoB{j} = zeros(1,length(flagpos{j}));
-            OoBLen{j} = zeros(1,length(flagpos{j}));
-        else
-            %processing data according to "TRIAL_FILTER", with 1 no change, 2 no distal cues, 3 no optic flow
-            flagpos{j}  = GroupData.FlagPos{j}(GroupData.Cond{j}(:,3) == 0 & GroupData.CondTable{1,j}.Condition == TRIAL_FILTER);
-            finalpos{j} = GroupData.TrigPos{j}(GroupData.Cond{j}(:,3) == 0 & GroupData.CondTable{1,j}.Condition == TRIAL_FILTER);
-            flagOoB{j} = zeros(1,length(flagpos{j}));
-            OoBLen{j} = zeros(1,length(flagpos{j}));
+    if(TRIAL_FILTER == 0)
+        %processing the data from all conditions
+        flagpos{j}  = GroupData.FlagPos{j};
+        OoBLen{j} = GroupData.Errors{j}.OoBLength;
+        for idx = 1:size(GroupData.TrigPos{j},1)
+            %If not out of bound or out of bound data is not present then take the trigpos
+            if(GroupData.CondTable{j}.OutOfBound(idx) == 0 | isnan(GroupData.OutOfBoundPos{1,j}{idx}(1,1)))
+                finalpos{j,1}(idx,1) = GroupData.TrigPos{j}(idx);
+                flagOoB{j}(idx) = 0; %OoB flag is 0, i.e., not OoB trial
+            elseif(GroupData.CondTable{j}.OutOfBound(idx) == 1)
+                finalpos{j,1}(idx,1) = GroupData.ReconstructedOOB{j}.ReconstructedOoB(idx);
+                flagOoB{j}(idx) = 1; %OoB flag is 0, i.e., it is OoB trial
+            end
         end
-    else 
-        %incuding all the OoB trials. all  about 30% amount of data
-        if(TRIAL_FILTER == 0)
-            %processing the data from all conditions
-            flagpos{j}  = GroupData.FlagPos{j};
-            OoBLen{j} = GroupData.Errors{j}.OoBLength;
-            for idx = 1:size(GroupData.TrigPos{j},1)
+        
+    else
+        %processing data according to "TRIAL_FILTER", with 1 no change, 2 no distal cues, 3 no optic flow
+        flagpos{j}  = GroupData.FlagPos{j}(GroupData.CondTable{1,j}.Condition == TRIAL_FILTER);
+        OoBLen{j} = GroupData.Errors{j}.OoBLength(GroupData.CondTable{1,j}.Condition == TRIAL_FILTER);
+        tempCnt = 1;
+        for idx = 1:size(GroupData.TrigPos{j},1)
+            if(GroupData.CondTable{1,j}.Condition(idx) == TRIAL_FILTER)
                 %If not out of bound or out of bound data is not present then take the trigpos
                 if(GroupData.CondTable{j}.OutOfBound(idx) == 0 | isnan(GroupData.OutOfBoundPos{1,j}{idx}(1,1)))
-                    finalpos{j,1}(idx,1) = GroupData.TrigPos{j}(idx);
-                    flagOoB{j}(idx) = 0; %OoB flag is 0, i.e., not OoB trial
+                    finalpos{j,1}(tempCnt,1) = GroupData.TrigPos{j}(idx);
+                    flagOoB{j}(tempCnt) = 0; %OoB flag is 0, i.e., not OoB trial
                 elseif(GroupData.CondTable{j}.OutOfBound(idx) == 1)
-                    finalpos{j,1}(idx,1) = GroupData.ReconstructedOOB{j}.ReconstructedOoB(idx);
-                    flagOoB{j}(idx) = 1; %OoB flag is 0, i.e., it is OoB trial
+                    finalpos{j,1}(tempCnt,1) = GroupData.ReconstructedOOB{j}.ReconstructedOoB(idx);
+                    flagOoB{j}(tempCnt) = 1; %OoB flag is 0, i.e., it is OoB trial
                 end
-            end
-        else
-            %processing data according to "TRIAL_FILTER", with 1 no change, 2 no distal cues, 3 no optic flow
-            flagpos{j}  = GroupData.FlagPos{j}(GroupData.CondTable{1,j}.Condition == TRIAL_FILTER);
-            OoBLen{j} = GroupData.Errors{j}.OoBLength(GroupData.CondTable{1,j}.Condition == TRIAL_FILTER);
-            tempCnt = 1;
-            for idx = 1:size(GroupData.TrigPos{j},1)
-                if(GroupData.CondTable{1,j}.Condition(idx) == TRIAL_FILTER)
-                    %If not out of bound or out of bound data is not present then take the trigpos
-                    if(GroupData.CondTable{j}.OutOfBound(idx) == 0 | isnan(GroupData.OutOfBoundPos{1,j}{idx}(1,1)))
-                        finalpos{j,1}(tempCnt,1) = GroupData.TrigPos{j}(idx);
-                        flagOoB{j}(tempCnt) = 0; %OoB flag is 0, i.e., not OoB trial
-                    elseif(GroupData.CondTable{j}.OutOfBound(idx) == 1)
-                        finalpos{j,1}(tempCnt,1) = GroupData.ReconstructedOOB{j}.ReconstructedOoB(idx);
-                        flagOoB{j}(tempCnt) = 1; %OoB flag is 0, i.e., it is OoB trial
-                    end
-                    tempCnt = tempCnt + 1;
-                end
+                tempCnt = tempCnt + 1;
             end
         end
-
     end
 
     if length(flagpos{j}) < numParams

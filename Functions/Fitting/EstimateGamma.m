@@ -1,4 +1,4 @@
-function [negloglikelihood] = Estimate(gamma, G3, g2, g3, b, sigma, nu, DX, THETAX, X, ifallo, useweber)
+function [negloglikelihood] = EstimateGamma(gamma, G3, g2, g3, b, sigma, nu, DX, THETAX, X, ifallo, useweber)
 %Estimate_ZL_mul means there exists a gain factor in the angle, which can not derive as a rotation matrix
 %ESTIMATE Summary of this function goes here
 %   gamma is the discount factor

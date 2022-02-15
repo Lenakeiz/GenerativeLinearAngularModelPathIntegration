@@ -16,12 +16,8 @@ savefolder = pwd + "/Output/";
 %% setting the configuration
 config.UseGlobalSearch = true;
 config.USEOoBTrials = true;
-%load the data
-if config.USEOoBTrials== true 
-    YoungControls = TransformPathsOoB(YoungControls); 
-else
-    YoungControls = TransformPaths(YoungControls);
-end
+
+YoungControls = TransformPaths(YoungControls);
 
 resultfolder = savefolder+"ModelComp/";
 config.ResultFolder = resultfolder;

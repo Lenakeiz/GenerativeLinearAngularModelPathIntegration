@@ -1,4 +1,4 @@
-function [ Errors,  OoBInfo] = CalculateOoB(FlagPos, TrigPos, OutOfBoundPos, CondTable)
+function [ Errors,  OoBInfo] = CalculateErrors(FlagPos, TrigPos, OutOfBoundPos, CondTable)
         
     debug_plotting = 0;
     
@@ -63,7 +63,9 @@ function [ Errors,  OoBInfo] = CalculateOoB(FlagPos, TrigPos, OutOfBoundPos, Con
         end 
 
         recontructedVert = thirdConePositions(idx(i),:) + directionOoB*inferredOoBLength;
- 
+
+% Alternatevely we have tried to discard the inferred location if that's
+% shorter than the out of bound dected location
 %         if(currOoBLength < inferredOoBLength)
 %             OoBInfo.ReconstructedOoB{idx(i),:} = [recontructedVert(1) 0 recontructedVert(2)];
 %         else

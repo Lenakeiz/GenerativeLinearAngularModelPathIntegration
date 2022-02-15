@@ -1,10 +1,8 @@
-function [FitParams, IC] = FitData(DX,THETAX,X,OoBLen,flagOoB,config)
+function [FitParams, IC] = FitData(DX,THETAX,X,config)
 %FITDATA Function to fit the data on a single participant
 %   DX is a cell structure containing the segment of each trial
 %   THETAX is the turning angle (wrong at the moment)
 %   X is the data points
-%   OoBLen is the Out-of-Boundary length with 0 for non-oob trials, >0 for oob trials.
-%   flagOoB is the flag of Out-of-Boundary trials, with 0 non-OoB trials 1 those OoB trials
 %   the noise for each trial
 
 %load configurations necessary for the script
@@ -80,7 +78,7 @@ else %gamma based model
     end
     
     %calculate the likelihood function
-    estFnc = @(FP) Estimate(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),DX,THETAX,X,ifallo,useweber);
+    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),DX,THETAX,X,ifallo,useweber);
 end
 
 %% parameter fitting

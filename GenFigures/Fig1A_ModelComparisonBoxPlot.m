@@ -1,5 +1,5 @@
 %% FittingData 
-% This script will lo%% FittingData 
+% This script will load FittingData 
 % This script will load the data, rotate the paths and call the solver to find the parameters 
 % that minimize the mean distance to generated x3' which matchs the physical leg 3
 
@@ -8,13 +8,10 @@ clearvars; clear all; close all; clc;
 
 %% Loading data
 disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
-%load('Data/AllDataErrors2018_V2.mat');
-%V3 including the missing participants, which should always being loaded now
 load('Data/AllDataErrors2018_V3.mat');
 savefolder = pwd + "/Output/";
 
 %% setting the configuration
-config.UseGlobalSearch = true;
 config.USEOoBTrials = true;
 
 YoungControls = TransformPaths(YoungControls);
@@ -27,42 +24,32 @@ if ~exist(resultfolder, 'dir')
 end
 
 %% 1,the allocentric PI model without weber's law
+config.UseGlobalSearch = false; %only one param, convex error func, no need for GlobalSearch
 config.ModelName = "Allo";
 config.NumParams = 1;
 [~, ~, ~, ~, AllYoungIC_Allo] = getResultsAllConditions(YoungControls, config);
 
 %% 2,the allocentric PI model with weber's law
+config.UseGlobalSearch = false; %only one param, convex error func, no need for GlobalSearch
 config.ModelName = "AlloWeber";
 config.NumParams = 1;
 [~, ~, ~, ~, AllYoungIC_AlloWeber] = getResultsAllConditions(YoungControls, config);
 
 %% 3,the egocentric PI model
+config.UseGlobalSearch = true;
 config.ModelName = "Ego";
 config.NumParams = 2;
 [~, ~, ~, ~, AllYoungIC_Ego] = getResultsAllConditions(YoungControls, config);
 
 %% 4,the egocentric PI model with weber's law
+config.UseGlobalSearch = true;
 config.ModelName = "EgoWeber";
 config.NumParams = 2;
 [~, ~, ~, ~, AllYoungIC_EgoWeber] = getResultsAllConditions(YoungControls, config);
 
-%% 5,the distance error model
-config.ModelName = "DistErrModel";
-config.NumParams = 3;
-[~, ~, ~, ~, AllYoungIC_DistErr] = getResultsAllConditions(YoungControls, config);
-
-%% 6,the angle error model
-config.ModelName = "AngleErrModel";
-config.NumParams = 4;
-[~, ~, ~, ~, AllYoungIC_AngleErr] = getResultsAllConditions(YoungControls, config);
-
-%% 7,the G1 G2 model
-config.ModelName = "G1G2";
-config.NumParams = 6;
-[~, ~, ~, ~, AllYoungIC_G1G2] = getResultsAllConditions(YoungControls, config);
-
-%% 8,Our base model
+%% 5,Our base model
 %no consider of the rotation gain factor in leg2, i.e., gamma, G3=1, g2=1, g3, k3, sigma, nu. #params=6
+config.UseGlobalSearch = true;
 config.ModelName = "BaseModel";
 config.NumParams = 5;
 [~, ~, ~, ~, AllYoungIC_Base] = getResultsAllConditions(YoungControls, config);
@@ -74,21 +61,15 @@ IC_Allo = getRawIC(AllYoungIC_Allo, ICType);
 IC_AlloWeber = getRawIC(AllYoungIC_AlloWeber, ICType);
 IC_Ego = getRawIC(AllYoungIC_Ego, ICType);
 IC_EgoWeber = getRawIC(AllYoungIC_EgoWeber, ICType);
-IC_DistErr = getRawIC(AllYoungIC_DistErr, ICType);
-IC_AngleErr = getRawIC(AllYoungIC_AngleErr, ICType);
-IC_G1G2 = getRawIC(AllYoungIC_G1G2, ICType);
 IC_Base = getRawIC(AllYoungIC_Base, ICType);
 
-IC_Cond1 = [IC_Allo{1}',IC_AlloWeber{1}',IC_Ego{1}', IC_EgoWeber{1}',...
-            IC_DistErr{1}', IC_AngleErr{1}', IC_G1G2{1}', IC_Base{1}'];
+IC_Cond1 = [IC_Allo{1}',IC_AlloWeber{1}',IC_Ego{1}', IC_EgoWeber{1}', IC_Base{1}'];
 plotBoxPlot(IC_Cond1, "NoChange", ICType, resultfolder);
 
-IC_Cond2 = [IC_Allo{2}',IC_AlloWeber{2}',IC_Ego{2}', IC_EgoWeber{2}',... 
-            IC_DistErr{2}', IC_AngleErr{2}', IC_G1G2{2}', IC_Base{2}'];
+IC_Cond2 = [IC_Allo{2}',IC_AlloWeber{2}',IC_Ego{2}', IC_EgoWeber{2}', IC_Base{2}'];
 plotBoxPlot(IC_Cond2, "NoDistalCue", ICType, resultfolder);
 
-IC_Cond3 = [IC_Allo{3}',IC_AlloWeber{3}',IC_Ego{3}', IC_EgoWeber{3}',...
-            IC_DistErr{3}', IC_AngleErr{3}', IC_G1G2{3}', IC_Base{3}'];
+IC_Cond3 = [IC_Allo{3}',IC_AlloWeber{3}',IC_Ego{3}', IC_EgoWeber{3}', IC_Base{3}'];
 plotBoxPlot(IC_Cond3, "NoOpticalFlow", ICType, resultfolder);
 
 % Box Plot of BIC 
@@ -98,21 +79,15 @@ IC_Allo = getRawIC(AllYoungIC_Allo, ICType);
 IC_AlloWeber = getRawIC(AllYoungIC_AlloWeber, ICType);
 IC_Ego = getRawIC(AllYoungIC_Ego, ICType);
 IC_EgoWeber = getRawIC(AllYoungIC_EgoWeber, ICType);
-IC_DistErr = getRawIC(AllYoungIC_DistErr, ICType);
-IC_AngleErr = getRawIC(AllYoungIC_AngleErr, ICType);
-IC_G1G2 = getRawIC(AllYoungIC_G1G2, ICType);
 IC_Base = getRawIC(AllYoungIC_Base, ICType);
 
-IC_Cond1 = [IC_Allo{1}',IC_AlloWeber{1}',IC_Ego{1}', IC_EgoWeber{1}',...
-            IC_DistErr{1}', IC_AngleErr{1}', IC_G1G2{1}', IC_Base{1}'];
+IC_Cond1 = [IC_Allo{1}',IC_AlloWeber{1}',IC_Ego{1}', IC_EgoWeber{1}', IC_Base{1}'];
 plotBoxPlot(IC_Cond1, "NoChange", ICType, resultfolder);
 
-IC_Cond2 = [IC_Allo{2}',IC_AlloWeber{2}',IC_Ego{2}', IC_EgoWeber{2}',... 
-            IC_DistErr{2}', IC_AngleErr{2}', IC_G1G2{2}', IC_Base{2}'];
+IC_Cond2 = [IC_Allo{2}',IC_AlloWeber{2}',IC_Ego{2}', IC_EgoWeber{2}', IC_Base{2}'];
 plotBoxPlot(IC_Cond2, "NoDistalCue", ICType, resultfolder);
 
-IC_Cond3 = [IC_Allo{3}',IC_AlloWeber{3}',IC_Ego{3}', IC_EgoWeber{3}',...
-            IC_DistErr{3}', IC_AngleErr{3}', IC_G1G2{3}', IC_Base{3}'];
+IC_Cond3 = [IC_Allo{3}',IC_AlloWeber{3}',IC_Ego{3}', IC_EgoWeber{3}', IC_Base{3}'];
 plotBoxPlot(IC_Cond3, "NoOpticalFlow", ICType, resultfolder);
 
 % Box Plot of NegLogLikelihood
@@ -122,21 +97,15 @@ IC_Allo = getRawIC(AllYoungIC_Allo, ICType);
 IC_AlloWeber = getRawIC(AllYoungIC_AlloWeber, ICType);
 IC_Ego = getRawIC(AllYoungIC_Ego, ICType);
 IC_EgoWeber = getRawIC(AllYoungIC_EgoWeber, ICType);
-IC_DistErr = getRawIC(AllYoungIC_DistErr, ICType);
-IC_AngleErr = getRawIC(AllYoungIC_AngleErr, ICType);
-IC_G1G2 = getRawIC(AllYoungIC_G1G2, ICType);
 IC_Base = getRawIC(AllYoungIC_Base, ICType);
 
-IC_Cond1 = [IC_Allo{1}',IC_AlloWeber{1}',IC_Ego{1}', IC_EgoWeber{1}',...
-            IC_DistErr{1}', IC_AngleErr{1}', IC_G1G2{1}', IC_Base{1}'];
+IC_Cond1 = [IC_Allo{1}',IC_AlloWeber{1}',IC_Ego{1}', IC_EgoWeber{1}', IC_Base{1}'];
 plotBoxPlot(IC_Cond1, "NoChange", ICType, resultfolder);
 
-IC_Cond2 = [IC_Allo{2}',IC_AlloWeber{2}',IC_Ego{2}', IC_EgoWeber{2}',... 
-            IC_DistErr{2}', IC_AngleErr{2}', IC_G1G2{2}', IC_Base{2}'];
+IC_Cond2 = [IC_Allo{2}',IC_AlloWeber{2}',IC_Ego{2}', IC_EgoWeber{2}', IC_Base{2}'];
 plotBoxPlot(IC_Cond2, "NoDistalCue", ICType, resultfolder);
 
-IC_Cond3 = [IC_Allo{3}',IC_AlloWeber{3}',IC_Ego{3}', IC_EgoWeber{3}',...
-            IC_DistErr{3}', IC_AngleErr{3}', IC_G1G2{3}', IC_Base{3}'];
+IC_Cond3 = [IC_Allo{3}',IC_AlloWeber{3}',IC_Ego{3}', IC_EgoWeber{3}', IC_Base{3}'];
 plotBoxPlot(IC_Cond3, "NoOpticalFlow", ICType, resultfolder);
 
 %% A function for getting Results from All Conditions
@@ -202,11 +171,6 @@ function plotBoxPlot(data, CondType, ICType, resultfolder)
     scatter_marker_edgeColor = 'k';
     scatter_marker_edgeWidth = 0.5;
     scatter_color_transparency = 0.7; %faceAlpha
-%     outlier_marker = 's';
-%     outlier_jitter_value = 0.1;
-%     outlier_marker_edgeColor = 'k';
-%     outlier_markerSize = 4; 
-%     outlier_marker_edgeWidth = 0.5;
 
     %%% Font type and size setting %%%
     % Using Arial as default because all journals normally require the font to
@@ -234,7 +198,7 @@ function plotBoxPlot(data, CondType, ICType, resultfolder)
                 'color','k', ...
                 'Notch','on',...
                 'widths',box_widths_value,...
-                'labels', {'Allo', 'AlloWeber', 'Ego', 'EgoWeber', 'DistErr', 'AngleErr', 'G1G2', 'Base'});
+                'labels', {'Allo', 'AlloWeber', 'Ego', 'EgoWeber', 'Base'});
     
     set(bp,'linewidth',box_lineWidth);
 
@@ -280,15 +244,6 @@ function plotBoxPlot(data, CondType, ICType, resultfolder)
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);
     end
-
-%     %% Adjusting outliers
-%     h=findobj(gca,'tag','Outliers');
-%     for i = 1:length(h)
-%         h(i).MarkerFaceColor = [0.5,0.5,0.5]; %alpha(0.7)
-%         h(i).MarkerEdgeColor = outlier_marker_edgeColor;
-%         h(i).MarkerSize = outlier_markerSize;
-%         h(i).LineWidth = outlier_marker_edgeWidth;
-%     end
 
     %% Further post-processing the figure
     set(gca, ...

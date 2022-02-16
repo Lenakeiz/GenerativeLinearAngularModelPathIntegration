@@ -15,6 +15,9 @@ if ~exist(resultfolder, 'dir')
    mkdir(resultfolder);
 end
 
+%% Setting colors
+ColorPattern; 
+
 %% 1,the allocentric PI model without weber's law
 config.UseGlobalSearch = false; %only one param, convex error func, no need for GlobalSearch
 config.ModelName = "Allo";

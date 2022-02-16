@@ -117,7 +117,7 @@ function plotLeg1(AllParams, AllDX, config)
         pt = plot([1 2], [all_Leg1_mean all_Leg1_prime_mean], '-d', 'Color', forground_color, 'linewidth',8, 'MarkerSize', 8);
         pt.Color = [pt.Color 0.8];
 
-        ylabel('Distance (meters)');
+        ylabel('Distance (in meters)');
         %Further post-processing the figure
         set(gca, ...
             'Box'         , 'off'     , ...
@@ -132,7 +132,7 @@ function plotLeg1(AllParams, AllDX, config)
             'LineWidth'   , .5        );
         title(conditionName{TRIAL_FILTER});
         %% save figure
-        exportgraphics(f,config.ResultFolder+"/Leg1Change"+conditionName{TRIAL_FILTER}+".png",'Resolution',300);
+        exportgraphics(f,config.ResultFolder+"/Leg1Change"+conditionName{TRIAL_FILTER}+".pdf",'Resolution',300);
     end
 end
 

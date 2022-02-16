@@ -57,7 +57,7 @@ function plotLeg1(AllParams, AllDX, config)
     for TRIAL_FILTER=1:numConds
         
         %% set figure info
-        f = figure('visible','off','Position', [100 100 600 400]);
+        f = figure('visible','off','Position', [100 100 700 500]);
 
         %%% Font type and size setting %%%
         % Using Arial as default because all journals normally require the font to
@@ -94,7 +94,7 @@ function plotLeg1(AllParams, AllDX, config)
             color_idx = mod(subj,numcolors)+1;
             cm = background_color(color_idx,:);
             %add jitter to making better plot
-            jitter_value = 0.3*(rand(1)-0.5);
+            jitter_value = 0.6*(rand(1)-0.5);
             for tr_id = 1:sampleSize %for each trial
                 leg1 = subjDX{tr_id}(1); Leg1(tr_id)=leg1;
                 leg1_prime = gamma^2*G3*leg1; Leg1_prime(tr_id)=leg1_prime;
@@ -126,13 +126,15 @@ function plotLeg1(AllParams, AllDX, config)
             'XColor'      , [.1 .1 .1], ...
             'YColor'      , [.1 .1 .1], ...
             'XTick'       , [1,2],... 
-            'XTickLabel'  , {'Physical','Mental'},...
-            'XLim'        , [0.6, 2.4],...
+            'XTickLabel'  , {'Physical leg 1','Mental leg 1'},...
+            'Ytick'       , [1:ceil(max([all_Leg1,all_Leg1_prime]))],...
+            'XLim'        , [0.5, 2.5],...
             'YLim'        , [0,ceil(max([all_Leg1,all_Leg1_prime]))],...
             'LineWidth'   , .5        );
         title(conditionName{TRIAL_FILTER});
         %% save figure
-        exportgraphics(f,config.ResultFolder+"/Leg1Change"+conditionName{TRIAL_FILTER}+".pdf",'Resolution',300);
+        exportgraphics(f,config.ResultFolder+"/Leg1Change"+conditionName{TRIAL_FILTER}+".png",'Resolution',300);
+        exportgraphics(f,config.ResultFolder+"/Leg1Change"+conditionName{TRIAL_FILTER}+".pdf",'Resolution',300, 'ContentType','vector');
     end
 end
 

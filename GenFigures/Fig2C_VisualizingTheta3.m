@@ -57,7 +57,7 @@ function plotTheta3(AllParams, AllDX, AllTheta, config)
     for TRIAL_FILTER=1:numConds
         
         %% set figure info
-        f = figure('visible','off','Position', [100 100 600 400]);
+        f = figure('visible','off','Position', [100 100 700 500]);
 
         %%% Font type and size setting %%%
         % Using Arial as default because all journals normally require the font to
@@ -96,7 +96,7 @@ function plotTheta3(AllParams, AllDX, AllTheta, config)
             color_idx = mod(subj,numcolors)+1;
             cm = background_color(color_idx,:);
             %add jitter to making better plot
-            jitter_value = 0.3*(rand(1)-0.5);
+            jitter_value = 0.6*(rand(1)-0.5);
 
             for tr_id = 1:sampleSize %for each trial
                 theta3 = subjTHETADX{tr_id}(3); 
@@ -159,15 +159,16 @@ function plotTheta3(AllParams, AllDX, AllTheta, config)
             'XColor'      , [.1 .1 .1], ...
             'YColor'      , [.1 .1 .1], ...
             'XTick'       , [1,2],... 
-            'XTickLabel'  , {'Mental encoded','Mental executed'},...
+            'XTickLabel'  , {'Encoded angle 3','Executed angle 3'},...
             'YTick'       , [0,0.5*pi,pi,1.5*pi,2*pi],... 
-            'YTickLabel'  , {'0','0.5\pi','\pi','1.5\pi','2\pi'},...            
-            'XLim'        , [0.6, 2.4],...
+            'YTickLabel'  , {'0','0.5pi','pi', '1.5pi', '2pi'},...  
+            'XLim'        , [0.5, 2.5],...
             'YLim'        , [0,2*pi],...
             'LineWidth'   , .5        );
         title(conditionName{TRIAL_FILTER});
         %% save figure
-        exportgraphics(f,config.ResultFolder+"/Theta3Change"+conditionName{TRIAL_FILTER}+".pdf",'Resolution',300);
+        exportgraphics(f,config.ResultFolder+"/Theta3Change"+conditionName{TRIAL_FILTER}+".png",'Resolution',300);
+        exportgraphics(f,config.ResultFolder+"/Theta3Change"+conditionName{TRIAL_FILTER}+".pdf",'Resolution',300,'ContentType','vector');
     end
 end
 

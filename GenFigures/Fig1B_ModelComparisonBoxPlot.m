@@ -1,8 +1,3 @@
-%% FittingData 
-% This script will load FittingData 
-% This script will load the data, rotate the paths and call the solver to find the parameters 
-% that minimize the mean distance to generated x3' which matchs the physical leg 3
-
 %% Cleaning variables
 clearvars; clear all; close all; clc;
 
@@ -13,85 +8,129 @@ YoungControls = TransformPaths(YoungControls);
 savefolder = pwd + "/Output/";
 
 %% setting the configuration
-resultfolder = savefolder+"ModelComp/Fig1B";
+config.UseGlobalSearch = true;
+resultfolder = savefolder+"PaperFigs/Fig1B";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
    mkdir(resultfolder);
 end
 
-%% 1,the distance error model
-config.ModelName = "DistErrModel";
-config.NumParams = 3;
-[~, ~, ~, ~, AllYoungIC_DistErr] = getResultsAllConditions(YoungControls, config);
+%% 1, the egocentric model
+config.UseGlobalSearch = true;
+config.ModelName = "Ego";
+config.NumParams = 2;
+[~, ~, ~, ~, AllYoungIC_Ego] = getResultsAllConditions(YoungControls, config);
 
 %% 2,the angle error model
 config.ModelName = "AngleErrModel";
 config.NumParams = 4;
 [~, ~, ~, ~, AllYoungIC_AngleErr] = getResultsAllConditions(YoungControls, config);
 
-%% 3,the G1 G2 model
+%% 3,the EqualDiscount Model
+config.ModelName = "EqualDiscount";
+config.NumParams = 3;
+[~, ~, ~, ~, AllYoungIC_EqualDiscount] = getResultsAllConditions(YoungControls, config);
+
+%% 4,the distance error model
+config.ModelName = "DistErrModel";
+config.NumParams = 3;
+[~, ~, ~, ~, AllYoungIC_DistErr] = getResultsAllConditions(YoungControls, config);
+
+%% 5,the G1 G2 model
 config.ModelName = "G1G2";
 config.NumParams = 6;
 [~, ~, ~, ~, AllYoungIC_G1G2] = getResultsAllConditions(YoungControls, config);
 
-%% 5,Our base model
+%% 6,Our base model
 %no consider of the rotation gain factor in leg2, i.e., gamma, G3=1, g2=1, g3, k3, sigma, nu. #params=6
-config.UseGlobalSearch = true;
 config.ModelName = "BaseModel";
 config.NumParams = 5;
 [~, ~, ~, ~, AllYoungIC_Base] = getResultsAllConditions(YoungControls, config);
 
+%%
+ModelNames = {'Ego', 'AngleErrModel', 'EqualDiscount', 'DistErrModel', 'G1G2', 'BaseModel'};
+
 %% Box Plot of AIC
 ICType = "AIC";
 
-IC_DistErr = getRawIC(AllYoungIC_DistErr, ICType);
+IC_Ego = getRawIC(AllYoungIC_Ego, ICType);
 IC_AngleErr = getRawIC(AllYoungIC_AngleErr, ICType);
+IC_EqualDiscount = getRawIC(AllYoungIC_EqualDiscount, ICType);
+IC_DistErr = getRawIC(AllYoungIC_DistErr, ICType);
 IC_G1G2 = getRawIC(AllYoungIC_G1G2, ICType);
 IC_Base = getRawIC(AllYoungIC_Base, ICType);
 
-IC_Cond1 = [IC_DistErr{1}', IC_AngleErr{1}', IC_G1G2{1}', IC_Base{1}'];
-plotBoxPlot(IC_Cond1, "NoChange", ICType, resultfolder);
+IC_AllConds = cell(1,3);
 
-IC_Cond2 = [IC_DistErr{2}', IC_AngleErr{2}', IC_G1G2{2}', IC_Base{2}'];
-plotBoxPlot(IC_Cond2, "NoDistalCue", ICType, resultfolder);
+IC_Cond1 = [IC_Ego{1}', IC_AngleErr{1}', IC_EqualDiscount{1}', IC_DistErr{1}', IC_G1G2{1}',  IC_Base{1}'];
+IC_AllConds{1} = IC_Cond1;
+plotBoxPlot(IC_Cond1, ModelNames, "NoChange", ICType, resultfolder);
 
-IC_Cond3 = [IC_DistErr{3}', IC_AngleErr{3}', IC_G1G2{3}', IC_Base{3}'];
-plotBoxPlot(IC_Cond3, "NoOpticalFlow", ICType, resultfolder);
+IC_Cond2 = [IC_Ego{2}', IC_AngleErr{2}', IC_EqualDiscount{2}', IC_DistErr{2}', IC_G1G2{2}',  IC_Base{2}'];
+IC_AllConds{2} = IC_Cond2;
+plotBoxPlot(IC_Cond2, ModelNames, "NoDistalCue", ICType, resultfolder);
+
+IC_Cond3 = [IC_Ego{3}', IC_AngleErr{3}', IC_EqualDiscount{3}', IC_DistErr{3}', IC_G1G2{3}',  IC_Base{3}'];
+IC_AllConds{3} = IC_Cond3;
+plotBoxPlot(IC_Cond3, ModelNames, "NoOpticalFlow", ICType, resultfolder);
+
+%plot all conditions in one figure
+plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, resultfolder)
 
 % Box Plot of BIC 
 ICType = "BIC";
 
-IC_DistErr = getRawIC(AllYoungIC_DistErr, ICType);
+IC_Ego = getRawIC(AllYoungIC_Ego, ICType);
 IC_AngleErr = getRawIC(AllYoungIC_AngleErr, ICType);
+IC_EqualDiscount = getRawIC(AllYoungIC_EqualDiscount, ICType);
+IC_DistErr = getRawIC(AllYoungIC_DistErr, ICType);
 IC_G1G2 = getRawIC(AllYoungIC_G1G2, ICType);
 IC_Base = getRawIC(AllYoungIC_Base, ICType);
 
-IC_Cond1 = [IC_DistErr{1}', IC_AngleErr{1}', IC_G1G2{1}', IC_Base{1}'];
-plotBoxPlot(IC_Cond1, "NoChange", ICType, resultfolder);
+IC_AllConds = cell(1,3);
 
-IC_Cond2 = [IC_DistErr{2}', IC_AngleErr{2}', IC_G1G2{2}', IC_Base{2}'];
-plotBoxPlot(IC_Cond2, "NoDistalCue", ICType, resultfolder);
+IC_Cond1 = [IC_Ego{1}', IC_AngleErr{1}', IC_EqualDiscount{1}', IC_DistErr{1}', IC_G1G2{1}',  IC_Base{1}'];
+IC_AllConds{1} = IC_Cond1;
+plotBoxPlot(IC_Cond1, ModelNames, "NoChange", ICType, resultfolder);
 
-IC_Cond3 = [IC_DistErr{3}', IC_AngleErr{3}', IC_G1G2{3}', IC_Base{3}'];
-plotBoxPlot(IC_Cond3, "NoOpticalFlow", ICType, resultfolder);
+IC_Cond2 = [IC_Ego{2}', IC_AngleErr{2}', IC_EqualDiscount{2}', IC_DistErr{2}', IC_G1G2{2}',  IC_Base{2}'];
+IC_AllConds{2} = IC_Cond2;
+plotBoxPlot(IC_Cond2, ModelNames, "NoDistalCue", ICType, resultfolder);
+
+IC_Cond3 = [IC_Ego{3}', IC_AngleErr{3}', IC_EqualDiscount{3}', IC_DistErr{3}', IC_G1G2{3}',  IC_Base{3}'];
+IC_AllConds{3} = IC_Cond3;
+plotBoxPlot(IC_Cond3, ModelNames, "NoOpticalFlow", ICType, resultfolder);
+
+%plot all conditions in one figure
+plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, resultfolder)
 
 % Box Plot of NegLogLikelihood
 ICType = "NegLogLikelihood";
 
-IC_DistErr = getRawIC(AllYoungIC_DistErr, ICType);
+IC_Ego = getRawIC(AllYoungIC_Ego, ICType);
 IC_AngleErr = getRawIC(AllYoungIC_AngleErr, ICType);
+IC_EqualDiscount = getRawIC(AllYoungIC_EqualDiscount, ICType);
+IC_DistErr = getRawIC(AllYoungIC_DistErr, ICType);
 IC_G1G2 = getRawIC(AllYoungIC_G1G2, ICType);
 IC_Base = getRawIC(AllYoungIC_Base, ICType);
 
-IC_Cond1 = [IC_DistErr{1}', IC_AngleErr{1}', IC_G1G2{1}', IC_Base{1}'];
-plotBoxPlot(IC_Cond1, "NoChange", ICType, resultfolder);
+IC_AllConds = cell(1,3);
 
-IC_Cond2 = [IC_DistErr{2}', IC_AngleErr{2}', IC_G1G2{2}', IC_Base{2}'];
-plotBoxPlot(IC_Cond2, "NoDistalCue", ICType, resultfolder);
+IC_Cond1 = [IC_Ego{1}', IC_AngleErr{1}', IC_EqualDiscount{1}', IC_DistErr{1}', IC_G1G2{1}',  IC_Base{1}'];
+IC_AllConds{1} = IC_Cond1;
+plotBoxPlot(IC_Cond1, ModelNames, "NoChange", ICType, resultfolder);
 
-IC_Cond3 = [IC_DistErr{3}', IC_AngleErr{3}', IC_G1G2{3}', IC_Base{3}'];
-plotBoxPlot(IC_Cond3, "NoOpticalFlow", ICType, resultfolder);
+IC_Cond2 = [IC_Ego{2}', IC_AngleErr{2}', IC_EqualDiscount{2}', IC_DistErr{2}', IC_G1G2{2}',  IC_Base{2}'];
+IC_AllConds{2} = IC_Cond2;
+plotBoxPlot(IC_Cond2, ModelNames, "NoDistalCue", ICType, resultfolder);
+
+IC_Cond3 = [IC_Ego{3}', IC_AngleErr{3}', IC_EqualDiscount{3}', IC_DistErr{3}', IC_G1G2{3}',  IC_Base{3}'];
+IC_AllConds{3} = IC_Cond3;
+plotBoxPlot(IC_Cond3, ModelNames, "NoOpticalFlow", ICType, resultfolder);
+
+%plot all conditions in one figure
+plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, resultfolder)
 
 %% A function for getting Results from All Conditions
 function [AllParams, AllX, AllDX, AllTheta, AllIC] = getResultsAllConditions(TransformedData, config)
@@ -139,7 +178,7 @@ function IC_AllConds=getRawIC(IC, ICType)
 end
 
 %% function for Box plot
-function plotBoxPlot(data, CondType, ICType, resultfolder)
+function plotBoxPlot(data, ModelNames, CondType, ICType, resultfolder)
 
     f = figure('visible','off','Position', [100 100 600 400]);
     
@@ -166,11 +205,11 @@ function plotBoxPlot(data, CondType, ICType, resultfolder)
     set(0,'DefaultTextFontSize',12)
 
     %%% Color definition %%%
-    color_scheme_npg = [0.9020    0.2941    0.2078; ...
+    color_scheme_npg = [0         0.6275    0.5294; ...  %Color for our model (blue)
+                        0.9020    0.2941    0.2078; ...
                         0.3020    0.7333    0.8353; ...
                         0.9529    0.6078    0.4980; ...                     
                         0.2353    0.3294    0.5333; ...
-                        0         0.6275    0.5294; ...  %Color for our model 
                         0.5176    0.5686    0.7059; ...
                         0.5686    0.8196    0.7608; ...
                         0.8627         0         0; ...
@@ -183,7 +222,7 @@ function plotBoxPlot(data, CondType, ICType, resultfolder)
                 'color','k', ...
                 'Notch','on',...
                 'widths',box_widths_value,...
-                'labels', {'DistErr', 'AngleErr', 'G1G2', 'Base'});
+                'labels', ModelNames);
     
     set(bp,'linewidth',box_lineWidth);
 
@@ -201,7 +240,7 @@ function plotBoxPlot(data, CondType, ICType, resultfolder)
     h = findobj(gca,'Tag','Box');
     for i = 1:length(h)
         %note that first getting the most right box, so do "length(h)-i+1"
-        patch(get(h(i),'XData'),get(h(i),'YData'),box_colors(length(h)-i+1,:),'FaceAlpha',box_color_transparency);
+        patch(get(h(i),'XData'),get(h(i),'YData'),box_colors(i,:),'FaceAlpha',box_color_transparency);
     end
     % Sending patch to back of the figure so that median can be drawn on top of it
     set(gca,'children',flipud(get(gca,'children'))) 
@@ -215,12 +254,13 @@ function plotBoxPlot(data, CondType, ICType, resultfolder)
 
     %% add scatter plot and the mean of the data
     num_points = size(data,1);
+    num_boxplots = size(data,2);
     for i=1:size(data,2)
         hold on
         x = i*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
         scatter(x, data(:,i), scatter_markerSize, ...
                 'filled','MarkerEdgeColor',scatter_marker_edgeColor, ...
-                'MarkerFaceColor',box_colors(i,:), ...
+                'MarkerFaceColor',box_colors(num_boxplots-i+1,:), ...
                 'MarkerFaceAlpha',scatter_color_transparency,...
                 'LineWidth',scatter_marker_edgeWidth); 
         hold on
@@ -231,6 +271,11 @@ function plotBoxPlot(data, CondType, ICType, resultfolder)
     end
 
     %% Further post-processing the figure
+    if ICType=='AIC' | ICType=='BIC'
+        ylimup = 75;
+    else
+        ylimup = 35;
+    end    
     set(gca, ...
         'Box'         , 'off'     , ...
         'TickDir'     , 'out'     , ...
@@ -238,8 +283,140 @@ function plotBoxPlot(data, CondType, ICType, resultfolder)
         'XColor'      , [.1 .1 .1], ...
         'YColor'      , [.1 .1 .1], ...
         'XTick'       , 1:1:100,... 
+        'XLim'        , [0.5,length(ModelNames)+0.5],...
+        'YLim'        , [0,ylimup],...
         'LineWidth'   , .5        );
 
     %% save figure
-    exportgraphics(f,resultfolder+"/boxplot_"+ICType+CondType+".png",'Resolution',300);
+    exportgraphics(f,resultfolder+"/"+ICType+"_"+CondType+".png",'Resolution',300);
 end
+
+%% function for Box plot of all conditions
+function plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, resultfolder)
+
+    f = figure('visible','off','Position', [100 100 1400 400]);
+    conditionName = {'No Change', 'No Distal Cue', 'No Optical Flow'};
+
+    nrows = 1;ncols = 3; 
+    % w and h of each axis in normalized units
+    axisw = (1 / ncols) * 0.8; axish = (1 / nrows) * 0.8;
+
+    for kk=1:3
+        % calculate the left, bottom coordinate of this subplot
+        axisl = (1 / ncols) * (kk-1);
+        subplot(1,3,kk, 'position', [axisl, 0.1, axisw, axish]);
+        %subplot(1,3,kk);
+        data = IC_AllConds{kk};
+
+        %%%set paramsters
+        num_boxplots = size(data,2);
+        box_lineWidth = 0.5;
+        whisker_value = 1.5;
+        box_widths_value = 0.6;
+        box_color_transparency = 0.5; %faceAlpha
+        median_lineWidth = 2;
+        median_color = 'k';
+        scatter_jitter_value = 0.1;
+        scatter_markerSize=10;
+        scatter_marker_edgeColor = 'k';
+        scatter_marker_edgeWidth = 0.5;
+        scatter_color_transparency = 0.7; %faceAlpha
+    
+        %%% Font type and size setting %%%
+        % Using Arial as default because all journals normally require the font to
+        % be either Arial or Helvetica
+        set(0,'DefaultAxesFontName','Arial')
+        set(0,'DefaultTextFontName','Arial')
+        set(0,'DefaultAxesFontSize',12)
+        set(0,'DefaultTextFontSize',12)
+    
+        %%% Color definition %%%
+        color_scheme_npg = [0         0.6275    0.5294; ...  %Color for our model (blue)
+                            0.9020    0.2941    0.2078; ...
+                            0.3020    0.7333    0.8353; ...
+                            0.9529    0.6078    0.4980; ...                     
+                            0.2353    0.3294    0.5333; ...
+                            0.5176    0.5686    0.7059; ...
+                            0.5686    0.8196    0.7608; ...
+                            0.8627         0         0; ...
+                            0.4941    0.3804    0.2824; ...
+                            0.6902    0.6118    0.5216 ];    
+        box_colors = color_scheme_npg(1:num_boxplots,:);
+        
+        %% main boxplot one box for each column in data
+        bp = boxplot(data, 'whisker',whisker_value,'symbol','', ... %symbol ='' making outlier invisible
+                    'color','k', ...
+                    'Notch','on',...
+                    'widths',box_widths_value,...
+                    'labels', ModelNames);
+        
+        set(bp,'linewidth',box_lineWidth);
+    
+        if ICType=="AIC"
+            ylabel('Akaike information criterion (AIC)');
+        elseif ICType=="BIC"
+            ylabel('Bayesian Inference Criterion (BIC)');
+        elseif ICType=="NegLogLikelihood"
+            ylabel('Negative Loglikelihood');
+        else
+            error("Choose correct IC type!");
+        end
+        
+        %% Coloring each box
+        h = findobj(gca,'Tag','Box');
+        for i = 1:length(h)
+            %note that first getting the most right box, so do "length(h)-i+1"
+            patch(get(h(i),'XData'),get(h(i),'YData'),box_colors(i,:),'FaceAlpha',box_color_transparency);
+        end
+        % Sending patch to back of the figure so that median can be drawn on top of it
+        %set(gca,'children',flipud(get(gca,'children'))) 
+    
+        %% Adjusting median
+        h=findobj(gca,'tag','Median');
+        for i = 1:length(h)
+            h(i).LineWidth = median_lineWidth;
+            h(i).Color = median_color;
+        end
+    
+        %% add scatter plot and the mean of the data
+        num_points = size(data,1);
+        num_boxplots = size(data,2);
+        for i=1:size(data,2)
+            hold on
+            x = i*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
+            scatter(x, data(:,i), scatter_markerSize, ...
+                    'filled','MarkerEdgeColor',scatter_marker_edgeColor, ...
+                    'MarkerFaceColor',box_colors(num_boxplots-i+1,:), ...
+                    'MarkerFaceAlpha',scatter_color_transparency,...
+                    'LineWidth',scatter_marker_edgeWidth); 
+            hold on
+            scatter(i, mean(data(:,i)), 4*scatter_markerSize, 'd',...
+                    'filled','MarkerEdgeColor','k', ...
+                    'MarkerFaceColor','w', ...
+                    'LineWidth',scatter_marker_edgeWidth);
+        end
+    
+        %% Further post-processing the figure
+        if ICType=='AIC' | ICType=='BIC'
+            ylimup = 75;
+        else
+            ylimup = 35;
+        end
+        set(gca, ...
+            'Box'         , 'off'     , ...
+            'TickDir'     , 'out'     , ...
+            'TickLength'  , [.01 .01] , ...
+            'XColor'      , [.1 .1 .1], ...
+            'YColor'      , [.1 .1 .1], ...
+            'XTick'       , 1:1:100,... 
+            'XLim'        , [0.5,length(ModelNames)+0.5],...
+            'YLim'        , [0,ylimup],...
+            'LineWidth'   , .5        );
+        title(conditionName{kk});
+        
+    end
+
+    %% save figure
+    exportgraphics(f,resultfolder+"/AAll_"+ICType+".png",'Resolution',300);
+end
+

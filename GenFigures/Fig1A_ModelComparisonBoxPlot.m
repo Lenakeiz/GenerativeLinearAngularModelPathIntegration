@@ -1,8 +1,3 @@
-%% FittingData 
-% This script will load FittingData 
-% This script will load the data, rotate the paths and call the solver to find the parameters 
-% that minimize the mean distance to generated x3' which matchs the physical leg 3
-
 %% Cleaning variables
 clearvars; clear all; close all; clc;
 
@@ -13,7 +8,7 @@ YoungControls = TransformPaths(YoungControls);
 savefolder = pwd + "/Output/";
 
 %% setting the configuration
-resultfolder = savefolder+"ModelComp/Fig1A";
+resultfolder = savefolder+"PaperFigs/Fig1A";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
@@ -293,16 +288,16 @@ end
 %% function for Box plot of all conditions
 function plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, resultfolder)
 
-    f = figure('visible','off','Position', [100 100 1800 400]);
+    f = figure('visible','off','Position', [100 100 1600 400]);
     conditionName = {'No Change', 'No Distal Cue', 'No Optical Flow'};
 
     nrows = 1;ncols = 3; 
     % w and h of each axis in normalized units
-    axisw = (1 / ncols) * 0.9; axish = (1 / nrows) * 0.9;
+    axisw = (1 / ncols) * 0.9; axish = (1 / nrows) * 0.8;
 
     for kk=1:3
         % calculate the left, bottom coordinate of this subplot
-        axisl = (axisw+0.1) * (kk-1);
+        axisl = (axisw+0.05) * (kk-1);
         subplot(1,3,kk, 'position', [axisl, 0.1, axisw, axish]);
         
         data = IC_AllConds{kk};

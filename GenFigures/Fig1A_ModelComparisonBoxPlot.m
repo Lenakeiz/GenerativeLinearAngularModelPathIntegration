@@ -15,9 +15,6 @@ if ~exist(resultfolder, 'dir')
    mkdir(resultfolder);
 end
 
-%% Setting colors
-ColorPattern; 
-
 %% 1,the allocentric PI model without weber's law
 config.UseGlobalSearch = false; %only one param, convex error func, no need for GlobalSearch
 config.ModelName = "Allo";
@@ -52,6 +49,9 @@ config.NumParams = 5;
 %%
 ModelNames = {'Allo', 'AlloWeber', 'Ego', 'EgoWeber', 'Base'};
 
+%% Setting colors for using in plots
+ColorPattern; 
+
 %% Box Plot of AIC
 ICType = "AIC";
 
@@ -65,18 +65,18 @@ IC_AllConds = cell(1,3);
 
 IC_Cond1 = [IC_Allo{1}',IC_AlloWeber{1}',IC_Ego{1}', IC_EgoWeber{1}', IC_Base{1}'];
 IC_AllConds{1} = IC_Cond1;
-plotBoxPlot(IC_Cond1, ModelNames, "NoChange", ICType, resultfolder);
+plotBoxPlot(IC_Cond1, ModelNames, "NoChange", ICType, config);
 
 IC_Cond2 = [IC_Allo{2}',IC_AlloWeber{2}',IC_Ego{2}', IC_EgoWeber{2}', IC_Base{2}'];
 IC_AllConds{2} = IC_Cond2;
-plotBoxPlot(IC_Cond2, ModelNames, "NoDistalCue", ICType, resultfolder);
+plotBoxPlot(IC_Cond2, ModelNames, "NoDistalCue", ICType, config);
 
 IC_Cond3 = [IC_Allo{3}',IC_AlloWeber{3}',IC_Ego{3}', IC_EgoWeber{3}', IC_Base{3}'];
 IC_AllConds{3} = IC_Cond3;
-plotBoxPlot(IC_Cond3, ModelNames, "NoOpticalFlow", ICType, resultfolder);
+plotBoxPlot(IC_Cond3, ModelNames, "NoOpticalFlow", ICType, config);
 
 %plot all conditions in one figure
-plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, resultfolder)
+plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, config)
 
 % Box Plot of BIC 
 ICType = "BIC";
@@ -91,18 +91,18 @@ IC_AllConds = cell(1,3);
 
 IC_Cond1 = [IC_Allo{1}',IC_AlloWeber{1}',IC_Ego{1}', IC_EgoWeber{1}', IC_Base{1}'];
 IC_AllConds{1} = IC_Cond1;
-plotBoxPlot(IC_Cond1, ModelNames, "NoChange", ICType, resultfolder);
+plotBoxPlot(IC_Cond1, ModelNames, "NoChange", ICType, config);
 
 IC_Cond2 = [IC_Allo{2}',IC_AlloWeber{2}',IC_Ego{2}', IC_EgoWeber{2}', IC_Base{2}'];
 IC_AllConds{2} = IC_Cond2;
-plotBoxPlot(IC_Cond2, ModelNames, "NoDistalCue", ICType, resultfolder);
+plotBoxPlot(IC_Cond2, ModelNames, "NoDistalCue", ICType, config);
 
 IC_Cond3 = [IC_Allo{3}',IC_AlloWeber{3}',IC_Ego{3}', IC_EgoWeber{3}', IC_Base{3}'];
 IC_AllConds{3} = IC_Cond3;
-plotBoxPlot(IC_Cond3, ModelNames, "NoOpticalFlow", ICType, resultfolder);
+plotBoxPlot(IC_Cond3, ModelNames, "NoOpticalFlow", ICType, config);
 
 %plot all conditions in one figure
-plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, resultfolder)
+plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, config)
 
 % Box Plot of NegLogLikelihood
 ICType = "NegLogLikelihood";
@@ -117,18 +117,19 @@ IC_AllConds = cell(1,3);
 
 IC_Cond1 = [IC_Allo{1}',IC_AlloWeber{1}',IC_Ego{1}', IC_EgoWeber{1}', IC_Base{1}'];
 IC_AllConds{1} = IC_Cond1;
-plotBoxPlot(IC_Cond1, ModelNames, "NoChange", ICType, resultfolder);
+plotBoxPlot(IC_Cond1, ModelNames, "NoChange", ICType, config);
 
 IC_Cond2 = [IC_Allo{2}',IC_AlloWeber{2}',IC_Ego{2}', IC_EgoWeber{2}', IC_Base{2}'];
 IC_AllConds{2} = IC_Cond2;
-plotBoxPlot(IC_Cond2, ModelNames, "NoDistalCue", ICType, resultfolder);
+plotBoxPlot(IC_Cond2, ModelNames, "NoDistalCue", ICType, config);
 
 IC_Cond3 = [IC_Allo{3}',IC_AlloWeber{3}',IC_Ego{3}', IC_EgoWeber{3}', IC_Base{3}'];
 IC_AllConds{3} = IC_Cond3;
-plotBoxPlot(IC_Cond3, ModelNames, "NoOpticalFlow", ICType, resultfolder);
+plotBoxPlot(IC_Cond3, ModelNames, "NoOpticalFlow", ICType, config);
 
 %plot all conditions in one figure
-plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, resultfolder)
+plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, config)
+
 %% A function for getting Results from All Conditions
 function [AllParams, AllX, AllDX, AllTheta, AllIC] = getResultsAllConditions(TransformedData, config)
     %get the estimated parameters, X, DX, Theta, IC for all trial
@@ -175,8 +176,7 @@ function IC_AllConds=getRawIC(IC, ICType)
 end
 
 %% function for Box plot
-function plotBoxPlot(data, ModelNames, CondType, ICType, resultfolder)
-
+function plotBoxPlot(data, ModelNames, CondType, ICType, config)
     f = figure('visible','off','Position', [100 100 600 400]);
     
     %%%set paramsters
@@ -274,11 +274,11 @@ function plotBoxPlot(data, ModelNames, CondType, ICType, resultfolder)
         'LineWidth'   , .5        );
 
     %% save figure
-    exportgraphics(f,resultfolder+"/"+ICType+"_"+CondType+".png",'Resolution',300);
+    exportgraphics(f,config.ResultFolder+"/"+ICType+"_"+CondType+".png",'Resolution',300);
 end
 
 %% function for Box plot of all conditions
-function plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, resultfolder)
+function plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, config)
 
     f = figure('visible','off','Position', [100 100 1600 400]);
     conditionName = {'No Change', 'No Distal Cue', 'No Optical Flow'};
@@ -393,6 +393,6 @@ function plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, resultfolder)
     end
 
     %% save figure
-    exportgraphics(f,resultfolder+"/"+ICType+"_All.png",'Resolution',300);
+    exportgraphics(f,config.ResultFolder+"/AAll_"+ICType+".png",'Resolution',300);
 end
 

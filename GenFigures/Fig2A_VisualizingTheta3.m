@@ -9,7 +9,7 @@ savefolder = pwd + "/Output/";
 
 %% setting the configuration
 config.UseGlobalSearch = true;
-resultfolder = savefolder+"PaperFigs/Fig2A";
+resultfolder = savefolder+"PaperFigs/Fig2C";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
@@ -26,7 +26,7 @@ config.NumParams = 5;
 ColorPattern; 
 
 %% Plot the leg 1 distribution
-plotLeg1(AllYoungParams, AllYoungDX, config)
+plotTheta3(AllYoungParams, AllYoungDX, AllYoungTheta, config)
 
 %% A function for getting Results from All Conditions
 function [AllParams, AllX, AllDX, AllTheta, AllIC] = getResultsAllConditions(TransformedData, config)
@@ -47,7 +47,7 @@ function [AllParams, AllX, AllDX, AllTheta, AllIC] = getResultsAllConditions(Tra
     end
 end    
 
-function plotLeg1(AllParams, AllDX, config)
+function plotTheta3(AllParams, AllDX, AllTheta, config)
     %%plot leg 1 changes
     % AllParams: estimated parameter values
     % AllDX: is a cell structure containing the segment of each trial
@@ -75,46 +75,79 @@ function plotLeg1(AllParams, AllDX, config)
         %% extract data
         ParamValues = AllParams{TRIAL_FILTER};
         DX = AllDX{TRIAL_FILTER};
+        THETADX = AllTheta{TRIAL_FILTER};
         subjectSize = size(DX,2);
 
-        all_Leg1 = []; all_Leg1_prime = [];
+        all_alpha = []; all_theta3_prime = [];
         
         for subj=1:subjectSize %for each subject
             paramX = ParamValues(subj,:);
             subjDX = DX{subj};
-            %extract gamma and G3
-            gamma = paramX(1); G3 = paramX(2);
+            subjTHETADX = THETADX{subj};
+            %extract parameters
+            [gamma,G3,g2,g3,b,sigma,nu] = deal(paramX(1),paramX(2),paramX(3),paramX(4),paramX(5),paramX(6),paramX(7));
             
             sampleSize = size(subjDX,2);
 
-            Leg1 = zeros(1,sampleSize);
-            Leg1_prime = zeros(1,sampleSize);
+            Alpha = zeros(1,sampleSize);
+            Theta3_prime = zeros(1,sampleSize);
             
             %for each subject choose one color by looping over color_scheme_npg
             color_idx = mod(subj,numcolors)+1;
             cm = background_color(color_idx,:);
             %add jitter to making better plot
             jitter_value = 0.3*(rand(1)-0.5);
+
             for tr_id = 1:sampleSize %for each trial
-                leg1 = subjDX{tr_id}(1); Leg1(tr_id)=leg1;
-                leg1_prime = gamma^2*G3*leg1; Leg1_prime(tr_id)=leg1_prime;
-                pt = plot([1+jitter_value, 2+jitter_value], [leg1, leg1_prime], '-', 'Color', cm ,'linewidth',2);            
+                theta3 = subjTHETADX{tr_id}(3); 
+                %Theta3(tr_id) = theta3;
+                
+                %leg length
+                l1 = subjDX{tr_id}(1); l2 = subjDX{tr_id}(2);
+                %angle value
+                theta2 = subjTHETADX{tr_id}(2); theta2_prime = g2*theta2;
+
+                %mental leg 1 end point:
+                G1 = gamma^2*G3; men_p1 = [G1*l1, 0];
+                
+                %mental leg 2 end point:
+                G2 = gamma*G3; 
+                men_p2 = [G1*l1+G2*l2*cos(theta2_prime), G2*l2*sin(theta2_prime)];
+
+                %for mental leg3 end point:
+                %calculate turn angle of accurate mental vector 3
+                vec1 = men_p2-men_p1; vec2 = [0,0]-men_p2;
+                alpha = atan2d(vec1(1)*vec2(2)-vec1(2)*vec2(1),vec1(1)*vec2(1)+vec1(2)*vec2(2));
+                %transfer from degree to radians
+                alpha = deg2rad(alpha);
+                %wrap to (0,2pi)
+                alpha = mod(alpha, 2*pi);
+                Alpha(tr_id)=alpha;                
+
+                %considering execution turn error
+                theta3_prime = g3*alpha+b;
+                %also wrap to (0,2pi)
+                theta3_prime = mod(theta3_prime, 2*pi);     
+                Theta3_prime(tr_id) = theta3_prime;
+
+                pt = plot([1+jitter_value, 2+jitter_value], [alpha, theta3], '-', 'Color', cm ,'linewidth',2);            
                 %transparancy
                 pt.Color = [pt.Color 0.05];
                 hold on
                 %scatter
-                st = scatter([1+jitter_value, 2+jitter_value], [leg1, leg1_prime], 15, ...
+                st = scatter([1+jitter_value, 2+jitter_value], [alpha, theta3], 15, ...
                     "filled", 'MarkerEdgeColor', 'k', 'MarkerFaceColor', cm, ...
                     'MarkerEdgeAlpha', 0.6, 'MarkerFaceAlpha', 0.3);
                 hold on
             end
-            all_Leg1 = [all_Leg1,Leg1];
-            all_Leg1_prime = [all_Leg1_prime,Leg1_prime];
+
+            all_alpha = [all_alpha,Alpha];
+            all_theta3_prime = [all_theta3_prime,Theta3_prime];  
         end
 
-        all_Leg1_mean = mean(all_Leg1);
-        all_Leg1_prime_mean = mean(all_Leg1_prime);
-        pt = plot([1 2], [all_Leg1_mean all_Leg1_prime_mean], '-d', 'Color', forground_color, 'linewidth',8, 'MarkerSize', 8);
+        all_alpha_mean = mean(all_alpha);
+        all_theta3_prime_mean = mean(all_theta3_prime);
+        pt = plot([1 2], [all_alpha_mean all_theta3_prime_mean], '-d', 'Color', forground_color, 'linewidth',8, 'MarkerSize', 8);
         pt.Color = [pt.Color 0.8];
 
         ylabel('Distance (meters)');
@@ -126,13 +159,13 @@ function plotLeg1(AllParams, AllDX, config)
             'XColor'      , [.1 .1 .1], ...
             'YColor'      , [.1 .1 .1], ...
             'XTick'       , [1,2],... 
-            'XTickLabel'  , {'Physical','Mental'},...
+            'XTickLabel'  , {'Mental encoded','Mental executed'},...
             'XLim'        , [0.6, 2.4],...
-            'YLim'        , [0,ceil(max([all_Leg1,all_Leg1_prime]))],...
+            'YLim'        , [0,ceil(max([all_alpha,all_theta3_prime]))],...
             'LineWidth'   , .5        );
         title(conditionName{TRIAL_FILTER});
         %% save figure
-        exportgraphics(f,config.ResultFolder+"/Leg1Change"+conditionName{TRIAL_FILTER}+".png",'Resolution',300);
+        exportgraphics(f,config.ResultFolder+"/Theta3Change"+conditionName{TRIAL_FILTER}+".png",'Resolution',300);
     end
 end
 

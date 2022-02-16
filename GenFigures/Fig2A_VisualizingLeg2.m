@@ -9,7 +9,7 @@ savefolder = pwd + "/Output/";
 
 %% setting the configuration
 config.UseGlobalSearch = true;
-resultfolder = savefolder+"PaperFigs/Fig2A";
+resultfolder = savefolder+"PaperFigs/Fig2B";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
@@ -26,7 +26,7 @@ config.NumParams = 5;
 ColorPattern; 
 
 %% Plot the leg 1 distribution
-plotLeg1(AllYoungParams, AllYoungDX, config)
+plotLeg2(AllYoungParams, AllYoungDX, config)
 
 %% A function for getting Results from All Conditions
 function [AllParams, AllX, AllDX, AllTheta, AllIC] = getResultsAllConditions(TransformedData, config)
@@ -47,7 +47,7 @@ function [AllParams, AllX, AllDX, AllTheta, AllIC] = getResultsAllConditions(Tra
     end
 end    
 
-function plotLeg1(AllParams, AllDX, config)
+function plotLeg2(AllParams, AllDX, config)
     %%plot leg 1 changes
     % AllParams: estimated parameter values
     % AllDX: is a cell structure containing the segment of each trial
@@ -77,7 +77,7 @@ function plotLeg1(AllParams, AllDX, config)
         DX = AllDX{TRIAL_FILTER};
         subjectSize = size(DX,2);
 
-        all_Leg1 = []; all_Leg1_prime = [];
+        all_Leg2 = []; all_Leg2_prime = [];
         
         for subj=1:subjectSize %for each subject
             paramX = ParamValues(subj,:);
@@ -87,8 +87,8 @@ function plotLeg1(AllParams, AllDX, config)
             
             sampleSize = size(subjDX,2);
 
-            Leg1 = zeros(1,sampleSize);
-            Leg1_prime = zeros(1,sampleSize);
+            Leg2 = zeros(1,sampleSize);
+            Leg2_prime = zeros(1,sampleSize);
             
             %for each subject choose one color by looping over color_scheme_npg
             color_idx = mod(subj,numcolors)+1;
@@ -96,24 +96,24 @@ function plotLeg1(AllParams, AllDX, config)
             %add jitter to making better plot
             jitter_value = 0.3*(rand(1)-0.5);
             for tr_id = 1:sampleSize %for each trial
-                leg1 = subjDX{tr_id}(1); Leg1(tr_id)=leg1;
-                leg1_prime = gamma^2*G3*leg1; Leg1_prime(tr_id)=leg1_prime;
-                pt = plot([1+jitter_value, 2+jitter_value], [leg1, leg1_prime], '-', 'Color', cm ,'linewidth',2);            
+                leg2 = subjDX{tr_id}(1); Leg2(tr_id)=leg2;
+                leg2_prime = gamma*G3*leg2; Leg2_prime(tr_id)=leg2_prime;
+                pt = plot([1+jitter_value, 2+jitter_value], [leg2, leg2_prime], '-', 'Color', cm ,'linewidth',2);            
                 %transparancy
                 pt.Color = [pt.Color 0.05];
                 hold on
                 %scatter
-                st = scatter([1+jitter_value, 2+jitter_value], [leg1, leg1_prime], 15, ...
+                st = scatter([1+jitter_value, 2+jitter_value], [leg2, leg2_prime], 15, ...
                     "filled", 'MarkerEdgeColor', 'k', 'MarkerFaceColor', cm, ...
                     'MarkerEdgeAlpha', 0.6, 'MarkerFaceAlpha', 0.3);
                 hold on
             end
-            all_Leg1 = [all_Leg1,Leg1];
-            all_Leg1_prime = [all_Leg1_prime,Leg1_prime];
+            all_Leg2 = [all_Leg2,Leg2];
+            all_Leg2_prime = [all_Leg2_prime,Leg2_prime];
         end
 
-        all_Leg1_mean = mean(all_Leg1);
-        all_Leg1_prime_mean = mean(all_Leg1_prime);
+        all_Leg1_mean = mean(all_Leg2);
+        all_Leg1_prime_mean = mean(all_Leg2_prime);
         pt = plot([1 2], [all_Leg1_mean all_Leg1_prime_mean], '-d', 'Color', forground_color, 'linewidth',8, 'MarkerSize', 8);
         pt.Color = [pt.Color 0.8];
 
@@ -128,11 +128,11 @@ function plotLeg1(AllParams, AllDX, config)
             'XTick'       , [1,2],... 
             'XTickLabel'  , {'Physical','Mental'},...
             'XLim'        , [0.6, 2.4],...
-            'YLim'        , [0,ceil(max([all_Leg1,all_Leg1_prime]))],...
+            'YLim'        , [0,ceil(max([all_Leg2,all_Leg2_prime]))],...
             'LineWidth'   , .5        );
         title(conditionName{TRIAL_FILTER});
         %% save figure
-        exportgraphics(f,config.ResultFolder+"/Leg1Change"+conditionName{TRIAL_FILTER}+".png",'Resolution',300);
+        exportgraphics(f,config.ResultFolder+"/Leg2Change"+conditionName{TRIAL_FILTER}+".png",'Resolution',300);
     end
 end
 

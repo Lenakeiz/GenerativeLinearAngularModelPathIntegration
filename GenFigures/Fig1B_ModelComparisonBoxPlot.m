@@ -51,6 +51,9 @@ config.NumParams = 5;
 %%
 ModelNames = {'Ego', 'AngleErrModel', 'EqualDiscount', 'DistErrModel', 'G1G2', 'BaseModel'};
 
+%% Setting colors for using in plots
+ColorPattern; 
+
 %% Box Plot of AIC
 ICType = "AIC";
 
@@ -65,18 +68,18 @@ IC_AllConds = cell(1,3);
 
 IC_Cond1 = [IC_Ego{1}', IC_AngleErr{1}', IC_EqualDiscount{1}', IC_DistErr{1}', IC_G1G2{1}',  IC_Base{1}'];
 IC_AllConds{1} = IC_Cond1;
-plotBoxPlot(IC_Cond1, ModelNames, "NoChange", ICType, resultfolder);
+plotBoxPlot(IC_Cond1, ModelNames, "NoChange", ICType, config);
 
 IC_Cond2 = [IC_Ego{2}', IC_AngleErr{2}', IC_EqualDiscount{2}', IC_DistErr{2}', IC_G1G2{2}',  IC_Base{2}'];
 IC_AllConds{2} = IC_Cond2;
-plotBoxPlot(IC_Cond2, ModelNames, "NoDistalCue", ICType, resultfolder);
+plotBoxPlot(IC_Cond2, ModelNames, "NoDistalCue", ICType, config);
 
 IC_Cond3 = [IC_Ego{3}', IC_AngleErr{3}', IC_EqualDiscount{3}', IC_DistErr{3}', IC_G1G2{3}',  IC_Base{3}'];
 IC_AllConds{3} = IC_Cond3;
-plotBoxPlot(IC_Cond3, ModelNames, "NoOpticalFlow", ICType, resultfolder);
+plotBoxPlot(IC_Cond3, ModelNames, "NoOpticalFlow", ICType, config);
 
 %plot all conditions in one figure
-plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, resultfolder)
+plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, config)
 
 % Box Plot of BIC 
 ICType = "BIC";
@@ -92,18 +95,18 @@ IC_AllConds = cell(1,3);
 
 IC_Cond1 = [IC_Ego{1}', IC_AngleErr{1}', IC_EqualDiscount{1}', IC_DistErr{1}', IC_G1G2{1}',  IC_Base{1}'];
 IC_AllConds{1} = IC_Cond1;
-plotBoxPlot(IC_Cond1, ModelNames, "NoChange", ICType, resultfolder);
+plotBoxPlot(IC_Cond1, ModelNames, "NoChange", ICType, config);
 
 IC_Cond2 = [IC_Ego{2}', IC_AngleErr{2}', IC_EqualDiscount{2}', IC_DistErr{2}', IC_G1G2{2}',  IC_Base{2}'];
 IC_AllConds{2} = IC_Cond2;
-plotBoxPlot(IC_Cond2, ModelNames, "NoDistalCue", ICType, resultfolder);
+plotBoxPlot(IC_Cond2, ModelNames, "NoDistalCue", ICType, config);
 
 IC_Cond3 = [IC_Ego{3}', IC_AngleErr{3}', IC_EqualDiscount{3}', IC_DistErr{3}', IC_G1G2{3}',  IC_Base{3}'];
 IC_AllConds{3} = IC_Cond3;
-plotBoxPlot(IC_Cond3, ModelNames, "NoOpticalFlow", ICType, resultfolder);
+plotBoxPlot(IC_Cond3, ModelNames, "NoOpticalFlow", ICType, config);
 
 %plot all conditions in one figure
-plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, resultfolder)
+plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, config)
 
 % Box Plot of NegLogLikelihood
 ICType = "NegLogLikelihood";
@@ -119,18 +122,18 @@ IC_AllConds = cell(1,3);
 
 IC_Cond1 = [IC_Ego{1}', IC_AngleErr{1}', IC_EqualDiscount{1}', IC_DistErr{1}', IC_G1G2{1}',  IC_Base{1}'];
 IC_AllConds{1} = IC_Cond1;
-plotBoxPlot(IC_Cond1, ModelNames, "NoChange", ICType, resultfolder);
+plotBoxPlot(IC_Cond1, ModelNames, "NoChange", ICType, config);
 
 IC_Cond2 = [IC_Ego{2}', IC_AngleErr{2}', IC_EqualDiscount{2}', IC_DistErr{2}', IC_G1G2{2}',  IC_Base{2}'];
 IC_AllConds{2} = IC_Cond2;
-plotBoxPlot(IC_Cond2, ModelNames, "NoDistalCue", ICType, resultfolder);
+plotBoxPlot(IC_Cond2, ModelNames, "NoDistalCue", ICType, config);
 
 IC_Cond3 = [IC_Ego{3}', IC_AngleErr{3}', IC_EqualDiscount{3}', IC_DistErr{3}', IC_G1G2{3}',  IC_Base{3}'];
 IC_AllConds{3} = IC_Cond3;
-plotBoxPlot(IC_Cond3, ModelNames, "NoOpticalFlow", ICType, resultfolder);
+plotBoxPlot(IC_Cond3, ModelNames, "NoOpticalFlow", ICType, config);
 
 %plot all conditions in one figure
-plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, resultfolder)
+plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, config)
 
 %% A function for getting Results from All Conditions
 function [AllParams, AllX, AllDX, AllTheta, AllIC] = getResultsAllConditions(TransformedData, config)
@@ -178,7 +181,7 @@ function IC_AllConds=getRawIC(IC, ICType)
 end
 
 %% function for Box plot
-function plotBoxPlot(data, ModelNames, CondType, ICType, resultfolder)
+function plotBoxPlot(data, ModelNames, CondType, ICType, config)
 
     f = figure('visible','off','Position', [100 100 600 400]);
     
@@ -205,17 +208,7 @@ function plotBoxPlot(data, ModelNames, CondType, ICType, resultfolder)
     set(0,'DefaultTextFontSize',12)
 
     %%% Color definition %%%
-    color_scheme_npg = [0         0.6275    0.5294; ...  %Color for our model (blue)
-                        0.9020    0.2941    0.2078; ...
-                        0.3020    0.7333    0.8353; ...
-                        0.9529    0.6078    0.4980; ...                     
-                        0.2353    0.3294    0.5333; ...
-                        0.5176    0.5686    0.7059; ...
-                        0.5686    0.8196    0.7608; ...
-                        0.8627         0         0; ...
-                        0.4941    0.3804    0.2824; ...
-                        0.6902    0.6118    0.5216 ];    
-    box_colors = color_scheme_npg(1:num_boxplots,:);
+    box_colors = config.color_scheme_npg(1:num_boxplots,:);
     
     %% main boxplot one box for each column in data
     bp = boxplot(data, 'whisker',whisker_value,'symbol','', ... %symbol ='' making outlier invisible
@@ -288,11 +281,11 @@ function plotBoxPlot(data, ModelNames, CondType, ICType, resultfolder)
         'LineWidth'   , .5        );
 
     %% save figure
-    exportgraphics(f,resultfolder+"/"+ICType+"_"+CondType+".png",'Resolution',300);
+    exportgraphics(f,config.ResultFolder+"/"+ICType+"_"+CondType+".png",'Resolution',300);
 end
 
 %% function for Box plot of all conditions
-function plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, resultfolder)
+function plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, config)
 
     f = figure('visible','off','Position', [100 100 1400 400]);
     conditionName = {'No Change', 'No Distal Cue', 'No Optical Flow'};
@@ -331,17 +324,7 @@ function plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, resultfolder)
         set(0,'DefaultTextFontSize',12)
     
         %%% Color definition %%%
-        color_scheme_npg = [0         0.6275    0.5294; ...  %Color for our model (blue)
-                            0.9020    0.2941    0.2078; ...
-                            0.3020    0.7333    0.8353; ...
-                            0.9529    0.6078    0.4980; ...                     
-                            0.2353    0.3294    0.5333; ...
-                            0.5176    0.5686    0.7059; ...
-                            0.5686    0.8196    0.7608; ...
-                            0.8627         0         0; ...
-                            0.4941    0.3804    0.2824; ...
-                            0.6902    0.6118    0.5216 ];    
-        box_colors = color_scheme_npg(1:num_boxplots,:);
+        box_colors = config.color_scheme_npg(1:num_boxplots,:);
         
         %% main boxplot one box for each column in data
         bp = boxplot(data, 'whisker',whisker_value,'symbol','', ... %symbol ='' making outlier invisible
@@ -417,6 +400,6 @@ function plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, resultfolder)
     end
 
     %% save figure
-    exportgraphics(f,resultfolder+"/AAll_"+ICType+".png",'Resolution',300);
+    exportgraphics(f,config.ResultFolder+"/AAll_"+ICType+".png",'Resolution',300);
 end
 

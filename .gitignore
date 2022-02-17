@@ -1,5 +1,0 @@
-# Customized gitignore
-Output/*
-Learning/*
-*.asv
-debug.ps

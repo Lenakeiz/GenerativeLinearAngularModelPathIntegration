@@ -1,8 +1,3 @@
-%% FittingData 
-% This script will lo%% FittingData 
-% This script will load the data, rotate the paths and call the solver to find the parameters 
-% that minimize the mean distance to generated x3' which matchs the physical leg 3
-
 %% Cleaning variables
 clearvars; clear all; close all; clc;
 

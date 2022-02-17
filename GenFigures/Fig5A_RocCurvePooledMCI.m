@@ -18,33 +18,56 @@ if ~exist(resultfolder, 'dir')
    mkdir(resultfolder);
 end
 
+ColorPattern;
+
 %% Aggregating the MCI sample
 AggregateMCI;
 
 %% Calculating our model
 %no consider of the rotation gain factor in leg2, i.e., gamma, G3=1, g2=1, g3, k3, sigma, nu. #params=6
+%"VariableNames", {'Gamma','g','b','sigma','nu'});
 config.UseGlobalSearch = true;
 config.ModelName = "BaseModel";
 config.NumParams = 5;
-[MCIParameters, ~, ~, ~, AllYoungIC_Base] = getResultsAllConditions(YoungControls, config);
+[MCIAllParameters, ~, ~, ~, ~] = getResultsAllConditions(MCIAll, config);
+MCIAllParameters = MCIAllParameters(:,[1 4 5 6 7]);
+
+[HealthyControlsParameters, ~, ~, ~, ~] = getResultsAllConditions(HealthyControls, config);
+HealthyControlsParameters = HealthyControlsParameters(:,[1 4 5 6 7]);
+
+%% Preparing the logistic regression
+AllData = [HealthyControlsParameters; MCIAllParameters];
+logicalResponse = (1:height(HealthyControlsParameters) + height(MCIAllParameters))' > height(HealthyControlsParameters);
+hcLabel     = cell(height(HealthyControlsParameters),1);
+hcLabel(:)  = {'HC'};
+mciLabel    = cell(height(MCIAllParameters),1);
+mciLabel(:) = {'MCI'};
+labels      = [hcLabel;mciLabel];
+
+clear hcLabel mciLabel
+
+%% Fitting the logistic regression
+mdl = fitglm(AllData,logicalResponse,'Distribution', 'binomial','Link','logit');
+
+scores = mdl.Fitted.Probability;
+[X,Y,T,AUC] = perfcurve(labels,scores,'MCI');
+
+plot(X,Y);
 
 %% A function for getting Results from All Conditions
 function [AllParams, AllX, AllDX, AllTheta, AllIC] = getResultsAllConditions(TransformedData, config)
     %get the estimated parameters, X, DX, Theta, IC for all trial
-    %conditions for each group of data.
-    AllParams = cell(0); AllX = cell(0);AllDX = cell(0); AllTheta = cell(0); AllIC = cell(0);
-    for TRIAL_FILTER=1:3
-        config.TrialFilter = TRIAL_FILTER;
-        tic
-        disp('%%%%%%%%%%%%%%% PERFORMING FITTING %%%%%%%%%%%%%%%');
-        Results = PerformGroupFit(TransformedData, config);
+    %conditions for each group of data.    
+    config.TrialFilter = 0;
+    tic
+    disp('%%%%%%%%%%%%%%% PERFORMING FITTING %%%%%%%%%%%%%%%');
+    Results = PerformGroupFit(TransformedData, config);
+    toc
 
-        AllParams{TRIAL_FILTER} = Results.estimatedParams; 
-        AllX{TRIAL_FILTER}      = Results.X;
-        AllDX{TRIAL_FILTER}     = Results.DX;      
-        AllTheta{TRIAL_FILTER}  = Results.THETADX;
-        AllIC{TRIAL_FILTER}     = Results.IC;
-        
-        toc
-    end
+    AllParams = Results.estimatedParams;
+    AllX      = Results.X;
+    AllDX     = Results.DX;
+    AllTheta  = Results.THETADX;
+    AllIC     = Results.IC;
+    
 end    

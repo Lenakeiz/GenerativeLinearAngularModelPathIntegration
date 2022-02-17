@@ -1,4 +1,4 @@
-%% Cleaning variables
+% Cleaning variables
 clearvars; clear all; close all; clc;
 
 %% Loading data
@@ -287,16 +287,17 @@ end
 %% function for Box plot of all conditions
 function plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, config)
 
-    f = figure('visible','off','Position', [100 100 1400 400]);
+    f = figure('visible','off','Position', [100 100 1600 400]);
     conditionName = {'No Change', 'No Distal Cue', 'No Optical Flow'};
 
     nrows = 1;ncols = 3; 
     % w and h of each axis in normalized units
-    axisw = (1 / ncols) * 0.8; axish = (1 / nrows) * 0.8;
+    axisw = (1 / ncols) * 0.9; axish = (1 / nrows) * 0.8;
 
     for kk=1:3
         % calculate the left, bottom coordinate of this subplot
-        axisl = (1 / ncols) * (kk-1);
+        %axisl = (1 / ncols) * (kk-1);
+        axisl = (axisw+0.05) * (kk-1);
         subplot(1,3,kk, 'position', [axisl, 0.1, axisw, axish]);
         %subplot(1,3,kk);
         data = IC_AllConds{kk};
@@ -401,5 +402,6 @@ function plotBoxPlotAllConds(IC_AllConds, ModelNames, ICType, config)
 
     %% save figure
     exportgraphics(f,config.ResultFolder+"/AAll_"+ICType+".png",'Resolution',300);
+    exportgraphics(f,config.ResultFolder+"/AAll_"+ICType+".pdf",'Resolution',300,'ContentType','vector');
 end
 

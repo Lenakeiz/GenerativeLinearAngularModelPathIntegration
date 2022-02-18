@@ -9,7 +9,6 @@ function [FitParams, IC] = FitData(DX,THETAX,X,config)
 Model_Name = config.ModelName;
 numParams = config.NumParams;
 useglobalsearch = config.UseGlobalSearch;
-ifallo=false; %only true when the model is a simple allocentric generative model
 useweber=false;%only true when use weber law in simple generative models
 
 if Model_Name == "G1G2"
@@ -21,17 +20,27 @@ if Model_Name == "G1G2"
 
     %set equality constriants
     Aeq = zeros(8,8); beq=zeros(1,8); 
-    
-    if Model_Name=="G1G2"
-        Aeq(3,3)=1; beq(3)=1;%G3=1
-        Aeq(4,4)=1; beq(4)=1;%g2=1   
-        Aeq(5,5)=1; beq(5)=1;%g3=1 
-        Aeq(6,6)=1; beq(6)=0;%b=0         
-    else
-        error("Please set the correct name of model!");
-    end    
+    Aeq(3,3)=1; beq(3)=1;%G3=1
+    Aeq(4,4)=1; beq(4)=1;%g2=1   
     %calculate the likelihood function
     estFnc = @(FP) EstimateG1G2(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),FP(8),DX,THETAX,X);
+
+elseif Model_Name=="DistErrG1G2"
+    %set model configurations
+    %set lower bound and up bound
+    %      1-G1     2-G2    3-G3    4-g2   5-g3   6-b    7-sigma    8-nu
+    lb  = [0.1,     0.1,    0.1,    0.5,   0,     0,         0.1,       0.1];
+    ub  = [1.5,     1.5,    1.0,    2.0,   1.0,   2*pi,      2.0,     100.0];
+
+    %set equality constriants
+    Aeq = zeros(8,8); beq=zeros(1,8);    
+    Aeq(3,3)=1; beq(3)=1;%G3=1
+    Aeq(4,4)=1; beq(4)=1;%g2=1   
+    Aeq(5,5)=1; beq(5)=1;%g3=1 
+    Aeq(6,6)=1; beq(6)=0;%b=0   
+    %calculate the likelihood function
+    estFnc = @(FP) EstimateG1G2(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),FP(8),DX,THETAX,X);
+
 elseif Model_Name=="Allo" | Model_Name=="AlloWeber"
     %set lower bound and up bound
     %      1-gamma    2-G3    3-g2     4-g3     5-b      6-sigma    7-nu
@@ -48,6 +57,7 @@ elseif Model_Name=="Allo" | Model_Name=="AlloWeber"
         useweber=true;
     end
     estFnc = @(FP) EstimateAllo(FP(6),DX,X,useweber);
+
 else %gamma based model
     %set model configurations
     ifEqualDiscount=false;

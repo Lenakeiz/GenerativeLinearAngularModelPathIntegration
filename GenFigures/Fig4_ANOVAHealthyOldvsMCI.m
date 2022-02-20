@@ -51,7 +51,7 @@ AllMCIParams = MergeMCI(AllMCIPosParams, AllMCINegParams, AllMCIUnkParams);
 
 %% BarScatter Plot between HealthyOld and MergedMCI for all Fitted Params
 %plotBarScatterOfFittedParam(AllHealthyOldParams, AllMCIParams, config);
-%plotBoxOfFittedParam(AllHealthyOldParams, AllMCIParams, anova_tab, config);
+plotBoxOfFittedParam(AllHealthyOldParams, AllMCIParams, anova_tab, config);
 plotBoxOfFittedParamMergeCondition(AllHealthyOldParams, AllMCIParams, multicomp_tab1, config)
 
 %% A function for getting Results from All Conditions
@@ -83,7 +83,7 @@ function plotBarScatterOfFittedParam(AllHealthyOldParams, AllMCIParams, config)
     mean_all = zeros(numConds, 2); %2 is the group number
     sem_all = zeros(numConds, 2); %2 is the group number
 
-    ParamName = ["Distance gain \gamma", "bG_3", "g_2", "Angle gain g_3", "Angle bias b", "sigma", "nu"];
+    ParamName = ["Distance gain gamma", "bG_3", "g_2", "Angle gain g_3", "Angle bias b", "sigma", "nu"];
     StoreName = ["Gamma", "bG_3", "g_2", "g_3", "b", "sigma", "nu"];
 
     for ParamIndx=1:length(ParamName)
@@ -185,7 +185,7 @@ end
 function plotBoxOfFittedParam(AllHealthyOldParams, AllMCIParams, anova_tab, config)
     
     numConds = 3; %3 is the condition number
-    ParamName = ["Distance gain \gamma", "bG_3", "g_2", "Angular gain g_3", "Anglar bias b", "sigma", "nu"];
+    ParamName = ["Distance gain gamma", "bG_3", "g_2", "Angular gain g_3", "Anglar bias b", "sigma", "nu"];
     StoreName = ["Gamma", "bG_3", "g_2", "g_3", "b", "sigma", "nu"];
     for ParamIndx=1:length(ParamName)
 
@@ -329,7 +329,7 @@ function plotBoxOfFittedParam(AllHealthyOldParams, AllMCIParams, anova_tab, conf
             %'Ytick'       , [0,0.5,1.0,1.5],...
             %'YLim'        , [0, 1.5],...   
         ylabel(ParamName(ParamIndx));
-        %legend(b, {'HealthyOld' 'MCIMerged'}, 'Location','northwest', 'NumColumns',2);
+        legend(gca, {'MCIMerged' 'HealthyOld'}, 'Location','northeast', 'NumColumns',2);
         %xlabel('G_1','Interpreter','tex'); ylabel('G_2','Interpreter','tex');
 
         %extract pvalue for group, conditino and interaction to show on the figure 
@@ -337,9 +337,9 @@ function plotBoxOfFittedParam(AllHealthyOldParams, AllMCIParams, anova_tab, conf
         group_pvalue = anova_result{2,7};
         condition_pvalue = anova_result{3,7};
         interaction_pvalue = anova_result{4,7};
-        str = {['Group Pvalue = ',num2str(round(group_pvalue,4))],...
-               ['Condition Pvalue = ',num2str(round(condition_pvalue,4))],...
-               ['Interaction Pvalue = ',num2str(round(interaction_pvalue,4))]};
+        str = {['Group Pvalue = ',sprintf('%.2g',group_pvalue)],...
+               ['Condition Pvalue = ',sprintf('%.2g',condition_pvalue)],...
+               ['Interaction Pvalue = ',sprintf('%.2g',interaction_pvalue)]};
         annotation('textbox',[0.2 0.6 0.3 0.3],'String',str,'FitBoxToText','on');
 
         %% save figure
@@ -353,7 +353,7 @@ end
 function plotBoxOfFittedParamMergeCondition(AllHealthyOldParams, AllMCIParams, multicomp_tab1, config)
     
     numConds = 3; %3 is the condition number
-    ParamName = ["Distance gain \gamma", "bG_3", "g_2", "Angular gain g_3", "Anglar bias b", "sigma", "nu"];
+    ParamName = ["Distance gain gamma", "bG_3", "g_2", "Angular gain g_3", "Anglar bias b", "sigma", "nu"];
     StoreName = ["Gamma", "bG_3", "g_2", "g_3", "b", "sigma", "nu"];
     for ParamIndx=1:length(ParamName)
 
@@ -502,13 +502,13 @@ function plotBoxOfFittedParamMergeCondition(AllHealthyOldParams, AllMCIParams, m
             %'Ytick'       , [0,0.5,1.0,1.5],...
             %'YLim'        , [0, 1.5],...   
         ylabel(ParamName(ParamIndx));
-        %legend(b, {'HealthyOld' 'MCIMerged'}, 'Location','northwest', 'NumColumns',2);
+        legend(gca, {'MCIMerged', 'HealthyOld'}, 'Location','northeast', 'NumColumns',2);
         %xlabel('G_1','Interpreter','tex'); ylabel('G_2','Interpreter','tex');
 
         %extract pvalue for multicomparison of Group effect for showing on the figure
         multicomp_result = multicomp_tab1{ParamIndx};
         Pvalue = multicomp_result(1,6); % MCI vs. HealthyOld see Two-way anova for details
-        str = {['Posthoc Test Pvalue = ',num2str(round(Pvalue,4))]};
+        str = {['P = ',sprintf('%.2g',Pvalue)]};
         annotation('textbox',[0.2 0.6 0.3 0.3],'String',str,'FitBoxToText','on');
 
         %% save figure

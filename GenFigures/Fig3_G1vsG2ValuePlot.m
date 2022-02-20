@@ -92,7 +92,7 @@ function plotBarScatterBetweenG1G2(AllParams, config)
             %scatter
             st = scatter([1+jitter_value, 2+jitter_value], [G1, G2], 50, ...
                 "filled", 'MarkerEdgeColor', 'k', 'MarkerFaceColor', pairline_color, ...
-                'MarkerEdgeAlpha', 1, 'MarkerFaceAlpha', 0.3);
+                'MarkerEdgeAlpha', 0.8, 'MarkerFaceAlpha', 0.3);
             hold on
         end
         meanG1 = mean(all_G1); meanG2 = mean(all_G2);

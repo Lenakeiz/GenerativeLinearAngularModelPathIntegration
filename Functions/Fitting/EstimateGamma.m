@@ -68,6 +68,7 @@ for tr = 1:sampleSize
 
     %the negative loglikelihood of angle
     neg_ll_angle = log(2*pi) + log(besseli(0,nu_scaled)) - nu_scaled*cos(angluar_diff);
+    %neg_ll_angle = 1/2*log(2*pi) + log(nu_scaled) + (angluar_diff^2)/(2*nu_scaled^2);
 
     %distance noise difference
     l3_prime = G3*h;

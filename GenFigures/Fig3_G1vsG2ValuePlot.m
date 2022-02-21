@@ -20,6 +20,8 @@ end
 %Model parameter G1 G2, sigma, nu. #params=4
 config.ModelName = "DistErrG1G2";
 config.NumParams = 4;
+% config.ModelName = "G1G2";
+% config.NumParams = 5;
 [AllYoungParams, AllYoungX, AllYoungDX, AllYoungTheta, AllYoungIC] = getResultsAllConditions(YoungControls, config);
 
 %% Setting colors for using in plots

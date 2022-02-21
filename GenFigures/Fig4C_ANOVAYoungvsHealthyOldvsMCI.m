@@ -8,7 +8,7 @@ savefolder = pwd + "/Output/";
 
 %% setting the configuration
 config.UseGlobalSearch = true;
-resultfolder = savefolder+"PaperFigs/Fig4";
+resultfolder = savefolder+"PaperFigs/Fig4C";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
@@ -49,10 +49,9 @@ AllMCIParams = MergeMCI(AllMCIPosParams, AllMCINegParams, AllMCIUnkParams);
 %% TwowayAnova
 [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnovaOn_Young_HealthyOld_MergeMCI(AllYoungParams, AllHealthyOldParams, AllMCIParams, config);
 
-%% BarScatter Plot between HealthyOld and MergedMCI for all Fitted Params
-%plotBarScatterOfFittedParam(AllHealthyOldParams, AllMCIParams, config);
-plotBoxOfFittedParam(AllHealthyOldParams, AllMCIParams, anova_tab, config);
-plotBoxOfFittedParamMergeCondition(AllHealthyOldParams, AllMCIParams, multicomp_tab1, config)
+%% BarScatter Plot between Young and HealthyOld for all Fitted Params
+plotBoxOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams, anova_tab, config);
+plotBoxOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCIParams, multicomp_tab1, config)
 
 %% A function for getting Results from All Conditions
 function [AllParams, AllX, AllDX, AllTheta, AllIC] = getResultsAllConditions(TransformedData, config)
@@ -74,130 +73,27 @@ function [AllParams, AllX, AllDX, AllTheta, AllIC] = getResultsAllConditions(Tra
 end    
 
 %%
-function plotBarScatterOfFittedParam(AllHealthyOldParams, AllMCIParams, config)
-    % AllParams: estimated parameter values
-    % ParamIndx
-    % config
-    
-    numConds = 3; %3 is the condition number
-    mean_all = zeros(numConds, 2); %2 is the group number
-    sem_all = zeros(numConds, 2); %2 is the group number
-
-    ParamName = ["Distance gain gamma", "bG_3", "g_2", "Angle gain g_3", "Angle bias b", "sigma", "nu"];
-    StoreName = ["Gamma", "bG_3", "g_2", "g_3", "b", "sigma", "nu"];
-
-    for ParamIndx=1:length(ParamName)
-
-        for TRIAL_FILTER=1:numConds
-            %% extract data
-            HealthyOldParam = AllHealthyOldParams{TRIAL_FILTER}(:,ParamIndx);
-            [HealthyOld_m, HealthyOld_s] = getMeanSem(HealthyOldParam);
-            mean_all(TRIAL_FILTER,1) = HealthyOld_m; 
-            sem_all(TRIAL_FILTER,1)=HealthyOld_s;
-    
-            MCIParam = AllMCIParams{TRIAL_FILTER}(:,ParamIndx);
-            [MCI_m, MCI_s] = getMeanSem(MCIParam);
-            mean_all(TRIAL_FILTER,2) = MCI_m; 
-            sem_all(TRIAL_FILTER,2)=MCI_s;       
-        end
-    
-        %% set figure info
-        f = figure('visible','off','Position', [100 100 1000 500]);
-        %%% Font type and size setting %%%
-        % Using Arial as default because all journals normally require the font to
-        % be either Arial or Helvetica
-        set(0,'DefaultAxesFontName','Arial')
-        set(0,'DefaultTextFontName','Arial')
-        set(0,'DefaultAxesFontSize',12)
-        set(0,'DefaultTextFontSize',12)     
-        %%% Color definition %%%
-        colorForHOld = config.color_scheme_npg(5,:);
-        colorForMCI = config.color_scheme_npg(2,:);
-    
-        b = bar(mean_all, 'grouped', 'FaceAlpha',0.5, 'LineWidth',1);
-        b(1).FaceColor = colorForHOld; %set color for HealthyOld
-        b(2).FaceColor = colorForMCI; %set color for MCI merge
-    
-        hold on
-        % Calculate the number of groups and number of bars in each group
-        [ngroups,nbars] = size(mean_all);
-        % Get the x coordinate of the bars
-        x = nan(nbars, ngroups);
-        for i = 1:nbars
-            x(i,:) = b(i).XEndPoints;
-        end
-    
-        % scatter
-        for TRIAL_FILTER=1:numConds
-            %% extract data
-            HealthyOldParam = AllHealthyOldParams{TRIAL_FILTER}(:,ParamIndx);
-            MCIParam = AllMCIParams{TRIAL_FILTER}(:,ParamIndx);    
-    
-            %plot scatter for HealthyOld
-            for i=1:length(HealthyOldParam)
-                jitter_value = 0.0*(rand(1)-0.5);
-                scatter(x(1,TRIAL_FILTER)+jitter_value, HealthyOldParam(i),30, ...
-                "filled", 'MarkerEdgeColor', 'k', 'MarkerFaceColor', colorForHOld, ...
-                'MarkerEdgeAlpha', 1, 'MarkerFaceAlpha', 0.3);
-            end
-    
-            hold on
-            %plot scatter for MCI
-            for i=1:length(MCIParam)
-                jitter_value = 0.0*(rand(1)-0.5);
-                scatter(x(2,TRIAL_FILTER)+jitter_value, MCIParam(i),30, ...
-                "filled", 'MarkerEdgeColor', 'k', 'MarkerFaceColor', colorForMCI, ...
-                'MarkerEdgeAlpha', 1, 'MarkerFaceAlpha', 0.3);  
-            end
-    
-        end    
-    
-        hold on
-        % Plot the errorbars
-        errorbar(x',mean_all,sem_all,'k','LineStyle','None', 'LineWidth', 2);    
-    
-        %Further post-processing the figure
-        set(gca, ...
-            'Box'         , 'off'     , ...
-            'TickDir'     , 'out'     , ...
-            'TickLength'  , [.01 .01] , ...
-            'XColor'      , [.1 .1 .1], ...
-            'YColor'      , [.1 .1 .1], ...
-            'XTick'       , [1:3],... 
-            'XTickLabel'  , {'No Change','No Distal Cue', 'No Optical Flow'},...
-            'LineWidth'   , .5        );
-            %'Ytick'       , [0,0.5,1.0,1.5],...
-            %'XLim'        , [0.5, 3.5],...
-            %'YLim'        , [0, 1.5],...   
-        
-        ylabel(ParamName(ParamIndx));
-        legend(b, {'HealthyOld' 'MCIMerged'}, 'Location','northwest', 'NumColumns',2);
-        %xlabel('G_1','Interpreter','tex'); ylabel('G_2','Interpreter','tex');
-        
-        %% save figure
-        exportgraphics(f,config.ResultFolder+"/Bar_"+StoreName(ParamIndx)+".png",'Resolution',300);
-        exportgraphics(f,config.ResultFolder+"/Bar_"+StoreName(ParamIndx)+".pdf",'Resolution',300, 'ContentType','vector');
-
-    end
-end
-
-%%
-function plotBoxOfFittedParam(AllHealthyOldParams, AllMCIParams, anova_tab, config)
+function plotBoxOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams, anova_tab, config)
     
     numConds = 3; %3 is the condition number
     ParamName = ["Distance gain gamma", "bG_3", "g_2", "Angular gain g_3", "Anglar bias b", "sigma", "nu"];
     StoreName = ["Gamma", "bG_3", "g_2", "g_3", "b", "sigma", "nu"];
     for ParamIndx=1:length(ParamName)
 
-        HealthyOldParamAllConds = []; %dimension are different, so separate from MCIParamAllConds
+        YoungParamAllConds = [];
+        HealthyOldParamAllConds = []; %dimension are different, so separate from YoungParams
         MCIParamAllConds = [];
+        
         for TRIAL_FILTER=1:numConds
             %% extract data
+            YoungParam = AllYoungParams{TRIAL_FILTER}(:,ParamIndx);
+            YoungParamAllConds = [YoungParamAllConds,YoungParam];
+
             HealthyOldParam = AllHealthyOldParams{TRIAL_FILTER}(:,ParamIndx);
             HealthyOldParamAllConds = [HealthyOldParamAllConds,HealthyOldParam];
 
             MCIParam = AllMCIParams{TRIAL_FILTER}(:,ParamIndx);
-            MCIParamAllConds = [MCIParamAllConds,MCIParam];
+            MCIParamAllConds = [MCIParamAllConds,MCIParam];            
         end
     
         %% set figure info
@@ -210,8 +106,10 @@ function plotBoxOfFittedParam(AllHealthyOldParams, AllMCIParams, anova_tab, conf
         set(0,'DefaultAxesFontSize',12)
         set(0,'DefaultTextFontSize',12)     
         %%% Color definition %%%
+        colorForYoung = config.color_scheme_npg(3,:);
         colorForHOld = config.color_scheme_npg(5,:);
         colorForMCI = config.color_scheme_npg(2,:);
+        
 
         %set params
         whisker_value = 1.5;
@@ -220,7 +118,7 @@ function plotBoxOfFittedParam(AllHealthyOldParams, AllMCIParams, anova_tab, conf
         box_color_transparency = 0.5; %faceAlpha
         %center of box (three conditions)
         center_x = [1,2,3];
-        shift_value = 0.2; %box shift from center
+        shift_value = 0.25; %box shift from center
         median_lineWidth = 2;
         median_color = 'k';
         scatter_jitter_value = 0.1;
@@ -229,8 +127,8 @@ function plotBoxOfFittedParam(AllHealthyOldParams, AllMCIParams, anova_tab, conf
         scatter_marker_edgeWidth = 0.5;
         scatter_color_transparency = 0.7; %faceAlpha        
 
-        %% boxplot for each column in HealthOld
-        bp1 = boxplot(HealthyOldParamAllConds, ...
+        %% boxplot for each column in Young
+        bp1 = boxplot(YoungParamAllConds, ...
                     'Whisker',whisker_value, ...
                     'symbol','', ... %symbol ='' making outlier invisible
                     'Color','k', ...
@@ -240,25 +138,38 @@ function plotBoxOfFittedParam(AllHealthyOldParams, AllMCIParams, anova_tab, conf
         set(bp1,'linewidth',box_lineWidth);
 
         hold on
-        %boxplot for each column in MCIMerge
-        bp2 = boxplot(MCIParamAllConds, ...
+        %% boxplot for each column in HealthOld
+        bp2 = boxplot(HealthyOldParamAllConds, ...
+                    'Whisker',whisker_value, ...
+                    'symbol','', ... %symbol ='' making outlier invisible
+                    'Color','k', ...
+                    'Notch','on', ...
+                    'widths',box_widths_value,...
+                    'positions', center_x);
+        set(bp2,'linewidth',box_lineWidth);
+
+        hold on
+        %% boxplot for each column in MCIMerge
+        bp3 = boxplot(MCIParamAllConds, ...
                     'Whisker',whisker_value, ...
                     'symbol','', ... %symbol ='' making outlier invisible
                     'Color','k', ...
                     'Notch','on', ...
                     'widths',box_widths_value,...
                     'positions', center_x+shift_value);
-        set(bp2,'linewidth',box_lineWidth);
+        set(bp3,'linewidth',box_lineWidth);
 
         %% Coloring each box
-        %findobj first getting the three boxes for MCI (from bp2) from right to left
-        %then getting the three boxes for HealthyOld (frm bp1) from right to left
+        %findobj first getting the three boxes from right to left
+        %first Young (bp3), then HealthyOld (from bp2), finally MCI (from bp1)
         h = findobj(gca,'Tag','Box'); 
         for i = 1:length(h)
-            if i<4  %get the MCI box
-                patch(get(h(i),'XData'),get(h(i),'YData'),colorForMCI,'FaceAlpha',box_color_transparency);
-            else %get the HelthyOld box
+            if i<4  %get the Young box
+                patch(get(h(i),'XData'),get(h(i),'YData'),colorForYoung,'FaceAlpha',box_color_transparency);
+            elseif i<7  %get the HelthyOld box
                 patch(get(h(i),'XData'),get(h(i),'YData'),colorForHOld,'FaceAlpha',box_color_transparency);
+            else %get the MCI box
+                patch(get(h(i),'XData'),get(h(i),'YData'),colorForMCI,'FaceAlpha',box_color_transparency);
             end
         end
 
@@ -269,11 +180,34 @@ function plotBoxOfFittedParam(AllHealthyOldParams, AllMCIParams, anova_tab, conf
             h(i).Color = median_color;
         end
 
+        %% add scatter plot and the mean of Young
+        num_points = size(YoungParamAllConds,1);
+        for i=1:size(YoungParamAllConds,2)
+            hold on
+            x = i*ones(num_points,1)-shift_value+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
+            scatter(x, YoungParamAllConds(:,i), scatter_markerSize, ...
+                    'filled','MarkerEdgeColor',scatter_marker_edgeColor, ...
+                    'MarkerFaceColor',colorForYoung, ...
+                    'MarkerFaceAlpha',scatter_color_transparency,...
+                    'LineWidth',scatter_marker_edgeWidth); 
+            hold on
+            %add errorbar
+            mean_Young = mean(YoungParamAllConds(:,i));
+            sem_Young = std(YoungParamAllConds(:,i))./sqrt(length(YoungParamAllConds(:,i)));
+            errorbar(i-shift_value,mean_Young,sem_Young,'k','LineStyle','None', 'LineWidth', 2); 
+            hold on
+            %add mean point
+            scatter(i-shift_value, mean_Young, 4*scatter_markerSize, 'd',...
+                    'filled','MarkerEdgeColor','k', ...
+                    'MarkerFaceColor','w', ...
+                    'LineWidth',scatter_marker_edgeWidth);
+        end
+
         %% add scatter plot and the mean of HealthyOld
         num_points = size(HealthyOldParamAllConds,1);
         for i=1:size(HealthyOldParamAllConds,2)
             hold on
-            x = i*ones(num_points,1)-shift_value+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
+            x = i*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
             scatter(x, HealthyOldParamAllConds(:,i), scatter_markerSize, ...
                     'filled','MarkerEdgeColor',scatter_marker_edgeColor, ...
                     'MarkerFaceColor',colorForHOld, ...
@@ -283,10 +217,10 @@ function plotBoxOfFittedParam(AllHealthyOldParams, AllMCIParams, anova_tab, conf
             %add errorbar
             mean_Hold = mean(HealthyOldParamAllConds(:,i));
             sem_Hold = std(HealthyOldParamAllConds(:,i))./sqrt(length(HealthyOldParamAllConds(:,i)));
-            errorbar(i-shift_value,mean_Hold,sem_Hold,'k','LineStyle','None', 'LineWidth', 2);    
+            errorbar(i,mean_Hold,sem_Hold,'k','LineStyle','None', 'LineWidth', 2);    
             hold on
             %add mean point
-            scatter(i-shift_value, mean_Hold, 4*scatter_markerSize, 'd',...
+            scatter(i+shift_value, mean_Hold, 4*scatter_markerSize, 'd',...
                     'filled','MarkerEdgeColor','k', ...
                     'MarkerFaceColor','w', ...
                     'LineWidth',scatter_marker_edgeWidth);
@@ -306,7 +240,7 @@ function plotBoxOfFittedParam(AllHealthyOldParams, AllMCIParams, anova_tab, conf
             %add errorbar
             mean_MCI = mean(MCIParamAllConds(:,i));
             sem_MCI = std(MCIParamAllConds(:,i))./sqrt(length(MCIParamAllConds(:,i)));
-            errorbar(i+shift_value,mean_MCI,sem_MCI,'k','LineStyle','None', 'LineWidth', 2); 
+            errorbar(i+shift_value,mean_MCI,sem_MCI,'k','LineStyle','None', 'LineWidth', 3); 
             hold on
             %add mean point
             scatter(i+shift_value, mean_MCI, 4*scatter_markerSize, 'd',...
@@ -329,7 +263,7 @@ function plotBoxOfFittedParam(AllHealthyOldParams, AllMCIParams, anova_tab, conf
             %'Ytick'       , [0,0.5,1.0,1.5],...
             %'YLim'        , [0, 1.5],...   
         ylabel(ParamName(ParamIndx));
-        legend(gca, {'MCIMerged' 'HealthyOld'}, 'Location','northeast', 'NumColumns',2);
+        legend(gca, {'Young', 'HealthyOld', 'MCIMerged'}, 'Location','northeast', 'NumColumns',1);
         %xlabel('G_1','Interpreter','tex'); ylabel('G_2','Interpreter','tex');
 
         %extract pvalue for group, conditino and interaction to show on the figure 
@@ -350,27 +284,34 @@ function plotBoxOfFittedParam(AllHealthyOldParams, AllMCIParams, anova_tab, conf
 end
 
 %%
-function plotBoxOfFittedParamMergeCondition(AllHealthyOldParams, AllMCIParams, multicomp_tab1, config)
+function plotBoxOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCIParams, multicomp_tab1, config)
     
     numConds = 3; %3 is the condition number
     ParamName = ["Distance gain gamma", "bG_3", "g_2", "Angular gain g_3", "Anglar bias b", "sigma", "nu"];
     StoreName = ["Gamma", "bG_3", "g_2", "g_3", "b", "sigma", "nu"];
     for ParamIndx=1:length(ParamName)
 
+        YoungParamAllConds = [];
         HealthyOldParamAllConds = []; %dimension are different, so separate from MCIParamAllConds
         MCIParamAllConds = [];
-
+        
+        YoungParamAllCondsMergeinColumn = [];
         HealthyOldParamAllCondsMergeinColumn = [];
         MCIParamAllCondsMergeinColumn = [];
+
         for TRIAL_FILTER=1:numConds
             %% extract data
+            YoungParam = AllYoungParams{TRIAL_FILTER}(:,ParamIndx);
+            YoungParamAllConds = [YoungParamAllConds,YoungParam];
+            YoungParamAllCondsMergeinColumn = [YoungParamAllCondsMergeinColumn;YoungParam];
+            
             HealthyOldParam = AllHealthyOldParams{TRIAL_FILTER}(:,ParamIndx);
             HealthyOldParamAllConds = [HealthyOldParamAllConds,HealthyOldParam];
             HealthyOldParamAllCondsMergeinColumn = [HealthyOldParamAllCondsMergeinColumn;HealthyOldParam];
 
             MCIParam = AllMCIParams{TRIAL_FILTER}(:,ParamIndx);
             MCIParamAllConds = [MCIParamAllConds,MCIParam];
-            MCIParamAllCondsMergeinColumn = [MCIParamAllCondsMergeinColumn;MCIParam];
+            MCIParamAllCondsMergeinColumn = [MCIParamAllCondsMergeinColumn;MCIParam];            
         end
     
         %% set figure info
@@ -382,7 +323,9 @@ function plotBoxOfFittedParamMergeCondition(AllHealthyOldParams, AllMCIParams, m
         set(0,'DefaultTextFontName','Arial')
         set(0,'DefaultAxesFontSize',12)
         set(0,'DefaultTextFontSize',12)     
+
         %%% Color definition %%%
+        colorForYoung = config.color_scheme_npg(3,:);        
         colorForHOld = config.color_scheme_npg(5,:);
         colorForMCI = config.color_scheme_npg(2,:);
 
@@ -399,19 +342,19 @@ function plotBoxOfFittedParamMergeCondition(AllHealthyOldParams, AllMCIParams, m
         scatter_marker_edgeWidth = 0.5;
         scatter_color_transparency = 0.7; %faceAlpha        
 
-        %% boxplot for each column in HealthOld
-        bp1 = boxplot(HealthyOldParamAllCondsMergeinColumn, ...
+        %% boxplot for each column in MCIMerge
+        bp1 = boxplot(MCIParamAllCondsMergeinColumn, ...
                     'Whisker',whisker_value, ...
                     'symbol','', ... %symbol ='' making outlier invisible
                     'Color','k', ...
                     'Notch','on', ...
                     'widths',box_widths_value,...
-                    'positions', 1);
+                    'positions', 3);
         set(bp1,'linewidth',box_lineWidth);
 
         hold on
-        %boxplot for each column in MCIMerge
-        bp2 = boxplot(MCIParamAllCondsMergeinColumn, ...
+        %% boxplot for each column in HealthOld
+        bp2 = boxplot(HealthyOldParamAllCondsMergeinColumn, ...
                     'Whisker',whisker_value, ...
                     'symbol','', ... %symbol ='' making outlier invisible
                     'Color','k', ...
@@ -420,14 +363,29 @@ function plotBoxOfFittedParamMergeCondition(AllHealthyOldParams, AllMCIParams, m
                     'positions', 2);
         set(bp2,'linewidth',box_lineWidth);
 
+        hold on
+        %% boxplot for each column in Young
+        bp3 = boxplot(YoungParamAllCondsMergeinColumn, ...
+                    'Whisker',whisker_value, ...
+                    'symbol','', ... %symbol ='' making outlier invisible
+                    'Color','k', ...
+                    'Notch','on', ...
+                    'widths',box_widths_value,...
+                    'positions', 1);
+        set(bp3,'linewidth',box_lineWidth);
+        
+
         %% Coloring each box
-        %findobj first getting the box for MCI (from bp2) 
-        %then getting the box for HealthyOld (frm bp1)
+        %findobj first getting the box for Young (from bp3) 
+        % then for HealthyOld (from bp2) 
+        %then getting the box for MCI (frm bp1)
         h = findobj(gca,'Tag','Box'); 
-        %get the MCI box
-        patch(get(h(1),'XData'),get(h(1),'YData'),colorForMCI,'FaceAlpha',box_color_transparency);
+        %get the Young box
+        patch(get(h(1),'XData'),get(h(1),'YData'),colorForYoung,'FaceAlpha',box_color_transparency);        
         %get the HelthyOld box
         patch(get(h(2),'XData'),get(h(2),'YData'),colorForHOld,'FaceAlpha',box_color_transparency);
+        %get the MCI box
+        patch(get(h(3),'XData'),get(h(3),'YData'),colorForMCI,'FaceAlpha',box_color_transparency);
 
         %% Adjusting median
         h=findobj(gca,'tag','Median');
@@ -436,12 +394,37 @@ function plotBoxOfFittedParamMergeCondition(AllHealthyOldParams, AllMCIParams, m
             h(i).Color = median_color;
         end
 
-        %% add scatter plot and the mean of HealthyOld
+        %% add scatter plot and the mean of Young
         condition_mkr = ['o', 'o', 'o'];
+        num_points = size(YoungParamAllConds,1);
+        for i=1:size(YoungParamAllConds,2)
+            hold on
+            x = 1*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
+            scatter(x, YoungParamAllConds(:,i), scatter_markerSize, ...
+                    'filled', ...
+                    condition_mkr(i), ... %marker shape
+                    'MarkerEdgeColor',scatter_marker_edgeColor, ...
+                    'MarkerFaceColor',colorForYoung, ...
+                    'MarkerFaceAlpha',scatter_color_transparency,...
+                    'LineWidth',scatter_marker_edgeWidth); 
+            hold on
+        end
+        %add errorbar
+        mean_Young = mean(YoungParamAllCondsMergeinColumn);
+        sem_Young = std(YoungParamAllCondsMergeinColumn)./sqrt(length(YoungParamAllCondsMergeinColumn));
+        errorbar(1,mean_Young,sem_Young,'k','LineStyle','None', 'LineWidth', 2); 
+        hold on
+        %add mean point
+        scatter(1, mean_Young, 2*scatter_markerSize, 'd',...
+                'filled','MarkerEdgeColor','k', ...
+                'MarkerFaceColor','w', ...
+                'LineWidth',scatter_marker_edgeWidth);    
+
+        %% add scatter plot and the mean of HealthyOld
         num_points = size(HealthyOldParamAllConds,1);
         for i=1:size(HealthyOldParamAllConds,2)
             hold on
-            x = ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
+            x = 2*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
             scatter(x, HealthyOldParamAllConds(:,i), scatter_markerSize, ...
                     'filled', ...
                     condition_mkr(i), ... %marker shape
@@ -455,19 +438,19 @@ function plotBoxOfFittedParamMergeCondition(AllHealthyOldParams, AllMCIParams, m
         %add errorbar
         mean_Hold = mean(HealthyOldParamAllCondsMergeinColumn);
         sem_Hold = std(HealthyOldParamAllCondsMergeinColumn)./sqrt(length(HealthyOldParamAllCondsMergeinColumn));
-        errorbar(1,mean_Hold,sem_Hold,'k','LineStyle','None', 'LineWidth', 2);    
+        errorbar(2,mean_Hold,sem_Hold,'k','LineStyle','None', 'LineWidth', 2);    
         hold on
         %add mean point
-        scatter(1, mean_Hold, 2*scatter_markerSize, 'd',...
+        scatter(2, mean_Hold, 2*scatter_markerSize, 'd',...
                 'filled','MarkerEdgeColor','k', ...
                 'MarkerFaceColor','w', ...
-                'LineWidth',scatter_marker_edgeWidth);
+                'LineWidth',scatter_marker_edgeWidth);    
 
         %% add scatter plot and the mean of MCI
         num_points = size(MCIParamAllConds,1);
         for i=1:size(MCIParamAllConds,2)
             hold on
-            x = 2*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
+            x = 3*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
             scatter(x, MCIParamAllConds(:,i), scatter_markerSize, ...
                     'filled', ...
                     condition_mkr(i), ... %marker shape
@@ -480,13 +463,13 @@ function plotBoxOfFittedParamMergeCondition(AllHealthyOldParams, AllMCIParams, m
         %add errorbar
         mean_MCI = mean(MCIParamAllCondsMergeinColumn);
         sem_MCI = std(MCIParamAllCondsMergeinColumn)./sqrt(length(MCIParamAllCondsMergeinColumn));
-        errorbar(2,mean_MCI,sem_MCI,'k','LineStyle','None', 'LineWidth', 2); 
+        errorbar(3,mean_MCI,sem_MCI,'k','LineStyle','None', 'LineWidth', 2); 
         hold on
         %add mean point
-        scatter(2, mean_MCI, 2*scatter_markerSize, 'd',...
+        scatter(3, mean_MCI, 2*scatter_markerSize, 'd',...
                 'filled','MarkerEdgeColor','k', ...
                 'MarkerFaceColor','w', ...
-                'LineWidth',scatter_marker_edgeWidth);        
+                'LineWidth',scatter_marker_edgeWidth);     
 
         %% Further post-processing the figure
         set(gca, ...
@@ -495,20 +478,27 @@ function plotBoxOfFittedParamMergeCondition(AllHealthyOldParams, AllMCIParams, m
             'TickLength'  , [.01 .01] , ...
             'XColor'      , [.1 .1 .1], ...
             'YColor'      , [.1 .1 .1], ...
-            'XTick'       , (1:2),... 
-            'XLim'        , [0.5, 2.5],...
-            'XTickLabel'  , {'HealthyOld','MCI'},...
+            'XTick'       , (1:3),... 
+            'XLim'        , [0.5, 3.5],...
+            'XTickLabel'  , {'Young','HealthyOld','MCI'},...
             'LineWidth'   , .5        );
             %'Ytick'       , [0,0.5,1.0,1.5],...
             %'YLim'        , [0, 1.5],...   
         ylabel(ParamName(ParamIndx));
-        legend(gca, {'MCIMerged', 'HealthyOld'}, 'Location','northeast', 'NumColumns',2);
+        legend(gca, {'Young', 'HealthyOld', 'MCI'}, 'Location','northeast', 'NumColumns',1);
         %xlabel('G_1','Interpreter','tex'); ylabel('G_2','Interpreter','tex');
 
         %extract pvalue for multicomparison of Group effect for showing on the figure
         multicomp_result = multicomp_tab1{ParamIndx};
-        Pvalue = multicomp_result(1,6); % MCI vs. HealthyOld see Two-way anova for details
-        str = {['P = ',sprintf('%.2g',Pvalue)]};
+        % 1       2             3
+        % MCI     HealthyOld    Young
+        PvalueYoungvsHealthyOld = multicomp_result(3,6); % Young vs. HealthyOld see Two-way anova for details
+        PvalueHealthyOldvsMCI = multicomp_result(1,6); % HealthyOld v.s. MCI vs.  see Two-way anova for details
+        PvalueYoungvsMCI = multicomp_result(2,6); % Young vs. MCI see Two-way anova for details 
+        str = {['P12 = ',sprintf('%.2g',PvalueYoungvsHealthyOld)],...
+               ['P23 = ',sprintf('%.2g',PvalueHealthyOldvsMCI)],...
+               ['P13 = ',sprintf('%.2g',PvalueYoungvsMCI)]};
+
         annotation('textbox',[0.2 0.6 0.3 0.3],'String',str,'FitBoxToText','on');
 
         %% save figure
@@ -516,12 +506,6 @@ function plotBoxOfFittedParamMergeCondition(AllHealthyOldParams, AllMCIParams, m
         exportgraphics(f,config.ResultFolder+"/ZMergeCondsBox_"+StoreName(ParamIndx)+".pdf",'Resolution',300, 'ContentType','vector');
 
     end
-end
-
-%%
-function [m, s] = getMeanSem(Param)
-    m = mean(Param);
-    s = std(Param)./sqrt(length(Param));
 end
 
 %% Two-way anova on merged MCI
@@ -584,3 +568,4 @@ function [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnov
     end
     
 end
+

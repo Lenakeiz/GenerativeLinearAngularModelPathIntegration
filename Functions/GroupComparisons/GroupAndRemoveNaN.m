@@ -1,4 +1,4 @@
-function [Y, GroupNames, ConditionNames]=GroupAndRemoveNaN(Data,param_idx,groupname)
+function [Y, GroupNames, ConditionNames]=GroupAndRemoveNaN(Data,param_idx, groupname)
 %Group all the data from five groups and three conditions into a long
 %numeric vector for further two-way anova analysis 
 %and also output the factor names 

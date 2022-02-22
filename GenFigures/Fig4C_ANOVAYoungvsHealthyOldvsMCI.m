@@ -254,7 +254,7 @@ function plotBoxOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
         maxdata = max(alldata,[],'all');
         mindata = min(alldata, [], 'all');
 
-        lowupYlim = [mindata-.2*(maxdata-mindata)-eps, maxdata+.2*(maxdata-mindata)+eps]; 
+        lowupYlim = [mindata-.2*(maxdata-mindata)-eps, maxdata+.4*(maxdata-mindata)+eps]; 
         %eps to make sure when mindata=maxdata, there won't be an error
 
         set(gca, ...
@@ -266,12 +266,12 @@ function plotBoxOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
             'XTick'       , (1:3),... 
             'XTickLabel'  , {'No Change','No Distal Cue', 'No Optical Flow'},...
             'XLim'        , [0.5, 3.5],...
-            'YLim'        , lowupYlim,... 
             'LineWidth'   , .5        );
-            %'Ytick'       , [0,0.5,1.0,1.5],...
+            %'YLim'        , lowupYlim,... 
         ylabel(ParamName(ParamIndx));
-        legend(gca, {'Young', 'HealthyOld', 'MCIMerged'}, 'Location','northeast', 'NumColumns',1);
-        %xlabel('G_1','Interpreter','tex'); ylabel('G_2','Interpreter','tex');
+        %legend(gca, {'Young', 'HealthyOld', 'MCIMerged'}, 'Location','northeast', 'NumColumns',1);
+        allpatches = findall(gca,'type','Patch');
+        legend(allpatches(1:3:end), {'Young', 'HealthyOld', 'MCIMerged'}, 'Location','northeast', 'NumColumns',1);
 
         %extract pvalue for group, conditino and interaction to show on the figure 
         anova_result = anova_tab{ParamIndx};
@@ -281,7 +281,7 @@ function plotBoxOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
         str = {['Group Pvalue = ',sprintf('%.2g',group_pvalue)],...
                ['Condition Pvalue = ',sprintf('%.2g',condition_pvalue)],...
                ['Interaction Pvalue = ',sprintf('%.2g',interaction_pvalue)]};
-        annotation('textbox',[0.2 0.6 0.3 0.3],'String',str,'FitBoxToText','on');
+        %annotation('textbox',[0.2 0.6 0.3 0.3],'String',str,'FitBoxToText','on');
 
         %% save figure
         exportgraphics(f,config.ResultFolder+"/Box_"+StoreName(ParamIndx)+".png",'Resolution',300);
@@ -479,6 +479,13 @@ function plotBoxOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
                 'LineWidth',scatter_marker_edgeWidth);     
 
         %% Further post-processing the figure
+        alldata = [YoungParamAllConds;HealthyOldParamAllConds;MCIParamAllConds];
+        maxdata = max(alldata,[],'all');
+        mindata = min(alldata, [], 'all');
+
+        lowupYlim = [mindata-.2*(maxdata-mindata)-eps, maxdata+.4*(maxdata-mindata)+eps]; 
+        %eps to make sure when mindata=maxdata, there won't be an error
+
         set(gca, ...
             'Box'         , 'off'     , ...
             'TickDir'     , 'out'     , ...
@@ -490,10 +497,9 @@ function plotBoxOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
             'XTickLabel'  , {'Young','HealthyOld','MCI'},...
             'LineWidth'   , .5        );
             %'Ytick'       , [0,0.5,1.0,1.5],...
-            %'YLim'        , [0, 1.5],...   
+            %'YLim'        , [0, 1.5],...  
+            %'YLim'        , lowupYlim,...
         ylabel(ParamName(ParamIndx));
-        legend(gca, {'Young', 'HealthyOld', 'MCI'}, 'Location','northeast', 'NumColumns',1);
-        %xlabel('G_1','Interpreter','tex'); ylabel('G_2','Interpreter','tex');
 
         %extract pvalue for multicomparison of Group effect for showing on the figure
         multicomp_result = multicomp_tab1{ParamIndx};
@@ -502,11 +508,25 @@ function plotBoxOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         PvalueYoungvsHealthyOld = multicomp_result(3,6); % Young vs. HealthyOld see Two-way anova for details
         PvalueHealthyOldvsMCI = multicomp_result(1,6); % HealthyOld v.s. MCI vs.  see Two-way anova for details
         PvalueYoungvsMCI = multicomp_result(2,6); % Young vs. MCI see Two-way anova for details 
-        str = {['P12 = ',sprintf('%.2g',PvalueYoungvsHealthyOld)],...
-               ['P23 = ',sprintf('%.2g',PvalueHealthyOldvsMCI)],...
-               ['P13 = ',sprintf('%.2g',PvalueYoungvsMCI)]};
-
-        annotation('textbox',[0.2 0.6 0.3 0.3],'String',str,'FitBoxToText','on');
+%         str = {['P12 = ',sprintf('%.2g',PvalueYoungvsHealthyOld)],...
+%                ['P23 = ',sprintf('%.2g',PvalueHealthyOldvsMCI)],...
+%                ['P13 = ',sprintf('%.2g',PvalueYoungvsMCI)]};
+%         annotation('textbox',[0.2 0.6 0.3 0.3],'String',str,'FitBoxToText','on');
+        
+        %% add sigstar
+        AllP = [PvalueYoungvsHealthyOld,PvalueHealthyOldvsMCI,PvalueYoungvsMCI];
+        Xval = [[1,2];[2,3];[1,3]];
+        %select those P value smaller than 0.05
+        PsigInd = AllP<0.05;
+        if sum(AllP<0.05)>0
+            Xval_select = Xval(PsigInd,:);
+            AllP_select = AllP(PsigInd);
+            XXX = {};
+            for i=1:sum(AllP<0.05)
+                XXX{i} = Xval_select(i,:);
+            end
+            H=sigstar(XXX,AllP_select);
+        end
 
         %% save figure
         exportgraphics(f,config.ResultFolder+"/ZMergeCondsBox_"+StoreName(ParamIndx)+".png",'Resolution',300);

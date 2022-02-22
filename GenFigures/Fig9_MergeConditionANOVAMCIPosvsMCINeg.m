@@ -179,6 +179,13 @@ function plotBoxOfFittedParam(MCIPosParams, MCINegParams, multicomp_tab, config)
                 'LineWidth',scatter_marker_edgeWidth);     
 
         %% Further post-processing the figure
+        alldata = [MCIPosParams(:,ParamIndx); MCINegParams(:,ParamIndx)];
+        maxdata = max(alldata);
+        mindata = min(alldata);
+
+        lowupYlim = [mindata-.2*(maxdata-mindata)-eps, maxdata+.4*(maxdata-mindata)+eps]; 
+
+        %% Further post-processing the figure
         set(gca, ...
             'Box'         , 'off'     , ...
             'TickDir'     , 'out'     , ...
@@ -187,19 +194,23 @@ function plotBoxOfFittedParam(MCIPosParams, MCINegParams, multicomp_tab, config)
             'YColor'      , [.1 .1 .1], ...
             'XTick'       , (1:2),... 
             'XLim'        , [0.5, 2.5],...
+            'YLim'        , lowupYlim,...
             'XTickLabel'  , {'MCIPos','MCINeg'},...
             'LineWidth'   , .5        );
-            %'Ytick'       , [0,0.5,1.0,1.5],...
-            %'YLim'        , [0, 1.5],...   
+            %'Ytick'       , [0,0.5,1.0,1.5],... 
         ylabel(ParamName(ParamIndx));
-        legend(gca, {'MCIPos','MCINeg'}, 'Location','northeast', 'NumColumns',2);
-        %xlabel('G_1','Interpreter','tex'); ylabel('G_2','Interpreter','tex');
 
-        %extract pvalue for multicomparison of Group effect for showing on the figure
+        %% extract pvalue for multicomparison of Group effect for showing on the figure
         multicomp_result = multicomp_tab{ParamIndx};
-        str = {['Pvalue = ',sprintf('%.2g',multicomp_result(1,6))]};
+        Pvalue = multicomp_result(1,6); %POsthoc test Pvalue between MCIPos and MCINeg 
+        %str = {['Pvalue = ',sprintf('%.2e',Pvalue)]};
+        %annotation('textbox',[0.2 0.6 0.3 0.3],'String',str,'FitBoxToText','on');
 
-        annotation('textbox',[0.2 0.6 0.3 0.3],'String',str,'FitBoxToText','on');
+        hold on
+        if Pvalue<0.05
+            % add sigstar
+            H=sigstar({[1,2]},[Pvalue]);
+        end
 
         %% save figure
         exportgraphics(f,config.ResultFolder+"/ZMergeCondsBox_"+StoreName(ParamIndx)+".png",'Resolution',300);

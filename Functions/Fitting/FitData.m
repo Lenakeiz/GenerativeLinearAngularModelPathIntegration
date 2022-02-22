@@ -63,7 +63,7 @@ else %gamma based model
     ifEqualDiscount=false;
     %set lower bound and up bound
     %      1-gamma    2-G3    3-g2     4-g3     5-b      6-sigma    7-nu
-    lb  = [0.5,       0.1,    0.5,     -2.0,       0,       0.1,       0.1];
+    lb  = [0.5,       0.1,    0.5,     -2.0,    0,       0.1,       0.1];
     ub  = [1.5,       1.0,    2.0,     2.0,     pi,  2.0,       100.0]; 
 
     %set equality constriants

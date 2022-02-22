@@ -450,12 +450,12 @@ function plotBoxOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
         end
 
         %add errorbar
-        mean_Hold = mean(MCIPosParamAllCondsMergeinColumn);
-        sem_Hold = std(MCIPosParamAllCondsMergeinColumn)./sqrt(length(MCIPosParamAllCondsMergeinColumn));
-        errorbar(1,mean_Hold,sem_Hold,'k','LineStyle','None', 'LineWidth', 2);    
+        mean_MCIPos = mean(MCIPosParamAllCondsMergeinColumn);
+        sem_MCIPos= std(MCIPosParamAllCondsMergeinColumn)./sqrt(length(MCIPosParamAllCondsMergeinColumn));
+        errorbar(1,mean_MCIPos,sem_MCIPos,'k','LineStyle','None', 'LineWidth', 2);    
         hold on
         %add mean point
-        scatter(1, mean_Hold, 2*scatter_markerSize, 'd',...
+        scatter(1, mean_MCIPos, 2*scatter_markerSize, 'd',...
                 'filled','MarkerEdgeColor','k', ...
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);
@@ -475,12 +475,12 @@ function plotBoxOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
             hold on
         end
         %add errorbar
-        mean_MCI = mean(MCINegParamAllCondsMergeinColumn);
-        sem_MCI = std(MCINegParamAllCondsMergeinColumn)./sqrt(length(MCINegParamAllCondsMergeinColumn));
-        errorbar(2,mean_MCI,sem_MCI,'k','LineStyle','None', 'LineWidth', 2); 
+        mean_MCINeg = mean(MCINegParamAllCondsMergeinColumn);
+        sem_MCINeg = std(MCINegParamAllCondsMergeinColumn)./sqrt(length(MCINegParamAllCondsMergeinColumn));
+        errorbar(2,mean_MCINeg,sem_MCINeg,'k','LineStyle','None', 'LineWidth', 2); 
         hold on
         %add mean point
-        scatter(2, mean_MCI, 2*scatter_markerSize, 'd',...
+        scatter(2, mean_MCINeg, 2*scatter_markerSize, 'd',...
                 'filled','MarkerEdgeColor','k', ...
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);        

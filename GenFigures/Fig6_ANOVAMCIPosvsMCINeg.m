@@ -1,5 +1,6 @@
 %% Cleaning variables
 clearvars; clear all; close all; clc;
+rng(123); %for reproduction
 
 %% Loading data
 disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
@@ -252,9 +253,9 @@ function plotBoxOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, confi
         %then getting the three boxes for MCIPos (frm bp1) from right to left
         h = findobj(gca,'Tag','Box'); 
         for i = 1:length(h)
-            if i<4  %get the MCI box
+            if i<4  %get the MCINeg box
                 patch(get(h(i),'XData'),get(h(i),'YData'),colorForMCINeg,'FaceAlpha',box_color_transparency);
-            else %get the HelthyOld box
+            else %get the MCIPos box
                 patch(get(h(i),'XData'),get(h(i),'YData'),colorForMCIPos,'FaceAlpha',box_color_transparency);
             end
         end
@@ -313,6 +314,14 @@ function plotBoxOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, confi
         end
 
         %% Further post-processing the figure
+
+        %calculate te ylim
+        alldata = [MCIPosParamAllConds;MCINegParamAllConds];
+        maxdata = max(alldata,[],'all');
+        mindata = min(alldata, [], 'all');
+        lowupYlim = [mindata-.1*(maxdata-mindata)-eps, maxdata+.1*(maxdata-mindata)+eps]; 
+        %eps to make sure when mindata=maxdata, there won't be an error
+
         set(gca, ...
             'Box'         , 'off'     , ...
             'TickDir'     , 'out'     , ...
@@ -321,23 +330,25 @@ function plotBoxOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, confi
             'YColor'      , [.1 .1 .1], ...
             'XTick'       , (1:3),... 
             'XLim'        , [0.5, 3.5],...
+            'YLim'        , lowupYlim,...   
             'XTickLabel'  , {'No Change','No Distal Cue', 'No Optical Flow'},...
             'LineWidth'   , .5        );
-            %'Ytick'       , [0,0.5,1.0,1.5],...
-            %'YLim'        , [0, 1.5],...   
         ylabel(ParamName(ParamIndx));
-        legend(gca, {'MCIPos' 'MCINeg'}, 'Location','northeast', 'NumColumns',2);
-        %xlabel('G_1','Interpreter','tex'); ylabel('G_2','Interpreter','tex');
+        allpatches = findall(gca,'type','Patch');
+        legend(allpatches(1:3:end), {'MCIPos' 'MCINeg'}, 'Location','northeast', 'NumColumns',2);
 
         %extract pvalue for group, conditino and interaction to show on the figure 
         anova_result = anova_tab{ParamIndx};
         group_pvalue = anova_result{2,7};
         condition_pvalue = anova_result{3,7};
         interaction_pvalue = anova_result{4,7};
-        str = {['Group Pvalue = ',sprintf('%.2g',group_pvalue)],...
-               ['Condition Pvalue = ',sprintf('%.2g',condition_pvalue)],...
-               ['Interaction Pvalue = ',sprintf('%.2g',interaction_pvalue)]};
-        annotation('textbox',[0.2 0.6 0.3 0.3],'String',str,'FitBoxToText','on');
+%         str = {['Group Pvalue = ',sprintf('%.2g',group_pvalue)],...
+%                ['Condition Pvalue = ',sprintf('%.2g',condition_pvalue)],...
+%                ['Interaction Pvalue = ',sprintf('%.2g',interaction_pvalue)]};
+%         annotation('textbox',[0.2 0.6 0.3 0.3],'String',str,'FitBoxToText','on');
+        title(strcat(['Group P = ',sprintf('%.2g',group_pvalue)],...
+              ['    Condition P = ',sprintf('%.2g',condition_pvalue)],...
+              ['    Interaction P = ',sprintf('%.2g',interaction_pvalue)]))
 
         %% save figure
         exportgraphics(f,config.ResultFolder+"/Box_"+StoreName(ParamIndx)+".png",'Resolution',300);
@@ -434,20 +445,16 @@ function plotBoxOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
         end
 
         %% add scatter plot and the mean of MCIPos
-        condition_mkr = ['o', 'o', 'o'];
-        num_points = size(MCIPosParamAllConds,1);
-        for i=1:size(MCIPosParamAllConds,2)
-            hold on
-            x = ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
-            scatter(x, MCIPosParamAllConds(:,i), scatter_markerSize, ...
-                    'filled', ...
-                    condition_mkr(i), ... %marker shape
-                    'MarkerEdgeColor',scatter_marker_edgeColor, ...
-                    'MarkerFaceColor',colorForMCIPos, ...
-                    'MarkerFaceAlpha',scatter_color_transparency,...
-                    'LineWidth',scatter_marker_edgeWidth); 
-            hold on
-        end
+        num_points = length(MCIPosParamAllCondsMergeinColumn);
+        hold on
+        x = ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
+        scatter(x, MCIPosParamAllCondsMergeinColumn, scatter_markerSize, ...
+                'filled', ...
+                'o', ... %marker shape
+                'MarkerEdgeColor',scatter_marker_edgeColor, ...
+                'MarkerFaceColor',colorForMCIPos, ...
+                'MarkerFaceAlpha',scatter_color_transparency,...
+                'LineWidth',scatter_marker_edgeWidth); 
 
         %add errorbar
         mean_MCIPos = mean(MCIPosParamAllCondsMergeinColumn);
@@ -461,19 +468,17 @@ function plotBoxOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
                 'LineWidth',scatter_marker_edgeWidth);
 
         %% add scatter plot and the mean of MCI
-        num_points = size(MCINegParamAllConds,1);
-        for i=1:size(MCINegParamAllConds,2)
-            hold on
-            x = 2*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
-            scatter(x, MCINegParamAllConds(:,i), scatter_markerSize, ...
-                    'filled', ...
-                    condition_mkr(i), ... %marker shape
-                    'MarkerEdgeColor',scatter_marker_edgeColor, ...
-                    'MarkerFaceColor',colorForMCINeg, ...
-                    'MarkerFaceAlpha',scatter_color_transparency,...
-                    'LineWidth',scatter_marker_edgeWidth); 
-            hold on
-        end
+        num_points = size(MCINegParamAllCondsMergeinColumn,1);
+        hold on
+        x = 2*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
+        scatter(x, MCINegParamAllCondsMergeinColumn, scatter_markerSize, ...
+                'filled', ...
+                'o', ... %marker shape
+                'MarkerEdgeColor',scatter_marker_edgeColor, ...
+                'MarkerFaceColor',colorForMCINeg, ...
+                'MarkerFaceAlpha',scatter_color_transparency,...
+                'LineWidth',scatter_marker_edgeWidth); 
+
         %add errorbar
         mean_MCINeg = mean(MCINegParamAllCondsMergeinColumn);
         sem_MCINeg = std(MCINegParamAllCondsMergeinColumn)./sqrt(length(MCINegParamAllCondsMergeinColumn));
@@ -486,6 +491,13 @@ function plotBoxOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
                 'LineWidth',scatter_marker_edgeWidth);        
 
         %% Further post-processing the figure
+        %calculate the ylim
+        alldata = [MCIPosParamAllConds;MCINegParamAllConds];
+        maxdata = max(alldata,[],'all');
+        mindata = min(alldata, [], 'all');
+        lowupYlim = [mindata-.1*(maxdata-mindata)-eps, maxdata+.1*(maxdata-mindata)+eps]; 
+        %eps to make sure when mindata=maxdata, there won't be an error
+
         set(gca, ...
             'Box'         , 'off'     , ...
             'TickDir'     , 'out'     , ...
@@ -494,19 +506,22 @@ function plotBoxOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
             'YColor'      , [.1 .1 .1], ...
             'XTick'       , (1:2),... 
             'XLim'        , [0.5, 2.5],...
+            'YLim'        , lowupYlim,...   
             'XTickLabel'  , {'MCIPos','MCINeg'},...
             'LineWidth'   , .5        );
-            %'Ytick'       , [0,0.5,1.0,1.5],...
-            %'YLim'        , [0, 1.5],...   
         ylabel(ParamName(ParamIndx));
-        legend(gca, {'MCINeg', 'MCIPos'}, 'Location','northeast', 'NumColumns',2);
-        %xlabel('G_1','Interpreter','tex'); ylabel('G_2','Interpreter','tex');
 
         %extract pvalue for multicomparison of Group effect for showing on the figure
         multicomp_result = multicomp_tab1{ParamIndx};
         Pvalue = multicomp_result(1,6); % MCIPos vs. MCINeg see Two-way anova for details
-        str = {['P = ',sprintf('%.2g',Pvalue)]};
-        annotation('textbox',[0.2 0.6 0.3 0.3],'String',str,'FitBoxToText','on');
+%         str = {['P = ',sprintf('%.2g',Pvalue)]};
+%         annotation('textbox',[0.2 0.6 0.3 0.3],'String',str,'FitBoxToText','on');
+        title(['P value = ',sprintf('%.2g',Pvalue)])
+
+        %% add sigstar 
+        if Pvalue<0.05
+            H=sigstar({[1,2]},[Pvalue]);
+        end
 
         %% save figure
         exportgraphics(f,config.ResultFolder+"/ZMergeCondsBox_"+StoreName(ParamIndx)+".png",'Resolution',300);

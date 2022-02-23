@@ -10,8 +10,13 @@
                         0.4941    0.3804    0.2824; ...
                         0.6902    0.6118    0.5216 ];
 
-    f = figure;
-    f.WindowState = 'maximized';
+    folder = pwd + "/Output/ColorPattern";
+    %create storing folder for trajectory if not exist
+    if ~exist(folder, 'dir')
+       mkdir(folder);
+    end
+
+    f = figure('Visible','off','Position',get(0,'ScreenSize'));
 
     hold on;
     for i = 1:length(config.color_scheme_npg)
@@ -30,10 +35,14 @@
     text(17,0.1,'sigma', 'Rotation',90, 'FontSize',25);
     text(19,0.1,'niu', 'Rotation',90, 'FontSize',25);
     hold off;
-    
+
     title("Color Scheme", "FontSize",30)
     axis([0 length(config.color_scheme_npg)*2 0 2])
     set(gca,'xtick',[])
     set(gca,'xticklabel',[])
     set(gca,'ytick',[])
     set(gca,'yticklabel',[])
+
+    exportgraphics(f,folder+"/ColorPantter.png",'Resolution',300);
+
+    clear folder f 

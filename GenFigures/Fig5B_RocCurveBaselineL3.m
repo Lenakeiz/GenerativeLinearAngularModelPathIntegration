@@ -25,48 +25,32 @@ clear savefolder resultfolder
 %% Aggregating the MCI sample
 AggregateMCI;
 
-%% Calculating distance quantities
-% Model fitting for HealthyOld data
-HealthyOld = TransformPaths(HealthyControls);
-[~, AllHealthyOldX, AllHealthyOldDX, ~, ~] = getResultsAllConditions(HealthyOld, config);
-[NormedDistHealthyOld, NormedAngleHealthyOld] = getNormalizedReturnDistanceandAngle(AllHealthyOldX, AllHealthyOldDX, AllHealthyOldTheta);
-
-%% Model fitting for MCIPos
-MCIPos = TransformPaths(MCIPos);
-[~, AllMCIPosX, AllMCIPosDX, ~, ~] = getResultsAllConditions(MCIPos, config);
-[NormedDistMCIPos, NormedAngleMCIPos] = getNormalizedReturnDistanceandAngle(AllMCIPosX, AllMCIPosDX, AllMCIPosTheta);
-
-%% Model fitting for MCINeg
-MCINeg = TransformPaths(MCINeg);
-[~, AllMCINegX, AllMCINegDX, ~, ~] = getResultsAllConditions(MCINeg, config);
-[NormedDistMCINeg, NormedAngleMCINeg] = getNormalizedReturnDistanceandAngle(AllMCINegX, AllMCINegDX, AllMCINegTheta);
-
-%% Model fitting for MCIUnk
-MCIUnk = TransformPaths(Unknown);
-[~, AllMCIUnkX, AllMCIUnkDX, ~, ~] = getResultsAllConditions(MCIUnk, config);
-[NormedDistMCIUnk, ~] = getNormalizedReturnDistanceandAngle(AllMCIUnkX, AllMCIUnkDX, AllMCIUnkTheta);
-
-%% Calculating our model
+%% Calculating our model, but returning only the informations about the trials
 %no consider of the rotation gain factor in leg2, i.e., gamma, G3=1, g2=1, g3, k3, sigma, nu. #params=6
 %"VariableNames", {'Gamma','g','b','sigma','nu'});
 config.UseGlobalSearch = true;
 config.ModelName = "BaseModel";
 config.NumParams = 5;
 
-[MCIAllParameters, ~, ~, ~, ~] = getResultsAllConditions(MCIAll, config);
-MCIAllParameters = MCIAllParameters(:,[1 4 5 6 7]);
+% Model fitting for HealthyOld data
+[~, AllHealthyOldX, AllHealthyOldDX, theta, ~] = getResultsAllConditions(HealthyOld, config);
+[NormedDistHealthyOld, NormedAngleHealthyOld] = getReturnAndActualDistance(AllHealthyOldX, AllHealthyOldDX, theta);
 
-[HealthyControlsParameters, ~, ~, ~, ~] = getResultsAllConditions(HealthyControls, config);
-HealthyControlsParameters = HealthyControlsParameters(:,[1 4 5 6 7]);
+%% Model fitting for MCIPos
+[~, AllMCIPosX, AllMCIPosDX, theta, ~] = getResultsAllConditions(MCIPos, config);
+[NormedDistMCIPos, NormedAngleMCIPos] = getReturnAndActualDistance(AllMCIPosX, AllMCIPosDX, theta);
 
-[MCIPosParameters, ~, ~, ~, ~] = getResultsAllConditions(MCIPos, config);
-MCIPosParameters = MCIPosParameters(:,[1 4 5 6 7]);
+%% Model fitting for MCINeg
+[~, AllMCINegX, AllMCINegDX, theta, ~] = getResultsAllConditions(MCINeg, config);
+[NormedDistMCINeg, NormedAngleMCINeg] = getReturnAndActualDistance(AllMCINegX, AllMCINegDX, theta);
 
-[MCINegParameters, ~, ~, ~, ~] = getResultsAllConditions(MCINeg, config);
-MCINegParameters = MCINegParameters(:,[1 4 5 6 7]);
+%% Model fitting for MCIUnk
+[~, AllMCIAgg, AllMCIAggDX, theta, ~] = getResultsAllConditions(MCIUnk, config);
+[NormedDistMCIUnk, ~] = getReturnAndActualDistance(AllMCIUnkX, AllMCIAggDX, theta);
+
+clear theta
 
 %% Creating the roc curves for MCI all vs HC
-
 close all;
 
 parametersName = [{'\gamma'},  {'g_3'}, {'b'}, {'\sigma'}, {'\nu'}];
@@ -238,6 +222,63 @@ exportgraphics(f,config.ResultFolder+"/ROC_MCInegvsMCIPos"+".pdf",'Resolution',3
 
 clear parametersName filesName i colors f ll legendText 
 
+%% get the return distance and the actual distance for each trial
+% each value is a mean value for per participant
+function [NormedDist, NormedAngle] = getReturnAndActualDistance(AllX, AllDX, AllTheta)
+    numConds = length(AllX);
+    NormedDist = [];
+    NormedAngle = [];
+
+    for TRIAL_FILTER=1:numConds
+        X = AllX{TRIAL_FILTER};
+        DX = AllDX{TRIAL_FILTER};
+        Theta = AllTheta{TRIAL_FILTER};
+
+        subjectSize = size(X,2);
+        NormedDistAllSubjs = zeros(1,subjectSize);
+        NormedAngleAllSubjs = zeros(1,subjectSize);
+
+        for subj=1:subjectSize
+            subjX = X{subj};
+            subjDX = DX{subj};
+            subjTheta = Theta{subj};
+
+            sampleSize = size(subjX,2);
+            NormedDistPerSubj = zeros(1,sampleSize);
+            NormedAnglePerSubj = zeros(1,sampleSize);
+            for tr_id=1:sampleSize
+                %normalized return distance
+                %actual return distance
+                l3 = subjDX{tr_id}(3);
+                %correct return distance
+                p3 = subjX{tr_id}(3,:);
+                correct_l3 = norm(p3);
+
+                normalized_dist = l3/correct_l3;
+                NormedDistPerSubj(tr_id) = normalized_dist;
+
+                %normalized return angle
+                %actual return angle
+                theta3 = subjTheta{tr_id}(3);
+                %correct return angle 
+                p1 = subjX{tr_id}(1,:);
+                p2 = subjX{tr_id}(2,:);
+                p3 = subjX{tr_id}(3,:);
+                vec1 = p3-p2; vec2 = p1-p3;
+                correct_theta3=atan2d(vec1(1)*vec2(2)-vec1(2)*vec2(1),vec1(1)*vec2(1)+vec1(2)*vec2(2));
+                correct_theta3 = deg2rad(correct_theta3);
+
+                normalized_angle = theta3/correct_theta3;
+                NormedAnglePerSubj(tr_id) = normalized_angle;
+            end
+            NormedDistAllSubjs(subj)=mean(NormedDistPerSubj);
+            NormedAngleAllSubjs(subj)=mean(NormedAnglePerSubj);
+        end
+        NormedDist = [NormedDist;NormedDistAllSubjs]; %dim=3*NumSubjects
+        NormedAngle = [NormedAngle;NormedAngleAllSubjs]; %dim=3*NumSubjects
+    end
+end
+
 %%
 function AUC = plotROCCurve(param1, param2, paramName, filename, param1Label, param2Label, paramColor, config)
     % Preparing the logistic regression
@@ -280,4 +321,4 @@ function [AllParams, AllX, AllDX, AllTheta, AllIC] = getResultsAllConditions(Tra
     AllTheta  = Results.THETADX;
     AllIC     = Results.IC;
     
-end    
+end

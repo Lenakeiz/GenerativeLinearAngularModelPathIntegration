@@ -1,6 +1,6 @@
 %% Cleaning variables
 clearvars; clear all; close all; clc;
-rng(123); %for reproduction
+rng('default'); %for code reproducibility
 
 %% Loading data
 disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
@@ -152,7 +152,7 @@ function plotBarScatterOfFittedParam(AllMCIPosParams, AllMCINegParams, config)
     
         hold on
         % Plot the errorbars
-        errorbar(x',mean_all,sem_all,'k','LineStyle','None', 'LineWidth', 2);    
+        errorbar(x',mean_all,sem_all,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 14);    
     
         %Further post-processing the figure
         set(gca, ...
@@ -281,7 +281,7 @@ function plotBoxOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, confi
             %add errorbar
             mean_MCIPos = mean(MCIPosParamAllConds(:,i));
             sem_MCIPos = std(MCIPosParamAllConds(:,i))./sqrt(length(MCIPosParamAllConds(:,i)));
-            errorbar(i-shift_value,mean_MCIPos,sem_MCIPos,'k','LineStyle','None', 'LineWidth', 2);    
+            errorbar(i-shift_value,mean_MCIPos,sem_MCIPos,'k','LineStyle','None', 'LineWidth', 2,  'CapSize', 14);    
             hold on
             %add mean point
             scatter(i-shift_value, mean_MCIPos, 4*scatter_markerSize, 'd',...
@@ -304,7 +304,7 @@ function plotBoxOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, confi
             %add errorbar
             mean_MCI = mean(MCINegParamAllConds(:,i));
             sem_MCI = std(MCINegParamAllConds(:,i))./sqrt(length(MCINegParamAllConds(:,i)));
-            errorbar(i+shift_value,mean_MCI,sem_MCI,'k','LineStyle','None', 'LineWidth', 2); 
+            errorbar(i+shift_value,mean_MCI,sem_MCI,'k','LineStyle','None', 'LineWidth', 2,  'CapSize', 14); 
             hold on
             %add mean point
             scatter(i+shift_value, mean_MCI, 4*scatter_markerSize, 'd',...
@@ -397,11 +397,11 @@ function plotBoxOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
         %set params
         whisker_value = 1.5;
         box_lineWidth = 0.3;
-        box_widths_value = 0.2;
+        box_widths_value = 0.4;
         box_color_transparency = 0.5; %faceAlpha
         median_lineWidth = 2;
         median_color = 'k';
-        scatter_jitter_value = 0.1;
+        scatter_jitter_value = 0.2;
         scatter_markerSize=10;
         scatter_marker_edgeColor = 'k';
         scatter_marker_edgeWidth = 0.5;
@@ -459,7 +459,7 @@ function plotBoxOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
         %add errorbar
         mean_MCIPos = mean(MCIPosParamAllCondsMergeinColumn);
         sem_MCIPos= std(MCIPosParamAllCondsMergeinColumn)./sqrt(length(MCIPosParamAllCondsMergeinColumn));
-        errorbar(1,mean_MCIPos,sem_MCIPos,'k','LineStyle','None', 'LineWidth', 2);    
+        errorbar(1,mean_MCIPos,sem_MCIPos,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 18);    
         hold on
         %add mean point
         scatter(1, mean_MCIPos, 2*scatter_markerSize, 'd',...
@@ -482,7 +482,7 @@ function plotBoxOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
         %add errorbar
         mean_MCINeg = mean(MCINegParamAllCondsMergeinColumn);
         sem_MCINeg = std(MCINegParamAllCondsMergeinColumn)./sqrt(length(MCINegParamAllCondsMergeinColumn));
-        errorbar(2,mean_MCINeg,sem_MCINeg,'k','LineStyle','None', 'LineWidth', 2); 
+        errorbar(2,mean_MCINeg,sem_MCINeg,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 18); 
         hold on
         %add mean point
         scatter(2, mean_MCINeg, 2*scatter_markerSize, 'd',...

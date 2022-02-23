@@ -1,6 +1,6 @@
 %% Cleaning variables
 clearvars; clear all; close all; clc;
-rng(123); %for reproduction
+rng('default'); %for code reproducibility
 
 %% Loading data
 disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
@@ -194,7 +194,7 @@ function plotBoxOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
             %add errorbar
             mean_Young = mean(YoungParamAllConds(:,i));
             sem_Young = std(YoungParamAllConds(:,i))./sqrt(length(YoungParamAllConds(:,i)));
-            errorbar(i-shift_value,mean_Young,sem_Young,'k','LineStyle','None', 'LineWidth', 2); 
+            errorbar(i-shift_value,mean_Young,sem_Young,'k','LineStyle','None', 'LineWidth', 2,  'CapSize', 14); 
             hold on
             %add mean point
             scatter(i-shift_value, mean_Young, 4*scatter_markerSize, 'd',...
@@ -217,10 +217,10 @@ function plotBoxOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
             %add errorbar
             mean_Hold = mean(HealthyOldParamAllConds(:,i));
             sem_Hold = std(HealthyOldParamAllConds(:,i))./sqrt(length(HealthyOldParamAllConds(:,i)));
-            errorbar(i,mean_Hold,sem_Hold,'k','LineStyle','None', 'LineWidth', 2);    
+            errorbar(i,mean_Hold,sem_Hold,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 14);    
             hold on
             %add mean point
-            scatter(i+shift_value, mean_Hold, 4*scatter_markerSize, 'd',...
+            scatter(i, mean_Hold, 4*scatter_markerSize, 'd',...
                     'filled','MarkerEdgeColor','k', ...
                     'MarkerFaceColor','w', ...
                     'LineWidth',scatter_marker_edgeWidth);
@@ -240,7 +240,7 @@ function plotBoxOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
             %add errorbar
             mean_MCI = mean(MCIParamAllConds(:,i));
             sem_MCI = std(MCIParamAllConds(:,i))./sqrt(length(MCIParamAllConds(:,i)));
-            errorbar(i+shift_value,mean_MCI,sem_MCI,'k','LineStyle','None', 'LineWidth', 3); 
+            errorbar(i+shift_value,mean_MCI,sem_MCI,'k','LineStyle','None', 'LineWidth', 3,  'CapSize', 14); 
             hold on
             %add mean point
             scatter(i+shift_value, mean_MCI, 4*scatter_markerSize, 'd',...
@@ -342,11 +342,11 @@ function plotBoxOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         %set params
         whisker_value = 1.5;
         box_lineWidth = 0.3;
-        box_widths_value = 0.2;
+        box_widths_value = 0.4;
         box_color_transparency = 0.5; %faceAlpha
         median_lineWidth = 2;
         median_color = 'k';
-        scatter_jitter_value = 0.1;
+        scatter_jitter_value = 0.2;
         scatter_markerSize=10;
         scatter_marker_edgeColor = 'k';
         scatter_marker_edgeWidth = 0.5;
@@ -421,7 +421,7 @@ function plotBoxOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         %add errorbar
         mean_Young = mean(YoungParamAllCondsMergeinColumn);
         sem_Young = std(YoungParamAllCondsMergeinColumn)./sqrt(length(YoungParamAllCondsMergeinColumn));
-        errorbar(1,mean_Young,sem_Young,'k','LineStyle','None', 'LineWidth', 2); 
+        errorbar(1,mean_Young,sem_Young,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 18); 
         hold on
         %add mean point
         scatter(1, mean_Young, 2*scatter_markerSize, 'd',...
@@ -444,7 +444,7 @@ function plotBoxOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         %add errorbar
         mean_Hold = mean(HealthyOldParamAllCondsMergeinColumn);
         sem_Hold = std(HealthyOldParamAllCondsMergeinColumn)./sqrt(length(HealthyOldParamAllCondsMergeinColumn));
-        errorbar(2,mean_Hold,sem_Hold,'k','LineStyle','None', 'LineWidth', 2);    
+        errorbar(2,mean_Hold,sem_Hold,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 18);    
         hold on
         %add mean point
         scatter(2, mean_Hold, 2*scatter_markerSize, 'd',...
@@ -467,7 +467,7 @@ function plotBoxOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         %add errorbar
         mean_MCI = mean(MCIParamAllCondsMergeinColumn);
         sem_MCI = std(MCIParamAllCondsMergeinColumn)./sqrt(length(MCIParamAllCondsMergeinColumn));
-        errorbar(3,mean_MCI,sem_MCI,'k','LineStyle','None', 'LineWidth', 2); 
+        errorbar(3,mean_MCI,sem_MCI,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 18); 
         hold on
         %add mean point
         scatter(3, mean_MCI, 2*scatter_markerSize, 'd',...

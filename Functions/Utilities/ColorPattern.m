@@ -45,4 +45,4 @@
 
     exportgraphics(f,folder+"/ColorPantter.png",'Resolution',300);
 
-    clear folder f 
+    clear folder f i

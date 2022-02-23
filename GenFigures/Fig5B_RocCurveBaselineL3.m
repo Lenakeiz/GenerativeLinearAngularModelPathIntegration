@@ -33,27 +33,20 @@ config.ModelName = "BaseModel";
 config.NumParams = 5;
 
 % Model fitting for HealthyOld data
-[~, AllHealthyOldX, AllHealthyOldDX, theta, ~] = getResultsAllConditions(HealthyOld, config);
-[NormedDistHealthyOld, NormedAngleHealthyOld] = getReturnAndActualDistance(AllHealthyOldX, AllHealthyOldDX, theta);
+[~, AllHealthyOldX, AllHealthyOldDX, ~, ~] = getResultsAllConditions(HealthyControls, config);
+[~, AllMCIAgg, AllMCIAggDX, ~, ~]          = getResultsAllConditions(MCIAll, config);
+[~, AllMCINegX, AllMCINegDX, ~, ~]         = getResultsAllConditions(MCINeg, config);
+[~, AllMCIPosX, AllMCIPosDX, ~, ~]         = getResultsAllConditions(MCIPos, config);
 
-%% Model fitting for MCIPos
-[~, AllMCIPosX, AllMCIPosDX, theta, ~] = getResultsAllConditions(MCIPos, config);
-[NormedDistMCIPos, NormedAngleMCIPos] = getReturnAndActualDistance(AllMCIPosX, AllMCIPosDX, theta);
+%% Calculating l3 - l3 hat (walked length - real return length)
 
-%% Model fitting for MCINeg
-[~, AllMCINegX, AllMCINegDX, theta, ~] = getResultsAllConditions(MCINeg, config);
-[NormedDistMCINeg, NormedAngleMCINeg] = getReturnAndActualDistance(AllMCINegX, AllMCINegDX, theta);
-
-%% Model fitting for MCIUnk
-[~, AllMCIAgg, AllMCIAggDX, theta, ~] = getResultsAllConditions(MCIUnk, config);
-[NormedDistMCIUnk, ~] = getReturnAndActualDistance(AllMCIUnkX, AllMCIAggDX, theta);
-
-clear theta
+[L3_L3Hat_HC]     = getReturnAndActualDistance(AllHealthyOldX, AllHealthyOldDX);
+[L3_L3Hat_MCIAll] = getReturnAndActualDistance(AllMCIAgg, AllMCIAggDX);
+[L3_L3Hat_MCINeg] = getReturnAndActualDistance(AllMCINegX, AllMCINegDX);
+[L3_L3Hat_MCIPos] = getReturnAndActualDistance(AllMCIPosX, AllMCIPosDX);
 
 %% Creating the roc curves for MCI all vs HC
 close all;
-
-parametersName = [{'\gamma'},  {'g_3'}, {'b'}, {'\sigma'}, {'\nu'}];
 
 % set figure info
 %f = figure('visible','off','Position', [100 100 1000 500]);
@@ -68,51 +61,12 @@ set(0,'DefaultTextFontSize',12)
 
 hold on;
 
-AUC{1} = plotROCCurve(HealthyControlsParameters, MCIAllParameters, {'\gamma g3 b \sigma \nu'}, 'AllParamsMCIvsHC','HC', 'MCI', config.color_scheme_npg(4,:), config);
-legendText{1,1} = "AUC(" + convertCharsToStrings({'\gamma g3 b \sigma \nu'}) + ") = " + num2str(round(AUC{1}.Value(1),2),2);
-% % Removing values that have hitted the boudary (b == 0)
-% allData = [HealthyControlsParameters; MCIAllParameters];
-% allDataLogicalResponse = (1:height(HealthyControlsParameters) + height(MCIAllParameters))' > height(HealthyControlsParameters);
-% label1     = cell(height(HealthyControlsParameters),1);
-% label1(:)  = {'HC'};
-% label2     = cell(height(MCIAllParameters),1);
-% label2(:)  = {'MCI'};
-% allLabels  = [label1;label2];
-% 
-% clear label1 label2
-
-filter = ~(HealthyControlsParameters(:,3) == 0);
-HealthyControlsParametersFilter = HealthyControlsParameters(filter,:);
-
-filter = ~(MCIAllParameters(:,3) == 0);
-MCIAllParametersFilter = MCIAllParameters(filter,:);
-
-clear filter
-
-parametersName = [{'\gamma'},  {'g3'}, {'b'}, {'\sigma'}, {'\nu'}];
-filesName = [{'GammaMCIvsHC'},  {'g3MCIvsHC'}, {'bMCIvsHC'}, {'SigmaMCIvsHC'}, {'NuMCIvsHC'}];
-colors = config.color_scheme_npg([8 3 7 9 10],:);
-
-for i = 1:length(parametersName)
-    if(i == 3)
-        % means b which has a lot of zeros
-        AUC{i + 1}=plotROCCurve(HealthyControlsParametersFilter(:,i), MCIAllParametersFilter(:,i), parametersName{i}, filesName{i}, 'HC', 'MCI', colors(i,:), config);
-    else
-        AUC{i + 1}=plotROCCurve(HealthyControlsParameters(:,i), MCIAllParameters(:,i), parametersName{i}, filesName{i}, 'HC', 'MCI', colors(i,:), config);
-    end
-    legendText{1,i + 1} = "AUC(" + convertCharsToStrings(parametersName{i}) + ") = " + num2str(round(AUC{i + 1}.Value(1),2),2);
-end
+AUC = plotROCCurve(L3_L3Hat_HC, L3_L3Hat_MCIAll, {'L3_L3Hat'}, 'L3_L3Hat_MCIvsHC','HC', 'MCI', config.color_scheme_npg(4,:), config);
+legendText = ['AUC(l3-$\hat{l3}$) = ' , num2str(round(AUC.Value(1),2),2)];
 
 hold off;
     
-% TextH = annotation('textbox', 'Position', [0.7 0.6 0.5 0.1], ...
-%     'String', {"AUC(" + convertCharsToStrings({'\gamma g_3 b \sigma \nu'}) + ") = " + num2str(round(AUC{1}.Value(1),2),2)}, ...
-%     'HorizontalAlignment', 'left', ...
-%     'VerticalAlignment', 'top',...
-%     'FitBoxToText','on', ...
-%     'FontSize', 12);
-
-ll = legend('Location','southeast');
+ll = legend('Location','southeast','Interpreter','latex');
 ll.String = legendText;
 ll.FontSize = 12;
 
@@ -131,15 +85,13 @@ set(gca, ...
 
 axis square;
 
-exportgraphics(f,config.ResultFolder+"/ROC_MCIvsHC"+".png",'Resolution',300);
-exportgraphics(f,config.ResultFolder+"/ROC_MCIvsHC"+".pdf",'Resolution',300, 'ContentType','vector');
+exportgraphics(f,config.ResultFolder+"/ROCL3_L3Hat_MCIvsHC"+".png",'Resolution',300);
+exportgraphics(f,config.ResultFolder+"/ROCL3_L3Hat_MCIvsHC"+".pdf",'Resolution',300, 'ContentType','vector');
 
 clear parametersName filesName i colors f ll legendText 
 
-%% Creating the roc curves for MCIpos vs MCIneg
+%% Creating the roc curves for MCI all vs HC
 close all;
-
-parametersName = [{'\gamma'},  {'g3'}, {'b'}, {'\sigma'}, {'\nu'}];
 
 % set figure info
 %f = figure('visible','off','Position', [100 100 1000 500]);
@@ -154,51 +106,12 @@ set(0,'DefaultTextFontSize',12)
 
 hold on;
 
-AUC{1} = plotROCCurve(MCINegParameters, MCIPosParameters, {'\gamma g3 b \sigma \nu'}, 'AllParamsMCIvsHC','MCIneg', 'MCIpos', config.color_scheme_npg(4,:), config);
-legendText{1,1} = "AUC(" + convertCharsToStrings({'\gamma g3 b \sigma \nu'}) + ") = " + num2str(round(AUC{1}.Value(1),2),2);
-% % Removing values that have hitted the boudary (b == 0)
-% allData = [HealthyControlsParameters; MCIAllParameters];
-% allDataLogicalResponse = (1:height(HealthyControlsParameters) + height(MCIAllParameters))' > height(HealthyControlsParameters);
-% label1     = cell(height(HealthyControlsParameters),1);
-% label1(:)  = {'HC'};
-% label2     = cell(height(MCIAllParameters),1);
-% label2(:)  = {'MCI'};
-% allLabels  = [label1;label2];
-% 
-% clear label1 label2
-
-filter = ~(HealthyControlsParameters(:,3) == 0);
-HealthyControlsParametersFilter = HealthyControlsParameters(filter,:);
-
-filter = ~(MCIAllParameters(:,3) == 0);
-MCIAllParametersFilter = MCIAllParameters(filter,:);
-
-clear filter
-
-parametersName = [{'\gamma'},  {'g3'}, {'b'}, {'\sigma'}, {'\nu'}];
-filesName = [{'GammaMCIvsHC'},  {'g3MCIvsHC'}, {'bMCIvsHC'}, {'SigmaMCIvsHC'}, {'NuMCIvsHC'}];
-colors = config.color_scheme_npg([8 3 7 9 10],:);
-
-for i = 1:length(parametersName)
-    if(i == 3)
-        % means b which has a lot of zeros
-        AUC{i + 1}=plotROCCurve(MCINegParameters(:,i), MCIPosParameters(:,i), parametersName{i}, filesName{i}, 'MCIneg', 'MCIpos', colors(i,:), config);
-    else
-        AUC{i + 1}=plotROCCurve(MCINegParameters(:,i), MCIPosParameters(:,i), parametersName{i}, filesName{i}, 'MCIneg', 'MCIpos', colors(i,:), config);
-    end
-    legendText{1,i + 1} = "AUC(" + convertCharsToStrings(parametersName{i}) + ") = " + num2str(round(AUC{i + 1}.Value(1),2),2);
-end
+AUC = plotROCCurve(L3_L3Hat_MCINeg, L3_L3Hat_MCIPos, {'L3_L3Hat'}, 'L3_L3Hat_MCIposvsHCneg','MCIneg', 'MCIpos', config.color_scheme_npg(4,:), config);
+legendText = ['AUC(l3-$\hat{l3}$) = ' , num2str(round(AUC.Value(1),2),2)];
 
 hold off;
     
-% TextH = annotation('textbox', 'Position', [0.7 0.6 0.5 0.1], ...
-%     'String', {"AUC(" + convertCharsToStrings({'\gamma g_3 b \sigma \nu'}) + ") = " + num2str(round(AUC{1}.Value(1),2),2)}, ...
-%     'HorizontalAlignment', 'left', ...
-%     'VerticalAlignment', 'top',...
-%     'FitBoxToText','on', ...
-%     'FontSize', 12);
-
-ll = legend('Location','southeast');
+ll = legend('Location','southeast','Interpreter','latex');
 ll.String = legendText;
 ll.FontSize = 12;
 
@@ -217,66 +130,43 @@ set(gca, ...
 
 axis square;
 
-exportgraphics(f,config.ResultFolder+"/ROC_MCInegvsMCIPos"+".png",'Resolution',300);
-exportgraphics(f,config.ResultFolder+"/ROC_MCInegvsMCIPos"+".pdf",'Resolution',300, 'ContentType','vector');
+exportgraphics(f,config.ResultFolder+"/ROCL3_L3Hat_MCIposvsneg"+".png",'Resolution',300);
+exportgraphics(f,config.ResultFolder+"/ROCL3_L3Hat_MCIposvsneg"+".pdf",'Resolution',300, 'ContentType','vector');
 
 clear parametersName filesName i colors f ll legendText 
 
 %% get the return distance and the actual distance for each trial
 % each value is a mean value for per participant
-function [NormedDist, NormedAngle] = getReturnAndActualDistance(AllX, AllDX, AllTheta)
-    numConds = length(AllX);
-    NormedDist = [];
-    NormedAngle = [];
+% l3 is the real distance to the first cone (origin)
+% l3hat is the actual distance of the last segme
+function [l3_l3hat] = getReturnAndActualDistance(AllX, AllDX)
+    
+    nParticipants = length(AllX);
 
-    for TRIAL_FILTER=1:numConds
-        X = AllX{TRIAL_FILTER};
-        DX = AllDX{TRIAL_FILTER};
-        Theta = AllTheta{TRIAL_FILTER};
+    %Averaged Across Trials
+    l3      = nan(1,nParticipants);
+    l3hat    = nan(1,nParticipants);
 
-        subjectSize = size(X,2);
-        NormedDistAllSubjs = zeros(1,subjectSize);
-        NormedAngleAllSubjs = zeros(1,subjectSize);
+    for ip = 1:nParticipants
 
-        for subj=1:subjectSize
-            subjX = X{subj};
-            subjDX = DX{subj};
-            subjTheta = Theta{subj};
-
-            sampleSize = size(subjX,2);
-            NormedDistPerSubj = zeros(1,sampleSize);
-            NormedAnglePerSubj = zeros(1,sampleSize);
-            for tr_id=1:sampleSize
-                %normalized return distance
-                %actual return distance
-                l3 = subjDX{tr_id}(3);
-                %correct return distance
-                p3 = subjX{tr_id}(3,:);
-                correct_l3 = norm(p3);
-
-                normalized_dist = l3/correct_l3;
-                NormedDistPerSubj(tr_id) = normalized_dist;
-
-                %normalized return angle
-                %actual return angle
-                theta3 = subjTheta{tr_id}(3);
-                %correct return angle 
-                p1 = subjX{tr_id}(1,:);
-                p2 = subjX{tr_id}(2,:);
-                p3 = subjX{tr_id}(3,:);
-                vec1 = p3-p2; vec2 = p1-p3;
-                correct_theta3=atan2d(vec1(1)*vec2(2)-vec1(2)*vec2(1),vec1(1)*vec2(1)+vec1(2)*vec2(2));
-                correct_theta3 = deg2rad(correct_theta3);
-
-                normalized_angle = theta3/correct_theta3;
-                NormedAnglePerSubj(tr_id) = normalized_angle;
-            end
-            NormedDistAllSubjs(subj)=mean(NormedDistPerSubj);
-            NormedAngleAllSubjs(subj)=mean(NormedAnglePerSubj);
+        X = AllX{ip};
+        DX = AllDX{ip};
+        
+        currl3    = nan(1,length(X));
+        currl3hat = nan(1,length(X));
+        
+        for tr = 1:length(X)
+            currl3(tr)    = DX{tr}(3);
+            currl3hat(tr) = norm(X{tr}(3,:));
         end
-        NormedDist = [NormedDist;NormedDistAllSubjs]; %dim=3*NumSubjects
-        NormedAngle = [NormedAngle;NormedAngleAllSubjs]; %dim=3*NumSubjects
+
+        l3(ip)    = mean(currl3);
+        l3hat(ip) = mean(currl3hat);
+
     end
+
+    l3_l3hat = l3' - l3hat';
+
 end
 
 %%
@@ -297,7 +187,6 @@ function AUC = plotROCCurve(param1, param2, paramName, filename, param1Label, pa
     
     allDataScores = mdl.Fitted.Probability;
     [X,Y,~,AUC.Value] = perfcurve(allLabels, allDataScores, param2Label, NBoot=10);
-    %[~,AUC.CI] = auc([allLabels allDataScores],0.05,'boot',10000,'type','bca');
 
     plot(X(:,1),Y(:,1),...
         "Color",paramColor,...

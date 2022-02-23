@@ -1,5 +1,6 @@
 %% Cleaning variables
 clearvars; clear all; close all; clc;
+rng('default'); %for code reproducibility
 
 %% Loading data
 disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
@@ -101,14 +102,14 @@ function plotBarScatterBetweenG1G2(AllParams, config)
         b = bar([1,2],[meanG1,meanG2],'BarWidth', 0.4, ...
             'FaceColor', color_scheme_npg, 'FaceAlpha',0.5, 'LineWidth',1);
 
-        hold on
-        % Plot the errorbars
-        stdG1 = std(all_G1);
-        stdG2 = std(all_G2);
-        eb = errorbar([1,2],[meanG1,meanG2],[stdG1,stdG2],'k', 'LineStyle', 'None', 'LineWidth', 2);
-
         % Sending barplot and errorbar plot back of the figure so that scatters can be drawn on top of it
         set(gca,'children',flipud(get(gca,'children'))) 
+
+        hold on
+        % Plot the errorbars
+        stdG1 = std(all_G1)/sqrt(length(all_G1));
+        stdG2 = std(all_G2)/sqrt(length(all_G2));
+        eb = errorbar([1,2],[meanG1,meanG2],[stdG1,stdG2],'k', 'LineStyle', 'None', 'LineWidth', 2, 'CapSize', 18);
 
         %link the mean value
         pt = plot([1,2],[meanG1, meanG2], 'd-', 'Color', pairline_color ,'linewidth',6);
@@ -133,6 +134,7 @@ function plotBarScatterBetweenG1G2(AllParams, config)
             'LineWidth'   , .5        );
         ylabel('Estimated value');
         %xlabel('G_1','Interpreter','tex'); ylabel('G_2','Interpreter','tex');
+        title(conditionName(TRIAL_FILTER));
         
         %% save figure
         exportgraphics(f,config.ResultFolder+"/BarG1G2"+conditionName{TRIAL_FILTER}+".png",'Resolution',300);
@@ -191,7 +193,7 @@ function plotRegressionBetweenG1G2Square(AllParams, config)
                 'MarkerFaceColor', scattercolor, 'MarkerEdgeAlpha', 1, 'MarkerFaceAlpha', 0.5)
         
         [R,P]=corrcoef(all_G1,all_G2.^2);
-        str = {['Person Corrcoef = ',num2str(round(R(1,2),4))],...
+        str = {['Pearson Corrcoef = ',num2str(round(R(1,2),4))],...
                ['Pvalue = ',num2str(round(P(1,2),4))]};
         annotation('textbox',[0.2 0.6 0.3 0.3],'String',str,'FitBoxToText','on');
 

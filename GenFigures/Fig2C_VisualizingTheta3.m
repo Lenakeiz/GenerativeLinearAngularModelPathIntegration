@@ -1,5 +1,6 @@
 %% Cleaning variables
 clearvars; clear all; close all; clc;
+rng('default'); %for code reproducibility
 
 %% Loading data
 disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
@@ -26,7 +27,7 @@ config.NumParams = 5;
 ColorPattern; 
 
 %% Plot the leg 1 distribution
-plotTheta3(AllYoungParams, AllYoungDX, AllYoungTheta, config)
+plotTheta3(AllYoungParams, AllYoungX, AllYoungDX, AllYoungTheta, config)
 
 %% A function for getting Results from All Conditions
 function [AllParams, AllX, AllDX, AllTheta, AllIC] = getResultsAllConditions(TransformedData, config)
@@ -47,7 +48,7 @@ function [AllParams, AllX, AllDX, AllTheta, AllIC] = getResultsAllConditions(Tra
     end
 end    
 
-function plotTheta3(AllParams, AllDX, AllTheta, config)
+function plotTheta3(AllParams, AllX, AllDX, AllTheta, config)
     %%plot leg 1 changes
     % AllParams: estimated parameter values
     % AllDX: is a cell structure containing the segment of each trial
@@ -74,14 +75,16 @@ function plotTheta3(AllParams, AllDX, AllTheta, config)
 
         %% extract data
         ParamValues = AllParams{TRIAL_FILTER};
+        X = AllX{TRIAL_FILTER};
         DX = AllDX{TRIAL_FILTER};
         THETADX = AllTheta{TRIAL_FILTER};
         subjectSize = size(DX,2);
 
-        all_alpha = []; all_theta3_prime = [];
+        all_alpha = []; all_theta3_prime = []; all_correct_theta3 = [];
         
         for subj=1:subjectSize %for each subject
             paramX = ParamValues(subj,:);
+            subjX = X{subj};
             subjDX = DX{subj};
             subjTHETADX = THETADX{subj};
             %extract parameters
@@ -90,6 +93,7 @@ function plotTheta3(AllParams, AllDX, AllTheta, config)
             sampleSize = size(subjDX,2);
 
             Alpha = zeros(1,sampleSize);
+            Correct_Theta3 = zeros(1,sampleSize);
             Theta3_prime = zeros(1,sampleSize);
             
             %for each subject choose one color by looping over color_scheme_npg
@@ -99,6 +103,16 @@ function plotTheta3(AllParams, AllDX, AllTheta, config)
             jitter_value = 0.6*(rand(1)-0.5);
 
             for tr_id = 1:sampleSize %for each trial
+
+                %% first calculate the correct return angle 
+                p1 = subjX{tr_id}(1,:);
+                p2 = subjX{tr_id}(2,:);
+                p3 = subjX{tr_id}(3,:);
+                vec1 = p3-p2; vec2 = p1-p3;
+                correct_theta3=atan2d(vec1(1)*vec2(2)-vec1(2)*vec2(1),vec1(1)*vec2(1)+vec1(2)*vec2(2));
+                correct_theta3 = deg2rad(correct_theta3);
+                Correct_Theta3(tr_id) = correct_theta3;
+
                 theta3 = subjTHETADX{tr_id}(3); 
                 %Theta3(tr_id) = theta3;
                 
@@ -130,12 +144,12 @@ function plotTheta3(AllParams, AllDX, AllTheta, config)
                 theta3_prime = mod(theta3_prime, 2*pi);     
                 Theta3_prime(tr_id) = theta3_prime;
 
-                pt = plot([1+jitter_value, 2+jitter_value], [alpha, theta3], '-', 'Color', cm ,'linewidth',2);            
+                pt = plot([1+jitter_value, 2+jitter_value], [correct_theta3, theta3_prime], '-', 'Color', cm ,'linewidth',2);            
                 %transparancy
                 pt.Color = [pt.Color 0.05];
                 hold on
                 %scatter
-                st = scatter([1+jitter_value, 2+jitter_value], [alpha, theta3], 15, ...
+                st = scatter([1+jitter_value, 2+jitter_value], [correct_theta3, theta3_prime], 15, ...
                     "filled", 'MarkerEdgeColor', 'k', 'MarkerFaceColor', cm, ...
                     'MarkerEdgeAlpha', 0.6, 'MarkerFaceAlpha', 0.3);
                 hold on
@@ -143,11 +157,14 @@ function plotTheta3(AllParams, AllDX, AllTheta, config)
 
             all_alpha = [all_alpha,Alpha];
             all_theta3_prime = [all_theta3_prime,Theta3_prime];  
+            all_correct_theta3 = [all_correct_theta3, Correct_Theta3];
         end
 
         all_alpha_mean = mean(all_alpha);
         all_theta3_prime_mean = mean(all_theta3_prime);
-        pt = plot([1 2], [all_alpha_mean all_theta3_prime_mean], '-d', 'Color', forground_color, 'linewidth',8, 'MarkerSize', 8);
+        all_correct_theta3_mean = mean(all_correct_theta3);
+
+        pt = plot([1 2], [all_correct_theta3_mean all_theta3_prime_mean], '-d', 'Color', forground_color, 'linewidth',8, 'MarkerSize', 8);
         pt.Color = [pt.Color 0.8];
 
         ylabel('Angle (in radians)');
@@ -159,16 +176,18 @@ function plotTheta3(AllParams, AllDX, AllTheta, config)
             'XColor'      , [.1 .1 .1], ...
             'YColor'      , [.1 .1 .1], ...
             'XTick'       , [1,2],... 
-            'XTickLabel'  , {'Encoded angle 3','Executed angle 3'},...
-            'YTick'       , [0,0.5*pi,pi,1.5*pi,2*pi],... 
-            'YTickLabel'  , {'0','0.5pi','pi', '1.5pi', '2pi'},...  
+            'XTickLabel'  , {'Ideal return angle','Mental return angle'},...
+            'YLim'        , [min([all_correct_theta3,all_theta3_prime])-0.1,3.5],...
             'XLim'        , [0.5, 2.5],...
-            'YLim'        , [0,2*pi],...
             'LineWidth'   , .5        );
-        title(conditionName{TRIAL_FILTER});
+            %'YTick'       , [0,0.5*pi,pi,1.5*pi,2*pi],... 
+            %'YTickLabel'  , {'0','0.5pi','pi', '1.5pi', '2pi'},...      
+            %'YLim'        , [0,2*pi],...
+            %'YLim'        , [min([all_correct_theta3,all_theta3_prime])-0.1,max([all_correct_theta3,all_theta3_prime])+0.1],...
+        title('Homebound angle');
         %% save figure
-        exportgraphics(f,config.ResultFolder+"/Theta3Change"+conditionName{TRIAL_FILTER}+".png",'Resolution',300);
-        exportgraphics(f,config.ResultFolder+"/Theta3Change"+conditionName{TRIAL_FILTER}+".pdf",'Resolution',300,'ContentType','vector');
+        exportgraphics(f,config.ResultFolder+"/Theta3"+conditionName{TRIAL_FILTER}+".png",'Resolution',300);
+        exportgraphics(f,config.ResultFolder+"/Theta3"+conditionName{TRIAL_FILTER}+".pdf",'Resolution',300,'ContentType','vector');
     end
 end
 

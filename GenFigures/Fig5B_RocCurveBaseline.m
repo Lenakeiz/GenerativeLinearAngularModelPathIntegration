@@ -95,8 +95,6 @@ clear parametersName filesName i colors f ll legendText
 %% Creating the roc curves for MCI all vs HC
 close all;
 
-
-
 % set figure info
 %f = figure('visible','off','Position', [100 100 1000 500]);
 f = figure('visible','off','Position', [100 100 500 500]);

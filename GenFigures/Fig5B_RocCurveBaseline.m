@@ -60,11 +60,14 @@ set(0,'DefaultTextFontSize',12)
 
 hold on;
 
-AUC{1} = plotROCCurve(L3_L3Hat_HC, L3_L3Hat_MCIAll, {'L3_L3Hat'}, 'L3_L3Hat_MCIvsHC','HC', 'MCI', config.color_scheme_npg(4,:), config);
+AUC{1} = plotROCCurve(L3_L3Hat_HC, L3_L3Hat_MCIAll, {'L3_L3Hat'}, 'L3_L3Hat_MCIvsHC','HC', 'MCI', config.color_scheme_npg(6,:), config);
 legendText{1,1} = ['AUC(l3-$\hat{l3}$) = ' , num2str(round(AUC{1}.Value(1),2),2)];
 
-AUC{2} = plotROCCurve(Theta3_Theta3Hat_HC, Theta3_Theta3Hat_MCIAll, {'Theta3_Theta3Hat'}, 'Theta3_Theta3Hat_MCIvsHC','HC', 'MCI', config.color_scheme_npg(8,:), config);
+AUC{2} = plotROCCurve(Theta3_Theta3Hat_HC, Theta3_Theta3Hat_MCIAll, {'Theta3_Theta3Hat'}, 'Theta3_Theta3Hat_MCIvsHC','HC', 'MCI', config.color_scheme_npg(5,:), config);
 legendText{1,2} = ['AUC($\theta$3-$\hat{\theta 3}$) = ' , num2str(round(AUC{2}.Value(1),2),2)];
+
+AUC{3} = plotROCCurve([L3_L3Hat_HC Theta3_Theta3Hat_HC], [L3_L3Hat_MCIAll Theta3_Theta3Hat_MCIAll], {'Combined_L3_L3Hat_Theta3_Theta3Hat'}, 'Combined_L3_L3Hat_Theta3_Theta3Hat_MCIvsHC','HC', 'MCI', config.color_scheme_npg(3,:), config);
+legendText{1,3} = ['AUC(l3-$\hat{l3}$, $\theta$3-$\hat{\theta 3}$) = ' , num2str(round(AUC{3}.Value(1),2),2)];
 
 hold off;
     
@@ -108,11 +111,14 @@ set(0,'DefaultTextFontSize',12)
 
 hold on;
 
-AUC{1} = plotROCCurve(L3_L3Hat_MCINeg, L3_L3Hat_MCIPos, {'L3_L3Hat'}, 'L3_L3Hat_MCIposvsHCneg','MCIneg', 'MCIpos', config.color_scheme_npg(4,:), config);
+AUC{1} = plotROCCurve(L3_L3Hat_MCINeg, L3_L3Hat_MCIPos, {'L3_L3Hat'}, 'L3_L3Hat_MCIposvsHCneg','MCIneg', 'MCIpos', config.color_scheme_npg(6,:), config);
 legendText{1,1} = ['AUC(l3-$\hat{l3}$) = ' , num2str(round(AUC{1}.Value(1),2),2)];
 
-AUC{2} = plotROCCurve(Theta3_Theta3Hat_MCINeg, Theta3_Theta3Hat_MCIPos, {'Theta3_Theta3Hat'}, 'Theta3_Theta3Hat_MCIvsHC','HC', 'MCI', config.color_scheme_npg(8,:), config);
+AUC{2} = plotROCCurve(Theta3_Theta3Hat_MCINeg, Theta3_Theta3Hat_MCIPos, {'Theta3_Theta3Hat'}, 'Theta3_Theta3Hat_MCInegvsMCIpos','MCIneg', 'MCIpos', config.color_scheme_npg(5,:), config);
 legendText{1,2} = ['AUC($\theta$3-$\hat{\theta 3}$) = ' , num2str(round(AUC{2}.Value(1),2),2)];
+
+AUC{3} = plotROCCurve([L3_L3Hat_MCINeg Theta3_Theta3Hat_MCINeg], [L3_L3Hat_MCIPos Theta3_Theta3Hat_MCIPos], {'Combined_L3_L3Hat_Theta3_Theta3Hat'}, 'Combined_L3_L3Hat_Theta3_Theta3Hat_MCInegvsMCIpos','MCIneg', 'MCIpos', config.color_scheme_npg(3,:), config);
+legendText{1,3} = ['AUC(l3-$\hat{l3}$, $\theta$3-$\hat{\theta 3}$) = ' , num2str(round(AUC{3}.Value(1),2),2)];
 
 hold off;
     

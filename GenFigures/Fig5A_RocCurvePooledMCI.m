@@ -112,7 +112,7 @@ ll.FontSize = 12;
 
 ylabel('True Positive Rate');
 xlabel('False Positive Rate')
-title('MCI Merged / Healthy Old controls');
+title('MCI Merged / Healthy Old controls - Base Model');
 
 %Further post-processing the figure
 set(gca, ...
@@ -198,7 +198,7 @@ ll.FontSize = 12;
 
 ylabel('True Positive Rate');
 xlabel('False Positive Rate')
-title('MCI negative / MCI positive');
+title('MCI negative / MCI positive - Base Model');
 
 %Further post-processing the figure
 set(gca, ...

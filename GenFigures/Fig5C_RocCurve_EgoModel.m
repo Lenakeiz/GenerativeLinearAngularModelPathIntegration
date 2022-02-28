@@ -12,7 +12,7 @@ Unknown         = TransformPaths(Unknown);
 savefolder = pwd + "/Output/";
 
 %% setting the configuration
-resultfolder = savefolder+"PaperFigs/Fig5B";
+resultfolder = savefolder+"PaperFigs/Fig5C";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
@@ -29,20 +29,17 @@ AggregateMCI;
 %no consider of the rotation gain factor in leg2, i.e., gamma, G3=1, g2=1, g3, k3, sigma, nu. #params=6
 %"VariableNames", {'Gamma','g','b','sigma','nu'});
 config.UseGlobalSearch = true;
-config.ModelName = "BaseModel";
-config.NumParams = 5;
+config.ModelName = "Ego";
+config.NumParams = 2;
+
+% Not filtering for condition
+config.TrialFilter = 0;
 
 % Model fitting for HealthyOld data
-[~, AllHealthyOldX, AllHealthyOldDX, AllHealthyOldTheta, ~] = getResultsAllConditions(HealthyControls, config);
-[~, AllMCIAgg, AllMCIAggDX, AllMCIAggTheta, ~]              = getResultsAllConditions(MCIAll, config);
-[~, AllMCINegX, AllMCINegDX, AllMCINegTheta, ~]             = getResultsAllConditions(MCINeg, config);
-[~, AllMCIPosX, AllMCIPosDX, AllMCIPosTheta, ~]             = getResultsAllConditions(MCIPos, config);
-
-%% Calculating l3 - l3 hat (walked length - real return length) and calculating Theta3 - Theta3Hat
-[L3_L3Hat_HC, Theta3_Theta3Hat_HC]         = getReturnAndActualDistance(AllHealthyOldX, AllHealthyOldDX, AllHealthyOldTheta);
-[L3_L3Hat_MCIAll, Theta3_Theta3Hat_MCIAll] = getReturnAndActualDistance(AllMCIAgg, AllMCIAggDX, AllMCIAggTheta);
-[L3_L3Hat_MCINeg, Theta3_Theta3Hat_MCINeg] = getReturnAndActualDistance(AllMCINegX, AllMCINegDX, AllMCINegTheta);
-[L3_L3Hat_MCIPos, Theta3_Theta3Hat_MCIPos] = getReturnAndActualDistance(AllMCIPosX, AllMCIPosDX, AllMCIPosTheta);
+[AllHealthyParams, ~, ~, ~, ~] = getResultsAllConditions(HealthyControls, config);
+[AllMCIParams, ~, ~, ~]        = getResultsAllConditions(MCIAll, config);
+[AllMCINegParams, ~, ~, ~]     = getResultsAllConditions(MCINeg, config);
+[AllMCIPosParams, ~, ~, ~]     = getResultsAllConditions(MCIPos, config);
 
 %% Creating the roc curves for MCI all vs HC
 close all;
@@ -60,14 +57,14 @@ set(0,'DefaultTextFontSize',12)
 
 hold on;
 
-AUC{1} = plotROCCurve(L3_L3Hat_HC, L3_L3Hat_MCIAll, {'L3_L3Hat'}, 'L3_L3Hat_MCIvsHC','HC', 'MCI', config.color_scheme_npg(6,:), config);
-legendText{1,1} = ['AUC(l3-$\hat{l3}$) = ' , num2str(round(AUC{1}.Value(1),2),2)];
+AUC{1} = plotROCCurve(AllHealthyParams(:,6), AllMCIParams(:,6), {'Sigma'}, 'Sigma_MCIvsHC','HC', 'MCI', config.color_scheme_npg(6,:), config);
+legendText{1,1} = ['AUC($\sigma$) = ' , num2str(round(AUC{1}.Value(1),2),2)];
 
-AUC{2} = plotROCCurve(Theta3_Theta3Hat_HC, Theta3_Theta3Hat_MCIAll, {'Theta3_Theta3Hat'}, 'Theta3_Theta3Hat_MCIvsHC','HC', 'MCI', config.color_scheme_npg(5,:), config);
-legendText{1,2} = ['AUC($\theta$3-$\hat{\theta 3}$) = ' , num2str(round(AUC{2}.Value(1),2),2)];
+AUC{2} = plotROCCurve(AllHealthyParams(:,7), AllMCIParams(:,7), {'Nu'}, 'Sigma_Nu_MCIvsHC','HC', 'MCI', config.color_scheme_npg(5,:), config);
+legendText{1,2} = ['AUC($\nu$) = ' , num2str(round(AUC{2}.Value(1),2),2)];
 
-AUC{3} = plotROCCurve([L3_L3Hat_HC Theta3_Theta3Hat_HC], [L3_L3Hat_MCIAll Theta3_Theta3Hat_MCIAll], {'Combined_L3_L3Hat_Theta3_Theta3Hat'}, 'Combined_L3_L3Hat_Theta3_Theta3Hat_MCIvsHC','HC', 'MCI', config.color_scheme_npg(3,:), config);
-legendText{1,3} = ['AUC(l3-$\hat{l3}$, $\theta$3-$\hat{\theta 3}$) = ' , num2str(round(AUC{3}.Value(1),2),2)];
+AUC{3} = plotROCCurve(AllHealthyParams(:,[6 7]), AllMCIParams(:,[6 7]), {'Sigma_Nu'}, 'Sigma_Nu_MCIvsHC','HC', 'MCI', config.color_scheme_npg(3,:), config);
+legendText{1,3} = ['AUC($\sigma ,\nu$) = ' , num2str(round(AUC{3}.Value(1),2),2)];
 
 hold off;
     
@@ -77,7 +74,7 @@ ll.FontSize = 12;
 
 ylabel('True Positive Rate');
 xlabel('False Positive Rate')
-title('MCI Merged / Healthy Old controls - Baseline');
+title('MCI Merged / Healthy Old controls - Ego model');
 
 %Further post-processing the figure
 set(gca, ...
@@ -90,8 +87,8 @@ set(gca, ...
 
 axis square;
 
-exportgraphics(f,config.ResultFolder+"/ROC_ActualVsReal_MCIvsHC"+".png",'Resolution',300);
-exportgraphics(f,config.ResultFolder+"/ROC_ActualVsReal_MCIvsHC"+".pdf",'Resolution',300, 'ContentType','vector');
+exportgraphics(f,config.ResultFolder+"/ROC_EgoModel_MCIvsHC"+".png",'Resolution',300);
+exportgraphics(f,config.ResultFolder+"/ROC_EgoModel_MCIvsHC"+".pdf",'Resolution',300, 'ContentType','vector');
 
 clear parametersName filesName i colors f ll legendText 
 
@@ -111,15 +108,14 @@ set(0,'DefaultTextFontSize',12)
 
 hold on;
 
-AUC{1} = plotROCCurve(L3_L3Hat_MCINeg, L3_L3Hat_MCIPos, {'L3_L3Hat'}, 'L3_L3Hat_MCIposvsHCneg','MCIneg', 'MCIpos', config.color_scheme_npg(6,:), config);
-legendText{1,1} = ['AUC(l3-$\hat{l3}$) = ' , num2str(round(AUC{1}.Value(1),2),2)];
+AUC{1} = plotROCCurve(AllMCINegParams(:,6), AllMCIPosParams(:,6), {'Sigma'}, 'Sigma_MCIposvsMCIneg','MCIneg', 'MCIpos', config.color_scheme_npg(6,:), config);
+legendText{1,1} = ['AUC($\sigma$) = ' , num2str(round(AUC{1}.Value(1),2),2)];
 
-AUC{2} = plotROCCurve(Theta3_Theta3Hat_MCINeg, Theta3_Theta3Hat_MCIPos, {'Theta3_Theta3Hat'}, 'Theta3_Theta3Hat_MCInegvsMCIpos','MCIneg', 'MCIpos', config.color_scheme_npg(5,:), config);
-legendText{1,2} = ['AUC($\theta$3-$\hat{\theta 3}$) = ' , num2str(round(AUC{2}.Value(1),2),2)];
+AUC{2} = plotROCCurve(AllMCINegParams(:,7), AllMCIPosParams(:,7), {'Nu'}, 'Sigma_Nu_MCIposvsMCIneg','MCIneg', 'MCIpos', config.color_scheme_npg(5,:), config);
+legendText{1,2} = ['AUC($\nu$) = ' , num2str(round(AUC{2}.Value(1),2),2)];
 
-AUC{3} = plotROCCurve([L3_L3Hat_MCINeg Theta3_Theta3Hat_MCINeg], [L3_L3Hat_MCIPos Theta3_Theta3Hat_MCIPos], {'Combined_L3_L3Hat_Theta3_Theta3Hat'}, 'Combined_L3_L3Hat_Theta3_Theta3Hat_MCInegvsMCIpos','MCIneg', 'MCIpos', config.color_scheme_npg(3,:), config);
-legendText{1,3} = ['AUC(l3-$\hat{l3}$, $\theta$3-$\hat{\theta 3}$) = ' , num2str(round(AUC{3}.Value(1),2),2)];
-
+AUC{3} = plotROCCurve(AllMCINegParams(:,[6 7]), AllMCIPosParams(:, [6 7]), {'Sigma_Nu'}, 'Sigma_Nu_MCIposvsMCIneg','MCIneg', 'MCIpos', config.color_scheme_npg(3,:), config);
+legendText{1,3} = ['AUC($\sigma ,\nu$) = ' , num2str(round(AUC{3}.Value(1),2),2)];
 hold off;
     
 ll = legend('Location','southeast','Interpreter','latex');
@@ -128,7 +124,7 @@ ll.FontSize = 12;
 
 ylabel('True Positive Rate');
 xlabel('False Positive Rate')
-title('MCI negative / MCI positive - Baseline');
+title('MCI negative / MCI positive - Ego Model');
 
 %Further post-processing the figure
 set(gca, ...
@@ -141,8 +137,8 @@ set(gca, ...
 
 axis square;
 
-exportgraphics(f,config.ResultFolder+"/ROC_ActualVsReal_MCIposvsneg"+".png",'Resolution',300);
-exportgraphics(f,config.ResultFolder+"/ROC_ActualVsReal_MCIposvsneg"+".pdf",'Resolution',300, 'ContentType','vector');
+exportgraphics(f,config.ResultFolder+"/ROC_EgoModel_MCIposvsneg"+".png",'Resolution',300);
+exportgraphics(f,config.ResultFolder+"/ROC_EgoModel_MCIposvsneg"+".pdf",'Resolution',300, 'ContentType','vector');
 
 clear parametersName filesName i colors f ll legendText 
 
@@ -227,7 +223,7 @@ end
 function [AllParams, AllX, AllDX, AllTheta, AllIC] = getResultsAllConditions(TransformedData, config)
     %get the estimated parameters, X, DX, Theta, IC for all trial
     %conditions for each group of data.    
-    config.TrialFilter = 0;
+
     tic
     disp('%%%%%%%%%%%%%%% PERFORMING FITTING %%%%%%%%%%%%%%%');
     Results = PerformGroupFit(TransformedData, config);

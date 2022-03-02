@@ -68,6 +68,8 @@ Tracked_pos_L1 = Tracked_pos(Tracked_pos.Time > Group.FlagSpawnTime{1,pId}{trial
 Tracked_pos_L2 = Tracked_pos(Tracked_pos.Time > Group.FlagSpawnTime{1,pId}{trialId,3} &...
                              Tracked_pos.Time < Group.FlagTrigTimes{1,pId}{trialId,3} + mean(DiffTrigSpawn23)/2, :);
 
+% Extracting velocity at each time  point
+
 hold on;
 
 plCones = plot(Cone_pos(:,1), Cone_pos(:,3),...

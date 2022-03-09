@@ -15,6 +15,7 @@ function [outGroup] = CalculateTrackingPath(Group, config)
     
         % Calculate the mean time between making cone 1 disappear and spawning cone
         % two (same between 2 and 3)
+        % Spoiler alert, is always 2 seconds
         DiffTrigSpawn12 = cell2mat(Group.FlagSpawnTime{1,pId}(:,2)) - cell2mat(Group.FlagTrigTimes{1,pId}(:,1));
         DiffTrigSpawn23 = cell2mat(Group.FlagSpawnTime{1,pId}(:,3)) - cell2mat(Group.FlagTrigTimes{1,pId}(:,2));
     
@@ -29,13 +30,19 @@ function [outGroup] = CalculateTrackingPath(Group, config)
             Tracked_pos    = Tracked_pos(Tracked_pos.Time > Group.FlagTrigTimes{1,pId}{trialId,1},:);
             
             % Extracting L1 walking path (between flag spawn time 2 and reaching cone 2)
+
             Tracked_pos_L1 = Tracked_pos(Tracked_pos.Time > Group.FlagSpawnTime{1,pId}{trialId,2} &...
-                                         Tracked_pos.Time < Group.FlagTrigTimes{1,pId}{trialId,2} + mean(DiffTrigSpawn12) + config.Speed.TOffsetAfterFlagReach, :);
+                                        Tracked_pos.Time < Group.FlagTrigTimes{1,pId}{trialId,2} + mean(DiffTrigSpawn12) + config.Speed.TOffsetAfterFlagReach, :);
+%             Tracked_pos_L1 = Tracked_pos(Tracked_pos.Time > Group.FlagTrigTimes{1,pId}{trialId,1} &...
+%                             Tracked_pos.Time < Group.FlagTrigTimes{1,pId}{trialId,2} + config.Speed.TOffsetAfterFlagReach, :);
             
             % Extracting L1 walking path (between flag spawn time 3 and reaching cone 3)
             Tracked_pos_L2 = Tracked_pos(Tracked_pos.Time > Group.FlagSpawnTime{1,pId}{trialId,3} &...
                                          Tracked_pos.Time < Group.FlagTrigTimes{1,pId}{trialId,3} + mean(DiffTrigSpawn23) + config.Speed.TOffsetAfterFlagReach, :);
-        
+
+%             Tracked_pos_L2 = Tracked_pos(Tracked_pos.Time > Group.FlagTrigTimes{1,pId}{trialId,2} &...
+%                                          Tracked_pos.Time < Group.FlagTrigTimes{1,pId}{trialId,3} + config.Speed.TOffsetAfterFlagReach, :);
+
             % Calculating ideal direction of walking
             s_dir_L1 = (Cone_pos(2,[1 3]) - Cone_pos(1,[1 3])) / norm(Cone_pos(2,[1 3]) - Cone_pos(1,[1 3])); 
             s_dir_L2 = (Cone_pos(3,[1 3]) - Cone_pos(2,[1 3])) / norm(Cone_pos(3,[1 3]) - Cone_pos(2,[1 3])); 
@@ -58,6 +65,13 @@ function [outGroup] = CalculateTrackingPath(Group, config)
             Tracked_pos_L1.Vel_proj = dot([Tracked_pos_L1.Vel_X Tracked_pos_L1.Vel_Z],repmat(s_dir_L1,l1Size,1),2);
             Tracked_pos_L1.Smoothed_Vel_proj = smoothdata(Tracked_pos_L1.Vel_proj,'gaussian',config.Speed.smoothWindow);
 
+            %Calculating the shifted position for the smoothed velocity
+            %projection
+            maxL1 = max(Tracked_pos_L1.Smoothed_Vel_proj);
+            idxMaxL1 = find(Tracked_pos_L1.Smoothed_Vel_proj == maxL1);
+
+            Tracked_pos_L1.ShiftedTime = Tracked_pos_L1.Time - Tracked_pos_L1.Time(idxMaxL1);
+
             l2Size = height(Tracked_pos_L2);
             Tracked_pos_L2.Vel_X = zeros(l2Size,1);
             Tracked_pos_L2.Vel_Z = zeros(l2Size,1);
@@ -75,6 +89,13 @@ function [outGroup] = CalculateTrackingPath(Group, config)
             % Calculating projecting over the cone3-1 direction
             Tracked_pos_L2.Vel_proj = dot([Tracked_pos_L2.Vel_X Tracked_pos_L2.Vel_Z],repmat(s_dir_L2,l2Size,1),2);
             Tracked_pos_L2.Smoothed_Vel_proj = smoothdata(Tracked_pos_L2.Vel_proj,'gaussian',config.Speed.smoothWindow);
+
+            %Calculating the shifted position for the smoothed velocity
+            %projection
+            maxL2 = max(Tracked_pos_L2.Smoothed_Vel_proj);
+            idxMaxL2 = find(Tracked_pos_L2.Smoothed_Vel_proj == maxL2);
+
+            Tracked_pos_L2.ShiftedTime = Tracked_pos_L2.Time - Tracked_pos_L2.Time(idxMaxL2);
 
             Group.TrackedL1{1,pId}{trialId,1} = Tracked_pos_L1;
             Group.TrackedL2{1,pId}{trialId,1} = Tracked_pos_L2;

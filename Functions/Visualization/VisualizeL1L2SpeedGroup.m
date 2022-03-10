@@ -9,6 +9,7 @@ load('Data/AllDataErrors2018_V3.mat');
 config.Speed.alpha = 0.9; %Paramanter for running speed calculation
 config.Speed.TOffsetAfterFlagReach = 2; %Time to track after flag reached in seconds 
 config.Speed.smoothWindow = 10; % tracking rate should be 10Hz so 4 secs window is 40
+config.Speed.VelocityCutoff = 0.2; % velocity cutoff to select only the walking part of the reconstructed velocity
 
 %%
 disp('%%%%%%%%%%%%%%% Calculating Tracking Path - YOUNG ... %%%%%%%%%%%%%%%');
@@ -35,8 +36,6 @@ plotCumulativeSpeedL1L2(MCIPos,'MCIPos',config);
 disp('%%%%%%%%%%%%%%% Plotting smoothed velocity - FINISHED %%%%%%%%%%%%%%%');
 
 %%
-config.Speed.VelocityCutoff = 0.0;
-%
 disp('%%%%%%%%%%%%%%% Plotting reconstructed velocity %%%%%%%%%%%%%%%');
 plotGroupwiseLenghtReconstructionForL1L2(YoungControls,"Young controls",config);
 plotGroupwiseLenghtReconstructionForL1L2(HealthyControls,"Healthy controls",config);
@@ -116,7 +115,6 @@ function plotCumulativeSpeedL1L2(Group,GroupName,config)
 
     end
 
-
 end
 
 %% Plotting recontructed lenght over speed
@@ -133,9 +131,11 @@ function plotGroupwiseLenghtReconstructionForL1L2(Group,GroupName,config)
 
     pSize = size(Group.TrackedL1,2);
     l1reconstructed = {};
+    l1reconstructedFilter = {};
     l1real = {};
 
     l2reconstructed = {};
+    l2reconstructedFilter = {};
     l2real = {};
     
     for pId = 1:pSize
@@ -148,29 +148,35 @@ function plotGroupwiseLenghtReconstructionForL1L2(Group,GroupName,config)
             currl1real = norm(Cone_pos(2,[1 3]) - Cone_pos(1,[1 3]));
             currl2real = norm(Cone_pos(3,[1 3]) - Cone_pos(2,[1 3]));
             
-            TrackedL1Thresholded = Group.TrackedL1{1,pId}{trialId,1}.Smoothed_Vel_proj;
-            TrackedL1Thresholded(TrackedL1Thresholded<config.Speed.VelocityCutoff) = 0;
-            currL1rec = trapz(Group.TrackedL1{1,pId}{trialId,1}.Time,TrackedL1Thresholded);
+            TrackedL1Smoothed = Group.TrackedL1{1,pId}{trialId,1}.Smoothed_Vel_proj;
+            currL1rec         = trapz(Group.TrackedL1{1,pId}{trialId,1}.Time,TrackedL1Smoothed);
+            currL1recfilter   = trapz(Group.TrackedL1{1,pId}{trialId,1}.Time(Group.TrackedL1{1,pId}{trialId,1}.Filthered_Vel_proj),TrackedL1Smoothed(Group.TrackedL1{1,pId}{trialId,1}.Filthered_Vel_proj));
 
-            TrackedL2Thresholded = Group.TrackedL2{1,pId}{trialId,1}.Smoothed_Vel_proj;
-            TrackedL2Thresholded(TrackedL2Thresholded<config.Speed.VelocityCutoff) = 0;
-            currL2rec = trapz(Group.TrackedL2{1,pId}{trialId,1}.Time,TrackedL2Thresholded);
+            TrackedL2Smoothed = Group.TrackedL2{1,pId}{trialId,1}.Smoothed_Vel_proj;
+            currL2rec         = trapz(Group.TrackedL2{1,pId}{trialId,1}.Time,TrackedL2Smoothed);
+            currL2recfilter   = trapz(Group.TrackedL2{1,pId}{trialId,1}.Time(Group.TrackedL2{1,pId}{trialId,1}.Filthered_Vel_proj),TrackedL2Smoothed(Group.TrackedL2{1,pId}{trialId,1}.Filthered_Vel_proj));
 
-            l1reconstructed{pId,1}{trialId,1} = currL1rec;
             l1real{pId,1}{trialId,1} = currl1real;
+            l1reconstructed{pId,1}{trialId,1} = currL1rec;
+            l1reconstructedFilter{pId,1}{trialId,1} = currL1recfilter;
 
-            l2reconstructed{pId,1}{trialId,1} = currL2rec;
             l2real{pId,1}{trialId,1} = currl2real;
+            l2reconstructed{pId,1}{trialId,1} = currL2rec;
+            l2reconstructedFilter{pId,1}{trialId,1} = currL2recfilter;
+
 
         end
     
     end
 
-    l1reconstructed = cell2mat(vertcat(l1reconstructed{:}));
     l1real          = cell2mat(vertcat(l1real{:}));
+    l1reconstructed = cell2mat(vertcat(l1reconstructed{:}));
+    l1reconstructedFilter = cell2mat(vertcat(l1reconstructedFilter{:}));
+
 
     l2reconstructed = cell2mat(vertcat(l2reconstructed{:}));
-    l2real          = cell2mat(vertcat(l2real{:}));
+    l2real          = cell2mat(vertcat(l2real{:}));    
+    l2reconstructedFilter = cell2mat(vertcat(l2reconstructedFilter{:}));
 
     jitter_value = 0.2*(rand(height(l1reconstructed),1)-0.5);
 
@@ -194,17 +200,19 @@ function plotGroupwiseLenghtReconstructionForL1L2(Group,GroupName,config)
     hold on
 
     % Tutte le x dei punti a sinistra come prima riga, tutte le x dei punti a destra come seconda riga 
-    pt = plot([ [ones(height(l1reconstructed),1)+jitter_value]'; [2*ones(height(l1reconstructed),1) + jitter_value]'], [l1real'; l1reconstructed'],...
-        '-', 'Color', [config.color_scheme_npg(2,:) 0.2],'linewidth',2);
+    pt = plot([ [ones(height(l1reconstructed),1)+jitter_value]'; [2*ones(height(l1reconstructed),1) + jitter_value]'; [3*ones(height(l1reconstructed),1) + jitter_value]' ],...
+                [l1real'; l1reconstructed'; l1reconstructedFilter'],...
+                '-', 'Color', [config.color_scheme_npg(2,:) 0.2],'linewidth',2);
 
-    st = scatter( [ones(height(l1reconstructed),1)+jitter_value, 2*ones(height(l1reconstructed),1) + jitter_value], [l1real, l1reconstructed], 50, ...
-        "filled","MarkerEdgeColor","k","MarkerFaceColor",config.color_scheme_npg(1,:),...
-        "MarkerEdgeAlpha",0.8,"MarkerFaceAlpha",0.3);
+    st = scatter( [ones(height(l1reconstructed),1)+jitter_value, 2*ones(height(l1reconstructed),1) + jitter_value, 3*ones(height(l1reconstructed),1) + jitter_value],...
+                  [l1real, l1reconstructed, l1reconstructedFilter], 50,...
+                  "filled","MarkerEdgeColor","k","MarkerFaceColor",config.color_scheme_npg(1,:),...
+                  "MarkerEdgeAlpha",0.8,"MarkerFaceAlpha",0.3);
 
     hold off    
 
-    ax_left.XAxis.TickValues = [1 2];
-    ax_left.XAxis.TickLabels = {'Real', 'Reconstructed'};
+    ax_left.XAxis.TickValues = [1 2 3];
+    ax_left.XAxis.TickLabels = {'Real', 'Reconstructed', 'Filtered'};
 
     title("L_{1}",FontSize=14)
 
@@ -216,19 +224,21 @@ function plotGroupwiseLenghtReconstructionForL1L2(Group,GroupName,config)
     hold on
 
     % Tutte le x dei punti a sinistra come prima riga, tutte le x dei punti a destra come seconda riga 
-    pt = plot([ [ones(height(l2reconstructed),1)+jitter_value]'; [2*ones(height(l2reconstructed),1) + jitter_value]'], [l2real'; l2reconstructed'],...
-        '-', 'Color', [config.color_scheme_npg(2,:) 0.2],'linewidth',2);
+    pt = plot([ [ones(height(l2reconstructed),1)+jitter_value]'; [2*ones(height(l2reconstructed),1) + jitter_value]'; [3*ones(height(l2reconstructed),1) + jitter_value]' ],...
+                [l2real'; l2reconstructed'; l2reconstructedFilter'],...
+                '-', 'Color', [config.color_scheme_npg(2,:) 0.2],'linewidth',2);
 
-    st = scatter( [ones(height(l2reconstructed),1)+jitter_value, 2*ones(height(l2reconstructed),1) + jitter_value], [l2real, l2reconstructed], 50, ...
-        "filled","MarkerEdgeColor","k","MarkerFaceColor",config.color_scheme_npg(1,:),...
-        "MarkerEdgeAlpha",0.8,"MarkerFaceAlpha",0.3);
+    st = scatter( [ones(height(l2reconstructed),1)+jitter_value, 2*ones(height(l2reconstructed),1) + jitter_value, 3*ones(height(l2reconstructed),1) + jitter_value],...
+                  [l2real, l2reconstructed, l2reconstructedFilter], 50,...
+                  "filled","MarkerEdgeColor","k","MarkerFaceColor",config.color_scheme_npg(1,:),...
+                  "MarkerEdgeAlpha",0.8,"MarkerFaceAlpha",0.3);
 
     hold off
 
     title("L_2",FontSize=14)
 
-    ax_right.XAxis.TickValues = [1 2];
-    ax_right.XAxis.TickLabels = {'Real', 'Reconstructed'};
+    ax_right.XAxis.TickValues = [1 2 3];
+    ax_right.XAxis.TickLabels = {'Real', 'Reconstructed', 'Filtered'};
 
     ylim([1.0 6.0]);
 

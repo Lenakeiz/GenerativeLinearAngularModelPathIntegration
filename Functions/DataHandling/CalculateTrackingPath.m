@@ -65,11 +65,14 @@ function [outGroup] = CalculateTrackingPath(Group, config)
             Tracked_pos_L1.Vel_proj = dot([Tracked_pos_L1.Vel_X Tracked_pos_L1.Vel_Z],repmat(s_dir_L1,l1Size,1),2);
             Tracked_pos_L1.Smoothed_Vel_proj = smoothdata(Tracked_pos_L1.Vel_proj,'gaussian',config.Speed.smoothWindow);
 
+            % Calculating velocity cutoff
+            filteredVel_proj = Tracked_pos_L1.Smoothed_Vel_proj > config.Speed.VelocityCutoff;
+            Tracked_pos_L1.Filthered_Vel_proj = findWalkingSegment(filteredVel_proj);
+
             %Calculating the shifted position for the smoothed velocity
             %projection
             maxL1 = max(Tracked_pos_L1.Smoothed_Vel_proj);
             idxMaxL1 = find(Tracked_pos_L1.Smoothed_Vel_proj == maxL1);
-
             Tracked_pos_L1.ShiftedTime = Tracked_pos_L1.Time - Tracked_pos_L1.Time(idxMaxL1);
 
             l2Size = height(Tracked_pos_L2);
@@ -90,11 +93,14 @@ function [outGroup] = CalculateTrackingPath(Group, config)
             Tracked_pos_L2.Vel_proj = dot([Tracked_pos_L2.Vel_X Tracked_pos_L2.Vel_Z],repmat(s_dir_L2,l2Size,1),2);
             Tracked_pos_L2.Smoothed_Vel_proj = smoothdata(Tracked_pos_L2.Vel_proj,'gaussian',config.Speed.smoothWindow);
 
+            % Calculating velocity cutoff
+            filteredVel_proj = Tracked_pos_L2.Smoothed_Vel_proj > config.Speed.VelocityCutoff;
+            Tracked_pos_L2.Filthered_Vel_proj = findWalkingSegment(filteredVel_proj);
+
             %Calculating the shifted position for the smoothed velocity
             %projection
             maxL2 = max(Tracked_pos_L2.Smoothed_Vel_proj);
             idxMaxL2 = find(Tracked_pos_L2.Smoothed_Vel_proj == maxL2);
-
             Tracked_pos_L2.ShiftedTime = Tracked_pos_L2.Time - Tracked_pos_L2.Time(idxMaxL2);
 
             Group.TrackedL1{1,pId}{trialId,1} = Tracked_pos_L1;
@@ -105,6 +111,41 @@ function [outGroup] = CalculateTrackingPath(Group, config)
     end
 
     outGroup = Group;
+
+    function y = findWalkingSegment(x)
+        
+        % This function returns the finds the index for the maximum maximum i
+        demA = 0;
+        demB = 0;
+        a = zeros(length(x),1);
+        b = zeros(length(x),1);
+        y = x;
+            for i=length(x):-1:1
+                %Traversing from the back
+                if x(i) == 1
+                    demA = demA + 1;
+                else
+                    demA = 0;
+                end
+    
+                if(x(length(x) - i + 1) == 1)
+                    demB = demB + 1;
+                else
+                    demB = 0;
+                end
+    
+                a(i) = demA;
+                b(length(x) - i + 1) = demB;
+            end
+    
+        xStart = find(a == max(a));
+        xEnd = find(b == max(b));
+    
+        %Cutting before start and after end
+        y(1:xStart-1) = 0;
+        y(xEnd+1:length(x)) = 0;
+    
+    end
 
 end
 

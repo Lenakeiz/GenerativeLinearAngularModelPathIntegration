@@ -7,8 +7,8 @@ load('Data/AllDataErrors2018_V3.mat');
 
 %%
 config.Speed.alpha = 0.9; %Paramanter for running speed calculation
-config.Speed.timeOffsetAfterFlagReach = 2; %Time to track after flag reached in seconds 
-config.Speed.smoothWindow = 10; % tracking rate should be 10Hz so 4 secs window is 40 datapoints
+config.Speed.timeOffsetAfterFlagReach = 0; %Time to track after flag reached in seconds 
+config.Speed.smoothWindow = 10; % trarate should be 10Hz so 4 secs window is 40 datapoints
 config.Speed.velocityCutoff = 0.2; % velocity cutoff to select only the walking part of the reconstructed velocity
 config.Speed.timeOffsetForDetectedTemporalWindow = 0.5; % time in seconds that will push earlier/ the detected rising edge
 %%
@@ -31,17 +31,18 @@ plotCumulativeSpeedL1L2(YoungControls,'YoungControls',config);
 plotCumulativeSpeedL1L2(HealthyControls,'HealthyControls',config);
 plotCumulativeSpeedL1L2(Unknown,'Unknown',config);
 plotCumulativeSpeedL1L2(MCINeg,'MCINeg',config);
+%%
 plotCumulativeSpeedL1L2(MCIPos,'MCIPos',config);
 disp('%%%%%%%%%%%%%%% Plotting smoothed velocity - FINISHED %%%%%%%%%%%%%%%');
 
 %%
-disp('%%%%%%%%%%%%%%% Plotting reconstructed velocity %%%%%%%%%%%%%%%');
-plotGroupwiseLenghtReconstructionForL1L2(YoungControls,"Young controls",config);
-plotGroupwiseLenghtReconstructionForL1L2(HealthyControls,"Healthy controls",config);
-plotGroupwiseLenghtReconstructionForL1L2(Unknown,"MCI Unknown",config);
-plotGroupwiseLenghtReconstructionForL1L2(MCINeg,"MCI Negative",config);
-plotGroupwiseLenghtReconstructionForL1L2(MCIPos,"MCI Positive",config);
-disp('%%%%%%%%%%%%%%% Plotting reconstructed velocity - FINISHED %%%%%%%%%%%%%%%');
+disp('%%%%%%%%%%%%%%% Plotting reconstructed lenghts %%%%%%%%%%%%%%%');
+youngBadPpt           = plotGroupwiseLenghtReconstructionForL1L2(YoungControls,"Young controls",config,1.55);
+healthyControlsBadPpt = plotGroupwiseLenghtReconstructionForL1L2(HealthyControls,"Healthy controls",config,2.0);
+unknownBadPpt         = plotGroupwiseLenghtReconstructionForL1L2(Unknown,"MCI Unknown",config,2.0);
+mciNegBadPpt          = plotGroupwiseLenghtReconstructionForL1L2(MCINeg,"MCI Negative",config,2.0);
+mciPosBadPpt          = plotGroupwiseLenghtReconstructionForL1L2(MCIPos,"MCI Positive",config,2.0);
+disp('%%%%%%%%%%%%%%% Plotting reconstructed lenghts - FINISHED %%%%%%%%%%%%%%%');
 
 %% Plotting cumulative plots
 function plotCumulativeSpeedL1L2(Group,GroupName,config)
@@ -116,7 +117,7 @@ function plotCumulativeSpeedL1L2(Group,GroupName,config)
 end
 
 %% Plotting recontructed lenght over speed
-function plotGroupwiseLenghtReconstructionForL1L2(Group,GroupName,config)
+function [groupFaultyIndices] = plotGroupwiseLenghtReconstructionForL1L2(Group,GroupName,config,thresholdForFaultyParticipants)
     
     savefolder = pwd + "/Output/";
     % setting the configuration
@@ -126,6 +127,8 @@ function plotGroupwiseLenghtReconstructionForL1L2(Group,GroupName,config)
     if ~exist(resultfolder, 'dir')
        mkdir(resultfolder);
     end
+
+    groupFaultyIndices = [];
 
     pSize = size(Group.TrackedL1,2);
     l1reconstructed = {};
@@ -154,18 +157,30 @@ function plotGroupwiseLenghtReconstructionForL1L2(Group,GroupName,config)
             currL2rec         = trapz(Group.TrackedL2{1,pId}{trialId,1}.Time,TrackedL2Smoothed);
             currL2recfilter   = trapz(Group.TrackedL2{1,pId}{trialId,1}.Time(Group.TrackedL2{1,pId}{trialId,1}.Filthered_Vel_proj),TrackedL2Smoothed(Group.TrackedL2{1,pId}{trialId,1}.Filthered_Vel_proj));
 
-            l1real{pId,1}{trialId,1} = currl1real;
-            l1reconstructed{pId,1}{trialId,1} = currL1rec;
-            l1reconstructedFilter{pId,1}{trialId,1} = currL1recfilter;
-
-            l2real{pId,1}{trialId,1} = currl2real;
-            l2reconstructed{pId,1}{trialId,1} = currL2rec;
-            l2reconstructedFilter{pId,1}{trialId,1} = currL2recfilter;
-
+            if(currl1real < thresholdForFaultyParticipants)
+                groupFaultyIndices = [groupFaultyIndices, pId];
+                l1real{pId,1}{trialId,1} = nan;
+                l1reconstructed{pId,1}{trialId,1} = nan;
+                l1reconstructedFilter{pId,1}{trialId,1} = nan;
+    
+                l2real{pId,1}{trialId,1} = nan;
+                l2reconstructed{pId,1}{trialId,1} = nan;
+                l2reconstructedFilter{pId,1}{trialId,1} = nan;
+            else
+                l1real{pId,1}{trialId,1} = currl1real;
+                l1reconstructed{pId,1}{trialId,1} = currL1rec;
+                l1reconstructedFilter{pId,1}{trialId,1} = currL1recfilter;
+                
+                l2real{pId,1}{trialId,1} = currl2real;
+                l2reconstructed{pId,1}{trialId,1} = currL2rec;
+                l2reconstructedFilter{pId,1}{trialId,1} = currL2recfilter;
+            end
 
         end
     
     end
+
+    groupFaultyIndices = unique(groupFaultyIndices);
 
     l1real          = cell2mat(vertcat(l1real{:}));
     l1reconstructed = cell2mat(vertcat(l1reconstructed{:}));

@@ -21,6 +21,14 @@ DX = cell(1, sampleSize);
 % the rotation from the first segment towards the second, so it s the outer
 % angle of the triangle.
 THETADX = cell(1, sampleSize);
+% projected speed within detected start-to-end time window
+ProjSpeedL1 = cell(1, sampleSize);
+TimeL1 = cell(1, sampleSize);
+ProjSpeedL2 = cell(1, sampleSize);
+TimeL2 = cell(1, sampleSize);
+
+% flagpos
+flagpos = cell(1, sampleSize);
 % OoB flag
 flagOoB = cell(1, sampleSize);
 % OoB length
@@ -89,6 +97,10 @@ for j = 1:sampleSize
     DX{j}       = cell(1,length(flagpos{j}));
     THETADX{j}  = cell(1,length(flagpos{j}));
     X{j}        = cell(1,length(flagpos{j}));
+    ProjSpeedL1{j}= cell(1,length(flagpos{j}));
+    TimeL1{j}= cell(1,length(flagpos{j}));
+    ProjSpeedL2{j}= cell(1,length(flagpos{j}));
+    TimeL2{j}= cell(1,length(flagpos{j}));
     
     % Temporary
     segments = cell(1, length(sampleSize));
@@ -105,6 +117,23 @@ for j = 1:sampleSize
 
         %wrap the angle into (0,2pi)
         THETADX{j}{tr} = mod(outer_rad, 2*pi);
+
+        %
+        L1_Vel_proj = GroupData.TrackedL1{j}{tr}.Vel_proj;
+        L1_Time = GroupData.TrackedL1{j}{tr}.Time;
+        L1_Filtered_Vel_proj = GroupData.TrackedL1{j}{tr}.Filtered_Vel_proj;
+        L1_Vel_proj_selected = L1_Vel_proj(L1_Filtered_Vel_proj);
+        L1_Time_selected = L1_Time(L1_Filtered_Vel_proj);
+        ProjSpeedL1{j}{tr} = L1_Vel_proj_selected;
+        TimeL1{j}{tr} = L1_Time_selected;
+
+        L2_Vel_proj = GroupData.TrackedL2{j}{tr}.Vel_proj;
+        L2_Time = GroupData.TrackedL2{j}{tr}.Time;
+        L2_Filtered_Vel_proj = GroupData.TrackedL2{j}{tr}.Filtered_Vel_proj;
+        L2_Vel_proj_selected = L2_Vel_proj(L2_Filtered_Vel_proj);
+        L2_Time_selected = L2_Time(L2_Filtered_Vel_proj);
+        ProjSpeedL2{j}{tr} = L2_Vel_proj_selected;
+        TimeL2{j}{tr} = L2_Time_selected;        
         
     end
 

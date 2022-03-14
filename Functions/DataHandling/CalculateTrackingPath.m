@@ -82,7 +82,7 @@ function [outGroup] = CalculateTrackingPath(Group, config)
             % The additional 0.0001 is to make sure that the resolution
             % gets the initial detected value (comparing to eps is still
             % not enough).
-            Tracked_pos_L1.Filthered_Vel_proj = Tracked_pos_L1.Time >= currDetectedOnset - 0.0001 & Tracked_pos_L1.Time <= currDetectedOffset + 0.0001;
+            Tracked_pos_L1.Filtered_Vel_proj = Tracked_pos_L1.Time >= currDetectedOnset - 0.0001 & Tracked_pos_L1.Time <= currDetectedOffset + 0.0001;
 
             %Calculating the shifted position for the smoothed velocity
             %projection
@@ -122,7 +122,7 @@ function [outGroup] = CalculateTrackingPath(Group, config)
                 currDetectedOffset = currDetectedOffset + config.Speed.timeOffsetForDetectedTemporalWindow;
             end
 
-            Tracked_pos_L2.Filthered_Vel_proj = Tracked_pos_L2.Time >= currDetectedOnset - 0.0001 & Tracked_pos_L2.Time <= currDetectedOffset + 0.0001;
+            Tracked_pos_L2.Filtered_Vel_proj = Tracked_pos_L2.Time >= currDetectedOnset - 0.0001 & Tracked_pos_L2.Time <= currDetectedOffset + 0.0001;
 
             %Calculating the shifted position for the smoothed velocity
             %projection

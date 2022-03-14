@@ -32,13 +32,13 @@ function [outGroup] = CalculateTrackingPath(Group, config)
             % Extracting L1 walking path (between flag spawn time 2 and reaching cone 2)
 
             Tracked_pos_L1 = Tracked_pos(Tracked_pos.Time > Group.FlagSpawnTime{1,pId}{trialId,2} &...
-                                        Tracked_pos.Time < Group.FlagTrigTimes{1,pId}{trialId,2} + mean(DiffTrigSpawn12) + config.Speed.TOffsetAfterFlagReach, :);
+                                        Tracked_pos.Time < Group.FlagTrigTimes{1,pId}{trialId,2} + mean(DiffTrigSpawn12) + config.Speed.timeOffsetAfterFlagReach, :);
 %             Tracked_pos_L1 = Tracked_pos(Tracked_pos.Time > Group.FlagTrigTimes{1,pId}{trialId,1} &...
 %                             Tracked_pos.Time < Group.FlagTrigTimes{1,pId}{trialId,2} + config.Speed.TOffsetAfterFlagReach, :);
             
             % Extracting L1 walking path (between flag spawn time 3 and reaching cone 3)
             Tracked_pos_L2 = Tracked_pos(Tracked_pos.Time > Group.FlagSpawnTime{1,pId}{trialId,3} &...
-                                         Tracked_pos.Time < Group.FlagTrigTimes{1,pId}{trialId,3} + mean(DiffTrigSpawn23) + config.Speed.TOffsetAfterFlagReach, :);
+                                         Tracked_pos.Time < Group.FlagTrigTimes{1,pId}{trialId,3} + mean(DiffTrigSpawn23) + config.Speed.timeOffsetAfterFlagReach, :);
 
 %             Tracked_pos_L2 = Tracked_pos(Tracked_pos.Time > Group.FlagTrigTimes{1,pId}{trialId,2} &...
 %                                          Tracked_pos.Time < Group.FlagTrigTimes{1,pId}{trialId,3} + config.Speed.TOffsetAfterFlagReach, :);
@@ -66,8 +66,23 @@ function [outGroup] = CalculateTrackingPath(Group, config)
             Tracked_pos_L1.Smoothed_Vel_proj = smoothdata(Tracked_pos_L1.Vel_proj,'gaussian',config.Speed.smoothWindow);
 
             % Calculating velocity cutoff
-            filteredVel_proj = Tracked_pos_L1.Smoothed_Vel_proj > config.Speed.VelocityCutoff;
-            Tracked_pos_L1.Filthered_Vel_proj = findWalkingSegment(filteredVel_proj);
+            filteredVel_proj = Tracked_pos_L1.Smoothed_Vel_proj > config.Speed.velocityCutoff;
+            [~,currIdxs] = findWalkingSegment(filteredVel_proj);
+
+            currDetectedOnset  = Tracked_pos_L1.Time(currIdxs.start);
+            currDetectedOffset = Tracked_pos_L1.Time(currIdxs.end);
+
+            currDetectedOnset  = currDetectedOnset - config.Speed.timeOffsetForDetectedTemporalWindow;
+            if(currDetectedOffset + config.Speed.timeOffsetForDetectedTemporalWindow > Tracked_pos_L1.Time(end))
+                currDetectedOffset = Tracked_pos_L1.Time(end);
+            else
+                currDetectedOffset = currDetectedOffset + config.Speed.timeOffsetForDetectedTemporalWindow;
+            end
+
+            % The additional 0.0001 is to make sure that the resolution
+            % gets the initial detected value (comparing to eps is still
+            % not enough).
+            Tracked_pos_L1.Filthered_Vel_proj = Tracked_pos_L1.Time >= currDetectedOnset - 0.0001 & Tracked_pos_L1.Time <= currDetectedOffset + 0.0001;
 
             %Calculating the shifted position for the smoothed velocity
             %projection
@@ -94,8 +109,20 @@ function [outGroup] = CalculateTrackingPath(Group, config)
             Tracked_pos_L2.Smoothed_Vel_proj = smoothdata(Tracked_pos_L2.Vel_proj,'gaussian',config.Speed.smoothWindow);
 
             % Calculating velocity cutoff
-            filteredVel_proj = Tracked_pos_L2.Smoothed_Vel_proj > config.Speed.VelocityCutoff;
-            Tracked_pos_L2.Filthered_Vel_proj = findWalkingSegment(filteredVel_proj);
+            filteredVel_proj = Tracked_pos_L2.Smoothed_Vel_proj > config.Speed.velocityCutoff;
+            [~,currIdxs] = findWalkingSegment(filteredVel_proj);
+
+            currDetectedOnset  = Tracked_pos_L2.Time(currIdxs.start);
+            currDetectedOffset = Tracked_pos_L2.Time(currIdxs.end);
+
+            currDetectedOnset  = currDetectedOnset - config.Speed.timeOffsetForDetectedTemporalWindow;
+            if(currDetectedOffset + config.Speed.timeOffsetForDetectedTemporalWindow > Tracked_pos_L2.Time(end))
+                currDetectedOffset = Tracked_pos_L2.Time(end);
+            else
+                currDetectedOffset = currDetectedOffset + config.Speed.timeOffsetForDetectedTemporalWindow;
+            end
+
+            Tracked_pos_L2.Filthered_Vel_proj = Tracked_pos_L2.Time >= currDetectedOnset - 0.0001 & Tracked_pos_L2.Time <= currDetectedOffset + 0.0001;
 
             %Calculating the shifted position for the smoothed velocity
             %projection
@@ -112,7 +139,7 @@ function [outGroup] = CalculateTrackingPath(Group, config)
 
     outGroup = Group;
 
-    function y = findWalkingSegment(x)
+    function [y, idxs] = findWalkingSegment(x)
         
         % This function returns the finds the index for the maximum maximum i
         demA = 0;
@@ -144,6 +171,9 @@ function [outGroup] = CalculateTrackingPath(Group, config)
         %Cutting before start and after end
         y(1:xStart-1) = 0;
         y(xEnd+1:length(x)) = 0;
+
+        idxs.start = xStart;
+        idxs.end = xEnd;
     
     end
 

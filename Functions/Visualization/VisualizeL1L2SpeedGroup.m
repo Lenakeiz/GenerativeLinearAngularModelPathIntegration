@@ -7,10 +7,10 @@ load('Data/AllDataErrors2018_V3.mat');
 
 %%
 config.Speed.alpha = 0.9; %Paramanter for running speed calculation
-config.Speed.TOffsetAfterFlagReach = 2; %Time to track after flag reached in seconds 
-config.Speed.smoothWindow = 10; % tracking rate should be 10Hz so 4 secs window is 40
-config.Speed.VelocityCutoff = 0.2; % velocity cutoff to select only the walking part of the reconstructed velocity
-
+config.Speed.timeOffsetAfterFlagReach = 2; %Time to track after flag reached in seconds 
+config.Speed.smoothWindow = 10; % tracking rate should be 10Hz so 4 secs window is 40 datapoints
+config.Speed.velocityCutoff = 0.2; % velocity cutoff to select only the walking part of the reconstructed velocity
+config.Speed.timeOffsetForDetectedTemporalWindow = 0.5; % time in seconds that will push earlier/ the detected rising edge
 %%
 disp('%%%%%%%%%%%%%%% Calculating Tracking Path - YOUNG ... %%%%%%%%%%%%%%%');
 YoungControls   = CalculateTrackingPath(YoungControls, config);
@@ -31,7 +31,6 @@ plotCumulativeSpeedL1L2(YoungControls,'YoungControls',config);
 plotCumulativeSpeedL1L2(HealthyControls,'HealthyControls',config);
 plotCumulativeSpeedL1L2(Unknown,'Unknown',config);
 plotCumulativeSpeedL1L2(MCINeg,'MCINeg',config);
-%%
 plotCumulativeSpeedL1L2(MCIPos,'MCIPos',config);
 disp('%%%%%%%%%%%%%%% Plotting smoothed velocity - FINISHED %%%%%%%%%%%%%%%');
 
@@ -41,7 +40,6 @@ plotGroupwiseLenghtReconstructionForL1L2(YoungControls,"Young controls",config);
 plotGroupwiseLenghtReconstructionForL1L2(HealthyControls,"Healthy controls",config);
 plotGroupwiseLenghtReconstructionForL1L2(Unknown,"MCI Unknown",config);
 plotGroupwiseLenghtReconstructionForL1L2(MCINeg,"MCI Negative",config);
-%%
 plotGroupwiseLenghtReconstructionForL1L2(MCIPos,"MCI Positive",config);
 disp('%%%%%%%%%%%%%%% Plotting reconstructed velocity - FINISHED %%%%%%%%%%%%%%%');
 

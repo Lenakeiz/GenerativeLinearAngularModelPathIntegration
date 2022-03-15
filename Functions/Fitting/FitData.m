@@ -1,4 +1,4 @@
-function [FitParams, IC] = FitData(DX,THETAX,X,config)
+function [FitParams, IC] = FitData(DX,THETAX,X,ProjSpeedL1,ProjSpeedL2,config)
 %FITDATA Function to fit the data on a single participant
 %   DX is a cell structure containing the segment of each trial
 %   THETAX is the turning angle (wrong at the moment)
@@ -24,7 +24,7 @@ if Model_Name == "LIModel"
     Aeq(3,3)=1; beq(3)=1; %g3=1   
     Aeq(4,4)=1; beq(4)=0; %b=0 
     %calculate the likelihood function
-    estFnc = @(FP) estimateLI(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),DX,THETAX,X);
+    estFnc = @(FP) EstimateLI(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),ProjSpeedL1, ProjSpeedL2,THETAX, DX, useweber);
 
 elseif Model_Name == "G1G2"
     %set model configurations

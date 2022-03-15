@@ -23,9 +23,7 @@ DX = cell(1, sampleSize);
 THETADX = cell(1, sampleSize);
 % projected speed within detected start-to-end time window
 ProjSpeedL1 = cell(1, sampleSize);
-TimeL1 = cell(1, sampleSize);
 ProjSpeedL2 = cell(1, sampleSize);
-TimeL2 = cell(1, sampleSize);
 
 % flagpos
 flagpos = cell(1, sampleSize);
@@ -97,11 +95,9 @@ for j = 1:sampleSize
     DX{j}       = cell(1,length(flagpos{j}));
     THETADX{j}  = cell(1,length(flagpos{j}));
     X{j}        = cell(1,length(flagpos{j}));
-    ProjSpeedL1{j}= cell(1,length(flagpos{j}));
-    TimeL1{j}= cell(1,length(flagpos{j}));
-    ProjSpeedL2{j}= cell(1,length(flagpos{j}));
-    TimeL2{j}= cell(1,length(flagpos{j}));
-    
+    ProjSpeedL1{j}= cell(2,length(flagpos{j}));
+    ProjSpeedL2{j}= cell(2,length(flagpos{j}));
+
     % Temporary
     segments = cell(1, length(sampleSize));
 
@@ -124,22 +120,22 @@ for j = 1:sampleSize
         L1_Filtered_Vel_proj = GroupData.TrackedL1{j}{tr}.Filtered_Vel_proj;
         L1_Vel_proj_selected = L1_Vel_proj(L1_Filtered_Vel_proj);
         L1_Time_selected = L1_Time(L1_Filtered_Vel_proj);
-        ProjSpeedL1{j}{tr} = L1_Vel_proj_selected;
-        TimeL1{j}{tr} = L1_Time_selected;
+        ProjSpeedL1{j}{1,tr} = L1_Time_selected;  %selected time in a start-to-end range
+        ProjSpeedL1{j}{2,tr} = L1_Vel_proj_selected;  %selected speed in a start-to-end range
 
         L2_Vel_proj = GroupData.TrackedL2{j}{tr}.Vel_proj;
         L2_Time = GroupData.TrackedL2{j}{tr}.Time;
         L2_Filtered_Vel_proj = GroupData.TrackedL2{j}{tr}.Filtered_Vel_proj;
         L2_Vel_proj_selected = L2_Vel_proj(L2_Filtered_Vel_proj);
         L2_Time_selected = L2_Time(L2_Filtered_Vel_proj);
-        ProjSpeedL2{j}{tr} = L2_Vel_proj_selected;
-        TimeL2{j}{tr} = L2_Time_selected;        
+        ProjSpeedL2{j}{1, tr} = L2_Time_selected;  %selected time in a start-to-end range
+        ProjSpeedL2{j}{2, tr} = L2_Vel_proj_selected; %selected speed in a start-to-end range
         
     end
 
     % Do the data fitting
     disp(['%%%%%%%%%%%%%%% STARTING FIT PER PARTICIPANT ' num2str(j) ' %%%%%%%%%%%%%%%']);
-    [GroupParameters{j}, IC{j}] = FitData(DX{j},THETADX{j},X{j},config);
+    [GroupParameters{j}, IC{j}] = FitData(DX{j},THETADX{j},X{j},ProjSpeedL1{j}, ProjSpeedL2{j}, config);
 end
 
 %Transforming the fitted parameters to array

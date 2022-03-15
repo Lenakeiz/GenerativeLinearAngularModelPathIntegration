@@ -8,10 +8,10 @@ load('Data/AllDataErrors2018_V3.mat');
 %% Plotting some example data
 ColorPattern;
 
-Group = HealthyControls;
-pId = 6;
-trialId = 3;
-tOffAfterConeReach = 3;
+Group = MCIPos;
+pId = 1;
+trialId = 5;
+tOffAfterConeReach = 0;
 
 close all;
 figure;
@@ -116,7 +116,7 @@ s_dir_L2 = (Cone_pos(3,[1 3]) - Cone_pos(2,[1 3])) / norm(Cone_pos(3,[1 3]) - Co
 
 %General properties
 alpha = 0.9;
-smoothWindow = 40;
+smoothWindow = 10;
 
 % Extracting velocity at each time point for segment L1
 l1Size = height(Tracked_pos_L1);

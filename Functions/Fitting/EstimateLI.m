@@ -1,18 +1,18 @@
-function [negloglikelihood] = EstimateLI(beta, g2, g3, b, sigma, nu, ProjSpeedL1, ProjSpeedL2, THETAX, DX, useweber)
-%Estimate_ZL_mul means there exists a gain factor in the angle, which can not derive as a rotation matrix
-%ESTIMATE Summary of this function goes here
-%   gamma is the discount factor
+function [negloglikelihood] = EstimateLI(beta, G3, g2, g3, b, sigma, nu, ProjSpeedL1, ProjSpeedL2, DX, THETAX, useweber)
+%   EstimateLI means using the leaky integration model when estimating the parameters
+%   ESTIMATELI Summary of this function goes here:
+%   beta is the leaky integration decay factor
 %   G3 is the gain of the length of the third leg 
 %   g2 is the rotation angle from the direction of leg 2
 %   g3 is the rotation angle from the direction of leg 3
 %   b is the systematic bias in the execution error
 %   sigma is the standard deviation for the Gaussian distribution of the return point
-%   nu is the xxx
+%   nu decribes the noise strength in the Von Mises distribution
+%   ProjSpeedL1, speed projected onto the first outbound path
+%   ProjSpeedL2, speed projected onto the second outbound path
 %   DX is a cell structure containing the segment of each trial
-%   THETAX is the turning angle (wrong at the moment)
-%   X is the data points
-%   ifallo 
-%   useweber
+%   THETAX is the turning angle
+%   useweber decides whether the noise scales with the walking distance 
 
 sampleSize = size(DX,2);
 deltat = 0.1; %the recording interval, always 0.1s.

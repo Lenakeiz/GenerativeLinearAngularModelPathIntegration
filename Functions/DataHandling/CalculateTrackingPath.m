@@ -96,7 +96,7 @@ function [outGroup] = CalculateTrackingPath(Group, config)
             % The additional 0.0001 is to make sure that the resolution
             % gets the initial detected value (comparing to eps is still
             % not enough).
-            Tracked_pos_L1.Filthered_Vel_proj = Tracked_pos_L1.Time >= currDetectedOnsetL1 - 0.0001 & Tracked_pos_L1.Time <= currDetectedOffsetL1 + 0.0001;
+            Tracked_pos_L1.Filtered_Vel_proj = Tracked_pos_L1.Time >= currDetectedOnsetL1 - 0.0001 & Tracked_pos_L1.Time <= currDetectedOffsetL1 + 0.0001;
 
             % Calculating the reconstructed quantities for L1
             currl1real                  = norm(Cone_pos(2,[1 3]) - Cone_pos(1,[1 3]));
@@ -154,7 +154,7 @@ function [outGroup] = CalculateTrackingPath(Group, config)
                 currDetectedOffsetL2 = currDetectedOffsetL2 + config.Speed.timeOffsetForDetectedTemporalWindow;
             end
 
-            Tracked_pos_L2.Filthered_Vel_proj = Tracked_pos_L2.Time >= currDetectedOnsetL2 - 0.0001 & Tracked_pos_L2.Time <= currDetectedOffsetL2 + 0.0001;
+            Tracked_pos_L2.Filtered_Vel_proj = Tracked_pos_L2.Time >= currDetectedOnsetL2 - 0.0001 & Tracked_pos_L2.Time <= currDetectedOffsetL2 + 0.0001;
 
             % Calculating the reconstructed quantities for L2
             currl2real = norm(Cone_pos(3,[1 3]) - Cone_pos(2,[1 3]));

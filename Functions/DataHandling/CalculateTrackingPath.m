@@ -101,9 +101,9 @@ function [outGroup] = CalculateTrackingPath(Group, config)
             % Calculating the reconstructed quantities for L1
             currl1real                  = norm(Cone_pos(2,[1 3]) - Cone_pos(1,[1 3]));
             currL1recsmoothed           = trapz(Tracked_pos_L1.Time,Tracked_pos_L1.Smoothed_Vel_proj);
-            currL1recsmoothedfiltered   = trapz(Tracked_pos_L1.Time(Tracked_pos_L1.Filthered_Vel_proj),Tracked_pos_L1.Smoothed_Vel_proj(Tracked_pos_L1.Filthered_Vel_proj));
+            currL1recsmoothedfiltered   = trapz(Tracked_pos_L1.Time(Tracked_pos_L1.Filtered_Vel_proj),Tracked_pos_L1.Smoothed_Vel_proj(Tracked_pos_L1.Filtered_Vel_proj));
             currL1recUnsmoothed         = trapz(Tracked_pos_L1.Time,Tracked_pos_L1.Vel_proj);
-            currL1recUnsmoothedfiltered = trapz(Tracked_pos_L1.Time(Tracked_pos_L1.Filthered_Vel_proj),Tracked_pos_L1.Vel_proj(Tracked_pos_L1.Filthered_Vel_proj));
+            currL1recUnsmoothedfiltered = trapz(Tracked_pos_L1.Time(Tracked_pos_L1.Filtered_Vel_proj),Tracked_pos_L1.Vel_proj(Tracked_pos_L1.Filtered_Vel_proj));
 
             % This happens only for L1 at the moment
             if(currl1real < config.Speed.tresholdForBadParticipantL1Recontruction)
@@ -159,9 +159,9 @@ function [outGroup] = CalculateTrackingPath(Group, config)
             % Calculating the reconstructed quantities for L2
             currl2real = norm(Cone_pos(3,[1 3]) - Cone_pos(2,[1 3]));
             currL2recsmoothed           = trapz(Tracked_pos_L2.Time,Tracked_pos_L2.Smoothed_Vel_proj);
-            currL2recsmoothedfiltered   = trapz(Tracked_pos_L2.Time(Tracked_pos_L2.Filthered_Vel_proj),Tracked_pos_L2.Smoothed_Vel_proj(Tracked_pos_L2.Filthered_Vel_proj));
+            currL2recsmoothedfiltered   = trapz(Tracked_pos_L2.Time(Tracked_pos_L2.Filtered_Vel_proj),Tracked_pos_L2.Smoothed_Vel_proj(Tracked_pos_L2.Filtered_Vel_proj));
             currL2recUnsmoothed         = trapz(Tracked_pos_L2.Time,Tracked_pos_L2.Vel_proj);
-            currL2recUnsmoothedfiltered = trapz(Tracked_pos_L2.Time(Tracked_pos_L2.Filthered_Vel_proj),Tracked_pos_L2.Vel_proj(Tracked_pos_L2.Filthered_Vel_proj));
+            currL2recUnsmoothedfiltered = trapz(Tracked_pos_L2.Time(Tracked_pos_L2.Filtered_Vel_proj),Tracked_pos_L2.Vel_proj(Tracked_pos_L2.Filtered_Vel_proj));
 
             RecontructedQuantities(1,6)  = currl2real;
             RecontructedQuantities(1,7)  = currL2recsmoothed;

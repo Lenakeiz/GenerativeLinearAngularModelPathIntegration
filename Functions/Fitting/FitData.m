@@ -10,8 +10,9 @@ Model_Name = config.ModelName;
 numParams = config.NumParams;
 useglobalsearch = config.UseGlobalSearch;
 useweber=false;%only true when use weber law in simple generative models
+ifEqualDiscount=false; %only true when use same discount in both leg
 
-if Model_Name == "LIModel"
+if Model_Name == "DistErrLI"
     %set model configurations
     %set lower bound and up bound
     %     1, beta    2-G3     3-g2     4-g3     5-b      6-sigma      7-nu
@@ -27,7 +28,21 @@ if Model_Name == "LIModel"
     %calculate the likelihood function
     estFnc = @(FP) EstimateLI(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),ProjSpeedL1, ProjSpeedL2, DX, THETAX, useweber);
 
-elseif Model_Name == "G1G2"
+elseif Model_Name == "LIFull"
+    %set model configurations
+    %set lower bound and up bound
+    %     1, beta    2-G3     3-g2     4-g3     5-b      6-sigma      7-nu
+    lb  = [0.0,      0.5,     0.5,     0,       0,       0.1,         0.1];
+    ub  = [1.0,      2.0,     2.0,     1.0,     2*pi,    2.0,         100.0];    
+
+    %set equality constriants
+    Aeq = zeros(7,7); beq=zeros(1,7);
+    Aeq(2,2)=1; beq(2)=1; %G3=1
+    Aeq(3,3)=1; beq(3)=1; %g2=1
+    %calculate the likelihood function
+    estFnc = @(FP) EstimateLI(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),ProjSpeedL1, ProjSpeedL2, DX, THETAX, useweber);
+
+elseif Model_Name == "G1G2Full"
     %set model configurations
     %set lower bound and up bound
     %      1-G1     2-G2    3-G3    4-g2   5-g3   6-b    7-sigma    8-nu
@@ -74,49 +89,85 @@ elseif Model_Name=="Allo" | Model_Name=="AlloWeber"
     end
     estFnc = @(FP) EstimateAllo(FP(6),DX,X,useweber);
 
-else %gamma based model
+elseif Model_Name=="GammaFull" 
+    %gamma full model
     %set model configurations
-    ifEqualDiscount=false;
     %set lower bound and up bound
     %      1-gamma    2-G3    3-g2     4-g3     5-b      6-sigma    7-nu
     lb  = [0.5,       0.1,    0.5,     -2.0,    0,       0.1,       0.1];
     ub  = [1.5,       1.0,    2.0,     2.0,     pi,  2.0,       100.0]; 
-
     %set equality constriants
     Aeq = zeros(7,7); beq=zeros(1,7);
-    
-    if Model_Name=="BaseModel"
-        Aeq(2,2)=1; beq(2)=1;%G3=1
-        Aeq(3,3)=1; beq(3)=1;%g2=1
-    elseif Model_Name=="DistErrModel"
-        Aeq(2,2)=1; beq(2)=1;%G3=1
-        Aeq(3,3)=1; beq(3)=1;%g2=1 
-        Aeq(4,4)=1; beq(4)=1;%g3=1 
-        Aeq(5,5)=1; beq(5)=0;%b=0 
-    elseif Model_Name=="EqualDiscount"
-        ifEqualDiscount=true;
-        Aeq(2,2)=1; beq(2)=1;%G3=1
-        Aeq(3,3)=1; beq(3)=1;%g2=1 
-        Aeq(4,4)=1; beq(4)=1;%g3=1 
-        Aeq(5,5)=1; beq(5)=0;%b=0       
-    elseif Model_Name=="AngleErrModel"
-        Aeq(1,1)=1; beq(1)=1;%gamma=1
-        Aeq(2,2)=1; beq(2)=1;%G3=1
-        Aeq(3,3)=1; beq(3)=1;%g2=1             
-    elseif Model_Name=="Ego" | Model_Name=="EgoWeber"
-        Aeq(1,1)=1; beq(1)=1;%gamma=1
-        Aeq(2,2)=1; beq(2)=1;%G3=1
-        Aeq(3,3)=1; beq(3)=1;%g2=1   
-        Aeq(4,4)=1; beq(4)=1;%g3=1 
-        Aeq(5,5)=1; beq(5)=0;%b=0 
-        if Model_Name=="EgoWeber"
-            useweber=true;
-        end    
-    else
-        error("Please set the correct name of model!");
-    end
+    Aeq(2,2)=1; beq(2)=1;%G3=1
+    Aeq(3,3)=1; beq(3)=1;%g2=1    
     %calculate the likelihood function
     estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),DX,THETAX,X,useweber,ifEqualDiscount);
+
+elseif Model_Name=="DistErrGamma"
+    %set model configurations
+    %set lower bound and up bound
+    %      1-gamma    2-G3    3-g2     4-g3     5-b      6-sigma    7-nu
+    lb  = [0.5,       0.1,    0.5,     -2.0,    0,       0.1,       0.1];
+    ub  = [1.5,       1.0,    2.0,     2.0,     pi,  2.0,       100.0]; 
+    %set equality constriants
+    Aeq = zeros(7,7); beq=zeros(1,7);
+    Aeq(2,2)=1; beq(2)=1;%G3=1
+    Aeq(3,3)=1; beq(3)=1;%g2=1 
+    Aeq(4,4)=1; beq(4)=1;%g3=1 
+    Aeq(5,5)=1; beq(5)=0;%b=0    
+    %calculate the likelihood function
+    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),DX,THETAX,X,useweber,ifEqualDiscount);   
+
+elseif Model_Name=="EqualDiscountGamma"
+    %set model configurations
+    ifEqualDiscount=true;
+    %set lower bound and up bound
+    %      1-gamma    2-G3    3-g2     4-g3     5-b      6-sigma    7-nu
+    lb  = [0.5,       0.1,    0.5,     -2.0,    0,       0.1,       0.1];
+    ub  = [1.5,       1.0,    2.0,     2.0,     pi,      2.0,       100.0]; 
+    %set equality constriants
+    Aeq = zeros(7,7); beq=zeros(1,7);
+    Aeq(2,2)=1; beq(2)=1;%G3=1
+    Aeq(3,3)=1; beq(3)=1;%g2=1 
+    Aeq(4,4)=1; beq(4)=1;%g3=1 
+    Aeq(5,5)=1; beq(5)=0;%b=0
+    %calculate the likelihood function
+    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),DX,THETAX,X,useweber,ifEqualDiscount);
+
+elseif Model_Name=="AngleErrGamma"
+    %set model configurations
+    %set lower bound and up bound
+    %      1-gamma    2-G3    3-g2     4-g3     5-b      6-sigma    7-nu
+    lb  = [0.5,       0.1,    0.5,     -2.0,    0,       0.1,       0.1];
+    ub  = [1.5,       1.0,    2.0,     2.0,     pi,      2.0,       100.0]; 
+    %set equality constriants
+    Aeq = zeros(7,7); beq=zeros(1,7);
+    Aeq(1,1)=1; beq(1)=1;%gamma=1
+    Aeq(2,2)=1; beq(2)=1;%G3=1
+    Aeq(3,3)=1; beq(3)=1;%g2=1             
+    %calculate the likelihood function
+    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),DX,THETAX,X,useweber,ifEqualDiscount);
+
+elseif Model_Name=="Ego" | Model_Name=="EgoWeber"
+    %set model configurations
+    %set lower bound and up bound
+    %      1-gamma    2-G3    3-g2     4-g3     5-b      6-sigma    7-nu
+    lb  = [0.5,       0.1,    0.5,     -2.0,    0,       0.1,       0.1];
+    ub  = [1.5,       1.0,    2.0,     2.0,     pi,      2.0,       100.0]; 
+    %set equality constriants
+    Aeq = zeros(7,7); beq=zeros(1,7);    
+    Aeq(1,1)=1; beq(1)=1;%gamma=1
+    Aeq(2,2)=1; beq(2)=1;%G3=1
+    Aeq(3,3)=1; beq(3)=1;%g2=1   
+    Aeq(4,4)=1; beq(4)=1;%g3=1 
+    Aeq(5,5)=1; beq(5)=0;%b=0 
+    if Model_Name=="EgoWeber"
+        useweber=true;
+    end  
+    %calculate the likelihood function
+    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),DX,THETAX,X,useweber,ifEqualDiscount);
+else
+    error("Please set the correct name of model!");
 end
 
 %% parameter fitting

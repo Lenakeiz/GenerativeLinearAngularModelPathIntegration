@@ -15,7 +15,7 @@ config.Speed.velocityCutoff = 0.2;                      % velocity cutoff to sel
 config.Speed.timeOffsetForDetectedTemporalWindow = 0.5; % time in seconds that will push earlier/ the detected rising edge
 
 config.ModelName = "LIModel";
-config.NumParams = 5;
+config.NumParams = 3;
 
 resultfolder = savefolder+config.ModelName+"/";
 %create storing folder for trajectory if not exist
@@ -29,6 +29,8 @@ config.UseGlobalSearch = true;
 
 %% calculating tracking path and transoform data
 disp('%%%%%%%%%%%%%%% Calculating Tracking Path - YOUNG ... %%%%%%%%%%%%%%%');
+% threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
+config.Speed.tresholdForBadParticipantL1Recontruction = 1.55;
 YoungControls   = CalculateTrackingPath(YoungControls, config);
 %transform data
 YoungControls = TransformPaths(YoungControls);

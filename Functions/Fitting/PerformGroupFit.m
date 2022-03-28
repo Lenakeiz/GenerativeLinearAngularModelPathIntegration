@@ -135,7 +135,7 @@ for j = 1:sampleSize
 
     % Do the data fitting
     disp(['%%%%%%%%%%%%%%% STARTING FIT PER PARTICIPANT ' num2str(j) ' %%%%%%%%%%%%%%%']);
-    [GroupParameters{j}, IC{j}] = FitData(DX{j},THETADX{j},X{j},ProjSpeedL1{j}, ProjSpeedL2{j}, config);
+    [GroupParameters{j}, IC{j}] = FitData(DX{j}, THETADX{j}, X{j}, ProjSpeedL1{j}, ProjSpeedL2{j}, config);
 end
 
 %Transforming the fitted parameters to array

@@ -20,6 +20,7 @@ negloglikelihood = 0;
 
 for tr = 1:sampleSize
     %extract the physical data info
+    l3 = DX{tr}(3);
     theta2 = THETAX{tr}(2); theta3 = THETAX{tr}(3); 
 
     timeL1 = ProjSpeedL1{1, tr}; 

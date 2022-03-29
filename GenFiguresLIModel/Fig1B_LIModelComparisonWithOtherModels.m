@@ -10,8 +10,8 @@ savefolder = pwd + "/Output/";
 config.Speed.alpha = 0.9;                                       %Paramanter for running speed calculation
 config.Speed.timeOffsetAfterFlagReach = 2;                      %Time to track after flag reached in seconds 
 config.Speed.smoothWindow = 10;                                 % tracking rate should be 10Hz so 4 secs window is 40 datapoints
-config.Speed.velocityCutoff = 0.2;                              % velocity cutoff to select only the walking part of the reconstructed velocity
-config.Speed.timeOffsetForDetectedTemporalWindow = 0.5;         % time in seconds that will push earlier/ the detected rising edge
+config.Speed.velocityCutoff = 0.1;                              % velocity cutoff to select only the walking part of the reconstructed velocity
+config.Speed.timeOffsetForDetectedTemporalWindow = 1.0;         % time in seconds that will push earlier/ the detected rising edge
 
 config.TrialFilter = 0; %merge all conditions
 config.UseGlobalSearch = true;
@@ -23,7 +23,7 @@ if ~exist(resultfolder, 'dir')
    mkdir(resultfolder);
 end
 
-%% calculating tracking path and transoform data
+% calculating tracking path and transoform data
 config.Speed.tresholdForBadParticipantL1Recontruction = 1.55;   % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
 YoungControls   = CalculateTrackingPath(YoungControls, config);
 %transform data

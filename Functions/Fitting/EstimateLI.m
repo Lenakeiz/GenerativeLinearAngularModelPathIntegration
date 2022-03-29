@@ -50,10 +50,10 @@ for tr = 1:sampleSize
     %sanity check
     sumV1 = exp(-0*(durationL1+durationL2))*sum(exp(0*timeCumL1).*speedL1*deltat);
     realL1 = DX{tr}(1);
-    diff1 = sumV1- realL1
+    diff1 = sumV1- realL1;
     sumV2 = exp(-0*(durationL2))*sum(exp(0*timeCumL2).*speedL2*deltat);
     realL2 = DX{tr}(2);
-    diff2 = sumV2- realL2 
+    diff2 = sumV2- realL2;
 
     men_p1 = [men_length1,0];
 

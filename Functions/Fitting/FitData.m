@@ -42,6 +42,20 @@ elseif Model_Name == "LIFull"
     %calculate the likelihood function
     estFnc = @(FP) EstimateLI(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),ProjSpeedL1, ProjSpeedL2, DX, THETAX, useweber);
 
+elseif Model_Name=="degradedLIFull"
+    %set model configurations
+    %set lower bound and up bound
+    %     1, beta    2-G3     3-g2     4-g3     5-b      6-sigma      7-nu
+    lb  = [-1.0,      0.5,     0.5,     0,       0,      0.1,         0.1];
+    ub  = [1.0,       2.0,     2.0,     1.0,    2*pi,    2.0,         100.0];    
+
+    %set equality constriants
+    Aeq = zeros(7,7); beq=zeros(1,7);
+    Aeq(2,2)=1; beq(2)=1; %G3=1
+    Aeq(3,3)=1; beq(3)=1; %g2=1
+    %calculate the likelihood function
+    estFnc = @(FP) EstimateDegradedLI(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7), ProjSpeedL1, ProjSpeedL2, DX, THETAX, useweber);   
+
 elseif Model_Name == "G1G2Full"
     %set model configurations
     %set lower bound and up bound
@@ -54,7 +68,7 @@ elseif Model_Name == "G1G2Full"
     Aeq(3,3)=1; beq(3)=1;%G3=1
     Aeq(4,4)=1; beq(4)=1;%g2=1   
     %calculate the likelihood function
-    estFnc = @(FP) EstimateG1G2(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),FP(8),DX,THETAX,X);
+    estFnc = @(FP) EstimateG1G2(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),FP(8),ProjSpeedL1, ProjSpeedL2,DX,THETAX,X);
 
 elseif Model_Name=="DistErrG1G2"
     %set model configurations
@@ -70,7 +84,7 @@ elseif Model_Name=="DistErrG1G2"
     Aeq(5,5)=1; beq(5)=1;%g3=1 
     Aeq(6,6)=1; beq(6)=0;%b=0   
     %calculate the likelihood function
-    estFnc = @(FP) EstimateG1G2(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),FP(8),DX,THETAX,X);
+    estFnc = @(FP) EstimateG1G2(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),FP(8),ProjSpeedL1, ProjSpeedL2,DX,THETAX,X);
 
 elseif Model_Name=="Allo" | Model_Name=="AlloWeber"
     %set lower bound and up bound
@@ -101,7 +115,7 @@ elseif Model_Name=="GammaFull"
     Aeq(2,2)=1; beq(2)=1;%G3=1
     Aeq(3,3)=1; beq(3)=1;%g2=1    
     %calculate the likelihood function
-    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),DX,THETAX,X,useweber,ifEqualDiscount);
+    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),ProjSpeedL1, ProjSpeedL2,DX,THETAX,X,useweber,ifEqualDiscount);
 
 elseif Model_Name=="DistErrGamma"
     %set model configurations
@@ -116,7 +130,7 @@ elseif Model_Name=="DistErrGamma"
     Aeq(4,4)=1; beq(4)=1;%g3=1 
     Aeq(5,5)=1; beq(5)=0;%b=0    
     %calculate the likelihood function
-    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),DX,THETAX,X,useweber,ifEqualDiscount);   
+    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),ProjSpeedL1, ProjSpeedL2,DX,THETAX,X,useweber,ifEqualDiscount);   
 
 elseif Model_Name=="EqualDiscountGamma"
     %set model configurations
@@ -132,7 +146,7 @@ elseif Model_Name=="EqualDiscountGamma"
     Aeq(4,4)=1; beq(4)=1;%g3=1 
     Aeq(5,5)=1; beq(5)=0;%b=0
     %calculate the likelihood function
-    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),DX,THETAX,X,useweber,ifEqualDiscount);
+    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),ProjSpeedL1, ProjSpeedL2,DX,THETAX,X,useweber,ifEqualDiscount);
 
 elseif Model_Name=="AngleErrGamma"
     %set model configurations
@@ -146,7 +160,7 @@ elseif Model_Name=="AngleErrGamma"
     Aeq(2,2)=1; beq(2)=1;%G3=1
     Aeq(3,3)=1; beq(3)=1;%g2=1             
     %calculate the likelihood function
-    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),DX,THETAX,X,useweber,ifEqualDiscount);
+    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),ProjSpeedL1, ProjSpeedL2,DX,THETAX,X,useweber,ifEqualDiscount);
 
 elseif Model_Name=="Ego" | Model_Name=="EgoWeber"
     %set model configurations
@@ -165,7 +179,7 @@ elseif Model_Name=="Ego" | Model_Name=="EgoWeber"
         useweber=true;
     end  
     %calculate the likelihood function
-    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),DX,THETAX,X,useweber,ifEqualDiscount);
+    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),ProjSpeedL1, ProjSpeedL2,DX,THETAX,X,useweber,ifEqualDiscount);
 else
     error("Please set the correct name of model!");
 end

@@ -1,4 +1,4 @@
-function [negloglikelihood] = EstimateG1G2(G1, G2, G3, g2, g3, b, sigma, nu, DX, THETAX, X)
+function [negloglikelihood] = EstimateG1G2(G1, G2, G3, g2, g3, b, sigma, nu, ProjSpeedL1, ProjSpeedL2, DX, THETAX, X)
 %Estimate_ZL_mul means there exists a gain factor in the angle, which can not derive as a rotation matrix
 %ESTIMATE Summary of this function goes here
 %   G1 is the gain of the length of the first leg 
@@ -14,7 +14,7 @@ function [negloglikelihood] = EstimateG1G2(G1, G2, G3, g2, g3, b, sigma, nu, DX,
 %   X is the data points
 
 sampleSize = size(X,2);
-
+deltat = 0.1; %the recording interval, always 0.1s.
 negloglikelihood = 0;
 
 for tr = 1:sampleSize
@@ -22,12 +22,18 @@ for tr = 1:sampleSize
     l1 = DX{tr}(1); l2 = DX{tr}(2); l3 = DX{tr}(3);
     theta2 = THETAX{tr}(2); theta3 = THETAX{tr}(3); 
 
+    speedL1 = ProjSpeedL1{2, tr};
+    sumV1 = sum(speedL1*deltat); %replace l1 with sumV1, l1 is the perfect distance of outbound path1
+
+    speedL2 = ProjSpeedL2{2, tr};
+    sumV2 = sum(speedL2*deltat); %replace l2 with sumV2, l2 is the perfect distance of outbound path2
+
     %mental point 1
-    men_p1 = [G1*l1,0];
+    men_p1 = [G1*sumV1,0];
 
     %mental point 2
     theta2_prime = g2*theta2; 
-    men_p2 = [G1*l1+G2*l2*cos(theta2_prime),G2*l2*sin(theta2_prime)];
+    men_p2 = [G1*sumV1+G2*sumV2*cos(theta2_prime),G2*sumV2*sin(theta2_prime)];
 
     %calculate length of mental vector 3
     h = norm(men_p2);

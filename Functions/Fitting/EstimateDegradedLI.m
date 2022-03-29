@@ -1,32 +1,42 @@
-function [negloglikelihood] = EstimateGamma(gamma, G3, g2, g3, b, sigma, nu, ProjSpeedL1, ProjSpeedL2, DX, THETAX, X, useweber, ifEqualDiscount)
-%Estimate_ZL_mul means there exists a gain factor in the angle, which can not derive as a rotation matrix
-%ESTIMATE Summary of this function goes here
-%   gamma is the discount factor
+function [negloglikelihood] = EstimateDegradedLI(beta, G3, g2, g3, b, sigma, nu, ProjSpeedL1, ProjSpeedL2, DX, THETAX, useweber)
+%   EstimateLI means using the degraded leaky integration model when estimating the parameters
+%   degraded means a constant speed
+%   ESTIMATELI Summary of this function goes here:
+%   beta is the leaky integration decay factor
 %   G3 is the gain of the length of the third leg 
 %   g2 is the rotation angle from the direction of leg 2
 %   g3 is the rotation angle from the direction of leg 3
 %   b is the systematic bias in the execution error
 %   sigma is the standard deviation for the Gaussian distribution of the return point
-%   nu is the xxx
+%   nu decribes the noise strength in the Von Mises distribution
+%   ProjSpeedL1, speed projected onto the first outbound path
+%   ProjSpeedL2, speed projected onto the second outbound path
 %   DX is a cell structure containing the segment of each trial
-%   THETAX is the turning angle (wrong at the moment)
-%   X is the data points
-%   ifallo 
-%   useweber
+%   THETAX is the turning angle
+%   useweber decides whether the noise scales with the walking distance 
 
-sampleSize = size(X,2);
+sampleSize = size(DX,2);
 deltat = 0.1; %the recording interval, always 0.1s.
 negloglikelihood = 0;
 
 for tr = 1:sampleSize
     %extract the physical data info
-    l1 = DX{tr}(1); l2 = DX{tr}(2); l3 = DX{tr}(3);
+    l1 = DX{tr}(1);l2 = DX{tr}(2);l3 = DX{tr}(3);
     theta2 = THETAX{tr}(2); theta3 = THETAX{tr}(3); 
 
+    timeL1 = ProjSpeedL1{1, tr}; 
+    timeIntervalL1 = [diff(timeL1);deltat]; %add 0.1 to keep the dimension the same
+    durationL1 = sum(timeIntervalL1); %total duration of walking in leg 1
+    timeCumL1 = cumsum(timeIntervalL1); %cumulative sum of the time interval, for later use
     speedL1 = ProjSpeedL1{2, tr};
     sumV1 = sum(speedL1*deltat); %replace l1 with sumV1, l1 is the perfect distance of outbound path1
+
+    timeL2 = ProjSpeedL2{1, tr}; 
+    timeIntervalL2 = [diff(timeL2);0.1]; %add 0.1 to keep the dimension the same
+    durationL2 = sum(timeIntervalL2); %total duration of walking in leg 2
+    timeCumL2 = cumsum(timeIntervalL2); %cumulative sum of the time interval, for later use
     speedL2 = ProjSpeedL2{2, tr};
-    sumV2 = sum(speedL2*deltat); %replace l2 with sumV2, l2 is the perfect distance of outbound path2
+    sumV2 = sum(speedL2*deltat); %replace l1 with sumV1, l1 is the perfect distance of outbound path1
 
     if useweber
         l1 = DX{tr}(1); l2 = DX{tr}(2);
@@ -37,20 +47,17 @@ for tr = 1:sampleSize
     sigma_scaled = scale*sigma;
     nu_scaled = scale*nu;
 
-    %mental point 1
-    %get G1
-    if ifEqualDiscount==true
-        G1 = gamma*G3; % G1=gamma*G3, G2=gamma*G3
-    else
-        G1 = gamma^2*G3; 
-    end
-    men_p1 = [G1*sumV1,0];
+    %mental point 1, asuming a constant speed, which will integrate upto l1 in duration1
+    men_length1 = l1*(1-exp(-beta*durationL1))/(beta*durationL1)*exp(-beta*durationL2);
 
-    %mental point 2
+    men_p1 = [men_length1,0];
+    
     theta2_prime = g2*theta2;
-    %get G2
-    G2 = gamma*G3;    
-    men_p2 = [G1*sumV1+G2*sumV2*cos(theta2_prime),G2*sumV2*sin(theta2_prime)];
+
+    %mental point 2, asuming a constant speed, which will integrate upto l2
+    %in duration2
+    men_length2 = l2*(1-exp(-beta*durationL2))/(beta*durationL2);
+    men_p2 = [men_length1+men_length2*cos(theta2_prime),men_length2*sin(theta2_prime)];
 
     %calculate length of mental vector 3
     h = norm(men_p2);

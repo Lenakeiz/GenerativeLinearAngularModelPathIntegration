@@ -78,7 +78,7 @@ plotBoxOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCIPa
 
 %% getting Mean Walking Speed of all participants in a group
 function meanS = getMeanWalkingSpeed(Dat)
-    numSubjs = length(Dat.Reconstructed)
+    numSubjs = length(Dat.Reconstructed);
     meanS = [];
     for subj=1:numSubjs
         %length on leg1

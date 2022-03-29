@@ -39,6 +39,9 @@ IC = cell(1, sampleSize);
 anglebetween = @(va,vb) atan2d(va(:,1).*vb(:,2) - va(:,2).*vb(:,1), va(:,1).*vb(:,1) + va(:,2).*vb(:,2));
 
 for j = 1:sampleSize
+    if j<25
+        continue
+    end
     if(TRIAL_FILTER == 0)
         %processing the data from all conditions
         flagpos{j}  = GroupData.FlagPos{j};

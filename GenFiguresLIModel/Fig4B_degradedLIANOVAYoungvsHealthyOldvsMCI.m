@@ -14,7 +14,6 @@ config.Speed.smoothWindow = 10;                                 % tracking rate 
 config.Speed.velocityCutoff = 0.1;                              % velocity cutoff to select only the walking part of the reconstructed velocity
 config.Speed.timeOffsetForDetectedTemporalWindow = 1.0;         % time in seconds that will push earlier/ the detected rising edge
 
-config.TrialFilter = 0; %merge all conditions
 config.UseGlobalSearch = true;
 
 resultfolder = savefolder+"PaperFigs/Fig4B";

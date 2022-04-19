@@ -8,7 +8,7 @@ load('Data/AllDataErrors2018_V3.mat');
 savefolder = pwd + "/Output/";
 
 %% setting the configuration
-config.Speed.alpha = 0.9;                                       %Paramanter for running speed calculation
+config.Speed.alpha = 0.9;                                       %Parameter for running speed calculation
 config.Speed.timeOffsetAfterFlagReach = 2;                      %Time to track after flag reached in seconds 
 config.Speed.smoothWindow = 10;                                 % tracking rate should be 10Hz so 4 secs window is 40 datapoints
 config.Speed.velocityCutoff = 0.1;                              % velocity cutoff to select only the walking part of the reconstructed velocity
@@ -17,7 +17,7 @@ config.Speed.timeOffsetForDetectedTemporalWindow = 1.0;         % time in second
 config.TrialFilter = 0; %merge all conditions
 config.UseGlobalSearch = true;
 
-resultfolder = savefolder+"PaperFigs/Fig4";
+resultfolder = savefolder+"PaperFigs/Fig4B";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
@@ -25,10 +25,15 @@ if ~exist(resultfolder, 'dir')
 end
 
 
+% %% Model fitting using Gamma Base Model
+% %Model parameter gamma, g3, b, sigma, nu. #params=5
+% config.ModelName = "LIFull";
+% config.NumParams = 5;
+
 %% Model fitting using Gamma Base Model
-%Model parameter gamma, g3, b, sigma, nu. #params=5
-config.ModelName = "LIFull";
-config.NumParams = 5;
+%Model parameter gamma, g3, sigma, nu. #params=4
+config.ModelName = "degradedLI_MeanReturnAng";
+config.NumParams = 4;
 
 %% Model fitting for YoungControl data
 %% calculating tracking path and transoform data

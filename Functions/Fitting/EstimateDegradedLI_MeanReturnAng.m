@@ -90,6 +90,7 @@ for tr = 1:sampleSize
 
     %considering execution turn error
     theta3_prime = g3*alpha+(1-g3)*mean_angle;
+    %theta3_prime = g3*alpha;
     %also wrap theta3_prime to (0,2pi) (We don't have to coz of the 'cos' below, 
     %also coz of the nonconstriant (if there is) which restrict theta3_prime in [0,2pi]).
     theta3_prime = mod(theta3_prime, 2*pi);

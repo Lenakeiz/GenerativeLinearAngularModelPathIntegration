@@ -16,15 +16,20 @@ config.Speed.timeOffsetForDetectedTemporalWindow = 1.0;         % time in second
 
 config.UseGlobalSearch = true;
 
-resultfolder = savefolder+"PaperFigs/Fig9B_degradedLIFull";
+resultfolder = savefolder+"PaperFigs/Fig9_MeanReturnAngle";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
    mkdir(resultfolder);
 end
-%% Model fitting using LeakyIntegration Model
-config.ModelName = "degradedLIFull";
-config.NumParams = 5;
+% %% Model fitting using LeakyIntegration Model
+% config.ModelName = "degradedLIFull";
+% config.NumParams = 5;
+
+%% Model fitting using Gamma Base Model
+%Model parameter gamma, g3, sigma, nu. #params=4
+config.ModelName = "degradedLI_MeanReturnAng";
+config.NumParams = 4;
 
 %% merge three conditions
 config.TrialFilter = 0;

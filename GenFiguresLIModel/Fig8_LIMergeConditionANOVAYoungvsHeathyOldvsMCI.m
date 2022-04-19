@@ -91,8 +91,8 @@ plotBoxOfFittedParam(YoungParams, HealthyOldParams, MCIParams, multicomp_tab, co
 %%
 function plotBoxOfFittedParam(YoungParams, HealthyOldParams, MCIParams, multicomp_tab, config)
     
-    ParamName = ["gamma", "bG_3", "g_2", "Angular gain g_3", "Anglar bias b", "sigma", "nu"];
-    StoreName = ["gamma", "bG_3", "g_2", "g_3", "b", "sigma", "nu"];
+    ParamName = ["beta", "bG_3", "g_2", "Angular gain g_3", "Anglar bias b", "sigma", "nu"];
+    StoreName = ["beta", "bG_3", "g_2", "g_3", "b", "sigma", "nu"];
     for ParamIndx=1:length(ParamName)
 
         %% set figure info

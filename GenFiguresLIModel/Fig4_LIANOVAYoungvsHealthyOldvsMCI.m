@@ -14,21 +14,14 @@ config.Speed.smoothWindow = 10;                                 % tracking rate 
 config.Speed.velocityCutoff = 0.1;                              % velocity cutoff to select only the walking part of the reconstructed velocity
 config.Speed.timeOffsetForDetectedTemporalWindow = 1.0;         % time in seconds that will push earlier/ the detected rising edge
 
-config.TrialFilter = 0; %merge all conditions
 config.UseGlobalSearch = true;
 
-resultfolder = savefolder+"PaperFigs/Fig4B";
+resultfolder = savefolder+"PaperFigs/Fig4";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
    mkdir(resultfolder);
 end
-
-
-% %% Model fitting using Gamma Base Model
-% %Model parameter gamma, g3, b, sigma, nu. #params=5
-% config.ModelName = "LIFull";
-% config.NumParams = 5;
 
 %% Model fitting using Gamma Base Model
 %Model parameter gamma, g3, sigma, nu. #params=4
@@ -107,8 +100,7 @@ end
 function plotBoxOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams, anova_tab, config)
     
     numConds = 3; %3 is the condition number
-    ParamName = ["beta", "bG_3", "g_2", "Angular gain g_3", "Anglar bias b", "sigma", "nu"];
-    StoreName = ["beta", "bG_3", "g_2", "g_3", "b", "sigma", "nu"];
+    ParamName = ["beta", "bG3", "g2", "g3", "b", "sigma", "nu"];
     for ParamIndx=1:length(ParamName)
 
         YoungParamAllConds = [];
@@ -317,8 +309,8 @@ function plotBoxOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
               ['    Interaction P = ',sprintf('%.2g',interaction_pvalue)]))
 
         %% save figure
-        exportgraphics(f,config.ResultFolder+"/Box_"+StoreName(ParamIndx)+".png",'Resolution',300);
-        exportgraphics(f,config.ResultFolder+"/Box_"+StoreName(ParamIndx)+".pdf",'Resolution',300, 'ContentType','vector');
+        exportgraphics(f,config.ResultFolder+"/Box_"+ParamName(ParamIndx)+".png",'Resolution',300);
+        exportgraphics(f,config.ResultFolder+"/Box_"+ParamName(ParamIndx)+".pdf",'Resolution',300, 'ContentType','vector');
 
     end
 end
@@ -327,8 +319,7 @@ end
 function plotBoxOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCIParams, multicomp_tab1, config)
     
     numConds = 3; %3 is the condition number
-    ParamName = ["beta", "bG_3", "g_2", "Angular gain g_3", "Anglar bias b", "sigma", "nu"];
-    StoreName = ["beta", "bG_3", "g_2", "g_3", "b", "sigma", "nu"];
+    ParamName = ["beta", "bG3", "g2", "g3", "b", "sigma", "nu"];
     for ParamIndx=1:length(ParamName)
 
         YoungParamAllConds = [];
@@ -561,8 +552,8 @@ function plotBoxOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         end
 
         %% save figure
-        exportgraphics(f,config.ResultFolder+"/ZMergeCondsBox_"+StoreName(ParamIndx)+".png",'Resolution',300);
-        exportgraphics(f,config.ResultFolder+"/ZMergeCondsBox_"+StoreName(ParamIndx)+".pdf",'Resolution',300, 'ContentType','vector');
+        exportgraphics(f,config.ResultFolder+"/ZMergeCondsBox_"+ParamName(ParamIndx)+".png",'Resolution',300);
+        exportgraphics(f,config.ResultFolder+"/ZMergeCondsBox_"+ParamName(ParamIndx)+".pdf",'Resolution',300, 'ContentType','vector');
 
     end
 end

@@ -61,7 +61,7 @@ elseif Model_Name=="degradedLI_MeanReturnAng"
     %set lower bound and up bound
     %     1, beta    2-G3     3-g2     4-g3     5-b      6-sigma      7-nu
     lb  = [-1.0,      0.5,     0.5,     0,       0,      0.1,         0.1];
-    ub  = [1.0,       2.0,     2.0,     1.0,    2*pi,    2.0,         100.0];    
+    ub  = [1.0,       2.0,     2.0,     2.0,    2*pi,    2.0,         100.0];    
 
     %set equality constriants
     Aeq = zeros(7,7); beq=zeros(1,7);

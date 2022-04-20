@@ -17,7 +17,7 @@ config.Speed.timeOffsetForDetectedTemporalWindow = 0.5;         % time in second
 config.TrialFilter = 0; %merge all conditions
 config.UseGlobalSearch = true;
 
-resultfolder = savefolder+"PaperFigs/Fig1";
+resultfolder = savefolder+"PaperFigs/Fig1C";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
@@ -63,19 +63,24 @@ MCIUnkmeanS = getMeanWalkingSpeed(MCIUnk);
 %% Setting colors for using in plots
 ColorPattern; 
 
-
 %% Two-way anova on mean speed of 5 groups and 3 conditions
 config.type = "meanspeed";
-[dist_anova_tab,dist_multicomp_tab1,dist_multicomp_tab2, dist_multicomp_tab12] = TwowayAnovaOnDistanceOrAngle(Young, HealthyOld, MCIPos, MCINeg, MCIUnk, config);
+[dist_anova_tab,~,~, ~] = TwowayAnovaOnRealData(YoungmeanS, HealthyOldmeanS, MCIPosmeanS, MCINegmeanS, MCIUnkmeanS, config);
 
 %% aBarScatter plot of return distance of all groups and conditions
-plotBarScatterOfMeanSpeed(YoungmeanS, HealthyOldmeanS, MCIPosmeanS, MCINegmeanS, MCIUnkmeanS)
+plotBarScatterOfMeanSpeed(YoungmeanS, HealthyOldmeanS, MCIPosmeanS, MCINegmeanS, MCIUnkmeanS, dist_anova_tab, config)
 
 %% getting Mean Walking Speed of all participants in a group
 function meanS = getMeanWalkingSpeed(Dat)
     numSubjs = length(Dat.Reconstructed);
-    meanS = [];
+    meanS = zeros(3,numSubjs);
     for subj=1:numSubjs
+        
+        %condition index
+        IdxCond1 = Dat.CondTable{subj}.Condition==1;
+        IdxCond2 = Dat.CondTable{subj}.Condition==2;
+        IdxCond3 = Dat.CondTable{subj}.Condition==3;
+
         %length on leg1
         length1 = table2array(Dat.Reconstructed{subj}(:,'L1Real'));
         %duration on leg1
@@ -87,34 +92,38 @@ function meanS = getMeanWalkingSpeed(Dat)
         %duration on leg2
         duration2 = table2array(Dat.Reconstructed{subj}(:,'T_L2'));
         meanspeed2 = length2./duration2;
+
+        %mean speed of condition 1,2,3
+        meanspeed_cond1 = mean([meanspeed1(IdxCond1);meanspeed2(IdxCond1)],'omitnan');
+        meanspeed_cond2 = mean([meanspeed1(IdxCond2);meanspeed2(IdxCond2)],'omitnan');
+        meanspeed_cond3 = mean([meanspeed1(IdxCond3);meanspeed2(IdxCond3)],'omitnan');
         
-        %mean speed across trials of one participant
-        meanspeed = mean([meanspeed1;meanspeed2]);
-        
-        meanS = [meanS,meanspeed];
+        meanS(1,subj) = meanspeed_cond1;
+        meanS(2,subj) = meanspeed_cond2;
+        meanS(3,subj) = meanspeed_cond3;
     end
 end
 
 %% plot Bar scatter of Return distance
 function plotBarScatterOfMeanSpeed(YoungmeanS, HealthyOldmeanS, MCIPosmeanS, MCINegmeanS, MCIUnkmeanS, dist_anova_tab, config)
-    % NormedDistYoung: 3*NumSubjects
-    % NormedDistHealthyOld: 3*NumSubjects
+    % YoungmeanS: 3*NumSubjects
+    % HealthyOldmeanS: 3*NumSubjects
     % ...
     % config
     
     
     %dim=5*3
-    mean_all = [mean(NormedDistYoung, 2)';%avearge over the row;
-                  mean(NormedDistHealthyOld, 2)';
-                  mean(NormedDistMCIPos, 2)';
-                  mean(NormedDistMCINeg, 2)';
-                  mean(NormedDistMCIUnk, 2)'];
+    mean_all = [mean(YoungmeanS, 2)';%avearge over the row;
+                  mean(HealthyOldmeanS, 2)';
+                  mean(MCIPosmeanS, 2)';
+                  mean(MCINegmeanS, 2)';
+                  mean(MCIUnkmeanS, 2)'];
     %dim=5*3
-    std_all = [std(NormedDistYoung,0,2)'./sqrt(size(NormedDistYoung,2));
-               std(NormedDistHealthyOld,0,2)'./sqrt(size(NormedDistHealthyOld,2));
-               std(NormedDistMCIPos,0,2)'./sqrt(size(NormedDistMCIPos,2));
-               std(NormedDistMCINeg,0,2)'./sqrt(size(NormedDistMCINeg,2));
-               std(NormedDistMCIUnk,0,2)'./sqrt(size(NormedDistMCIUnk,2))];
+    std_all = [std(YoungmeanS,0,2)'./sqrt(size(YoungmeanS,2));
+               std(HealthyOldmeanS,0,2)'./sqrt(size(HealthyOldmeanS,2));
+               std(MCIPosmeanS,0,2)'./sqrt(size(MCIPosmeanS,2));
+               std(MCINegmeanS,0,2)'./sqrt(size(MCINegmeanS,2));
+               std(MCIUnkmeanS,0,2)'./sqrt(size(MCIUnkmeanS,2))];
 
     %% set figure info
     f = figure('visible','off','Position', [100 100 1500 500]);
@@ -149,7 +158,7 @@ function plotBarScatterOfMeanSpeed(YoungmeanS, HealthyOldmeanS, MCIPosmeanS, MCI
     scatter_edgealpha=0.8;
     %plot scatter for Young
     for i=1:nbars
-        scatter(x(i,1), NormedDistYoung(i,:),30, ...
+        scatter(x(i,1), YoungmeanS(i,:),30, ...
         "filled", 'MarkerEdgeColor', 'k', 'MarkerFaceColor', colorForAll(i,:), ...
         'MarkerEdgeAlpha', scatter_edgealpha, 'MarkerFaceAlpha', scatter_facealpha);
     end
@@ -157,7 +166,7 @@ function plotBarScatterOfMeanSpeed(YoungmeanS, HealthyOldmeanS, MCIPosmeanS, MCI
     hold on
     %plot scatter for healthyOld
     for i=1:nbars
-        scatter(x(i,2), NormedDistHealthyOld(i,:),30, ...
+        scatter(x(i,2), HealthyOldmeanS(i,:),30, ...
         "filled", 'MarkerEdgeColor', 'k', 'MarkerFaceColor', colorForAll(i,:), ...
         'MarkerEdgeAlpha', scatter_edgealpha, 'MarkerFaceAlpha', scatter_facealpha);
     end   
@@ -165,7 +174,7 @@ function plotBarScatterOfMeanSpeed(YoungmeanS, HealthyOldmeanS, MCIPosmeanS, MCI
     hold on
     %plot scatter for MCIPos
     for i=1:nbars
-        scatter(x(i,3), NormedDistMCIPos(i,:),30, ...
+        scatter(x(i,3), MCIPosmeanS(i,:),30, ...
         "filled", 'MarkerEdgeColor', 'k', 'MarkerFaceColor', colorForAll(i,:), ...
         'MarkerEdgeAlpha', scatter_edgealpha, 'MarkerFaceAlpha', scatter_facealpha);
     end   
@@ -173,7 +182,7 @@ function plotBarScatterOfMeanSpeed(YoungmeanS, HealthyOldmeanS, MCIPosmeanS, MCI
     hold on
     %plot scatter for MCIPos
     for i=1:nbars
-        scatter(x(i,4), NormedDistMCINeg(i,:),30, ...
+        scatter(x(i,4), MCINegmeanS(i,:),30, ...
         "filled", 'MarkerEdgeColor', 'k', 'MarkerFaceColor', colorForAll(i,:), ...
         'MarkerEdgeAlpha', scatter_edgealpha, 'MarkerFaceAlpha', scatter_facealpha);
     end 
@@ -181,7 +190,7 @@ function plotBarScatterOfMeanSpeed(YoungmeanS, HealthyOldmeanS, MCIPosmeanS, MCI
     hold on
     %plot scatter for MCIPos
     for i=1:nbars
-        scatter(x(i,5), NormedDistMCIUnk(i,:),30, ...
+        scatter(x(i,5), MCIUnkmeanS(i,:),30, ...
         "filled", 'MarkerEdgeColor', 'k', 'MarkerFaceColor', colorForAll(i,:), ...
         'MarkerEdgeAlpha', scatter_edgealpha, 'MarkerFaceAlpha', scatter_facealpha);
     end     
@@ -209,7 +218,7 @@ function plotBarScatterOfMeanSpeed(YoungmeanS, HealthyOldmeanS, MCIPosmeanS, MCI
         %'YLim'        , [0, 1.5],...   
         
     legend(b, {'No change' 'No distal cue' 'No optical flow'}, 'Location','northeast', 'NumColumns',3);
-    ylabel("Actual distance / correct distance");
+    ylabel("Mean walking speed (m/s)");
 
     %extract pvalue for group, conditino and interaction to show on the figure 
     group_pvalue = dist_anova_tab{2,7};
@@ -221,59 +230,7 @@ function plotBarScatterOfMeanSpeed(YoungmeanS, HealthyOldmeanS, MCIPosmeanS, MCI
     annotation('textbox',[0.2 0.6 0.3 0.3],'String',str,'FitBoxToText','on');
         
     %% save figure
-    exportgraphics(f,config.ResultFolder+"/BarNormedReturnDistance.png",'Resolution',300);
-    exportgraphics(f,config.ResultFolder+"/BarNormedReturnDistance.pdf",'Resolution',300, 'ContentType','vector');
+    exportgraphics(f,config.ResultFolder+"/BarMeanSpeed.png",'Resolution',300);
+    exportgraphics(f,config.ResultFolder+"/BarMeanSpeed.pdf",'Resolution',300, 'ContentType','vector');
 
 end
-
-%% One-way anova on merged MCI
-function [anova_tab,multicomp_tab] = OnewayAnovaOnMeanSpeed(YoungmeanS, HealthyOldmeanS, MCIPosmeanS, MCINegmeanS, MCIUnkmeanS, config)
-
-    %load configurations necessary for the script
-    resultfolder = config.ResultFolder;
-    
-    %create storing folder for trajectory if not exist
-    savefoldername = resultfolder+"/OnewayAnova/";
-    if ~exist(savefoldername, 'dir')
-       mkdir(savefoldername);
-    end
-    
-    param_names = ["beta", "bG3", "g2", "g3", 'b', "sigma", "nu"];
-    param_nums = length(param_names);
-    
-    anova_tab = cell(0);
-    multicomp_tab = cell(0);
-
-    %for each parameter, calculate the anova and multiple test
-    for param_idx=1:param_nums
-        
-        param_name = param_names(param_idx);
-        
-        %processing the data into a long numeric vector 
-        Params = [MCIPosParams(:,param_idx)',...
-                  MCINegParams(:,param_idx)',...
-                  MCIUnkParams(:,param_idx)',...
-                  HealthyOldParams(:,param_idx)',...
-                  YoungParams(:,param_idx)'];
-        GroupNames = [string(repmat({'MCIPos'},1,size(MCIPosParams,1))),...
-                      string(repmat({'MCINeg'},1,size(MCINegParams,1))),...
-                      string(repmat({'MCIUnk'},1,size(MCIUnkParams,1))),...
-                      string(repmat({'HealthyOld'},1,size(HealthyOldParams,1))),...
-                      string(repmat({'Young'},1,size(YoungParams,1)))];
-    
-        %Do one-way anova with unbalanced design
-        [p,tb1, stats]= anova1(Params, GroupNames, 'display','on');
-        anova_tab{param_idx} = tb1;
-    
-        %Do multiple comparisons on main effect 1
-        result = multcompare(stats,'CType','bonferroni');
-        multicomp_tab{param_idx} = result;
-        title("Multiple comparisons with bonferroni correction of : "+param_name);
-        saveas(gcf,savefoldername+"MultiComp"+param_name+".png");
-        close(gcf);
-    
-    end
-    
-end
-
-

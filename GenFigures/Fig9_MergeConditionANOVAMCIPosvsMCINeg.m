@@ -1,5 +1,6 @@
 %% Cleaning variables
 clearvars; clear all; close all; clc;
+rng('default'); %for code reproducibility
 
 %% Loading data
 disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
@@ -7,54 +8,78 @@ load('Data/AllDataErrors2018_V3.mat');
 savefolder = pwd + "/Output/";
 
 %% setting the configuration
+config.Speed.alpha = 0.9;                                       %Paramanter for running speed calculation
+config.Speed.timeOffsetAfterFlagReach = 2;                      %Time to track after flag reached in seconds 
+config.Speed.smoothWindow = 10;                                 % tracking rate should be 10Hz so 4 secs window is 40 datapoints
+config.Speed.velocityCutoff = 0.1;                              % velocity cutoff to select only the walking part of the reconstructed velocity
+config.Speed.timeOffsetForDetectedTemporalWindow = 1.0;         % time in seconds that will push earlier/ the detected rising edge
+
 config.UseGlobalSearch = true;
-resultfolder = savefolder+"PaperFigs/Fig9";
+
+resultfolder = savefolder+"PaperFigs/Fig9_MeanReturnAngle";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
    mkdir(resultfolder);
 end
+% %% Model fitting using LeakyIntegration Model
+% config.ModelName = "degradedLIFull";
+% config.NumParams = 5;
 
 %% Model fitting using Gamma Base Model
-%Model parameter gamma, g3, b, sigma, nu. #params=5
-config.ModelName = "BaseModel";
-config.NumParams = 5;
-% config.ModelName = "DistErrModel";
-% config.NumParams = 3;
+%Model parameter gamma, g3, sigma, nu. #params=4
+config.ModelName = "degradedLI_MeanReturnAng";
+config.NumParams = 4;
 
 %% merge three conditions
 config.TrialFilter = 0;
 
 %% Model fitting for YoungControl data
+% calculating tracking path and transoform data
+config.Speed.tresholdForBadParticipantL1Recontruction = 1.55;   % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
+YoungControls   = CalculateTrackingPath(YoungControls, config);
+%transform data
 YoungControls = TransformPaths(YoungControls);
-YoungResults = PerformGroupFit(YoungControls, config);
-YoungParams = YoungResults.estimatedParams;
+ResultsYoung = PerformGroupFit(YoungControls, config);
+YoungParams = ResultsYoung.estimatedParams;      
 
 %% Model fitting for HealthyOld data
+config.Speed.tresholdForBadParticipantL1Recontruction = 2.0; 
+HealthyControls   = CalculateTrackingPath(HealthyControls, config);
+%transform data
 HealthyOld = TransformPaths(HealthyControls);
-HealthyOldResults = PerformGroupFit(HealthyOld, config);
-HealthyOldParams = HealthyOldResults.estimatedParams;
+ResultsHealthyOld = PerformGroupFit(HealthyOld, config);
+HealthyOldParams = ResultsHealthyOld.estimatedParams;  
 
 %% Model fitting for MCIPos
+config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
+MCIPos   = CalculateTrackingPath(MCIPos, config);
+%transform data
 MCIPos = TransformPaths(MCIPos);
-MCIPosResults = PerformGroupFit(MCIPos, config);
-MCIPosParams = MCIPosResults.estimatedParams;
+ResultsMCIPos = PerformGroupFit(MCIPos, config);
+MCIPosParams = ResultsMCIPos.estimatedParams;  
 
 %% Model fitting for MCINeg
+config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
+MCINeg   = CalculateTrackingPath(MCINeg, config);
+%transform data
 MCINeg = TransformPaths(MCINeg);
-MCINegResults = PerformGroupFit(MCINeg, config);
-MCINegParams = MCINegResults.estimatedParams;
+ResultsMCINeg = PerformGroupFit(MCINeg, config);
+MCINegParams = ResultsMCINeg.estimatedParams; 
 
 %% Model fitting for MCIUnk
+config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
+Unknown   = CalculateTrackingPath(Unknown, config);
+%transform data
 MCIUnk = TransformPaths(Unknown);
-MCIUnkResults = PerformGroupFit(MCIUnk, config);
-MCIUnkParams = MCIUnkResults.estimatedParams;
+ResultsMCIUnk = PerformGroupFit(MCIUnk, config);
+MCIUnkParams = ResultsMCIUnk.estimatedParams; 
 
 %% Setting colors for using in plots
 ColorPattern; 
 
-%% TwowayAnova
-[~,multicomp_tab] = OnewayAnovaOn_Young_HealthyOld_MergeMCI(YoungParams, HealthyOldParams, MCIPosParams, MCINegParams, MCIUnkParams, config);
+%% OnewayAnova
+[~,multicomp_tab] = OnewayAnovaOn_Young_HealthyOld_MCIs(YoungParams, HealthyOldParams, MCIPosParams, MCINegParams, MCIUnkParams, config);
 
 %% BarScatter Plot between Young and HealthyOld for all Fitted Params
 plotBoxOfFittedParam(MCIPosParams, MCINegParams, multicomp_tab, config);
@@ -62,8 +87,8 @@ plotBoxOfFittedParam(MCIPosParams, MCINegParams, multicomp_tab, config);
 %%
 function plotBoxOfFittedParam(MCIPosParams, MCINegParams, multicomp_tab, config)
     
-    ParamName = ["Distance gain gamma", "bG_3", "g_2", "Angular gain g_3", "Anglar bias b", "sigma", "nu"];
-    StoreName = ["Gamma", "bG_3", "g_2", "g_3", "b", "sigma", "nu"];
+    ParamName = ["Beta", "bG_3", "g_2", "Angular gain g_3", "Anglar bias b", "sigma", "nu"];
+    StoreName = ["Beta", "bG_3", "g_2", "g_3", "b", "sigma", "nu"];
     for ParamIndx=1:length(ParamName)
 
         %% set figure info
@@ -117,13 +142,13 @@ function plotBoxOfFittedParam(MCIPosParams, MCINegParams, multicomp_tab, config)
         hold on       
 
         %% Coloring each box
-        %findobj first getting the box for MCINeg (from bp2) 
-        %then getting the box for MCIPos(frm bp1)
+        %findobj first getting the box for MCIPos (from bp2) 
+        %then getting the box for MCINeg (frm bp1)
         h = findobj(gca,'Tag','Box'); 
         %get the MCI box
-        patch(get(h(1),'XData'),get(h(1),'YData'),colorForMCINeg,'FaceAlpha',box_color_transparency);
+        patch(get(h(1),'XData'),get(h(1),'YData'),colorForMCIPos,'FaceAlpha',box_color_transparency);
         %get the HelthyOld box
-        patch(get(h(2),'XData'),get(h(2),'YData'),colorForMCIPos,'FaceAlpha',box_color_transparency);
+        patch(get(h(2),'XData'),get(h(2),'YData'),colorForMCINeg,'FaceAlpha',box_color_transparency);
 
         %% Adjusting median
         h=findobj(gca,'tag','Median');
@@ -155,7 +180,7 @@ function plotBoxOfFittedParam(MCIPosParams, MCINegParams, multicomp_tab, config)
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);
 
-        %% add scatter plot and the mean of MCI
+        %% add scatter plot and the mean of MCINeg
         num_points = size(MCINegParams,1);
         hold on
         x = 2*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
@@ -220,7 +245,7 @@ function plotBoxOfFittedParam(MCIPosParams, MCINegParams, multicomp_tab, config)
 end
 
 %% One-way anova on merged MCI
-function [anova_tab,multicomp_tab] = OnewayAnovaOn_Young_HealthyOld_MergeMCI(YoungParams, HealthyOldParams, MCIPosParams, MCINegParams, MCIUnkParams, config)
+function [anova_tab,multicomp_tab] = OnewayAnovaOn_Young_HealthyOld_MCIs(YoungParams, HealthyOldParams, MCIPosParams, MCINegParams, MCIUnkParams, config)
 
     %load configurations necessary for the script
     resultfolder = config.ResultFolder;
@@ -231,7 +256,7 @@ function [anova_tab,multicomp_tab] = OnewayAnovaOn_Young_HealthyOld_MergeMCI(You
        mkdir(savefoldername);
     end
     
-    param_names = ["gamma", "bG3", "g2", "g3", 'b', "sigma", "nu"];
+    param_names = ["beta", "bG3", "g2", "g3", 'b', "sigma", "nu"];
     param_nums = length(param_names);
     
     anova_tab = cell(0);

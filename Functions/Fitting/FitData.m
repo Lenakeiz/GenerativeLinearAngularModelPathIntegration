@@ -7,7 +7,7 @@ function [FitParams, IC] = FitData(DX,THETAX,X,ProjSpeedL1,ProjSpeedL2,config)
 
 %load configurations necessary for the script
 Model_Name = config.ModelName;
-numParams = config.NumParams;
+numFreeParams = config.NumFreeParams;
 useglobalsearch = config.UseGlobalSearch;
 useweber=false;%only true when use weber law in simple generative models
 ifEqualDiscount=false; %only true when use same discount in both leg
@@ -42,7 +42,7 @@ elseif Model_Name == "LIFull"
     %calculate the likelihood function
     estFnc = @(FP) EstimateLI(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),ProjSpeedL1, ProjSpeedL2, DX, THETAX, useweber);
 
-elseif Model_Name=="degradedLIFull"
+elseif Model_Name=="ConstSpeedModel"
     %set model configurations
     %set lower bound and up bound
     %     1, beta    2-G3     3-g2     4-g3     5-b      6-sigma      7-nu
@@ -54,9 +54,12 @@ elseif Model_Name=="degradedLIFull"
     Aeq(2,2)=1; beq(2)=1; %G3=1
     Aeq(3,3)=1; beq(3)=1; %g2=1
     %calculate the likelihood function
-    estFnc = @(FP) EstimateDegradedLI(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7), ProjSpeedL1, ProjSpeedL2, DX, THETAX, useweber);   
+    regress2mean = false;
+    estFnc = @(FP) EstimateConstSpeed(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7), ...
+                                      ProjSpeedL1, ProjSpeedL2, DX, THETAX, ...
+                                      useweber, regress2mean);   
 
-elseif Model_Name=="degradedLI_MeanReturnAng"
+elseif Model_Name=="ConstSpeedModel_Regress2Mean"
     %set model configurations
     %set lower bound and up bound
     %     1, beta    2-G3     3-g2     4-g3     5-b      6-sigma      7-nu
@@ -69,7 +72,10 @@ elseif Model_Name=="degradedLI_MeanReturnAng"
     Aeq(3,3)=1; beq(3)=1; %g2=1
     Aeq(5,5)=1; beq(5)=0; %b=0
     %calculate the likelihood function
-    estFnc = @(FP) EstimateDegradedLI_MeanReturnAng(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6), FP(7), ProjSpeedL1, ProjSpeedL2, DX, THETAX, useweber); 
+    regress2mean = true;
+    estFnc = @(FP) EstimateConstSpeed(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7), ...
+                                      ProjSpeedL1, ProjSpeedL2, DX, THETAX, ...
+                                      useweber, regress2mean); 
 
 elseif Model_Name == "G1G2Full"
     %set model configurations
@@ -83,7 +89,8 @@ elseif Model_Name == "G1G2Full"
     Aeq(3,3)=1; beq(3)=1;%G3=1
     Aeq(4,4)=1; beq(4)=1;%g2=1   
     %calculate the likelihood function
-    estFnc = @(FP) EstimateG1G2(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),FP(8),ProjSpeedL1, ProjSpeedL2,DX,THETAX,X);
+    estFnc = @(FP) EstimateG1G2(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),FP(8), ...
+                                ProjSpeedL1, ProjSpeedL2,DX,THETAX,X);
 
 elseif Model_Name=="DistErrG1G2"
     %set model configurations
@@ -99,7 +106,8 @@ elseif Model_Name=="DistErrG1G2"
     Aeq(5,5)=1; beq(5)=1;%g3=1 
     Aeq(6,6)=1; beq(6)=0;%b=0   
     %calculate the likelihood function
-    estFnc = @(FP) EstimateG1G2(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),FP(8),ProjSpeedL1, ProjSpeedL2,DX,THETAX,X);
+    estFnc = @(FP) EstimateG1G2(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),FP(8), ...
+                                ProjSpeedL1, ProjSpeedL2,DX,THETAX,X);
 
 elseif Model_Name=="Allo" | Model_Name=="AlloWeber"
     %set lower bound and up bound
@@ -130,7 +138,9 @@ elseif Model_Name=="GammaFull"
     Aeq(2,2)=1; beq(2)=1;%G3=1
     Aeq(3,3)=1; beq(3)=1;%g2=1    
     %calculate the likelihood function
-    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),ProjSpeedL1, ProjSpeedL2,DX,THETAX,X,useweber,ifEqualDiscount);
+    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7), ...
+                                 ProjSpeedL1, ProjSpeedL2,DX,THETAX,X, ...
+                                 useweber,ifEqualDiscount);
 
 elseif Model_Name=="DistErrGamma"
     %set model configurations
@@ -145,7 +155,9 @@ elseif Model_Name=="DistErrGamma"
     Aeq(4,4)=1; beq(4)=1;%g3=1 
     Aeq(5,5)=1; beq(5)=0;%b=0    
     %calculate the likelihood function
-    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),ProjSpeedL1, ProjSpeedL2,DX,THETAX,X,useweber,ifEqualDiscount);   
+    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7), ...
+                                 ProjSpeedL1, ProjSpeedL2,DX,THETAX,X, ...
+                                 useweber,ifEqualDiscount);   
 
 elseif Model_Name=="EqualDiscountGamma"
     %set model configurations
@@ -161,7 +173,9 @@ elseif Model_Name=="EqualDiscountGamma"
     Aeq(4,4)=1; beq(4)=1;%g3=1 
     Aeq(5,5)=1; beq(5)=0;%b=0
     %calculate the likelihood function
-    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),ProjSpeedL1, ProjSpeedL2,DX,THETAX,X,useweber,ifEqualDiscount);
+    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7), ...
+                                 ProjSpeedL1, ProjSpeedL2,DX,THETAX,X, ...
+                                 useweber,ifEqualDiscount);
 
 elseif Model_Name=="AngleErrGamma"
     %set model configurations
@@ -175,7 +189,9 @@ elseif Model_Name=="AngleErrGamma"
     Aeq(2,2)=1; beq(2)=1;%G3=1
     Aeq(3,3)=1; beq(3)=1;%g2=1             
     %calculate the likelihood function
-    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),ProjSpeedL1, ProjSpeedL2,DX,THETAX,X,useweber,ifEqualDiscount);
+    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7), ...
+                                 ProjSpeedL1, ProjSpeedL2,DX,THETAX,X, ...
+                                 useweber,ifEqualDiscount);
 
 elseif Model_Name=="Ego" | Model_Name=="EgoWeber"
     %set model configurations
@@ -194,7 +210,9 @@ elseif Model_Name=="Ego" | Model_Name=="EgoWeber"
         useweber=true;
     end  
     %calculate the likelihood function
-    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),ProjSpeedL1, ProjSpeedL2,DX,THETAX,X,useweber,ifEqualDiscount);
+    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7), ...
+                                 ProjSpeedL1, ProjSpeedL2,DX,THETAX,X, ...
+                                 useweber,ifEqualDiscount);
 else
     error("Please set the correct name of model!");
 end
@@ -235,7 +253,7 @@ disp(" ");
 %% Calculate the Bayesian Inference Criterion for each model
 sampleSize = size(X,2); %the number of observations, i.e., the sample size
 loglikelihood = -negloglikelihood; %the loglikelihood derived from fitting different models 
-[aic, bic] = aicbic(loglikelihood, numParams, sampleSize, 'Normalize',false);
+[aic, bic] = aicbic(loglikelihood, numFreeParams, sampleSize, 'Normalize',false);
 IC.aic = aic;
 IC.bic = bic;
 IC.negll = negloglikelihood;

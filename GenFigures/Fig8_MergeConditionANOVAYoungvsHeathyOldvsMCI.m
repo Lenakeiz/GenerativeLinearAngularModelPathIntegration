@@ -1,5 +1,6 @@
 %% Cleaning variables
 clearvars; clear all; close all; clc;
+rng('default'); %for code reproducibility
 
 %% Loading data
 disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
@@ -7,48 +8,73 @@ load('Data/AllDataErrors2018_V3.mat');
 savefolder = pwd + "/Output/";
 
 %% setting the configuration
+config.Speed.alpha = 0.9;                                       %Paramanter for running speed calculation
+config.Speed.timeOffsetAfterFlagReach = 2;                      %Time to track after flag reached in seconds 
+config.Speed.smoothWindow = 10;                                 % tracking rate should be 10Hz so 4 secs window is 40 datapoints
+config.Speed.velocityCutoff = 0.2;                              % velocity cutoff to select only the walking part of the reconstructed velocity
+config.Speed.timeOffsetForDetectedTemporalWindow = 0.5;         % time in seconds that will push earlier/ the detected rising edge
+
 config.UseGlobalSearch = true;
-resultfolder = savefolder+"PaperFigs/Fig8";
+
+resultfolder = savefolder+"PaperFigs/Fig8_MeanReturnAngle";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
    mkdir(resultfolder);
 end
 
+% %% Model fitting using LeakyIntegration Model
+% config.ModelName = "GammaFull";
+% config.NumParams = 5;
+
 %% Model fitting using Gamma Base Model
-%Model parameter gamma, g3, b, sigma, nu. #params=5
-config.ModelName = "BaseModel";
-config.NumParams = 5;
-% config.ModelName = "DistErrModel";
-% config.NumParams = 3;
+%Model parameter gamma, g3, sigma, nu. #params=4
+config.ModelName = "degradedLI_MeanReturnAng";
+config.NumParams = 4;
 
 %% merge three conditions
 config.TrialFilter = 0;
 
 %% Model fitting for YoungControl data
+% calculating tracking path and transoform data
+config.Speed.tresholdForBadParticipantL1Recontruction = 1.55;   % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
+YoungControls   = CalculateTrackingPath(YoungControls, config);
+%transform data
 YoungControls = TransformPaths(YoungControls);
-YoungResults = PerformGroupFit(YoungControls, config);
-YoungParams = YoungResults.estimatedParams;
+ResultsYoung = PerformGroupFit(YoungControls, config);
+YoungParams = ResultsYoung.estimatedParams;      
 
 %% Model fitting for HealthyOld data
+config.Speed.tresholdForBadParticipantL1Recontruction = 2.0; 
+HealthyControls   = CalculateTrackingPath(HealthyControls, config);
+%transform data
 HealthyOld = TransformPaths(HealthyControls);
-HealthyOldResults = PerformGroupFit(HealthyOld, config);
-HealthyOldParams = HealthyOldResults.estimatedParams;
+ResultsHealthyOld = PerformGroupFit(HealthyOld, config);
+HealthyOldParams = ResultsHealthyOld.estimatedParams;  
 
 %% Model fitting for MCIPos
+config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
+MCIPos   = CalculateTrackingPath(MCIPos, config);
+%transform data
 MCIPos = TransformPaths(MCIPos);
-MCIPosResults = PerformGroupFit(MCIPos, config);
-MCIPosParams = MCIPosResults.estimatedParams;
+ResultsMCIPos = PerformGroupFit(MCIPos, config);
+MCIPosParams = ResultsMCIPos.estimatedParams;  
 
 %% Model fitting for MCINeg
+config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
+MCINeg   = CalculateTrackingPath(MCINeg, config);
+%transform data
 MCINeg = TransformPaths(MCINeg);
-MCINegResults = PerformGroupFit(MCINeg, config);
-MCINegParams = MCINegResults.estimatedParams;
+ResultsMCINeg = PerformGroupFit(MCINeg, config);
+MCINegParams = ResultsMCINeg.estimatedParams; 
 
 %% Model fitting for MCIUnk
+config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
+Unknown   = CalculateTrackingPath(Unknown, config);
+%transform data
 MCIUnk = TransformPaths(Unknown);
-MCIUnkResults = PerformGroupFit(MCIUnk, config);
-MCIUnkParams = MCIUnkResults.estimatedParams;
+ResultsMCIUnk = PerformGroupFit(MCIUnk, config);
+MCIUnkParams = ResultsMCIUnk.estimatedParams; 
 
 %% Setting colors for using in plots
 ColorPattern; 
@@ -56,7 +82,7 @@ ColorPattern;
 %% merge MCI together
 MCIParams = [MCIPosParams;MCINegParams;MCIUnkParams];
 
-%% TwowayAnova
+%% OnewayAnova
 [~,multicomp_tab] = OnewayAnovaOn_Young_HealthyOld_MergeMCI(YoungParams, HealthyOldParams, MCIParams, config);
 
 %% BarScatter Plot between Young and HealthyOld for all Fitted Params
@@ -65,8 +91,8 @@ plotBoxOfFittedParam(YoungParams, HealthyOldParams, MCIParams, multicomp_tab, co
 %%
 function plotBoxOfFittedParam(YoungParams, HealthyOldParams, MCIParams, multicomp_tab, config)
     
-    ParamName = ["Distance gain gamma", "bG_3", "g_2", "Angular gain g_3", "Anglar bias b", "sigma", "nu"];
-    StoreName = ["Gamma", "bG_3", "g_2", "g_3", "b", "sigma", "nu"];
+    ParamName = ["beta", "bG_3", "g_2", "Angular gain g_3", "Anglar bias b", "sigma", "nu"];
+    StoreName = ["beta", "bG_3", "g_2", "g_3", "b", "sigma", "nu"];
     for ParamIndx=1:length(ParamName)
 
         %% set figure info
@@ -219,6 +245,13 @@ function plotBoxOfFittedParam(YoungParams, HealthyOldParams, MCIParams, multicom
                 'LineWidth',scatter_marker_edgeWidth);     
 
         %% Further post-processing the figure
+        alldata = [MCIParams(:,ParamIndx); HealthyOldParams(:,ParamIndx); YoungParams(:,ParamIndx)];
+        maxdata = max(alldata);
+        mindata = min(alldata);
+
+        lowupYlim = [mindata-.2*(maxdata-mindata)-eps, maxdata+.4*(maxdata-mindata)+eps]; 
+
+        %% Further post-processing the figure
         set(gca, ...
             'Box'         , 'off'     , ...
             'TickDir'     , 'out'     , ...
@@ -227,13 +260,13 @@ function plotBoxOfFittedParam(YoungParams, HealthyOldParams, MCIParams, multicom
             'YColor'      , [.1 .1 .1], ...
             'XTick'       , (1:3),... 
             'XLim'        , [0.5, 3.5],...
+            'YLim'        , lowupYlim,...
             'XTickLabel'  , {'Young','HealthyOld','MCI'},...
             'LineWidth'   , .5        );
             %'Ytick'       , [0,0.5,1.0,1.5],...
             %'YLim'        , [0, 1.5],...   
+
         ylabel(ParamName(ParamIndx));
-        legend(gca, {'Young', 'HealthyOld', 'MCI'}, 'Location','northeast', 'NumColumns',1);
-        %xlabel('G_1','Interpreter','tex'); ylabel('G_2','Interpreter','tex');
 
         %extract pvalue for multicomparison of Group effect for showing on the figure
         multicomp_result = multicomp_tab{ParamIndx};
@@ -242,11 +275,33 @@ function plotBoxOfFittedParam(YoungParams, HealthyOldParams, MCIParams, multicom
         PvalueYoungvsHealthyOld = multicomp_result(3,6); % Young vs. HealthyOld see Two-way anova for details
         PvalueHealthyOldvsMCI = multicomp_result(1,6); % HealthyOld v.s. MCI vs.  see Two-way anova for details
         PvalueYoungvsMCI = multicomp_result(2,6); % Young vs. MCI see Two-way anova for details 
-        str = {['P12 = ',sprintf('%.2g',PvalueYoungvsHealthyOld)],...
-               ['P23 = ',sprintf('%.2g',PvalueHealthyOldvsMCI)],...
-               ['P13 = ',sprintf('%.2g',PvalueYoungvsMCI)]};
+%         str = {['P12 = ',sprintf('%.2g',PvalueYoungvsHealthyOld)],...
+%                ['P23 = ',sprintf('%.2g',PvalueHealthyOldvsMCI)],...
+%                ['P13 = ',sprintf('%.2g',PvalueYoungvsMCI)]};
 
-        annotation('textbox',[0.2 0.6 0.3 0.3],'String',str,'FitBoxToText','on');
+%         annotation('textbox',[0.2 0.6 0.3 0.3],'String',str,'FitBoxToText','on');
+        title(strcat(['P12 = ',sprintf('%.2g',PvalueYoungvsHealthyOld)],...
+              ['    P23 = ',sprintf('%.2g',PvalueHealthyOldvsMCI)],...
+              ['    P13 = ',sprintf('%.2g',PvalueYoungvsMCI)]))
+
+        %% add sigstar 
+        AllP = [PvalueYoungvsHealthyOld,PvalueHealthyOldvsMCI,PvalueYoungvsMCI];
+        Xval = [[1,2];[2,3];[1,3]];
+        %select those P value smaller than 0.05 (only add line when p<0.05)
+        % * represents p<=0.05
+        % ** represents p<=1E-2
+        % *** represents p<=1E-3
+        PsigInd = AllP<0.05;
+        if sum(AllP<0.05)>0
+            Xval_select = Xval(PsigInd,:);
+            AllP_select = AllP(PsigInd);
+            XXX = {};
+            for i=1:sum(AllP<0.05)
+                XXX{i} = Xval_select(i,:);
+            end
+            H=sigstar(XXX,AllP_select);
+        end
+
 
         %% save figure
         exportgraphics(f,config.ResultFolder+"/ZMergeCondsBox_"+StoreName(ParamIndx)+".png",'Resolution',300);

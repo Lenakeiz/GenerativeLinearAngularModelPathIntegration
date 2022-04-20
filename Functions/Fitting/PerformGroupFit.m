@@ -7,8 +7,6 @@ function Results = PerformGroupFit(GroupData, config)
 
 %load configurations necessary for the script
 TRIAL_FILTER = config.TrialFilter;
-numParams = config.NumParams;
-Model_Name = config.ModelName;
 
 % Calculating sample size
 sampleSize = size(GroupData.FlagPos,2);
@@ -53,7 +51,6 @@ for j = 1:sampleSize
                 flagOoB{j}(idx) = 1; %OoB flag is 0, i.e., it is OoB trial
             end
         end
-        
     else
         %processing data according to "TRIAL_FILTER", with 1 no change, 2 no distal cues, 3 no optic flow
         flagpos{j}  = GroupData.FlagPos{j}(GroupData.CondTable{1,j}.Condition == TRIAL_FILTER);
@@ -67,25 +64,19 @@ for j = 1:sampleSize
                     flagOoB{j}(tempCnt) = 0; %OoB flag is 0, i.e., not OoB trial
                 elseif(GroupData.CondTable{j}.OutOfBound(idx) == 1)
                     finalpos{j,1}(tempCnt,1) = GroupData.ReconstructedOOB{j}.ReconstructedOoB(idx);
-                    flagOoB{j}(tempCnt) = 1; %OoB flag is 0, i.e., it is OoB trial
+                    flagOoB{j}(tempCnt) = 1; %OoB flag is 1, i.e., it is OoB trial
                 end
                 tempCnt = tempCnt + 1;
             end
         end
     end
 
-    if length(flagpos{j}) < numParams
-        disp("%%%%%%%%%%%%%%% WARNING: " + length(flagpos{j}) + " datapoints for the current participant %%%%%%%%%%%%%%%\n");
-    end
-
-    if isempty(flagpos{j}) %this can be empty if we remove the OoB trials. Empty coz all the trials are OoB trials
-        disp("%%%%%%%%%%%%%%% Skipping participant " + num2str(j) + " because no datapoints available %%%%%%%%%%%%%%%");
+    if length(flagpos{j}) < config.NumFreeParams
+        disp("%%%%%%%%%%%%%%% Skipping participant " + num2str(j) + ...
+            ", because only "+ length(flagpos{j}) + ...
+            " datapoints available for parameter estimation%%%%%%%%%%%%%%%\n");
         % NUmber of parameters in return matrix is fixed
-        if Model_Name == "G1G2"%G1G2 model has 8 parameters in total
-            GroupParameters{j} = NaN(8,1);
-        else %gamma model has 7 parameters in total
-            GroupParameters{j} = NaN(7,1);
-        end
+        GroupParameters{j} = NaN(config.NumParams,1);
         IC{j} = nan;
         flagOoB{j} = [];
         continue;
@@ -108,13 +99,11 @@ for j = 1:sampleSize
         segments{j}{tr}  = X{j}{tr}(2:end,:) - X{j}{tr}(1:end-1,:);
         DX{j}{tr}        = sqrt(sum(segments{j}{tr}.^2,2));        
         
-        %THETADX{j}{tr} = ([0; anglebetween(segments{j}{tr}(1:end-1,:), segments{j}{tr}(2:end,:))]);
         outer_rad = deg2rad([0; anglebetween(segments{j}{tr}(1:end-1,:), segments{j}{tr}(2:end,:))]);
-
         %wrap the angle into (0,2pi)
         THETADX{j}{tr} = mod(outer_rad, 2*pi);
 
-        %
+        %extract the projected speed information along with the time information on outbound path
         L1_Vel_proj = GroupData.TrackedL1{j}{tr}.Vel_proj;
         L1_Time = GroupData.TrackedL1{j}{tr}.Time;
         L1_Filtered_Vel_proj = GroupData.TrackedL1{j}{tr}.Filtered_Vel_proj;
@@ -129,8 +118,7 @@ for j = 1:sampleSize
         L2_Vel_proj_selected = L2_Vel_proj(L2_Filtered_Vel_proj);
         L2_Time_selected = L2_Time(L2_Filtered_Vel_proj);
         ProjSpeedL2{j}{1, tr} = L2_Time_selected;  %selected time in a start-to-end range
-        ProjSpeedL2{j}{2, tr} = L2_Vel_proj_selected; %selected speed in a start-to-end range
-        
+        ProjSpeedL2{j}{2, tr} = L2_Vel_proj_selected; %selected speed in a start-to-end range        
     end
 
     % Do the data fitting

@@ -26,6 +26,9 @@ end
 %Model related parameters
 config.ModelName        = "ConstSpeedModel_Regress2Mean";
 config.ParamName        = ["beta", "bG3", "g2", "g3", 'b', "sigma", "nu"];
+config.regress2mean     = true;
+config.includeStand     = true;
+config.useweber         = flase;                        %only true when use weber law in simple generative models
 config.NumTotalParams   = length(config.ParamName);
 config.NumFreeParams    = 4;
 

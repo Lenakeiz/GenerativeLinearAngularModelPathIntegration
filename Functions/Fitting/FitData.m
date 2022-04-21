@@ -18,7 +18,6 @@ function [FitParams, IC] = FitData(Input,config)
 Model_Name      =   config.ModelName;
 numFreeParams   =   config.NumFreeParams;
 useglobalsearch =   config.UseGlobalSearch;
-useweber        =   false;%only true when use weber law in simple generative models
 ifEqualDiscount =   false; %only true when use same discount in both leg
 
 if Model_Name == "DistErrLI"
@@ -63,10 +62,7 @@ elseif Model_Name=="ConstSpeedModel"
     Aeq(2,2)    =   1;              beq(2)  =   1;      %G3=1
     Aeq(3,3)    =   1;              beq(3)  =   1;      %g2=1
     %calculate the likelihood function
-    regress2mean = false;
-    includeStand = true;
-    estFnc = @(FP) EstimateConstSpeed(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7), ...
-                                      Input, useweber, regress2mean, includeStand);   
+    estFnc = @(FP) EstimateConstSpeed(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7), Input, config);   
 
 elseif Model_Name=="ConstSpeedModel_Regress2Mean"
     %set model configurations
@@ -81,10 +77,7 @@ elseif Model_Name=="ConstSpeedModel_Regress2Mean"
     Aeq(3,3)    =   1;                  beq(3)=1;       %g2=1
     Aeq(5,5)    =   1;                  beq(5)=0;       %b=0
     %calculate the likelihood function
-    regress2mean = true;
-    includeStand = true;
-    estFnc = @(FP) EstimateConstSpeed(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7), ...
-                                      Input, useweber, regress2mean, includeStand); 
+    estFnc = @(FP) EstimateConstSpeed(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7), Input, config); 
 
 elseif Model_Name == "G1G2Full"
     %set model configurations

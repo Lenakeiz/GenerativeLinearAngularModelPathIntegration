@@ -1,4 +1,4 @@
-function [negloglikelihood] = EstimateConstSpeed(beta, G3, g2, g3, b, sigma, nu, Input, useweber, regress2mean, includeStand)
+function [negloglikelihood] = EstimateConstSpeed(beta, G3, g2, g3, b, sigma, nu, Input, config)
 %   EstimateLI means using the degraded leaky integration model when estimating the parameters
 %   degraded means a constant speed
 %   ESTIMATELI Summary of this function goes here:
@@ -15,6 +15,7 @@ function [negloglikelihood] = EstimateConstSpeed(beta, G3, g2, g3, b, sigma, nu,
 %   THETAX is the turning angle
 %   useweber decides whether the noise scales with the walking distance 
 
+%% information necessary for running parameter estimation
 DX              =   Input.DX;
 THETAX          =   Input.THETADX;
 L1Dur           =   Input.L1Dur;
@@ -55,7 +56,7 @@ for tr = 1:sampleSize
     durationStand =     StandingDur{tr};
     
     %% whether to use weber's law to scaling the noise strength
-    if useweber
+    if config.useweber == true
         scale = sqrt(l1^2+l2^2); %noise scale
     else
         scale = 1; %noise scale
@@ -65,7 +66,7 @@ for tr = 1:sampleSize
 
     %mental point 1 (asuming a constant speed)
     %considering standing duration or not
-    if includeStand==true
+    if config.includeStand==true
         men_length1 = l1*(1-exp(-beta*durationL1))/(beta*durationL1)*exp(-beta*(durationL2+durationStand));
     else
         men_length1 = l1*(1-exp(-beta*durationL1))/(beta*durationL1)*exp(-beta*durationL2);
@@ -87,7 +88,7 @@ for tr = 1:sampleSize
     alpha       = mod(alpha, 2*pi); %wrap to (0,2pi)
 
     %whether to regress to the mean correct return angle
-    if regress2mean==true
+    if config.regress2mean ==true
         theta3_prime = g3*alpha+(1-g3)*mean_angle;
     else
         theta3_prime = g3*alpha+b;

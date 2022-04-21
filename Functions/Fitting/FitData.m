@@ -1,16 +1,25 @@
-function [FitParams, IC] = FitData(DX,THETAX,X,ProjSpeedL1,ProjSpeedL2,config)
+function [FitParams, IC] = FitData(Input,config)
 %FITDATA Function to fit the data on a single participant
 %   DX is a cell structure containing the segment of each trial
 %   THETAX is the turning angle (wrong at the moment)
 %   X is the data points
 %   the noise for each trial
 
+% DX              =   Input.DX;
+% THETAX          =   Input.THETAX;
+% X               =   Input.X;
+% ProjSpeedL1     =   Input.ProjSpeedL1;
+% ProjSpeedL2     =   Input.ProjSpeedL2;
+% L1Dur           =   Input.L1Dur;
+% L2Dur           =   Input.L2Dur;
+% StandingDur     =   Input.StandingDur;
+
 %load configurations necessary for the script
-Model_Name = config.ModelName;
-numFreeParams = config.NumFreeParams;
-useglobalsearch = config.UseGlobalSearch;
-useweber=false;%only true when use weber law in simple generative models
-ifEqualDiscount=false; %only true when use same discount in both leg
+Model_Name      =   config.ModelName;
+numFreeParams   =   config.NumFreeParams;
+useglobalsearch =   config.UseGlobalSearch;
+useweber        =   false;%only true when use weber law in simple generative models
+ifEqualDiscount =   false; %only true when use same discount in both leg
 
 if Model_Name == "DistErrLI"
     %set model configurations
@@ -50,14 +59,14 @@ elseif Model_Name=="ConstSpeedModel"
     ub  = [1.0,       2.0,     2.0,     1.0,    2*pi,    2.0,         100.0];    
 
     %set equality constriants
-    Aeq = zeros(7,7); beq=zeros(1,7);
-    Aeq(2,2)=1; beq(2)=1; %G3=1
-    Aeq(3,3)=1; beq(3)=1; %g2=1
+    Aeq         =   zeros(7,7);     beq     =   zeros(1,7);
+    Aeq(2,2)    =   1;              beq(2)  =   1;      %G3=1
+    Aeq(3,3)    =   1;              beq(3)  =   1;      %g2=1
     %calculate the likelihood function
     regress2mean = false;
+    includeStand = true;
     estFnc = @(FP) EstimateConstSpeed(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7), ...
-                                      ProjSpeedL1, ProjSpeedL2, DX, THETAX, ...
-                                      useweber, regress2mean);   
+                                      Input, useweber, regress2mean, includeStand);   
 
 elseif Model_Name=="ConstSpeedModel_Regress2Mean"
     %set model configurations
@@ -67,15 +76,15 @@ elseif Model_Name=="ConstSpeedModel_Regress2Mean"
     ub  = [1.0,       2.0,     2.0,     2.0,    2*pi,    2.0,         100.0];    
 
     %set equality constriants
-    Aeq = zeros(7,7); beq=zeros(1,7);
-    Aeq(2,2)=1; beq(2)=1; %G3=1
-    Aeq(3,3)=1; beq(3)=1; %g2=1
-    Aeq(5,5)=1; beq(5)=0; %b=0
+    Aeq         =   zeros(7,7);         beq     =   zeros(1,7);
+    Aeq(2,2)    =   1;                  beq(2)=1;       %G3=1
+    Aeq(3,3)    =   1;                  beq(3)=1;       %g2=1
+    Aeq(5,5)    =   1;                  beq(5)=0;       %b=0
     %calculate the likelihood function
     regress2mean = true;
+    includeStand = true;
     estFnc = @(FP) EstimateConstSpeed(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7), ...
-                                      ProjSpeedL1, ProjSpeedL2, DX, THETAX, ...
-                                      useweber, regress2mean); 
+                                      Input, useweber, regress2mean, includeStand); 
 
 elseif Model_Name == "G1G2Full"
     %set model configurations
@@ -251,7 +260,7 @@ disp(" ");
 disp(" ");
 
 %% Calculate the Bayesian Inference Criterion for each model
-sampleSize = size(X,2); %the number of observations, i.e., the sample size
+sampleSize = size(Input.X,2); %the number of observations, i.e., the sample size
 loglikelihood = -negloglikelihood; %the loglikelihood derived from fitting different models 
 [aic, bic] = aicbic(loglikelihood, numFreeParams, sampleSize, 'Normalize',false);
 IC.aic = aic;

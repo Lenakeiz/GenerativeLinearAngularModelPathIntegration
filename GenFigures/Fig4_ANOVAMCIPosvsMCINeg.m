@@ -8,15 +8,14 @@ load('Data/AllDataErrors2018_V3.mat');
 savefolder = pwd + "/Output/";
 
 %% setting the configuration
-config.Speed.alpha = 0.9;                                       %Parameter for running speed calculation
-config.Speed.timeOffsetAfterFlagReach = 2;                      %Time to track after flag reached in seconds 
-config.Speed.smoothWindow = 10;                                 % tracking rate should be 10Hz so 4 secs window is 40 datapoints
-config.Speed.velocityCutoff = 0.1;                              % velocity cutoff to select only the walking part of the reconstructed velocity
-config.Speed.timeOffsetForDetectedTemporalWindow = 1.0;         % time in seconds that will push earlier/ the detected rising edge
+config.Speed.alpha                                  = 0.9;                 %Paramanter for running speed calculation
+config.Speed.timeOffsetAfterFlagReach               = 1.5;                 %Time to track after flag reached in seconds 
+config.Speed.smoothWindow                           = 10;                  % tracking rate should be 10Hz so 4 secs window is 40 datapoints
+config.Speed.velocityCutoff                         = 0.2;                 % velocity cutoff to select only the walking part of the reconstructed velocity
+config.Speed.timeOffsetForDetectedTemporalWindow    = 0.4;                 % time in seconds that will push earlier/ the detected rising edge
+config.UseGlobalSearch                              = true;
 
-config.UseGlobalSearch = true;
-
-resultfolder = savefolder+"PaperFigs/Fig4";
+resultfolder = savefolder+"PaperFigs/Fig4B";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
@@ -24,45 +23,40 @@ if ~exist(resultfolder, 'dir')
 end
 
 %Model related parameters
-config.ModelName = "ConstSpeedModel_Regress2Mean";
-config.ParamName = ["beta", "bG3", "g2", "g3", 'b', "sigma", "nu"];
-config.NumTotalParams = length(config.ParamName);
-config.NumFreeParams = 4;
+config.ModelName        = "ConstSpeedModel_Regress2Mean";
+config.ParamName        = ["beta", "bG3", "g2", "g3", 'b', "sigma", "nu"];
+config.NumTotalParams   = length(config.ParamName);
+config.NumFreeParams    = 4;
 
 %% Model fitting for YoungControl data
 %% calculating tracking path and transoform data
 config.Speed.tresholdForBadParticipantL1Recontruction = 1.55;   % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
 YoungControls   = CalculateTrackingPath(YoungControls, config);
-%transform data
-YoungControls = TransformPaths(YoungControls);
+YoungControls = TransformPaths(YoungControls);%transform data
 [AllYoungParams, ~, ~, ~, ~] = getResultsAllConditions(YoungControls, config);
 
 %% Model fitting for HealthyOld data
 config.Speed.tresholdForBadParticipantL1Recontruction = 2.0; 
 HealthyControls   = CalculateTrackingPath(HealthyControls, config);
-%transform data
-HealthyOld = TransformPaths(HealthyControls);
+HealthyOld = TransformPaths(HealthyControls);%transform data
 [AllHealthyOldParams, ~, ~, ~, ~] = getResultsAllConditions(HealthyOld, config);
 
 %% Model fitting for MCIPos
 config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
 MCIPos   = CalculateTrackingPath(MCIPos, config);
-%transform data
-MCIPos = TransformPaths(MCIPos);
+MCIPos = TransformPaths(MCIPos);%transform data
 [AllMCIPosParams,  ~, ~, ~, ~] = getResultsAllConditions(MCIPos, config);
 
 %% Model fitting for MCINeg
 config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
 MCINeg   = CalculateTrackingPath(MCINeg, config);
-%transform data
-MCINeg = TransformPaths(MCINeg);
+MCINeg = TransformPaths(MCINeg);%transform data
 [AllMCINegParams,  ~, ~, ~, ~] = getResultsAllConditions(MCINeg, config);
 
 %% Model fitting for MCIUnk
 config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
 Unknown   = CalculateTrackingPath(Unknown, config);
-%transform data
-MCIUnk = TransformPaths(Unknown);
+MCIUnk = TransformPaths(Unknown);%transform data
 [AllMCIUnkParams,  ~, ~, ~, ~] = getResultsAllConditions(MCIUnk, config);
 
 %% Setting colors for using in plots
@@ -107,20 +101,19 @@ function BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, confi
         colorForMCINeg = config.color_scheme_npg(3,:);
 
         %set params
-        whisker_value = 1.5;
-        box_lineWidth = 0.3;
-        box_widths_value = 0.2;
-        box_color_transparency = 0.5; %faceAlpha
-        %center of box (three conditions)
-        center_x = [1,2,3];
-        shift_value = 0.2; %box shift from center
-        median_lineWidth = 2;
-        median_color = 'k';
-        scatter_jitter_value = 0.1;
-        scatter_markerSize=10;
-        scatter_marker_edgeColor = 'k';
-        scatter_marker_edgeWidth = 0.5;
-        scatter_color_transparency = 0.7; %faceAlpha        
+        whisker_value               =   1.5;
+        box_lineWidth               =   0.3;
+        box_widths_value            =   0.2;
+        box_color_transparency      =   0.5;        %faceAlpha
+        center_x                    =   [1,2,3];    %center of box (three conditions)
+        shift_value                 =   0.2;        %box shift from center
+        median_lineWidth            =   2;
+        median_color                =   'k';
+        scatter_jitter_value        =   0.1;
+        scatter_markerSize          =   10;
+        scatter_marker_edgeColor    =   'k';
+        scatter_marker_edgeWidth    =   0.5;
+        scatter_color_transparency  =   0.7;        %faceAlpha        
 
         %% boxplot for each column in MCIPos
         bp1 = boxplot(MCIPosParamAllConds, ...
@@ -288,17 +281,17 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
         colorForMCINeg = config.color_scheme_npg(3,:);
 
         %set params
-        whisker_value = 1.5;
-        box_lineWidth = 0.3;
-        box_widths_value = 0.4;
-        box_color_transparency = 0.5; %faceAlpha
-        median_lineWidth = 2;
-        median_color = 'k';
-        scatter_jitter_value = 0.2;
-        scatter_markerSize=10;
-        scatter_marker_edgeColor = 'k';
-        scatter_marker_edgeWidth = 0.5;
-        scatter_color_transparency = 0.7; %faceAlpha        
+        whisker_value               =   1.5;
+        box_lineWidth               =   0.3;
+        box_widths_value            =   0.4;
+        box_color_transparency      =   0.5; %faceAlpha
+        median_lineWidth            =   2;
+        median_color                =   'k';
+        scatter_jitter_value        =   0.2;
+        scatter_markerSize          =   10;
+        scatter_marker_edgeColor    =   'k';
+        scatter_marker_edgeWidth    =   0.5;
+        scatter_color_transparency  =   0.7; %faceAlpha        
 
         %% boxplot for each column in MCIPOs
         bp1 = boxplot(MCIPosParamMean, ...

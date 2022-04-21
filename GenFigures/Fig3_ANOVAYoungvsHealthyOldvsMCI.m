@@ -8,15 +8,14 @@ load('Data/AllDataErrors2018_V3.mat');
 savefolder = pwd + "/Output/";
 
 %% setting the configuration
-config.Speed.alpha = 0.9;                                       %Parameter for running speed calculation
-config.Speed.timeOffsetAfterFlagReach = 2;                      %Time to track after flag reached in seconds 
-config.Speed.smoothWindow = 10;                                 % tracking rate should be 10Hz so 4 secs window is 40 datapoints
-config.Speed.velocityCutoff = 0.1;                              % velocity cutoff to select only the walking part of the reconstructed velocity
-config.Speed.timeOffsetForDetectedTemporalWindow = 1.0;         % time in seconds that will push earlier/ the detected rising edge
+config.Speed.alpha                                  = 0.9;                 %Paramanter for running speed calculation
+config.Speed.timeOffsetAfterFlagReach               = 1.5;                 %Time to track after flag reached in seconds 
+config.Speed.smoothWindow                           = 10;                  % tracking rate should be 10Hz so 4 secs window is 40 datapoints
+config.Speed.velocityCutoff                         = 0.2;                 % velocity cutoff to select only the walking part of the reconstructed velocity
+config.Speed.timeOffsetForDetectedTemporalWindow    = 0.4;                 % time in seconds that will push earlier/ the detected rising edge
+config.UseGlobalSearch                              = true;
 
-config.UseGlobalSearch = true;
-
-resultfolder = savefolder+"PaperFigs/Fig3";
+resultfolder = savefolder+"PaperFigs/Fig3B";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
@@ -25,10 +24,10 @@ end
 
 %% Model fitting
 %Model related parameters
-config.ModelName = "ConstSpeedModel_Regress2Mean";
-config.ParamName = ["beta", "bG3", "g2", "g3", 'b', "sigma", "nu"];
-config.NumTotalParams = length(config.ParamName);
-config.NumFreeParams = 4;
+config.ModelName        = "ConstSpeedModel_Regress2Mean";
+config.ParamName        = ["beta", "bG3", "g2", "g3", 'b', "sigma", "nu"];
+config.NumTotalParams   = length(config.ParamName);
+config.NumFreeParams    = 4;
 
 %% Model fitting for YoungControl data
 %% calculating tracking path and transoform data
@@ -92,14 +91,14 @@ function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
         
         for TRIAL_FILTER=1:numConds
             %% extract data
-            YoungParam = AllYoungParams{TRIAL_FILTER}(:,ParamIndx);
-            YoungParamAllConds = [YoungParamAllConds,YoungParam];
+            YoungParam          = AllYoungParams{TRIAL_FILTER}(:,ParamIndx);
+            YoungParamAllConds  = [YoungParamAllConds,YoungParam];
 
-            HealthyOldParam = AllHealthyOldParams{TRIAL_FILTER}(:,ParamIndx);
+            HealthyOldParam     = AllHealthyOldParams{TRIAL_FILTER}(:,ParamIndx);
             HealthyOldParamAllConds = [HealthyOldParamAllConds,HealthyOldParam];
 
-            MCIParam = AllMCIParams{TRIAL_FILTER}(:,ParamIndx);
-            MCIParamAllConds = [MCIParamAllConds,MCIParam];            
+            MCIParam            = AllMCIParams{TRIAL_FILTER}(:,ParamIndx);
+            MCIParamAllConds    = [MCIParamAllConds,MCIParam];            
         end
     
         %% set figure info
@@ -311,19 +310,19 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
 
         for TRIAL_FILTER=1:numConds
             %% extract data
-            YoungParam = AllYoungParams{TRIAL_FILTER}(:,ParamIndx);
-            YoungParamAllConds = [YoungParamAllConds,YoungParam];
+            YoungParam          = AllYoungParams{TRIAL_FILTER}(:,ParamIndx);
+            YoungParamAllConds  = [YoungParamAllConds,YoungParam];
             
-            HealthyOldParam = AllHealthyOldParams{TRIAL_FILTER}(:,ParamIndx);
+            HealthyOldParam     = AllHealthyOldParams{TRIAL_FILTER}(:,ParamIndx);
             HealthyOldParamAllConds = [HealthyOldParamAllConds,HealthyOldParam];
 
-            MCIParam = AllMCIParams{TRIAL_FILTER}(:,ParamIndx);
-            MCIParamAllConds = [MCIParamAllConds,MCIParam];         
+            MCIParam            = AllMCIParams{TRIAL_FILTER}(:,ParamIndx);
+            MCIParamAllConds    = [MCIParamAllConds,MCIParam];         
         end
 
-        YoungParamMean = mean(YoungParamAllConds, 2);
+        YoungParamMean      = mean(YoungParamAllConds, 2);
         HealthyOldParamMean = mean(HealthyOldParamAllConds, 2);
-        MCIParamMean = mean(MCIParamAllConds, 2);
+        MCIParamMean        = mean(MCIParamAllConds, 2);
     
         %% set figure info
         f = figure('visible','off','Position', [100 100 500 500]);
@@ -341,17 +340,17 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         colorForMCI = config.color_scheme_npg(2,:);
 
         %set params
-        whisker_value = 1.5;
-        box_lineWidth = 0.3;
-        box_widths_value = 0.4;
-        box_color_transparency = 0.5; %faceAlpha
-        median_lineWidth = 2;
-        median_color = 'k';
-        scatter_jitter_value = 0.2;
-        scatter_markerSize=10;
-        scatter_marker_edgeColor = 'k';
-        scatter_marker_edgeWidth = 0.5;
-        scatter_color_transparency = 0.7; %faceAlpha        
+        whisker_value               =   1.5;
+        box_lineWidth               =   0.3;
+        box_widths_value            =   0.4;
+        box_color_transparency      =   0.5; %faceAlpha
+        median_lineWidth            =   2;
+        median_color                =   'k';
+        scatter_jitter_value        =   0.2;
+        scatter_markerSize          =   10;
+        scatter_marker_edgeColor    =   'k';
+        scatter_marker_edgeWidth    =   0.5;
+        scatter_color_transparency  =   0.7; %faceAlpha        
 
         hold on
         %% boxplot for each column in Young

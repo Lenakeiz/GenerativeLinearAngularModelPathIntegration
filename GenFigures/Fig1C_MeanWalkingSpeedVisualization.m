@@ -8,15 +8,12 @@ load('Data/AllDataErrors2018_V3.mat');
 savefolder = pwd + "/Output/";
 
 %% setting the configuration
-config.Speed.alpha = 0.9;                                       %Paramanter for running speed calculation
-config.Speed.timeOffsetAfterFlagReach = 2;                      %Time to track after flag reached in seconds 
-config.Speed.smoothWindow = 10;                                 % tracking rate should be 10Hz so 4 secs window is 40 datapoints
-config.Speed.velocityCutoff = 0.2;                              % velocity cutoff to select only the walking part of the reconstructed velocity
-config.Speed.timeOffsetForDetectedTemporalWindow = 0.5;         % time in seconds that will push earlier/ the detected rising edge
-
-config.TrialFilter = 0; %merge all conditions
+config.Speed.alpha                                  = 0.9;                 %Paramanter for running speed calculation
+config.Speed.timeOffsetAfterFlagReach               = 1.5;                 %Time to track after flag reached in seconds 
+config.Speed.smoothWindow                           = 10;                  % tracking rate should be 10Hz so 4 secs window is 40 datapoints
+config.Speed.velocityCutoff                         = 0.2;                 % velocity cutoff to select only the walking part of the reconstructed velocity
+config.Speed.timeOffsetForDetectedTemporalWindow    = 0.4;                 % time in seconds that will push earlier/ the detected rising edge
 config.UseGlobalSearch = true;
-
 resultfolder = savefolder+"PaperFigs/Fig1C";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
@@ -28,37 +25,32 @@ end
 %% calculating tracking path and transoform data
 config.Speed.tresholdForBadParticipantL1Recontruction = 1.55;   % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
 YoungControls   = CalculateTrackingPath(YoungControls, config);
-%transform data
-YoungControls = TransformPaths(YoungControls);
-YoungmeanS = getMeanWalkingSpeed(YoungControls);
+YoungControls   = TransformPaths(YoungControls);%transform data
+YoungmeanS      = getMeanWalkingSpeed(YoungControls);
 
 %% Model fitting for HealthyOld data
 config.Speed.tresholdForBadParticipantL1Recontruction = 2.0; 
-HealthyControls   = CalculateTrackingPath(HealthyControls, config);
-%transform data
-HealthyOld = TransformPaths(HealthyControls);
+HealthyControls = CalculateTrackingPath(HealthyControls, config);
+HealthyOld      = TransformPaths(HealthyControls);%transform data
 HealthyOldmeanS = getMeanWalkingSpeed(HealthyOld);
 
 %% Model fitting for MCIPos
 config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
-MCIPos   = CalculateTrackingPath(MCIPos, config);
-%transform data
-MCIPos = TransformPaths(MCIPos);
-MCIPosmeanS = getMeanWalkingSpeed(MCIPos);
+MCIPos          = CalculateTrackingPath(MCIPos, config);
+MCIPos          = TransformPaths(MCIPos);%transform data
+MCIPosmeanS     = getMeanWalkingSpeed(MCIPos);
 
 %% Model fitting for MCINeg
 config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
-MCINeg   = CalculateTrackingPath(MCINeg, config);
-%transform data
-MCINeg = TransformPaths(MCINeg);
-MCINegmeanS = getMeanWalkingSpeed(MCINeg);
+MCINeg          = CalculateTrackingPath(MCINeg, config);
+MCINeg          = TransformPaths(MCINeg);%transform data
+MCINegmeanS     = getMeanWalkingSpeed(MCINeg);
 
 %% Model fitting for MCIUnk
 config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
-Unknown   = CalculateTrackingPath(Unknown, config);
-%transform data
-MCIUnk = TransformPaths(Unknown);
-MCIUnkmeanS = getMeanWalkingSpeed(MCIUnk);
+Unknown         = CalculateTrackingPath(Unknown, config);
+MCIUnk          = TransformPaths(Unknown);%transform data
+MCIUnkmeanS     = getMeanWalkingSpeed(MCIUnk);
 
 %% Setting colors for using in plots
 ColorPattern; 
@@ -73,25 +65,30 @@ plotBarScatterOfMeanSpeed(YoungmeanS, HealthyOldmeanS, MCIPosmeanS, MCINegmeanS,
 %% getting Mean Walking Speed of all participants in a group
 function meanS = getMeanWalkingSpeed(Dat)
     numSubjs = length(Dat.Reconstructed);
-    meanS = zeros(3,numSubjs);
+    meanS = NaN(3,numSubjs);
     for subj=1:numSubjs
         
+        %filter out participants who did short walking
+        if ismember(subj, Dat.BadPptIdxs)
+            continue
+        end
+        
         %condition index
-        IdxCond1 = Dat.CondTable{subj}.Condition==1;
-        IdxCond2 = Dat.CondTable{subj}.Condition==2;
-        IdxCond3 = Dat.CondTable{subj}.Condition==3;
+        IdxCond1    = Dat.CondTable{subj}.Condition==1;
+        IdxCond2    = Dat.CondTable{subj}.Condition==2;
+        IdxCond3    = Dat.CondTable{subj}.Condition==3;
 
         %length on leg1
-        length1 = table2array(Dat.Reconstructed{subj}(:,'L1Real'));
+        length1     = table2array(Dat.Reconstructed{subj}(:,'L1Real'));
         %duration on leg1
-        duration1 = table2array(Dat.Reconstructed{subj}(:,'T_L1'));
-        meanspeed1 = length1./duration1;
+        duration1   = table2array(Dat.Reconstructed{subj}(:,'T_L1'));
+        meanspeed1  = length1./duration1;
 
         %length on leg2
-        length2 = table2array(Dat.Reconstructed{subj}(:,'L2Real'));
+        length2     = table2array(Dat.Reconstructed{subj}(:,'L2Real'));
         %duration on leg2
-        duration2 = table2array(Dat.Reconstructed{subj}(:,'T_L2'));
-        meanspeed2 = length2./duration2;
+        duration2   = table2array(Dat.Reconstructed{subj}(:,'T_L2'));
+        meanspeed2  = length2./duration2;
 
         %mean speed of condition 1,2,3
         meanspeed_cond1 = mean([meanspeed1(IdxCond1);meanspeed2(IdxCond1)],'omitnan');
@@ -102,6 +99,10 @@ function meanS = getMeanWalkingSpeed(Dat)
         meanS(2,subj) = meanspeed_cond2;
         meanS(3,subj) = meanspeed_cond3;
     end
+
+    %delete NANs in meanS
+    nanacol = isnan(meanS(1,:));
+    meanS   = meanS(:,~nanacol);
 end
 
 %% plot Bar scatter of Return distance

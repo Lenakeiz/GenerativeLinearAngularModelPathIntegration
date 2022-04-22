@@ -1,19 +1,15 @@
 function [negloglikelihood] = EstimateConstSpeed(beta, G3, g2, g3, b, sigma, nu, Input, config)
-%   EstimateLI means using the degraded leaky integration model when estimating the parameters
-%   degraded means a constant speed
-%   ESTIMATELI Summary of this function goes here:
-%   beta is the leaky integration decay factor
-%   G3 is the gain of the length of the third leg 
-%   g2 is the rotation angle from the direction of leg 2
-%   g3 is the rotation angle from the direction of leg 3
-%   b is the systematic bias in the execution error
-%   sigma is the standard deviation for the Gaussian distribution of the return point
-%   nu decribes the noise strength in the Von Mises distribution
-%   ProjSpeedL1, speed projected onto the first outbound path
-%   ProjSpeedL2, speed projected onto the second outbound path
-%   DX is a cell structure containing the segment of each trial
-%   THETAX is the turning angle
-%   useweber decides whether the noise scales with the walking distance 
+%   EstimateConstSpeed means using the constant speed model when estimating the parameters
+%   Args:
+%       beta is the leaky integration decay factor
+%       G3 is the gain of the length of the third leg 
+%       g2 is the rotation angle from the direction of leg 2
+%       g3 is the rotation angle from the direction of leg 3
+%       b is the systematic bias in the execution error
+%       sigma is the standard deviation for the Gaussian distribution of the return point
+%       nu decribes the noise strength in the Von Mises distribution
+%       Input contains all the data information for estimating, see PerformGroupFit for how it was generated
+%       config: self-explained
 
 %% information necessary for running parameter estimation
 DX              =   Input.DX;
@@ -88,9 +84,9 @@ for tr = 1:sampleSize
     alpha       = mod(alpha, 2*pi); %wrap to (0,2pi)
 
     %whether to regress to the mean correct return angle
-    if config.regress2mean ==true
+    if contains("RGmean", config.subtype)
         theta3_prime = g3*alpha+(1-g3)*mean_angle;
-    else
+    else 
         theta3_prime = g3*alpha+b;
     end
     

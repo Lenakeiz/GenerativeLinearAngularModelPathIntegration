@@ -15,7 +15,7 @@ config.Speed.velocityCutoff                         = 0.2;                 % vel
 config.Speed.timeOffsetForDetectedTemporalWindow    = 0.4;                 % time in seconds that will push earlier/ the detected rising edge
 config.UseGlobalSearch                              = true;
 
-resultfolder = savefolder+"PaperFigs/Fig3B";
+resultfolder = savefolder+"PaperFigs/Fig3";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
@@ -24,16 +24,16 @@ end
 
 %% Model fitting
 %Model related parameters
-config.ModelName        = "ConstSpeedModel_Regress2Mean";
+config.ModelName        = "ConstSpeedModel";
 config.ParamName        = ["beta", "bG3", "g2", "g3", 'b', "sigma", "nu"];
-config.regress2mean     = true;
+config.subtype          = "DistAng_RGmean";%choose from 1,egoNoise / 2, onlyDist / 3, onlyAng_RGb, 
+                                                      %4, onlyAng_RGmean / 5, DistAng_RGb / 6, DistAng_RGmean
 config.includeStand     = true;
-config.useweber         = flase;                        %only true when use weber law in simple generative models
+config.useweber         = false; %only true when use weber law in simple generative models
 config.NumTotalParams   = length(config.ParamName);
 config.NumFreeParams    = 4;
 
 %% Model fitting for YoungControl data
-%% calculating tracking path and transoform data
 config.Speed.tresholdForBadParticipantL1Recontruction = 1.55;   % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
 YoungControls   = CalculateTrackingPath(YoungControls, config);
 %transform data
@@ -78,7 +78,7 @@ AllMCIParams = MergeMCI(AllMCIPosParams, AllMCINegParams, AllMCIUnkParams);
 [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_LIModel_MCIMerged(AllYoungParams, AllHealthyOldParams, AllMCIParams, config);
 
 %% BarScatter Plot between Young and HealthyOld for all Fitted Params
-%BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams, anova_tab, config);
+BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams, anova_tab, config);
 BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCIParams, multicomp_tab1, config)
 
 %%
@@ -103,6 +103,11 @@ function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
             MCIParam            = AllMCIParams{TRIAL_FILTER}(:,ParamIndx);
             MCIParamAllConds    = [MCIParamAllConds,MCIParam];            
         end
+        
+        %remove Nan rows (nan coz of 1, removing participants with short walking length; 2, not enough trials for parameter estimation)
+        YoungParamAllConds      = removeNanRows(YoungParamAllConds);
+        HealthyOldParamAllConds = removeNanRows(HealthyOldParamAllConds);
+        MCIParamAllConds        = removeNanRows(MCIParamAllConds);
     
         %% set figure info
         f = figure('visible','off','Position', [100 100 1000 500]);
@@ -322,6 +327,11 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
             MCIParam            = AllMCIParams{TRIAL_FILTER}(:,ParamIndx);
             MCIParamAllConds    = [MCIParamAllConds,MCIParam];         
         end
+
+        %remove Nan rows (nan coz of 1, removing participants with short walking length; 2, not enough trials for parameter estimation)
+        YoungParamAllConds      = removeNanRows(YoungParamAllConds);
+        HealthyOldParamAllConds = removeNanRows(HealthyOldParamAllConds);
+        MCIParamAllConds        = removeNanRows(MCIParamAllConds);
 
         YoungParamMean      = mean(YoungParamAllConds, 2);
         HealthyOldParamMean = mean(HealthyOldParamAllConds, 2);

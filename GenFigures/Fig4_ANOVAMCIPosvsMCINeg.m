@@ -15,24 +15,29 @@ config.Speed.velocityCutoff                         = 0.2;                 % vel
 config.Speed.timeOffsetForDetectedTemporalWindow    = 0.4;                 % time in seconds that will push earlier/ the detected rising edge
 config.UseGlobalSearch                              = true;
 
-resultfolder = savefolder+"PaperFigs/Fig4B";
+resultfolder = savefolder+"PaperFigs/Fig4_Stand";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
    mkdir(resultfolder);
 end
 
+%% Model fitting
 %Model related parameters
-config.ModelName        = "ConstSpeedModel_Regress2Mean";
+config.ModelName        = "ConstSpeedModel";
 config.ParamName        = ["beta", "bG3", "g2", "g3", 'b', "sigma", "nu"];
+config.subtype          = "DistAng_RGmean";%choose from 1,egoNoise / 2, onlyDist / 3, onlyAng_RGb, 
+                                                      %4, onlyAng_RGmean / 5, DistAng_RGb / 6, DistAng_RGmean
+config.includeStand     = true;
+config.useweber         = false; %only true when use weber law in simple generative models
 config.NumTotalParams   = length(config.ParamName);
 config.NumFreeParams    = 4;
 
 %% Model fitting for YoungControl data
-%% calculating tracking path and transoform data
 config.Speed.tresholdForBadParticipantL1Recontruction = 1.55;   % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
 YoungControls   = CalculateTrackingPath(YoungControls, config);
 YoungControls = TransformPaths(YoungControls);%transform data
+%%
 [AllYoungParams, ~, ~, ~, ~] = getResultsAllConditions(YoungControls, config);
 
 %% Model fitting for HealthyOld data
@@ -86,6 +91,10 @@ function BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, confi
             MCINegParam = AllMCINegParams{TRIAL_FILTER}(:,ParamIndx);
             MCINegParamAllConds = [MCINegParamAllConds,MCINegParam];
         end
+
+        %remove Nan rows (nan coz of 1, removing participants with short walking length; 2, not enough trials for parameter estimation)
+        MCIPosParamAllConds = removeNanRows(MCIPosParamAllConds);
+        MCINegParamAllConds = removeNanRows(MCINegParamAllConds);
     
         %% set figure info
         f = figure('visible','off','Position', [100 100 1000 500]);
@@ -252,7 +261,7 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
     ParamName = config.ParamName;
     for ParamIndx=1:length(ParamName)
 
-        MCIPosParamAllConds = []; %dimension are different, so separate from MCIParamAllConds
+        MCIPosParamAllConds = []; 
         MCINegParamAllConds = [];
 
         for TRIAL_FILTER=1:numConds
@@ -263,6 +272,10 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
             MCINegParam = AllMCINegParams{TRIAL_FILTER}(:,ParamIndx);
             MCINegParamAllConds = [MCINegParamAllConds,MCINegParam];
         end
+
+        %remove Nan rows (nan coz of 1, removing participants with short walking length; 2, not enough trials for parameter estimation)
+        MCIPosParamAllConds = removeNanRows(MCIPosParamAllConds);
+        MCINegParamAllConds = removeNanRows(MCINegParamAllConds);
 
         MCIPosParamMean = mean(MCIPosParamAllConds, 2);
         MCINegParamMean = mean(MCINegParamAllConds, 2);

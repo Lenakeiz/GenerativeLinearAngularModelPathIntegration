@@ -29,6 +29,20 @@ IC              =       cell(1, sampleSize);
 anglebetween = @(va,vb) atan2d(va(:,1).*vb(:,2) - va(:,2).*vb(:,1), va(:,1).*vb(:,1) + va(:,2).*vb(:,2));
 
 for j = 1:sampleSize
+
+    %filter out participants who did short walking
+    if ismember(j, GroupData.BadPptIdxs)
+        % set results to nan for later processing
+        GroupParameters{j}  =   NaN(config.NumTotalParams,1);
+        IC{j}.aic           =   nan;
+        IC{j}.bic           =   nan;
+        IC{j}.negll         =   nan;
+        IC{j}.likelihood    =   nan;
+        flagOoB{j}          =   [];
+        disp(['%%%%%%%%%%%%%%% Skipping PARTICIPANT ' num2str(j) ' ---- because of bad trials%%%%%%%%%%%%%%%']);
+        continue
+    end
+
     %% read and process data 
     if(TRIAL_FILTER == 0)
         %processing the data from all conditions
@@ -68,9 +82,12 @@ for j = 1:sampleSize
         disp("%%%%%%%%%%%%%%% Skipping participant " + num2str(j) + ...
             ", because only "+ length(flagpos{j}) + ...
             " datapoints available for parameter estimation%%%%%%%%%%%%%%%\n");
-        % NUmber of parameters in return matrix is fixed
-        GroupParameters{j}  =   NaN(config.NumParams,1);
-        IC{j}               =   nan;
+        % set results to nan for later processing
+        GroupParameters{j}  =   NaN(config.NumTotalParams,1);
+        IC{j}.aic           =   nan;
+        IC{j}.bic           =   nan;
+        IC{j}.negll         =   nan;
+        IC{j}.likelihood    =   nan;
         flagOoB{j}          =   [];
         continue;
     end
@@ -138,7 +155,7 @@ for j = 1:sampleSize
     [GroupParameters{j}, IC{j}] = FitData(Input, config);
 end
 %%
-%Transforming the fitted parameters to array
+%Transforming the fitted parameters from cell to array
 [~, rows]       = size(GroupParameters);
 [cols,~]        = size(GroupParameters{1});
 estimatedParams = zeros(rows,cols);

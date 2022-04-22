@@ -20,7 +20,63 @@ numFreeParams   =   config.NumFreeParams;
 useglobalsearch =   config.UseGlobalSearch;
 ifEqualDiscount =   false; %only true when use same discount in both leg
 
-if Model_Name == "DistErrLI"
+if Model_Name=="AlloModel" 
+    %set lower bound and up bound
+    %      1-sigma 
+    lb  = [0.1];
+    ub  = [2.0]; 
+    Aeq = [];
+    beq = [];
+    estFnc = @(FP) EstimateAllo(FP,Input, config);
+
+elseif Model_Name=="EgoModel"
+    %set model configurations
+    %set lower bound and up bound
+    %     1-sigma    2-nu
+    lb  = [0.1,       0.1];
+    ub  = [2.0,       100.0]; 
+    %set equality constriants
+    Aeq = [];
+    beq = [];
+    %calculate the likelihood function
+    estFnc = @(FP) EstimateEgo(FP(1), FP(2), Input, config);    
+
+elseif Model_Name=="ConstSpeedModel"
+    %set model configurations
+    %set lower bound and up bound
+    %     1, beta    2-G3     3-g2     4-g3     5-b      6-sigma      7-nu
+    lb  = [-1.0,      0.5,     0.5,     0,       0,      0.1,         0.1];
+    ub  = [1.0,       2.0,     2.0,     2.0,    2*pi,    2.0,         100.0];    
+
+    %set equality constriants
+    Aeq         =   zeros(7,7);         beq     =   zeros(1,7);
+    Aeq(2,2)    =   1;                  beq(2)  =   1;             %G3=1
+    Aeq(3,3)    =   1;                  beq(3)  =   1;             %g2=1
+    
+    if config.subtype == "egoNoise"
+        Aeq(1,1) = 1;  beq(1) = 0; %beta=0
+        Aeq(4,4) = 1;  beq(4) = 1; %g3=1
+        Aeq(5,5) = 1;  beq(5) = 0; %b=0          
+    elseif config.subtype == "onlyDist"
+        Aeq(4,4) = 1;  beq(4) = 1; %g3=1
+        Aeq(5,5) = 1;  beq(5) = 0; %b=0   
+    elseif config.subtype == "onlyAng_RGb"
+        Aeq(1,1) = 1;  beq(1) = 0; %beta=0
+    elseif config.subtype == "onlyAng_RGmean"
+        Aeq(1,1) = 1;  beq(1) = 0; %beta=0
+        Aeq(5,5) = 1;  beq(5) = 0; %b=0  
+    elseif config.subtype == "DistAng_RGb" 
+        %do nothing
+    elseif config.subtype == "DistAng_RGmean"
+        Aeq(5,5) = 1;  beq(5) = 0; %b=0
+    else
+        error("Please set the correct subtype!");
+    end
+
+    %calculate the likelihood function
+    estFnc = @(FP) EstimateConstSpeed(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7), Input, config); 
+
+elseif Model_Name == "DistErrLI"
     %set model configurations
     %set lower bound and up bound
     %     1, beta    2-G3     3-g2     4-g3     5-b      6-sigma      7-nu
@@ -49,35 +105,6 @@ elseif Model_Name == "LIFull"
     Aeq(3,3)=1; beq(3)=1; %g2=1
     %calculate the likelihood function
     estFnc = @(FP) EstimateLI(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),ProjSpeedL1, ProjSpeedL2, DX, THETAX, useweber);
-
-elseif Model_Name=="ConstSpeedModel"
-    %set model configurations
-    %set lower bound and up bound
-    %     1, beta    2-G3     3-g2     4-g3     5-b      6-sigma      7-nu
-    lb  = [-1.0,      0.5,     0.5,     0,       0,      0.1,         0.1];
-    ub  = [1.0,       2.0,     2.0,     1.0,    2*pi,    2.0,         100.0];    
-
-    %set equality constriants
-    Aeq         =   zeros(7,7);     beq     =   zeros(1,7);
-    Aeq(2,2)    =   1;              beq(2)  =   1;      %G3=1
-    Aeq(3,3)    =   1;              beq(3)  =   1;      %g2=1
-    %calculate the likelihood function
-    estFnc = @(FP) EstimateConstSpeed(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7), Input, config);   
-
-elseif Model_Name=="ConstSpeedModel_Regress2Mean"
-    %set model configurations
-    %set lower bound and up bound
-    %     1, beta    2-G3     3-g2     4-g3     5-b      6-sigma      7-nu
-    lb  = [-1.0,      0.5,     0.5,     0,       0,      0.1,         0.1];
-    ub  = [1.0,       2.0,     2.0,     2.0,    2*pi,    2.0,         100.0];    
-
-    %set equality constriants
-    Aeq         =   zeros(7,7);         beq     =   zeros(1,7);
-    Aeq(2,2)    =   1;                  beq(2)=1;       %G3=1
-    Aeq(3,3)    =   1;                  beq(3)=1;       %g2=1
-    Aeq(5,5)    =   1;                  beq(5)=0;       %b=0
-    %calculate the likelihood function
-    estFnc = @(FP) EstimateConstSpeed(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7), Input, config); 
 
 elseif Model_Name == "G1G2Full"
     %set model configurations
@@ -110,23 +137,6 @@ elseif Model_Name=="DistErrG1G2"
     %calculate the likelihood function
     estFnc = @(FP) EstimateG1G2(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),FP(8), ...
                                 ProjSpeedL1, ProjSpeedL2,DX,THETAX,X);
-
-elseif Model_Name=="Allo" | Model_Name=="AlloWeber"
-    %set lower bound and up bound
-    %      1-gamma    2-G3    3-g2     4-g3     5-b      6-sigma    7-nu
-    lb  = [0.5,       0.1,    0.5,     0,       0,         0.1,       0.1];
-    ub  = [1.5,       1.0,    2.0,     1.0,     2*pi,      2.0,       100.0]; 
-
-    Aeq(1,1)=1; beq(1)=1;%gamma=1
-    Aeq(2,2)=1; beq(2)=1;%G3=1
-    Aeq(3,3)=1; beq(3)=1;%g2=1   
-    Aeq(4,4)=1; beq(4)=1;%g3=1 
-    Aeq(5,5)=1; beq(5)=0;%b=0 
-    Aeq(7,7)=1; beq(7)=0;%b=0 
-    if Model_Name=="AlloWeber"
-        useweber=true;
-    end
-    estFnc = @(FP) EstimateAllo(FP(6),DX,X,useweber);
 
 elseif Model_Name=="GammaFull" 
     %gamma full model
@@ -190,27 +200,6 @@ elseif Model_Name=="AngleErrGamma"
     Aeq(1,1)=1; beq(1)=1;%gamma=1
     Aeq(2,2)=1; beq(2)=1;%G3=1
     Aeq(3,3)=1; beq(3)=1;%g2=1             
-    %calculate the likelihood function
-    estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7), ...
-                                 ProjSpeedL1, ProjSpeedL2,DX,THETAX,X, ...
-                                 useweber,ifEqualDiscount);
-
-elseif Model_Name=="Ego" | Model_Name=="EgoWeber"
-    %set model configurations
-    %set lower bound and up bound
-    %      1-gamma    2-G3    3-g2     4-g3     5-b      6-sigma    7-nu
-    lb  = [0.5,       0.1,    0.5,     0,       0,       0.1,       0.1];
-    ub  = [1.5,       1.0,    2.0,     1.0,     2*pi,      2.0,       100.0]; 
-    %set equality constriants
-    Aeq = zeros(7,7); beq=zeros(1,7);    
-    Aeq(1,1)=1; beq(1)=1;%gamma=1
-    Aeq(2,2)=1; beq(2)=1;%G3=1
-    Aeq(3,3)=1; beq(3)=1;%g2=1   
-    Aeq(4,4)=1; beq(4)=1;%g3=1 
-    Aeq(5,5)=1; beq(5)=0;%b=0 
-    if Model_Name=="EgoWeber"
-        useweber=true;
-    end  
     %calculate the likelihood function
     estFnc = @(FP) EstimateGamma(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7), ...
                                  ProjSpeedL1, ProjSpeedL2,DX,THETAX,X, ...

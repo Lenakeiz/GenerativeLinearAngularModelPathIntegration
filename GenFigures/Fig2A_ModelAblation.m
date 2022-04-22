@@ -15,7 +15,7 @@ config.Speed.velocityCutoff                         = 0.2;                 % vel
 config.Speed.timeOffsetForDetectedTemporalWindow    = 0.4;                 % time in seconds that will push earlier/ the detected rising edge
 config.UseGlobalSearch                              = true;
 
-resultfolder = savefolder+"PaperFigs/Fig2D";
+resultfolder = savefolder+"PaperFigs/Fig2_ModelAblation";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')

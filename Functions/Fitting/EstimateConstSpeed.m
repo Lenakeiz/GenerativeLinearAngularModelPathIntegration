@@ -67,7 +67,7 @@ for tr = 1:sampleSize
     else
         men_length1 = l1*(1-exp(-beta*durationL1))/(beta*durationL1)*exp(-beta*durationL2);
     end
-    men_p1      = [men_length1,0];
+    men_p1 = [men_length1,0];
     
     theta2_prime = g2*theta2;
 
@@ -78,7 +78,8 @@ for tr = 1:sampleSize
     %calculate length of mental vector 3
     h           = norm(men_p2);
     %calculate turn angle of mental vector 3
-    vec1        = men_p2-men_p1; vec2 = [0,0]-men_p2;
+    vec1        = men_p2-men_p1; 
+    vec2        = [0,0]-men_p2;
     alpha       = atan2d(vec1(1)*vec2(2)-vec1(2)*vec2(1),vec1(1)*vec2(1)+vec1(2)*vec2(2));
     alpha       = deg2rad(alpha);   %transfer from degree to radians
     alpha       = mod(alpha, 2*pi); %wrap to (0,2pi)

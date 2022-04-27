@@ -17,6 +17,7 @@ THETAX          =   Input.THETADX;
 L1Dur           =   Input.L1Dur;
 L2Dur           =   Input.L2Dur;
 StandingDur     =   Input.StandingDur;
+flagOoB         =   Input.flagOoB;
 
 sampleSize          =   size(DX,2);
 negloglikelihood    =   0;
@@ -103,15 +104,26 @@ for tr = 1:sampleSize
     %distance noise difference
     l3_prime    = G3*h;
     dist_diff   = l3-l3_prime;
-    %the negative loglikelihood of distance on all trials 
-    neg_ll_dist = 1/2*log(2*pi) + log(sigma_scaled) + (dist_diff^2)/(2*sigma_scaled^2);
 
+    if config.useOoBTrial == true 
+        %use OoB trials with the walking length replaced by the mean walking lenghth of good trials
+        %the negative loglikelihood of distance on all trials 
+        neg_ll_dist = 1/2*log(2*pi) + log(sigma_scaled) + (dist_diff^2)/(2*sigma_scaled^2);
+    else
+        %     %the negative loglikelihood of distance on non-OoB trials
+        if flagOoB(tr)==0
+            %this is a non-OoB trial
+            neg_ll_dist = 1/2*log(2*pi) + log(sigma) + (dist_diff^2)/(2*sigma^2);
+        else
+            %this is an OoB trial
+            neg_ll_dist = 0;
+        end
+    end
+    
     %total negative loglikelihood
     neg_ll = neg_ll_angle + neg_ll_dist;
+
 
     negloglikelihood = negloglikelihood + neg_ll;
 end
 end
-
-
-

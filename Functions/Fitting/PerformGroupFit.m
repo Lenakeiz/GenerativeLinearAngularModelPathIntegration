@@ -144,6 +144,7 @@ for j = 1:sampleSize
     Input.DX            =   DX{j};
     Input.THETADX       =   THETADX{j};
     Input.X             =   X{j};
+    Input.flagOoB       =   flagOoB{j};
     Input.ProjSpeedL1   =   ProjSpeedL1{j};
     Input.ProjSpeedL2   =   ProjSpeedL2{j};
     Input.L1Dur         =   L1Dur{j};

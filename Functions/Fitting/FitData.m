@@ -153,7 +153,7 @@ if useglobalsearch == true
                                  'lb',lb,'ub',ub, ...
                                  'nonlcon', nonlcon, ...
                                  'options',optim_options);
-    gs = GlobalSearch();
+    gs = GlobalSearch('NumTrialPoints', 1000);
     [FitParams,negloglikelihood] = run(gs,problem);
 else
     %find a local minima with fmincon

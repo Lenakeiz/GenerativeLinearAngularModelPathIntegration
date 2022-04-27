@@ -15,7 +15,7 @@ config.Speed.velocityCutoff                         = 0.2;                 % vel
 config.Speed.timeOffsetForDetectedTemporalWindow    = 0.4;                 % time in seconds that will push earlier/ the detected rising edge
 config.UseGlobalSearch                              = true;
 
-resultfolder = savefolder+"PaperFigs/Fig3";
+resultfolder = savefolder+"PaperFigs/OurDataResults/Fig3_NoOoB";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
@@ -29,6 +29,7 @@ config.ParamName        = ["beta", "bG3", "g2", "g3", 'b', "sigma", "nu"];
 config.subtype          = "DistAng_RGmean";%choose from 1,egoNoise / 2, onlyDist / 3, onlyAng_RGb, 
                                                       %4, onlyAng_RGmean / 5, DistAng_RGb / 6, DistAng_RGmean
 config.includeStand     = true;
+config.useOoBTrial      = false;
 config.useweber         = false; %only true when use weber law in simple generative models
 config.NumTotalParams   = length(config.ParamName);
 config.NumFreeParams    = 4;

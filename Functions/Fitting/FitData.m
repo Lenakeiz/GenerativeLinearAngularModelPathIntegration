@@ -65,7 +65,7 @@ elseif Model_Name=="ConstSpeedModel"
 elseif Model_Name == "IntSpeedModel"
     %set parameter lower bound and up bound
     %     1, beta    2-G3     3-g2     4-g3     5-b      6-sigma      7-nu
-    lb  = [-1.0,     0.5,     0.5,     0,       0,       0.1,         0.1];
+    lb  = [-1.0,     0.5,     0.5,     0.2,       0,       0.1,         0.1];
     ub  = [1.0,      2.0,     2.0,     2.0,     2*pi,     2.0,         100.0];    
 
     %set equality constriants
@@ -143,6 +143,7 @@ optim_options = optimoptions(@fmincon, 'Algorithm','sqp', 'MaxFunctionEvaluation
 %setting nonlinear constriants We don't have to constraint here coz
 %Theta3Prime will always in the range of (0,2pi)
 %nonlcon = @(FP) Theta3PrimeCon(FP(1),FP(2),FP(3),FP(4),FP(5),DX,THETAX,X);
+%nonlcon = @(FP) OoBcon(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),FP(8),DX,THETAX,X,OoBLen,flagOoB);
 nonlcon = [];
 
 if useglobalsearch == true

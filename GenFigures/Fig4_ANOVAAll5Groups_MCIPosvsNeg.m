@@ -15,7 +15,7 @@ config.Speed.velocityCutoff                         = 0.2;                 % vel
 config.Speed.timeOffsetForDetectedTemporalWindow    = 0.4;                 % time in seconds that will push earlier/ the detected rising edge
 config.UseGlobalSearch                              = true;
 
-resultfolder = savefolder+"PaperFigs/OurDataResults/Fig5_RG2PhyAng";
+resultfolder = savefolder+"PaperFigs/OurDataResults/Fig4_NoOoB";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
@@ -28,18 +28,30 @@ config.ModelName        = "ConstSpeedModel";
 config.ParamName        = ["beta", "bG3", "g2", "g3", 'b', "sigma", "nu"];
 config.subtype          = "DistAng_RGmean";%choose from 1,egoNoise / 2, onlyDist / 3, onlyAng_RGb, 
                                                       %4, onlyAng_RGmean / 5, DistAng_RGb / 6, DistAng_RGmean
-config.includeStand     = false;
+config.includeStand     = true;
 config.useOoBTrial      = false;
 config.useweber         = false; %only true when use weber law in simple generative models
 config.NumTotalParams   = length(config.ParamName);
 config.NumFreeParams    = 4;
 
+%% Model fitting for YoungControl data
+config.Speed.tresholdForBadParticipantL1Recontruction = 1.55;   % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
+YoungControls   = CalculateTrackingPath(YoungControls, config);
+YoungControls = TransformPaths(YoungControls);%transform data
+%%
+[AllYoungParams, ~, ~, ~, ~] = getResultsAllConditions(YoungControls, config);
+
+%% Model fitting for HealthyOld data
+config.Speed.tresholdForBadParticipantL1Recontruction = 2.0; 
+HealthyControls   = CalculateTrackingPath(HealthyControls, config);
+HealthyOld = TransformPaths(HealthyControls);%transform data
+[AllHealthyOldParams, ~, ~, ~, ~] = getResultsAllConditions(HealthyOld, config);
 
 %% Model fitting for MCIPos
 config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
 MCIPos   = CalculateTrackingPath(MCIPos, config);
 MCIPos = TransformPaths(MCIPos);%transform data
-[AllMCIPosParams, AllMCIPosX, AllMCIPosDX, AllMCIPosTheta, AllMCIPosIC] = getResultsAllConditions(MCIPos, config);
+[AllMCIPosParams,  ~, ~, ~, ~] = getResultsAllConditions(MCIPos, config);
 
 %% Model fitting for MCINeg
 config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
@@ -47,11 +59,17 @@ MCINeg   = CalculateTrackingPath(MCINeg, config);
 MCINeg = TransformPaths(MCINeg);%transform data
 [AllMCINegParams,  ~, ~, ~, ~] = getResultsAllConditions(MCINeg, config);
 
+%% Model fitting for MCIUnk
+config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
+Unknown   = CalculateTrackingPath(Unknown, config);
+MCIUnk = TransformPaths(Unknown);%transform data
+[AllMCIUnkParams,  ~, ~, ~, ~] = getResultsAllConditions(MCIUnk, config);
+
 %% Setting colors for using in plots
 ColorPattern; 
 
 %% TwowayAnova
-[anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_LIModel_MCIPosvsMCINeg(AllMCIPosParams, AllMCINegParams, config);
+[anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_LIModel_MCISeparated(AllYoungParams, AllHealthyOldParams, AllMCIPosParams, AllMCINegParams, AllMCIUnkParams, config);
 
 %% BarScatter Plot between Young and HealthyOld for all Fitted Params
 BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, config);

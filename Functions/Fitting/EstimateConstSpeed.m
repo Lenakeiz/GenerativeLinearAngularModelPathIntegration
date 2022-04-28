@@ -22,22 +22,31 @@ flagOoB         =   Input.flagOoB;
 sampleSize          =   size(DX,2);
 negloglikelihood    =   0;
 
+% %% find the correct mean return angle based on all trials 
+% Alphas = zeros(sampleSize,1);
+% for tr = 1:sampleSize
+%     %extract the physical data info
+%     l1      = DX{tr}(1);
+%     l2      = DX{tr}(2);
+%     theta2  = THETAX{tr}(2);
+% 
+%     %calculate the correct return angle
+%     phy_p1  = [l1,0];
+%     phy_p2  = [l1+l2*cos(theta2),l2*sin(theta2)];
+%     vec1    = phy_p2-phy_p1; vec2 = [0,0]-phy_p2;
+%     alpha   = atan2d(vec1(1)*vec2(2)-vec1(2)*vec2(1),vec1(1)*vec2(1)+vec1(2)*vec2(2));
+%     alpha   = deg2rad(alpha);%transfer from degree to radians
+%     alpha   = mod(alpha, 2*pi);  %wrap to (0,2pi)  
+%     Alphas(tr) = alpha;
+% end
+% mean_angle = mean(Alphas);
+
 %% find the correct mean return angle based on all trials 
 Alphas = zeros(sampleSize,1);
 for tr = 1:sampleSize
     %extract the physical data info
-    l1      = DX{tr}(1);
-    l2      = DX{tr}(2);
-    theta2  = THETAX{tr}(2);
-
-    %calculate the correct return angle
-    phy_p1  = [l1,0];
-    phy_p2  = [l1+l2*cos(theta2),l2*sin(theta2)];
-    vec1    = phy_p2-phy_p1; vec2 = [0,0]-phy_p2;
-    alpha   = atan2d(vec1(1)*vec2(2)-vec1(2)*vec2(1),vec1(1)*vec2(1)+vec1(2)*vec2(2));
-    alpha   = deg2rad(alpha);%transfer from degree to radians
-    alpha   = mod(alpha, 2*pi);  %wrap to (0,2pi)  
-    Alphas(tr) = alpha;
+    theta3  = THETAX{tr}(3);
+    Alphas(tr) = theta3;
 end
 mean_angle = mean(Alphas);
 
@@ -86,7 +95,7 @@ for tr = 1:sampleSize
     alpha       = mod(alpha, 2*pi); %wrap to (0,2pi)
 
     %whether to regress to the mean correct return angle
-    if contains("RGmean", config.subtype)
+    if contains(config.subtype, "RGmean")
         theta3_prime = g3*alpha+(1-g3)*mean_angle;
     else 
         theta3_prime = g3*alpha+b;

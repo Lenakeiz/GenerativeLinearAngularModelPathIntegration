@@ -28,6 +28,52 @@ if Model_Name=="AlloModel"
     beq = [];
     estFnc = @(FP) EstimateAllo(FP,Input, config);   
 
+elseif Model_Name=="ConstSpeedModel4Params"
+    %set parameter lower bound and up bound
+    %     1, beta     2-g3         3-sigma      4-nu
+    lb  = [-1.0,      0,           0.1,         0.1];
+    ub  = [1.0,       2.0,         2.0,         100.0];    
+
+    %set equality constriants
+    Aeq         =   [];         beq     =   [];
+    
+    if config.subtype == "egoNoise"
+        Aeq(1,1) = 1;  beq(1) = 0; %beta=0
+        Aeq(4,4) = 1;  beq(4) = 1; %g3=1
+        Aeq(5,5) = 1;  beq(5) = 0; %b=0          
+    elseif config.subtype == "onlyDist"
+        Aeq(4,4) = 1;  beq(4) = 1; %g3=1
+        Aeq(5,5) = 1;  beq(5) = 0; %b=0   
+    elseif config.subtype == "onlyAng_RGb"
+        Aeq(1,1) = 1;  beq(1) = 0; %beta=0
+    elseif config.subtype == "onlyAng_RGmean"
+        Aeq(1,1) = 1;  beq(1) = 0; %beta=0
+        Aeq(5,5) = 1;  beq(5) = 0; %b=0  
+    elseif config.subtype == "onlyAng_SimpleGain"
+        Aeq(1,1) = 1;  beq(1) = 0; %beta=0        
+    elseif config.subtype == "DistAng_RGmean"
+        %do nothing
+    elseif config.subtype == "DistAng_SimpleGain"
+        %do nothing
+    else
+        error("Please set the correct subtype!");
+    end
+
+    %calculate the likelihood function
+    estFnc = @(FP) EstimateConstSpeed4Params(FP(1),FP(2),FP(3),FP(4), Input, config); 
+
+elseif Model_Name=="ConstSpeedModel5Params"
+    %set parameter lower bound and up bound
+    %     1, beta        2-g3     3-b      4-sigma      5-nu
+    lb  = [-1.0,         0,       0,      0.1,         0.1];
+    ub  = [1.0,          2.0,    2*pi,    2.0,         100.0];    
+
+    %set equality constriants
+    Aeq         =   [];         beq     =   [];
+
+    %calculate the likelihood function
+    estFnc = @(FP) EstimateConstSpeed5Params(FP(1),FP(2),FP(3),FP(4),FP(5), Input, config); 
+
 elseif Model_Name=="ConstSpeedModel"
     %set parameter lower bound and up bound
     %     1, beta    2-G3     3-g2     4-g3     5-b      6-sigma      7-nu

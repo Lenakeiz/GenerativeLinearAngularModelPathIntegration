@@ -42,8 +42,19 @@ for j = 1:sampleSize
         disp(['%%%%%%%%%%%%%%% Skipping PARTICIPANT ' num2str(j) ' ---- because of bad trials%%%%%%%%%%%%%%%']);
         continue
     end
-
-    %% read and process data 
+    
+    %filter out participants who did short walking
+    if ismember(j, [0])
+        % set results to nan for later processing
+        GroupParameters{j}  =   NaN(config.NumTotalParams,1);
+        IC{j}.aic           =   nan;
+        IC{j}.bic           =   nan;
+        IC{j}.negll         =   nan;
+        IC{j}.likelihood    =   nan;
+        flagOoB{j}          =   [];
+        disp(['%%%%%%%%%%%%%%% Skipping PARTICIPANT ' num2str(j) ' ---- because of bad trials%%%%%%%%%%%%%%%']);
+        continue
+    end%% read and process data 
     if(TRIAL_FILTER == 0)
         %processing the data from all conditions
         flagpos{j}  = GroupData.FlagPos{j};

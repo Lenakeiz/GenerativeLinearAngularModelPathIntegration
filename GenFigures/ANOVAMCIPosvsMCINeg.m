@@ -17,13 +17,11 @@ config.UseGlobalSearch                              = true;
 
 %% Model fitting
 %Model related parameters
-config.ModelName        = "ConstSpeedModelDistAngle";
-config.ParamName        = ["beta", "sigma", "g3", "nu"];
-config.subtype          = "Regress2Mean"; %DistAng_SimpleGain, DistAng_RGmean
+% config.ModelName        = "ConstSpeedModelDistAngleGain";
+% config.ParamName        = ["beta", "sigma", "g3", "nu"];
 
-% config.ModelName        = "ConstSpeedModel5Params";
-% config.ParamName        = ["beta", "g3", "b", "sigma", "nu"];
-% config.subtype          = "DistAng_RGb"; %DistAng_SimpleGain, DistAng_RGmean
+config.ModelName        = "ConstSpeedModelDistAngleRGb";
+config.ParamName        = ["beta", "sigma", "g3", "b", "nu"];
 
 % config.ModelName        = "ConstSpeedModel";
 % config.ParamName        = ["beta", "bG3", "g2", "g3", 'b', "sigma", "nu"];
@@ -32,10 +30,9 @@ config.subtype          = "Regress2Mean"; %DistAng_SimpleGain, DistAng_RGmean
 config.includeStand     = false;
 config.useOoBTrial      = false;
 config.useweber         = false; %only true when use weber law in simple generative models
-config.NumTotalParams   = length(config.ParamName);
-config.NumFreeParams    = 4;
+config.NumParams   = length(config.ParamName);
 
-resultfolder = savefolder+"PaperFigs/OurDataResults/XFig5_"+config.ModelName+"_"+config.subtype+"_exclude2patcipants";
+resultfolder = savefolder+"PaperFigs/SeparateEstimation/Fig2_"+config.ModelName;
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')

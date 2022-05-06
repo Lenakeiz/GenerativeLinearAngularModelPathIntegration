@@ -1,22 +1,8 @@
-function [FitParams, IC] = FitData(Input,config)
+function [FitAllParams, ICDist, ICAng] = FitData(Input,config)
 %FITDATA Function to fit the data on a single participant
-%   DX is a cell structure containing the segment of each trial
-%   THETAX is the turning angle (wrong at the moment)
-%   X is the data points
-%   the noise for each trial
-
-% DX              =   Input.DX;
-% THETAX          =   Input.THETAX;
-% X               =   Input.X;
-% ProjSpeedL1     =   Input.ProjSpeedL1;
-% ProjSpeedL2     =   Input.ProjSpeedL2;
-% L1Dur           =   Input.L1Dur;
-% L2Dur           =   Input.L2Dur;
-% StandingDur     =   Input.StandingDur;
 
 %load configurations necessary for the script
 Model_Name      =   config.ModelName;
-numFreeParams   =   config.NumFreeParams;
 useglobalsearch =   config.UseGlobalSearch;
 
 if Model_Name=="AlloModel" 
@@ -24,43 +10,209 @@ if Model_Name=="AlloModel"
     %      1-sigma 
     lb  = [0.1];
     ub  = [2.0]; 
-    Aeq = [];
-    beq = [];
-    estFnc = @(FP) EstimateAllo(FP,Input, config);   
+    estFnc = @(FP) EstimateAllo(FP,Input, config); 
 
-elseif Model_Name=="ConstSpeedModel4Params"
+%% ConstSpeedModelDistAngleGain model
+elseif Model_Name=="ConstSpeedModelDistAngleGain"
+
+    % distance parameter fitting
+
     %set parameter lower bound and up bound
-    %     1, beta     2-g3         3-sigma      4-nu
-    lb  = [-1.0,      0,           0.1,         0.1];
-    ub  = [1.0,       2.0,         2.0,         100.0];    
+    %     1, beta    2, sigma      
+    lb_dist  = [-1.0,     0.1];
+    ub_dist  = [1.0,      2.0]; 
 
-    %set equality constriants
-    Aeq         =   [];         beq     =   [];
+    %calculate the likelihood function of distance error
+    estFncDist = @(FP) EstimateConstSpeed_Dist(FP(1), FP(2), Input, config); 
+
+    %Generating random start in the range
+    FitDistParams0 = (ub_dist - lb_dist)'.*rand(size(lb_dist,2),1) + lb_dist';
+    disp("Initial distance parameters: "+num2str(FitDistParams0'));
+    %setting optimization options
+    optim_options = optimoptions(@fmincon, 'Algorithm','sqp', 'MaxFunctionEvaluations',1e4);
     
-    if config.subtype == "egoNoise"
-        Aeq(1,1) = 1;  beq(1) = 0; %beta=0
-        Aeq(4,4) = 1;  beq(4) = 1; %g3=1
-        Aeq(5,5) = 1;  beq(5) = 0; %b=0          
-    elseif config.subtype == "onlyDist"
-        Aeq(4,4) = 1;  beq(4) = 1; %g3=1
-        Aeq(5,5) = 1;  beq(5) = 0; %b=0   
-    elseif config.subtype == "onlyAng_RGb"
-        Aeq(1,1) = 1;  beq(1) = 0; %beta=0
-    elseif config.subtype == "onlyAng_RGmean"
-        Aeq(1,1) = 1;  beq(1) = 0; %beta=0
-        Aeq(5,5) = 1;  beq(5) = 0; %b=0  
-    elseif config.subtype == "onlyAng_SimpleGain"
-        Aeq(1,1) = 1;  beq(1) = 0; %beta=0        
-    elseif config.subtype == "DistAng_RGmean"
-        %do nothing
-    elseif config.subtype == "DistAng_SimpleGain"
-        %do nothing
+    if useglobalsearch == true
+        %finding the best local minima with globalsearch
+        problem = createOptimProblem('fmincon', ...
+                                     'objective', estFncDist, ...
+                                     'x0', FitDistParams0, ...
+                                     'Aineq',[],'bineq',[], ...
+                                     'Aeq',[],'beq',[], ...
+                                     'lb',lb_dist,'ub',ub_dist, ...
+                                     'nonlcon', [], ...
+                                     'options',optim_options);
+        gs = GlobalSearch('NumTrialPoints', 1000);
+        [FitDistParams,negloglikelihood_Dist] = run(gs,problem);
     else
-        error("Please set the correct subtype!");
+        %find a local minima with fmincon
+        [FitDistParams, negloglikelihood_Dist] = fmincon(estFncDist,FitDistParams0,[],[],[],[],lb_dist,ub_dist,nonlcon,optim_options);
     end
+    
+    disp("Fitted distance parameters: "+num2str(FitDistParams'));
+    disp("Distance Negative LogLikelihood=" + num2str(negloglikelihood_Dist));
+    disp(" ");disp(" ");disp(" ");
 
-    %calculate the likelihood function
-    estFnc = @(FP) EstimateConstSpeed4Params(FP(1),FP(2),FP(3),FP(4), Input, config); 
+    % Calculate the Bayesian Inference Criterion for each model
+    sampleSize = size(Input.X,2); %the number of observations, i.e., the sample size
+    loglikelihood = -negloglikelihood_Dist; %the loglikelihood derived from fitting different models 
+    numParams = length(lb_dist);
+    [aic, bic] = aicbic(loglikelihood, numParams, sampleSize, 'Normalize',false);
+    ICDist.aic = aic;
+    ICDist.bic = bic;
+    ICDist.negll = negloglikelihood_Dist;
+    ICDist.likelihood = exp(loglikelihood);    
+
+    % angle parameter fitting
+    
+    beta = FitDistParams(1); %from distance estimation
+
+    %           1-g3        2-nu
+    lb_angle  = [0,         0.1];
+    ub_angle  = [2.0,       100.0]; 
+
+    %calculate the likelihood function of angle error
+    estFncAng = @(FP) EstimateConstSpeed_AngleGain(FP(1), FP(2), beta, Input, config); 
+
+    %Generating random start in the range
+    FitAngParams0 = (ub_angle - lb_angle)'.*rand(size(lb_angle,2),1) + lb_angle';
+    disp("Initial angle parameters: "+num2str(FitAngParams0'));
+    %setting optimization options
+    optim_options = optimoptions(@fmincon, 'Algorithm','sqp', 'MaxFunctionEvaluations',1e4);
+    
+    if useglobalsearch == true
+        %finding the best local minima with globalsearch
+        problem = createOptimProblem('fmincon', ...
+                                     'objective', estFncAng, ...
+                                     'x0', FitAngParams0, ...
+                                     'Aineq',[],'bineq',[], ...
+                                     'Aeq',[],'beq',[], ...
+                                     'lb',lb_angle,'ub',ub_angle, ...
+                                     'nonlcon', [], ...
+                                     'options',optim_options);
+        gs = GlobalSearch('NumTrialPoints', 1000);
+        [FitAngParams,negloglikelihood_Ang] = run(gs,problem);
+    else
+        %find a local minima with fmincon
+        [FitAngParams, negloglikelihood_Ang] = fmincon(estFncAng,FitAngParams0,[],[],[],[],lb_angle,ub_angle,nonlcon,optim_options);
+    end
+    
+    disp("Fitted angle parameters: "+num2str(FitAngParams'));
+    disp("Angle Negative LogLikelihood=" + num2str(negloglikelihood_Ang));
+    disp(" ");disp(" ");disp(" ");    
+
+    % Calculate the Bayesian Inference Criterion for each model
+    sampleSize = size(Input.X,2); %the number of observations, i.e., the sample size
+    loglikelihood = -negloglikelihood_Ang; %the loglikelihood derived from fitting different models 
+    numParams = length(lb_angle);
+    [aic, bic] = aicbic(loglikelihood, numParams, sampleSize, 'Normalize',false);
+    ICAng.aic = aic;
+    ICAng.bic = bic;
+    ICAng.negll = negloglikelihood_Ang;
+    ICAng.likelihood = exp(loglikelihood); 
+
+    %
+    FitAllParams = [FitDistParams; FitAngParams];
+
+%% ConstSpeedModelDistAngleRGb model
+elseif Model_Name=="ConstSpeedModelDistAngleRGb"
+
+    %% distance parameter fitting
+
+    %set parameter lower bound and up bound
+    %     1, beta    2, sigma      
+    lb_dist  = [-1.0,     0.1];
+    ub_dist  = [1.0,      2.0]; 
+
+    %calculate the likelihood function of distance error
+    estFncDist = @(FP) EstimateConstSpeed_Dist(FP(1), FP(2), Input, config); 
+
+    %Generating random start in the range
+    FitDistParams0 = (ub_dist - lb_dist)'.*rand(size(lb_dist,2),1) + lb_dist';
+    disp("Initial distance parameters: "+num2str(FitDistParams0'));
+    %setting optimization options
+    optim_options = optimoptions(@fmincon, 'Algorithm','sqp', 'MaxFunctionEvaluations',1e4);
+    
+    if useglobalsearch == true
+        %finding the best local minima with globalsearch
+        problem = createOptimProblem('fmincon', ...
+                                     'objective', estFncDist, ...
+                                     'x0', FitDistParams0, ...
+                                     'Aineq',[],'bineq',[], ...
+                                     'Aeq',[],'beq',[], ...
+                                     'lb',lb_dist,'ub',ub_dist, ...
+                                     'nonlcon', [], ...
+                                     'options',optim_options);
+        gs = GlobalSearch('NumTrialPoints', 1000);
+        [FitDistParams,negloglikelihood_Dist] = run(gs,problem);
+    else
+        %find a local minima with fmincon
+        [FitDistParams, negloglikelihood_Dist] = fmincon(estFncDist,FitDistParams0,[],[],[],[],lb_dist,ub_dist,nonlcon,optim_options);
+    end
+    
+    disp("Fitted distance parameters: "+num2str(FitDistParams'));
+    disp("Distance Negative LogLikelihood=" + num2str(negloglikelihood_Dist));
+    disp(" ");disp(" ");disp(" ");
+
+    % Calculate the Bayesian Inference Criterion for each model
+    sampleSize = size(Input.X,2); %the number of observations, i.e., the sample size
+    loglikelihood = -negloglikelihood_Dist; %the loglikelihood derived from fitting different models 
+    numParams = length(lb_dist);
+    [aic, bic] = aicbic(loglikelihood, numParams, sampleSize, 'Normalize',false);
+    ICDist.aic = aic;
+    ICDist.bic = bic;
+    ICDist.negll = negloglikelihood_Dist;
+    ICDist.likelihood = exp(loglikelihood);    
+
+    %% angle parameter fitting
+    
+    beta = FitDistParams(1); %from distance estimation
+
+    %           1-g3    2-b     3-nu
+    lb_angle  = [0,     0,      0.1];
+    ub_angle  = [2.0,   2*pi,   100.0]; 
+
+    %calculate the likelihood function of angle error
+    estFncAng = @(FP) EstimateConstSpeed_AngleRGb(FP(1), FP(2), FP(3), beta, Input, config); 
+
+    %Generating random start in the range
+    FitAngParams0 = (ub_angle - lb_angle)'.*rand(size(lb_angle,2),1) + lb_angle';
+    disp("Initial angle parameters: "+num2str(FitAngParams0'));
+    %setting optimization options
+    optim_options = optimoptions(@fmincon, 'Algorithm','sqp', 'MaxFunctionEvaluations',1e4);
+    
+    if useglobalsearch == true
+        %finding the best local minima with globalsearch
+        problem = createOptimProblem('fmincon', ...
+                                     'objective', estFncAng, ...
+                                     'x0', FitAngParams0, ...
+                                     'Aineq',[],'bineq',[], ...
+                                     'Aeq',[],'beq',[], ...
+                                     'lb',lb_angle,'ub',ub_angle, ...
+                                     'nonlcon', [], ...
+                                     'options',optim_options);
+        gs = GlobalSearch('NumTrialPoints', 1000);
+        [FitAngParams,negloglikelihood_Ang] = run(gs,problem);
+    else
+        %find a local minima with fmincon
+        [FitAngParams, negloglikelihood_Ang] = fmincon(estFncAng,FitAngParams0,[],[],[],[],lb_angle,ub_angle,nonlcon,optim_options);
+    end
+    
+    disp("Fitted angle parameters: "+num2str(FitAngParams'));
+    disp("Angle Negative LogLikelihood=" + num2str(negloglikelihood_Ang));
+    disp(" ");disp(" ");disp(" ");    
+
+    % Calculate the Bayesian Inference Criterion for each model
+    sampleSize = size(Input.X,2); %the number of observations, i.e., the sample size
+    loglikelihood = -negloglikelihood_Ang; %the loglikelihood derived from fitting different models 
+    numParams = length(lb_angle);
+    [aic, bic] = aicbic(loglikelihood, numParams, sampleSize, 'Normalize',false);
+    ICAng.aic = aic;
+    ICAng.bic = bic;
+    ICAng.negll = negloglikelihood_Ang;
+    ICAng.likelihood = exp(loglikelihood); 
+
+    %
+    FitAllParams = [FitDistParams; FitAngParams];
 
 elseif Model_Name=="ConstSpeedModel5Params"
     %set parameter lower bound and up bound
@@ -73,40 +225,6 @@ elseif Model_Name=="ConstSpeedModel5Params"
 
     %calculate the likelihood function
     estFnc = @(FP) EstimateConstSpeed5Params(FP(1),FP(2),FP(3),FP(4),FP(5), Input, config); 
-
-elseif Model_Name=="ConstSpeedModel"
-    %set parameter lower bound and up bound
-    %     1, beta    2-G3     3-g2     4-g3     5-b      6-sigma      7-nu
-    lb  = [-1.0,      0.5,     0.5,     0,       0,      0.1,         0.1];
-    ub  = [1.0,       2.0,     2.0,     2.0,    2*pi,    2.0,         100.0];    
-
-    %set equality constriants
-    Aeq         =   zeros(7,7);         beq     =   zeros(1,7);
-    Aeq(2,2)    =   1;                  beq(2)  =   1;             %G3=1
-    Aeq(3,3)    =   1;                  beq(3)  =   1;             %g2=1
-    
-    if config.subtype == "egoNoise"
-        Aeq(1,1) = 1;  beq(1) = 0; %beta=0
-        Aeq(4,4) = 1;  beq(4) = 1; %g3=1
-        Aeq(5,5) = 1;  beq(5) = 0; %b=0          
-    elseif config.subtype == "onlyDist"
-        Aeq(4,4) = 1;  beq(4) = 1; %g3=1
-        Aeq(5,5) = 1;  beq(5) = 0; %b=0   
-    elseif config.subtype == "onlyAng_RGb"
-        Aeq(1,1) = 1;  beq(1) = 0; %beta=0
-    elseif config.subtype == "onlyAng_RGmean"
-        Aeq(1,1) = 1;  beq(1) = 0; %beta=0
-        Aeq(5,5) = 1;  beq(5) = 0; %b=0  
-    elseif config.subtype == "DistAng_RGb" 
-        %do nothing
-    elseif config.subtype == "DistAng_RGmean"
-        Aeq(5,5) = 1;  beq(5) = 0; %b=0
-    else
-        error("Please set the correct subtype!");
-    end
-
-    %calculate the likelihood function
-    estFnc = @(FP) EstimateConstSpeed(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7), Input, config); 
 
 elseif Model_Name == "IntSpeedModel"
     %set parameter lower bound and up bound
@@ -178,49 +296,6 @@ elseif Model_Name == "G1G2Model"
 else
     error("Please set the correct name of model!");
 end
-
-%% parameter fitting
-%Generating random start in the range
-FitParams0 = (ub - lb)'.*rand(size(lb,2),1) + lb';
-disp("Initial parameters: "+num2str(FitParams0'));
-%setting optimization options
-optim_options = optimoptions(@fmincon, 'Algorithm','sqp', 'MaxFunctionEvaluations',1e4);
-
-%setting nonlinear constriants We don't have to constraint here coz
-%Theta3Prime will always in the range of (0,2pi)
-%nonlcon = @(FP) Theta3PrimeCon(FP(1),FP(2),FP(3),FP(4),FP(5),DX,THETAX,X);
-%nonlcon = @(FP) OoBcon(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),FP(8),DX,THETAX,X,OoBLen,flagOoB);
-nonlcon = [];
-
-if useglobalsearch == true
-    %finding the best local minima with globalsearch
-    problem = createOptimProblem('fmincon','objective', estFnc,'x0',FitParams0, ...
-                                 'Aineq',[],'bineq',[], ...
-                                 'Aeq',Aeq,'beq',beq, ...
-                                 'lb',lb,'ub',ub, ...
-                                 'nonlcon', nonlcon, ...
-                                 'options',optim_options);
-    gs = GlobalSearch('NumTrialPoints', 1000);
-    [FitParams,negloglikelihood] = run(gs,problem);
-else
-    %find a local minima with fmincon
-    [FitParams, negloglikelihood] = fmincon(estFnc,FitParams0,[],[],Aeq,beq,lb,ub,nonlcon,optim_options);
-end
-
-disp("Fitted parameters: "+num2str(FitParams'));
-disp("Negative LogLikelihood=" + num2str(negloglikelihood));
-disp(" ");
-disp(" ");
-disp(" ");
-
-%% Calculate the Bayesian Inference Criterion for each model
-sampleSize = size(Input.X,2); %the number of observations, i.e., the sample size
-loglikelihood = -negloglikelihood; %the loglikelihood derived from fitting different models 
-[aic, bic] = aicbic(loglikelihood, numFreeParams, sampleSize, 'Normalize',false);
-IC.aic = aic;
-IC.bic = bic;
-IC.negll = negloglikelihood;
-IC.likelihood = exp(loglikelihood);
 
 end
 

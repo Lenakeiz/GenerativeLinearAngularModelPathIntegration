@@ -23,7 +23,8 @@ flagpos         =       cell(1, sampleSize);% flagpos
 flagOoB         =       cell(1, sampleSize);% OoB flag
 OoBLen          =       cell(1, sampleSize);% OoB length
 GroupParameters =       cell(1, sampleSize);% Output value
-IC              =       cell(1, sampleSize);  
+ICDist          =       cell(1, sampleSize);  
+ICAng           =       cell(1, sampleSize);  
 
 %help function to calculate the angle between two vector
 anglebetween = @(va,vb) atan2d(va(:,1).*vb(:,2) - va(:,2).*vb(:,1), va(:,1).*vb(:,1) + va(:,2).*vb(:,2));
@@ -33,11 +34,17 @@ for j = 1:sampleSize
     %filter out participants who did short walking
     if ismember(j, GroupData.BadPptIdxs)
         % set results to nan for later processing
-        GroupParameters{j}  =   NaN(config.NumTotalParams,1);
-        IC{j}.aic           =   nan;
-        IC{j}.bic           =   nan;
-        IC{j}.negll         =   nan;
-        IC{j}.likelihood    =   nan;
+        GroupParameters{j}  =   NaN(config.NumParams,1);
+        ICDist{j}.aic           =   nan;
+        ICDist{j}.bic           =   nan;
+        ICDist{j}.negll         =   nan;
+        ICDist{j}.likelihood    =   nan;
+
+        ICAng{j}.aic           =   nan;
+        ICAng{j}.bic           =   nan;
+        ICAng{j}.negll         =   nan;
+        ICAng{j}.likelihood    =   nan;
+
         flagOoB{j}          =   [];
         disp(['%%%%%%%%%%%%%%% Skipping PARTICIPANT ' num2str(j) ' ---- because of bad trials%%%%%%%%%%%%%%%']);
         continue
@@ -46,11 +53,16 @@ for j = 1:sampleSize
     %filter out participants who did short walking
     if ismember(j, [0])
         % set results to nan for later processing
-        GroupParameters{j}  =   NaN(config.NumTotalParams,1);
-        IC{j}.aic           =   nan;
-        IC{j}.bic           =   nan;
-        IC{j}.negll         =   nan;
-        IC{j}.likelihood    =   nan;
+        GroupParameters{j}  =   NaN(config.NumParams,1);
+        ICDist{j}.aic           =   nan;
+        ICDist{j}.bic           =   nan;
+        ICDist{j}.negll         =   nan;
+        ICDist{j}.likelihood    =   nan;
+
+        ICAng{j}.aic           =   nan;
+        ICAng{j}.bic           =   nan;
+        ICAng{j}.negll         =   nan;
+        ICAng{j}.likelihood    =   nan;
         flagOoB{j}          =   [];
         disp(['%%%%%%%%%%%%%%% Skipping PARTICIPANT ' num2str(j) ' ---- because of bad trials%%%%%%%%%%%%%%%']);
         continue
@@ -89,16 +101,21 @@ for j = 1:sampleSize
         end
     end
 
-    if length(flagpos{j}) < config.NumFreeParams
+    if length(flagpos{j}) < config.NumParams
         disp("%%%%%%%%%%%%%%% Skipping participant " + num2str(j) + ...
             ", because only "+ length(flagpos{j}) + ...
             " datapoints available for parameter estimation%%%%%%%%%%%%%%%\n");
         % set results to nan for later processing
-        GroupParameters{j}  =   NaN(config.NumTotalParams,1);
-        IC{j}.aic           =   nan;
-        IC{j}.bic           =   nan;
-        IC{j}.negll         =   nan;
-        IC{j}.likelihood    =   nan;
+        GroupParameters{j}  =   NaN(config.NumParams,1);
+        ICDist{j}.aic           =   nan;
+        ICDist{j}.bic           =   nan;
+        ICDist{j}.negll         =   nan;
+        ICDist{j}.likelihood    =   nan;
+
+        ICAng{j}.aic           =   nan;
+        ICAng{j}.bic           =   nan;
+        ICAng{j}.negll         =   nan;
+        ICAng{j}.likelihood    =   nan;
         flagOoB{j}          =   [];
         continue;
     end
@@ -164,7 +181,7 @@ for j = 1:sampleSize
 
     %% Do the data fitting
     disp(['%%%%%%%%%%%%%%% STARTING FIT PER PARTICIPANT ' num2str(j) ' %%%%%%%%%%%%%%%']);
-    [GroupParameters{j}, IC{j}] = FitData(Input, config);
+    [GroupParameters{j}, ICDist{j}, ICAng{j}] = FitData(Input, config);
 end
 %%
 %Transforming the fitted parameters from cell to array
@@ -180,7 +197,8 @@ Results.estimatedParams =   estimatedParams;
 Results.X               =   X;
 Results.DX              =   DX;
 Results.THETADX         =   THETADX;
-Results.IC              =   IC;
+Results.ICDist          =   ICDist;
+Results.ICAng           =   ICAng;
 Results.flagOoB         =   flagOoB;
 
 end

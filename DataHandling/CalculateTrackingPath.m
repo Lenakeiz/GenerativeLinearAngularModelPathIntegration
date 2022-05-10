@@ -8,12 +8,23 @@ function [outGroup] = CalculateTrackingPath(Group, config)
     Group.Reconstructed = {};
     Group.BadPptIdxs = [];
 
+    % For angular calculation. Calculating the signed angle between two
+    % vectors (please refer to
+    % https://wumbo.net/formula/angle-between-two-vectors-2d/)
+    anglebetween = @(va,vb) atan2d(va(:,1).*vb(:,2) - va(:,2).*vb(:,1), va(:,1).*vb(:,1) + va(:,2).*vb(:,2));
+
+    % Delta t multiplier is used to integrate every dtMultiplier delta
+    % times instead of 100 ms (in this second every 500 ms)
+    dtMultiplier = config.TrackedInboundAngularDeltaT;
+
     for pId = 1:pSize
         
         trialSize = size(Group.Path{1,pId},1);
 
         Group.TrackedL1{1,pId} = {};
         Group.TrackedL2{1,pId} = {};
+   
+        InboundAngularRotation = [];
 
         participantRecontructedQuantities = [];
 
@@ -27,8 +38,25 @@ function [outGroup] = CalculateTrackingPath(Group, config)
             
             Cone_pos    = Group.FlagPos{1,pId}{trialId,1};
             Tracked_pos = Group.Path{1,pId}{trialId,1};
-            Tracked_pos = array2table(Tracked_pos,"VariableNames",{'Time' 'Pos_X' 'Pos_Y' 'Pos_Z' 'Euler_X' 'Euler_Y' 'Euler_Z'});
+            Tracked_pos = array2table(Tracked_pos,"VariableNames",{'Time' 'Pos_X' 'Pos_Y' 'Pos_Z' 'Forward_X' 'Forward_Y' 'Forward_Z'});
             
+            %% Calculating angular rotations from tracking data
+            % For angular calculations getting only the tracked position after reaching cone 3
+            Angular_pos = Tracked_pos(Tracked_pos.Time > Group.FlagTrigTimes{1,pId}{trialId,3},:);
+            % Getting only the portion of angular data we are interested in
+            Angular_pos = removevars(Tracked_pos,{'Pos_X' 'Pos_Y' 'Pos_Z' 'Forward_Y'});
+            % Getting a reading only after dtMultiplier * dt 
+            Angular_pos = Tracked_pos(1:dtMultiplier:end,:);
+            % Calculating the turning angle for this trial by summing up
+            % all of the angular dts
+            tracking_size = height(Angular_pos);
+            ang_rotation = 0;
+            for trackId = 2:tracking_size
+                ang_rotation = ang_rotation + anglebetween([Angular_pos.Forward_X(trackId) Angular_pos.Forward_Z(trackId)],[Angular_pos.Forward_X(trackId-1) Angular_pos.Forward_Z(trackId-1)]);
+            end
+            InboundAngularRotation = [InboundAngularRotation;ang_rotation];
+
+            %% Calculating speed and tracked distances
             % VARIABLE NAMES --> l1real l1realsmoothed
             % l1realsmoothedfilterd l1realunsmoothed
             % l1realunsmoothedfiltered l2real l2realsmoothed
@@ -197,6 +225,8 @@ function [outGroup] = CalculateTrackingPath(Group, config)
             {'L1Real' 'L1Smoothed' 'L1SmoothedFiltered' 'L1Unsmoothed' 'L1UnsmoothedFiltered'...
              'L2Real' 'L2Smoothed' 'L2SmoothedFiltered' 'L2Unsmoothed' 'L2UnsmoothedFiltered'...
              'T_L1' 'T_Standing' 'T_L2'});
+        % Adding angular calculation
+        Group.Reconstructed{1,pId}.InboundRotation = InboundAngularRotation;
     
     end
 

@@ -34,9 +34,12 @@ for npart = 1:sampleSize
         disp("Participant #" + npart + " does not have a registered OuB position");
     end
 
+    track_flipping = [];
+
     %Looping through the trials
     for tr = 1:length(flagpos)
 
+        flip = 0;
         firstConePositions  = flagpos{tr}(1 : 3 : end, [1,3]);
         secondConePositions = flagpos{tr}(2 : 3 : end, [1,3]);
         thirdConePositions  = flagpos{tr}(3 : 3 : end, [1,3]);
@@ -71,11 +74,13 @@ for npart = 1:sampleSize
         % Mirroring left turns means inverting the y-position of segments
         % after the second one
         if (internalAngle > 0)
+            flip = 1;
             X_coord_rotated(3,2) = X_coord_rotated(3,2) * -1;
             X_coord_rotated(4,2) = X_coord_rotated(4,2) * -1;
             X_outOfBound_rotated(1,2) = X_outOfBound_rotated(1,2) * -1;
         end
         
+        track_flipping = [track_flipping;flip];
         %internalAngle = anglebetween(X_coord_rotated(1:2,:),X_coord_zero(2:3,:));
         %internalAngle = internalAngle(2);
         
@@ -122,10 +127,11 @@ for npart = 1:sampleSize
 %           ttex = text(2.5,2.5,num2str(angle),'FontSize',20);
 %           ttex.FontSize = 20;
             xlim([-4 4]); ylim([-4 4]); axis square; hold off; drawnow; waitforbuttonpress;
-        end
-        
+        end        
     end
     
+    outData.Reconstructed{1,npart}.FlippedTrial = track_flipping;
+
     outData.FlagPos{npart} = flagposTemp;
     outData.TrigPos{npart} = trigposTemp;
     outData.OutOfBoundPos{npart} = outofboundpostemp;

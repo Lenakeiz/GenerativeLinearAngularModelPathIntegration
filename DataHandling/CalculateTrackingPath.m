@@ -42,7 +42,7 @@ function [outGroup] = CalculateTrackingPath(Group, config)
             
             %% Calculating angular rotations from tracking data
             % For angular calculations getting only the tracked position after reaching cone 3
-            Angular_pos = Tracked_pos(Tracked_pos.Time > Group.FlagTrigTimes{1,pId}{trialId,3},:);
+            Angular_pos = Tracked_pos(Tracked_pos.Time > Group.FlagTrigTimes{1,pId}{trialId,3} & Tracked_pos.Time < Group.FlagTrigTimes{1,pId}{trialId,3} + 2,:);
             % Getting only the portion of angular data we are interested in
             Angular_pos = removevars(Tracked_pos,{'Pos_X' 'Pos_Y' 'Pos_Z' 'Forward_Y'});
             % Getting a reading only after dtMultiplier * dt 
@@ -52,7 +52,7 @@ function [outGroup] = CalculateTrackingPath(Group, config)
             tracking_size = height(Angular_pos);
             ang_rotation = 0;
             for trackId = 2:tracking_size
-                ang_rotation = ang_rotation + anglebetween([Angular_pos.Forward_X(trackId) Angular_pos.Forward_Z(trackId)],[Angular_pos.Forward_X(trackId-1) Angular_pos.Forward_Z(trackId-1)]);
+                ang_rotation = ang_rotation + anglebetween([Angular_pos.Forward_X(trackId-1) Angular_pos.Forward_Z(trackId-1)],[Angular_pos.Forward_X(trackId) Angular_pos.Forward_Z(trackId)]);
             end
             InboundAngularRotation = [InboundAngularRotation;ang_rotation];
 

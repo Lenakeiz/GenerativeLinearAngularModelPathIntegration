@@ -11,7 +11,7 @@ function [outGroup] = CalculateTrackingPath(Group, config)
 
     % For angular calculation. Calculating the signed angle between two
     % vectors (please refer to
-    % https://wumbo.net/formula/angle-between-two-vectors-2d/)
+    % https://wumbo.net/formula/angle-between-two-vectors-2d/
     anglebetween = @(v,w) atan2d(w(:,2).*v(:,1) - v(:,2).*w(:,1), v(:,1).*w(:,1) + v(:,2).*w(:,2));
 
     % Delta t multiplier is used to integrate every dtMultiplier delta
@@ -26,6 +26,10 @@ function [outGroup] = CalculateTrackingPath(Group, config)
         Group.TrackedL2{1,pId} = {};
    
         InboundAngularRotation = [];
+        SignInboundBodyRotation = [];
+        InferredReturnAngle      = [];
+        SignInferredReturnAngle = [];
+        RealReturnAngle = [];
 
         participantRecontructedQuantities = [];
 
@@ -38,16 +42,23 @@ function [outGroup] = CalculateTrackingPath(Group, config)
         for trialId = 1:trialSize
             
             Cone_pos    = Group.FlagPos{1,pId}{trialId,1};
+            Trig_pos    = Group.TrigPos{1,pId}{trialId,1};
             Tracked_pos = Group.Path{1,pId}{trialId,1};
             Tracked_pos = array2table(Tracked_pos,"VariableNames",{'Time' 'Pos_X' 'Pos_Y' 'Pos_Z' 'Forward_X' 'Forward_Y' 'Forward_Z'});
             
             %% Calculating angular rotations from tracking data
             % For angular calculations getting only the tracked position after reaching cone 3
-            Angular_pos = Tracked_pos(Tracked_pos.Time > Group.FlagTrigTimes{1,pId}{trialId,3},:);
+            Angular_pos = Tracked_pos(Tracked_pos.Time > Group.FlagTrigTimes{1,pId}{trialId,3} - 2,:);
             % Getting only the portion of angular data we are interested in
             Angular_pos = removevars(Angular_pos,{'Pos_X' 'Pos_Y' 'Pos_Z' 'Forward_Y'});
             % Getting a reading only after dtMultiplier * dt 
             Angular_pos = Angular_pos(1:dtMultiplier:end,:);
+
+            % Calculating the Signed Return Angle as the signed angle
+            % between cone 2-3 and the trig pos - cone 3
+            dir_23   = [(Cone_pos(3,1) - Cone_pos(2,1)) (Cone_pos(3,3) - Cone_pos(2,3))];
+            dir_trig = [(Trig_pos(1,1) - Cone_pos(3,1)) (Trig_pos(1,3) - Cone_pos(3,3))];
+            f_return_angle = anglebetween(dir_23,dir_trig);
             % Calculating the turning angle for this trial by summing up
             % all of the angular dts
             tracking_size = height(Angular_pos);
@@ -65,7 +76,27 @@ function [outGroup] = CalculateTrackingPath(Group, config)
                 Group.overRotations = [Group.overRotations;[pId trialId]];
             end
 
-            InboundAngularRotation = [InboundAngularRotation;ang_rotation];
+            sign_ang_rotation = sign(ang_rotation);
+            sign_return_angle = sign(f_return_angle);
+            
+            real_return_angle = f_return_angle;
+            if(sign_ang_rotation * sign_return_angle == -1)
+                %We found a mismatch between inferred rotation and actual
+                %body rotation. In this case we are going to readjust the
+                %angles. Positive is an anticlockwise rotation, while
+                %negative is clockwise rotation
+                if (sign_return_angle > 0)
+                    real_return_angle = real_return_angle - 360;
+                elseif (sign_return_angle < 0)
+                    real_return_angle = real_return_angle + 360;
+                end
+            end
+
+            InboundAngularRotation  = [InboundAngularRotation;ang_rotation];
+            SignInboundBodyRotation = [SignInboundBodyRotation;sign_ang_rotation];
+            InferredReturnAngle     = [InferredReturnAngle;f_return_angle];
+            SignInferredReturnAngle = [SignInferredReturnAngle;sign_return_angle];
+            RealReturnAngle         = [RealReturnAngle;real_return_angle];
 
             %% Calculating speed and tracked distances
             % VARIABLE NAMES --> l1real l1realsmoothed
@@ -237,8 +268,11 @@ function [outGroup] = CalculateTrackingPath(Group, config)
              'L2Real' 'L2Smoothed' 'L2SmoothedFiltered' 'L2Unsmoothed' 'L2UnsmoothedFiltered'...
              'T_L1' 'T_Standing' 'T_L2'});
         % Adding angular calculation
-        Group.Reconstructed{1,pId}.InboundRotation = InboundAngularRotation;
-    
+        Group.Reconstructed{1,pId}.InboundBodyRotation = InboundAngularRotation;
+        Group.Reconstructed{1,pId}.SignBodyRotation = SignInboundBodyRotation;
+        Group.Reconstructed{1,pId}.InferredReturnAngle = InferredReturnAngle;
+        Group.Reconstructed{1,pId}.SignInferredReturnAngle = SignInferredReturnAngle;
+        Group.Reconstructed{1,pId}.RealReturnAngle = RealReturnAngle;
     end
 
     Group.overRotations = array2table(Group.overRotations,"VariableNames", {'ParticipantID' 'TrialID'});

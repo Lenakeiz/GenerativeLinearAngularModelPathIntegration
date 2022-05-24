@@ -1,5 +1,7 @@
 function VisualizeRealtimeTrackingData(Group, pId, trialId, playbackSpeed,varargin)
 
+anglebetween = @(v,w) atan2d(w(:,2).*v(:,1) - v(:,2).*w(:,1), v(:,1).*w(:,1) + v(:,2).*w(:,2));
+
 % Reconstructing a visualization of participants walk and head drection after reaching the third
 % cone
 config.cutFromConeThree = false;
@@ -15,14 +17,19 @@ end
 ColorPattern;
 
 Cone_pos      = Group.FlagPos{1,pId}{trialId,1};
+Trig_pos      = Group.TrigPos{1,pId}{trialId,1};
 Extracted_pos = Group.Path{1,pId}{trialId,1};
 Extracted_pos = array2table(Extracted_pos,"VariableNames",{'Time' 'Pos_X' 'Pos_Y' 'Pos_Z' 'Forward_X' 'Forward_Y' 'Forward_Z'});
+
+dir_23   = [(Cone_pos(3,1) - Cone_pos(2,1)) (Cone_pos(3,3) - Cone_pos(2,3))];
+dir_trig = [(Trig_pos(1,1) - Cone_pos(3,1)) (Trig_pos(1,3) - Cone_pos(3,3))];
+f_return_angle = anglebetween(dir_23,dir_trig);
 
 close all; clc;
 
 % Extracting after reaching cone 3
 if(config.cutFromConeThree)
-    Extracted_pos = Extracted_pos(Extracted_pos.Time > Group.FlagTrigTimes{1,pId}{trialId,3},:);
+    Extracted_pos = Extracted_pos(Extracted_pos.Time > Group.FlagTrigTimes{1,pId}{trialId,3} - 2,:);
 end
 
 % Plotting according to the speed
@@ -39,8 +46,8 @@ xlabel('x (m)')
 ylabel('y (m)')
 
 if(isfield(Group,'Reconstructed'))
-    calculatedAngle = Group.Reconstructed{1,pId}.InboundRotation(trialId);
-    title(['Participant: ', num2str(pId), ' Trial: ', num2str(trialId), ' Body Rotation: ', num2str(calculatedAngle,'%.0f') ],FontSize=25);
+    calculatedAngle = Group.Reconstructed{1,pId}.InboundBodyRotation(trialId);
+    title(['Participant: ', num2str(pId), ' Trial: ', num2str(trialId), ' Body Rotation: ', num2str(calculatedAngle,'%.0f') , ' Return Angle: ', num2str(f_return_angle,'%.0f')],FontSize=25);
 else
     title(['Participant: ', num2str(pId), ' Trial ', num2str(trialId)],FontSize=25);
 end
@@ -52,9 +59,10 @@ tracking_size = height(Extracted_pos);
 % Plot the position of the third cone
 pCone1 = plot(Cone_pos(1,1),Cone_pos(1,3),'Marker','d','LineStyle','none','MarkerFaceColor',config.color_scheme_npg(2,:),'MarkerEdgeColor','black','MarkerSize',18); 
 pCone2 = plot(Cone_pos(2,1),Cone_pos(2,3),'Marker','d','LineStyle','none','MarkerFaceColor','black','MarkerEdgeColor','black','MarkerSize',18); 
-pCone3 = plot(Cone_pos(3,1),Cone_pos(3,3),'Marker','d','LineStyle','none','MarkerFaceColor',config.color_scheme_npg(1,:),'MarkerEdgeColor','black','MarkerSize',18); 
+pCone3 = plot(Cone_pos(3,1),Cone_pos(3,3),'Marker','d','LineStyle','none','MarkerFaceColor',config.color_scheme_npg(1,:),'MarkerEdgeColor','black','MarkerSize',18);
+pTrigPos = plot(Trig_pos(1,1),Trig_pos(1,3),'Marker','x','LineStyle','none','MarkerFaceColor',config.color_scheme_npg(2,:),'MarkerEdgeColor','black','MarkerSize',18);
 
-leg = legend([pCone1 pCone2 pCone3], 'Cone 1', 'Cone 2', 'Cone 3', 'AutoUpdate','off');
+leg = legend([pCone1 pCone2 pCone3 pTrigPos], 'Cone 1', 'Cone 2', 'Cone 3', 'Response','AutoUpdate','off');
 leg.Location = 'northeastoutside';
 leg.FontSize = 15;
 
@@ -82,7 +90,7 @@ for k = 2 : tracking_size
 
     pause(playbackSpeed);
 
-    if(k<tracking_size)
+    if(k > 2 && k < tracking_size)
         delete(qv);
     end
 

@@ -30,29 +30,40 @@ CreateCustomFigure;
 
 hold all
 
+ax = gca;
+ax.FontSize = 20;
 xlim([-2.5 2.5])
 ylim([-2.5 2.5])
 
 xlabel('x (m)')
 ylabel('y (m)')
 
+if(isfield(Group,'Reconstructed'))
+    calculatedAngle = Group.Reconstructed{1,pId}.InboundRotation(trialId);
+    title(['Participant: ', num2str(pId), ' Trial: ', num2str(trialId), ' Body Rotation: ', num2str(calculatedAngle,'%.0f') ],FontSize=25);
+else
+    title(['Participant: ', num2str(pId), ' Trial ', num2str(trialId)],FontSize=25);
+end
+
 axis square
 
 tracking_size = height(Extracted_pos);
 
 % Plot the position of the third cone
-if(config.cutFromConeThree == false)
-    plot(Cone_pos(1,1),Cone_pos(1,3),'Marker','d','LineStyle','none','MarkerFaceColor',config.color_scheme_npg(2,:),'MarkerEdgeColor','black','MarkerSize',12); 
-    plot(Cone_pos(2,1),Cone_pos(2,3),'Marker','d','LineStyle','none','MarkerFaceColor',config.color_scheme_npg(3,:),'MarkerEdgeColor','black','MarkerSize',12); 
-end
-plot(Cone_pos(3,1),Cone_pos(3,3),'Marker','d','LineStyle','none','MarkerFaceColor',config.color_scheme_npg(1,:),'MarkerEdgeColor','black','MarkerSize',12); 
+pCone1 = plot(Cone_pos(1,1),Cone_pos(1,3),'Marker','d','LineStyle','none','MarkerFaceColor',config.color_scheme_npg(2,:),'MarkerEdgeColor','black','MarkerSize',18); 
+pCone2 = plot(Cone_pos(2,1),Cone_pos(2,3),'Marker','d','LineStyle','none','MarkerFaceColor',config.color_scheme_npg(3,:),'MarkerEdgeColor','black','MarkerSize',18); 
+pCone3 = plot(Cone_pos(3,1),Cone_pos(3,3),'Marker','d','LineStyle','none','MarkerFaceColor',config.color_scheme_npg(1,:),'MarkerEdgeColor','black','MarkerSize',18); 
+
+leg = legend([pCone1 pCone2 pCone3], 'Cone 1', 'Cone 2', 'Cone 3', 'AutoUpdate','off');
+leg.Location = 'northeastoutside';
+leg.FontSize = 15;
 
 for k = 2 : tracking_size
 
     tempPos = Extracted_pos(k-1:k,[2 4]);
     
     % Current path
-    plot(tempPos.Pos_X,tempPos.Pos_Z,'Marker','none','LineStyle','-','LineWidth',0.7,'Color',config.color_scheme_npg(4,:));
+    plot(tempPos.Pos_X,tempPos.Pos_Z,'Marker','none','LineStyle','-','LineWidth',2.5,'Color',config.color_scheme_npg(4,:));
     
     % Adding an arrow to visualize the orientation of the participant at
     % the second point    
@@ -60,15 +71,20 @@ for k = 2 : tracking_size
     tempDir = [Extracted_pos.Forward_X(k) Extracted_pos.Forward_Z(k)];
     tempDir = tempDir/norm(tempDir);
     % Making it smaller for visualization
-    tempDir = tempDir.*0.2;
+    tempDir = tempDir.*0.5;
 
     qv = quiver(Extracted_pos.Pos_X(k),Extracted_pos.Pos_Z(k),tempDir(1), tempDir(2), 'off');
     qv.Color = config.color_scheme_npg(5,:);
-    qv.LineWidth = 1.3;
+    qv.LineWidth = 5;
+    qv.MaxHeadSize = 2;
     
+    drawnow
+
     pause(playbackSpeed);
 
-    delete(qv);
+    if(k<tracking_size)
+        delete(qv);
+    end
 
 end
 

@@ -7,11 +7,12 @@ function [outGroup] = CalculateTrackingPath(Group, config)
     Group.TrackedL2 = {};
     Group.Reconstructed = {};
     Group.BadPptIdxs = [];
+    Group.overRotations = [];
 
     % For angular calculation. Calculating the signed angle between two
     % vectors (please refer to
     % https://wumbo.net/formula/angle-between-two-vectors-2d/)
-    anglebetween = @(va,vb) atan2d(va(:,1).*vb(:,2) - va(:,2).*vb(:,1), va(:,1).*vb(:,1) + va(:,2).*vb(:,2));
+    anglebetween = @(v,w) atan2d(w(:,2).*v(:,1) - v(:,2).*w(:,1), v(:,1).*w(:,1) + v(:,2).*w(:,2));
 
     % Delta t multiplier is used to integrate every dtMultiplier delta
     % times instead of 100 ms (in this second every 500 ms)
@@ -42,18 +43,28 @@ function [outGroup] = CalculateTrackingPath(Group, config)
             
             %% Calculating angular rotations from tracking data
             % For angular calculations getting only the tracked position after reaching cone 3
-            Angular_pos = Tracked_pos(Tracked_pos.Time > Group.FlagTrigTimes{1,pId}{trialId,3} & Tracked_pos.Time < Group.FlagTrigTimes{1,pId}{trialId,3} + 2,:);
+            Angular_pos = Tracked_pos(Tracked_pos.Time > Group.FlagTrigTimes{1,pId}{trialId,3},:);
             % Getting only the portion of angular data we are interested in
-            Angular_pos = removevars(Tracked_pos,{'Pos_X' 'Pos_Y' 'Pos_Z' 'Forward_Y'});
+            Angular_pos = removevars(Angular_pos,{'Pos_X' 'Pos_Y' 'Pos_Z' 'Forward_Y'});
             % Getting a reading only after dtMultiplier * dt 
-            Angular_pos = Tracked_pos(1:dtMultiplier:end,:);
+            Angular_pos = Angular_pos(1:dtMultiplier:end,:);
             % Calculating the turning angle for this trial by summing up
             % all of the angular dts
             tracking_size = height(Angular_pos);
             ang_rotation = 0;
             for trackId = 2:tracking_size
-                ang_rotation = ang_rotation + anglebetween([Angular_pos.Forward_X(trackId-1) Angular_pos.Forward_Z(trackId-1)],[Angular_pos.Forward_X(trackId) Angular_pos.Forward_Z(trackId)]);
+                prevDirection = [Angular_pos.Forward_X(trackId-1) Angular_pos.Forward_Z(trackId-1)];
+                prevDirection = prevDirection/norm(prevDirection);
+                currDirection = [Angular_pos.Forward_X(trackId) Angular_pos.Forward_Z(trackId)];
+                currDirection = currDirection/norm(currDirection);
+                ang_rotation = ang_rotation + anglebetween(prevDirection,currDirection);
             end
+
+            if(ang_rotation > 180 || ang_rotation < -180)
+                disp(['Over rotation participant ', num2str(pId), ' trial ', num2str(trialId)]);
+                Group.overRotations = [Group.overRotations;[pId trialId]];
+            end
+
             InboundAngularRotation = [InboundAngularRotation;ang_rotation];
 
             %% Calculating speed and tracked distances
@@ -230,6 +241,7 @@ function [outGroup] = CalculateTrackingPath(Group, config)
     
     end
 
+    Group.overRotations = array2table(Group.overRotations,"VariableNames", {'ParticipantID' 'TrialID'});
     Group.BadPptIdxs = unique(Group.BadPptIdxs);
 
     outGroup = Group;

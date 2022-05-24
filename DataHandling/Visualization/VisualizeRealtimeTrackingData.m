@@ -51,7 +51,7 @@ tracking_size = height(Extracted_pos);
 
 % Plot the position of the third cone
 pCone1 = plot(Cone_pos(1,1),Cone_pos(1,3),'Marker','d','LineStyle','none','MarkerFaceColor',config.color_scheme_npg(2,:),'MarkerEdgeColor','black','MarkerSize',18); 
-pCone2 = plot(Cone_pos(2,1),Cone_pos(2,3),'Marker','d','LineStyle','none','MarkerFaceColor',config.color_scheme_npg(3,:),'MarkerEdgeColor','black','MarkerSize',18); 
+pCone2 = plot(Cone_pos(2,1),Cone_pos(2,3),'Marker','d','LineStyle','none','MarkerFaceColor','black','MarkerEdgeColor','black','MarkerSize',18); 
 pCone3 = plot(Cone_pos(3,1),Cone_pos(3,3),'Marker','d','LineStyle','none','MarkerFaceColor',config.color_scheme_npg(1,:),'MarkerEdgeColor','black','MarkerSize',18); 
 
 leg = legend([pCone1 pCone2 pCone3], 'Cone 1', 'Cone 2', 'Cone 3', 'AutoUpdate','off');

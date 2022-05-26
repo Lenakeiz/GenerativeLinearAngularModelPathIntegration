@@ -30,6 +30,18 @@ if(~isfield(Group,'Reconstructed'))
     return;
 end
 
+cond = Group.CondTable{1,pId}.Condition(trialId);
+condStr = '';
+
+if(cond == 1)
+    condStr = 'No change';
+elseif(cond == 2)
+    condStr = 'No distal cues';
+else
+    condStr = 'No optic flow';
+end
+
+calculatedAngle = Group.Reconstructed{1,pId}.InboundBodyRotation(trialId);
 real_return_angle = Group.Reconstructed{1,pId}.RealReturnAngle(trialId);
 
 close all; clc;
@@ -52,12 +64,15 @@ ylim([-2.5 2.5])
 xlabel('x (m)')
 ylabel('y (m)')
 
-if(isfield(Group,'Reconstructed'))
-    calculatedAngle = Group.Reconstructed{1,pId}.InboundBodyRotation(trialId);
-    title(['Participant: ', num2str(pId), ' Trial: ', num2str(trialId), ' Body Rotation: ', num2str(calculatedAngle,'%.0f') , ' Inferred Angle: ', num2str(f_return_angle,'%.0f'), ' Real Inferred Angle: ' , num2str(real_return_angle,'%.0f')],FontSize=25);
-else
-    title(['Participant: ', num2str(pId), ' Trial ', num2str(trialId)],FontSize=25);
-end
+title([...
+    'Participant: ', num2str(pId),...
+    ' Trial: ', num2str(trialId),...
+    ' Body Rotation: ',num2str(calculatedAngle,'%.0f') ,...
+    ' Inferred Angle: ', num2str(f_return_angle,'%.0f'),...
+    ' Real Inferred Angle: ' , num2str(real_return_angle,'%.0f')...
+    ' Condition: ' , condStr]...
+    ,FontSize=20);
+
 
 axis square
 

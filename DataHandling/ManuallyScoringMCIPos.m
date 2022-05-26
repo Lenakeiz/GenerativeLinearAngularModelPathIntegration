@@ -94,6 +94,6 @@ BadExecution = zeros(trialsize,1);
 % Check the following quantity as well to see what s going to be input on
 % the model MCIPos.Reconstructed{1,1}.RealReturnAngle
 % Write here all the bad trials after visual inspection
-6,14
+
 %Save the information in the Reconstructed Structure
 MCIPos.Reconstructed{1,5}.BadExecution = BadExecution;

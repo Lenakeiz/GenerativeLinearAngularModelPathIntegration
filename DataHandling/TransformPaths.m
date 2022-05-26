@@ -43,7 +43,9 @@ for npart = 1:sampleSize
         firstConePositions  = flagpos{tr}(1 : 3 : end, [1,3]);
         secondConePositions = flagpos{tr}(2 : 3 : end, [1,3]);
         thirdConePositions  = flagpos{tr}(3 : 3 : end, [1,3]);
-        
+        % Getting the tracking data to transorm it
+        path = Data.Path{1,npart}{tr,1};
+
         X_coord = [flagpos{tr}(:,[1,3]);trigpos{tr}([1,3])];
         % Translating to zero
         X_coord_zero = X_coord - X_coord(1,:);
@@ -56,6 +58,9 @@ for npart = 1:sampleSize
 
         X_outOfBound_zero = X_outOfBound - X_coord(1,:);
 
+        % Offseting the path
+        path(:,[2 4]) = path(:,[2 4]) - X_coord(1,:);
+
         realAxisDirection = [0 0; 1 0];
         angle = anglebetween(realAxisDirection,X_coord_zero(1:2,:));
         angle = angle(2);
@@ -66,6 +71,10 @@ for npart = 1:sampleSize
         % Applying rotation matrix
         X_coord_rotated = (RMatrix * X_coord_zero')';
         X_outOfBound_rotated = (RMatrix * X_outOfBound_zero')';
+        % Applying rotation to the path data
+        path(:,[2 4]) = (RMatrix * path(:,[2 4])')';
+        path(:,[5 7]) = (RMatrix * path(:,[5 7])')';
+
         % Calculating internal angle between the first and second segment
         firstSegment  = X_coord_rotated(2,:) - X_coord_rotated(1,:);
         secondSegment = X_coord_rotated(3,:) - X_coord_rotated(2,:);
@@ -78,6 +87,9 @@ for npart = 1:sampleSize
             X_coord_rotated(3,2) = X_coord_rotated(3,2) * -1;
             X_coord_rotated(4,2) = X_coord_rotated(4,2) * -1;
             X_outOfBound_rotated(1,2) = X_outOfBound_rotated(1,2) * -1;
+            %Flipping Path and Head direction data
+            path(:,[4]) = path(:,[4]).*-1;
+            path(:,[7]) = path(:,[7]).*-1;
         end
         
         track_flipping = [track_flipping;flip];
@@ -89,6 +101,9 @@ for npart = 1:sampleSize
         flagposTemp{tr,1} = [X_coord_rotated(1:3,1) ones(3,1)*2 X_coord_rotated(1:3,2)];
         trigposTemp{tr,1} = [X_coord_rotated(4,1) ones(1,1)*2 X_coord_rotated(4,2)];
         outofboundpostemp{tr,1} = [X_outOfBound_rotated(1,1) 1.0 X_outOfBound_rotated(1,2)];
+
+        %saving back to the outdata for override
+        outData.Path{1,npart}{tr,1} = path;
 
         if(PLOT_FEEDBACK == 1 && Data.CondTable{npart}.OutOfBound(tr) == 1)
 

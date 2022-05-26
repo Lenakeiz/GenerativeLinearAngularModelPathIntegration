@@ -13,5 +13,3 @@ function [ RetData ] = CalculateAllErrors(GroupData)
     
 end
 
-
-zeros[ntrials,1] 

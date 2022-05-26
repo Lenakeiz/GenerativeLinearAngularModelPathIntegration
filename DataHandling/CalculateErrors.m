@@ -35,7 +35,6 @@ function [ Errors,  OoBInfo] = CalculateErrors(FlagPos, TrigPos, OutOfBoundPos, 
 
     for i=1:size(idx,1)
 
-        disp("Plotting trial " + idx(i));
         currOoB = outofboundpos(idx(i),:);
         currOoBLength = sqrt(sum((currOoB - thirdConePositions(idx(i),:)).^2,2));
         OoBLength(idx(i)) = currOoBLength;
@@ -79,6 +78,7 @@ function [ Errors,  OoBInfo] = CalculateErrors(FlagPos, TrigPos, OutOfBoundPos, 
 
         % Debug
         if(debug_plotting == 1)
+            disp("Plotting trial " + idx(i));
             a = [firstConePositions(idx(i),:);secondConePositions(idx(i),:);thirdConePositions(idx(i),:);currOoB;OoBInfo.ReconstructedOoB{idx(i)}(:,[1 3])]; scatter(a(:,1), a(:,2)); hold on; plot(a(:,1), a(:,2));
             ts = ["X_0";"X_1";"X_2";"OoB";"OoB_i"]; for j = 1:5; text(a(j,1),a(j,2),ts(j,1)); end; hold off; xlim([-1 7]); ylim([-4 4]); axis square;
             titletype = ["No Change"; "No Distal Cues"; "No Optic Flow"]; title(titletype(CondTable.Condition(idx(i)))); drawnow; waitforbuttonpress;            

@@ -58,8 +58,8 @@ hold all
 
 ax = gca;
 ax.FontSize = 20;
-xlim([-2.5 2.5])
-ylim([-2.5 2.5])
+xlim([-1 4])
+ylim([-1 4])
 
 xlabel('x (m)')
 ylabel('y (m)')

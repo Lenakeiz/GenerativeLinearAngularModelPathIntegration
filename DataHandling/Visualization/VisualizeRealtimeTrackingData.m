@@ -31,20 +31,35 @@ if(~isfield(Group,'Reconstructed'))
 end
 
 cond = Group.CondTable{1,pId}.Condition(trialId);
-condStr = '';
+outofbound = Group.CondTable{1,pId}.OutOfBound(trialId);
 
+condStr = '';
 if(cond == 1)
-    condStr = 'No change';
+    condStr = 'no change';
 elseif(cond == 2)
-    condStr = 'No distal cues';
+    condStr = 'no distal cues';
 else
-    condStr = 'No optic flow';
+    condStr = 'no optic flow';
+end
+
+outStr = '';
+if(outofbound == 1)
+    outStr = 'yes';
+else
+    outStr = 'no';
 end
 
 calculatedAngle = Group.Reconstructed{1,pId}.InboundBodyRotation(trialId);
 real_return_angle = Group.Reconstructed{1,pId}.RealReturnAngle(trialId);
 
 close all; clc;
+
+OoB = [100 0 100];
+ReconstrutedOoB = [100 0 100];
+if (outofbound == 1)
+    OoB = Group.OutOfBoundPos{1,pId}{trialId,1};
+    ReconstrutedOoB = Group.ReconstructedOOB{1,pId}.ReconstructedOoB{trialId,1};
+end
 
 % Extracting after reaching cone 3
 if(config.cutFromConeThree)
@@ -58,33 +73,44 @@ hold all
 
 ax = gca;
 ax.FontSize = 20;
-xlim([-1 4])
-ylim([-1 4])
+ax.FontName = 'Times New Roman';
+xlim([-2 5])
+ylim([-2 5])
 
 xlabel('x (m)')
 ylabel('y (m)')
 
-title([...
-    'Participant: ', num2str(pId),...
-    ' Trial: ', num2str(trialId),...
-    ' Body Rotation: ',num2str(calculatedAngle,'%.0f') ,...
-    ' Inferred Angle: ', num2str(f_return_angle,'%.0f'),...
-    ' Real Inferred Angle: ' , num2str(real_return_angle,'%.0f')...
-    ' Condition: ' , condStr]...
-    ,FontSize=20);
-
+title(['Path visualizer'],FontSize=20);
 
 axis square
+
+boxwidth = [0.15 0.2];
+leftCorner = [0.7 0.4];
+dim = [leftCorner boxwidth];
+str = {...
+    ['\textbf{Trial Info}'],...
+    ['\textit{Participant:} ', num2str(pId) ],...
+    ['\textit{Trial:} ', num2str(trialId)],...
+    ['\textit{Body Rotation:} $',num2str(calculatedAngle,'%.0f'),'^{\circ}$'],...
+    ['\textit{Inferred Angle:} $', num2str(f_return_angle,'%.0f'),'^{\circ}$'],...
+    ['\textit{Real Inferred Angle:} $' , num2str(real_return_angle,'%.0f'),'^{\circ}$'],...
+    ['\textit{Condition:} ' , condStr],...
+    ['\textit{Out of Bound:} ', outStr]...
+    };
+
+annotation('textbox',dim,String=str,FontSize=15,Interpreter='latex', FitBoxToText='on');
 
 tracking_size = height(Extracted_pos);
 
 % Plot the position of the third cone
 pCone1 = plot(Cone_pos(1,1),Cone_pos(1,3),'Marker','d','LineStyle','none','MarkerFaceColor',config.color_scheme_npg(2,:),'MarkerEdgeColor','black','MarkerSize',18); 
-pCone2 = plot(Cone_pos(2,1),Cone_pos(2,3),'Marker','d','LineStyle','none','MarkerFaceColor','black','MarkerEdgeColor','black','MarkerSize',18); 
+pCone2 = plot(Cone_pos(2,1),Cone_pos(2,3),'Marker','d','LineStyle','none','MarkerFaceColor',[0.5 0.5 0.5],'MarkerEdgeColor','black','MarkerSize',18); 
 pCone3 = plot(Cone_pos(3,1),Cone_pos(3,3),'Marker','d','LineStyle','none','MarkerFaceColor',config.color_scheme_npg(1,:),'MarkerEdgeColor','black','MarkerSize',18);
-pTrigPos = plot(Trig_pos(1,1),Trig_pos(1,3),'Marker','x','LineStyle','none','MarkerFaceColor',config.color_scheme_npg(2,:),'MarkerEdgeColor','black','MarkerSize',18);
+pOoB = plot(OoB(1,1),OoB(1,3),'Marker','*',Color=config.color_scheme_npg(4,:),MarkerSize=18, LineWidth=3);
+pRecconstructedOoB = plot(ReconstrutedOoB(1,1),ReconstrutedOoB(1,3),'Marker','*',Color=config.color_scheme_npg(7,:),MarkerSize=18,LineWidth=3);
+pTrigPos = plot(Trig_pos(1,1),Trig_pos(1,3),'Marker','x','LineStyle','none','MarkerFaceColor',config.color_scheme_npg(2,:),'MarkerEdgeColor','black','MarkerSize',18,LineWidth=3);
 
-leg = legend([pCone1 pCone2 pCone3 pTrigPos], 'Cone 1', 'Cone 2', 'Cone 3', 'Response','AutoUpdate','off');
+leg = legend([pCone1 pCone2 pCone3 pTrigPos pOoB pRecconstructedOoB], 'Cone 1', 'Cone 2', 'Cone 3','Response','Out of Bound(OoB)','Reconstructed OoB','AutoUpdate','off');
 leg.Location = 'northeastoutside';
 leg.FontSize = 15;
 

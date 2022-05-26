@@ -32,7 +32,6 @@ BadExecution = zeros(trialsize,1);
 % Write here all the bad trials after visual inspection
 BadExecution(3,1) = 1;
 BadExecution(5,1) = 1;
-BadExecution(6,1) = 1;
 BadExecution(10,1) = 1;
 BadExecution(12,1) = 1;
 BadExecution(14,1) = 1;

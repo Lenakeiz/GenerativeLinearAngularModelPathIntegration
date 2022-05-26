@@ -30,8 +30,6 @@ function [ Errors,  OoBInfo] = CalculateErrors(FlagPos, TrigPos, OutOfBoundPos, 
     meanReturnSegmentNoOpticFlow = nanmean(AbsWalkedSegment(CondTable.Condition == 3 & CondTable.OutOfBound == 0));
 
     idx = find(CondTable.OutOfBound == 1);
-    
-
 
     for i=1:size(idx,1)
 
@@ -63,14 +61,14 @@ function [ Errors,  OoBInfo] = CalculateErrors(FlagPos, TrigPos, OutOfBoundPos, 
 
         recontructedVert = thirdConePositions(idx(i),:) + directionOoB*inferredOoBLength;
 
-% Alternatevely we have tried to discard the inferred location if that's
-% shorter than the out of bound dected location
-%         if(currOoBLength < inferredOoBLength)
-%             OoBInfo.ReconstructedOoB{idx(i),:} = [recontructedVert(1) 0 recontructedVert(2)];
-%         else
-%             disp("Discarding current inferred location");
-%             OoBInfo.ReconstructedOoB{idx(i),:} = [currOoB(1) 0 currOoB(2)];
-%         end
+        % Alternatevely we have tried to discard the inferred location if that's
+        % shorter than the out of bound dected location
+        %         if(currOoBLength < inferredOoBLength)
+        %             OoBInfo.ReconstructedOoB{idx(i),:} = [recontructedVert(1) 0 recontructedVert(2)];
+        %         else
+        %             disp("Discarding current inferred location");
+        %             OoBInfo.ReconstructedOoB{idx(i),:} = [currOoB(1) 0 currOoB(2)];
+        %         end
         
         %for all the OoB trials, replace the leg length with the infered
         %one

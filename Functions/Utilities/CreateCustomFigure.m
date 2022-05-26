@@ -10,7 +10,9 @@ if size(MP, 1) == 1
 else
     newPosition(1) = newPosition(1) + MP(N,1);
 end
+
 fh.set('Position', newPosition, 'units', 'normalized');
+fh.Units = 'normalized';
 fh.WindowState = 'maximized';
 
 set(gcf,'color','w');

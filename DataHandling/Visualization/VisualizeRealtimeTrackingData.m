@@ -25,6 +25,25 @@ dir_23   = [(Cone_pos(3,1) - Cone_pos(2,1)) (Cone_pos(3,3) - Cone_pos(2,3))];
 dir_trig = [(Trig_pos(1,1) - Cone_pos(3,1)) (Trig_pos(1,3) - Cone_pos(3,3))];
 f_return_angle = anglebetween(dir_23,dir_trig);
 
+if(~isfield(Group,'Reconstructed'))
+    disp('Please run CalculateTrckingPath first');
+    return;
+end
+
+cond = Group.CondTable{1,pId}.Condition(trialId);
+condStr = '';
+
+if(cond == 1)
+    condStr = 'No change';
+elseif(cond == 2)
+    condStr = 'No distal cues';
+else
+    condStr = 'No optic flow';
+end
+
+calculatedAngle = Group.Reconstructed{1,pId}.InboundBodyRotation(trialId);
+real_return_angle = Group.Reconstructed{1,pId}.RealReturnAngle(trialId);
+
 close all; clc;
 
 % Extracting after reaching cone 3
@@ -45,12 +64,15 @@ ylim([-2.5 2.5])
 xlabel('x (m)')
 ylabel('y (m)')
 
-if(isfield(Group,'Reconstructed'))
-    calculatedAngle = Group.Reconstructed{1,pId}.InboundBodyRotation(trialId);
-    title(['Participant: ', num2str(pId), ' Trial: ', num2str(trialId), ' Body Rotation: ', num2str(calculatedAngle,'%.0f') , ' Return Angle: ', num2str(f_return_angle,'%.0f')],FontSize=25);
-else
-    title(['Participant: ', num2str(pId), ' Trial ', num2str(trialId)],FontSize=25);
-end
+title([...
+    'Participant: ', num2str(pId),...
+    ' Trial: ', num2str(trialId),...
+    ' Body Rotation: ',num2str(calculatedAngle,'%.0f') ,...
+    ' Inferred Angle: ', num2str(f_return_angle,'%.0f'),...
+    ' Real Inferred Angle: ' , num2str(real_return_angle,'%.0f')...
+    ' Condition: ' , condStr]...
+    ,FontSize=20);
+
 
 axis square
 

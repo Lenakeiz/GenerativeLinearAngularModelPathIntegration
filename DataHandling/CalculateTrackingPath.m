@@ -29,6 +29,8 @@ function [outGroup] = CalculateTrackingPath(Group, config)
         SignInboundBodyRotation = [];
         InferredReturnAngle      = [];
         SignInferredReturnAngle = [];
+        OobReturnAngle = [];
+        SignOobReturnAngle = [];
         RealReturnAngle = [];
 
         participantRecontructedQuantities = [];
@@ -46,6 +48,20 @@ function [outGroup] = CalculateTrackingPath(Group, config)
             Tracked_pos = Group.Path{1,pId}{trialId,1};
             Tracked_pos = array2table(Tracked_pos,"VariableNames",{'Time' 'Pos_X' 'Pos_Y' 'Pos_Z' 'Forward_X' 'Forward_Y' 'Forward_Z'});
             
+            % Getting detected out of bound position for
+            % trials where participant went oob
+            oob_return_angle = nan;
+            outofbound = Group.CondTable{1,pId}.OutOfBound(trialId);
+            if (outofbound == 1)
+                OoB_pos = Group.OutOfBoundPos{1,pId}{trialId,1};
+                % If transform paths has been run then we have also the
+                % reconstructed Oob, if we don t have then keep using the
+                % original one for calculations.
+                if(isfield(Group,'ReconstructedOOB'))
+                    OoB_pos = Group.ReconstructedOOB{1,pId}.ReconstructedOoB{trialId,1};
+                end    
+            end
+
             %% Calculating angular rotations from tracking data
             % For angular calculations getting only the tracked position after reaching cone 3
             Angular_pos = Tracked_pos(Tracked_pos.Time > Group.FlagTrigTimes{1,pId}{trialId,3} - 2,:);
@@ -57,8 +73,14 @@ function [outGroup] = CalculateTrackingPath(Group, config)
             % Calculating the Signed Return Angle as the signed angle
             % between cone 2-3 and the trig pos - cone 3
             dir_23   = [(Cone_pos(3,1) - Cone_pos(2,1)) (Cone_pos(3,3) - Cone_pos(2,3))];
-            dir_trig = [(Trig_pos(1,1) - Cone_pos(3,1)) (Trig_pos(1,3) - Cone_pos(3,3))];
+            dir_trig = [(Trig_pos(1,1) - Cone_pos(3,1)) (Trig_pos(1,3) - Cone_pos(3,3))];            
             f_return_angle = anglebetween(dir_23,dir_trig);
+
+            if (outofbound == 1)
+                dir_oob = [(OoB_pos(1,1) - Cone_pos(3,1)) (OoB_pos(1,3) - Cone_pos(3,3))];
+                oob_return_angle = anglebetween(dir_23,dir_oob);
+            end           
+
             % Calculating the turning angle for this trial by summing up
             % all of the angular dts
             tracking_size = height(Angular_pos);
@@ -78,25 +100,40 @@ function [outGroup] = CalculateTrackingPath(Group, config)
 
             sign_ang_rotation = sign(ang_rotation);
             sign_return_angle = sign(f_return_angle);
+            sign_oob_return_angle = sign(oob_return_angle);
+
+            % Create a temporary angle for the real angle calculation. This
+            % depend on wheter this is a oob trial
+            if(outofbound == 1)
+                temp_ret_angle = oob_return_angle;
+                tem_sign_ret_angle = sign_oob_return_angle;
+            else
+                temp_ret_angle = f_return_angle;
+                tem_sign_ret_angle = sign_return_angle;
+            end
             
-            real_return_angle = f_return_angle;
-            if(sign_ang_rotation * sign_return_angle == -1)
+            % Assignign the real angle
+            real_return_angle = temp_ret_angle;
+            if(sign_ang_rotation * tem_sign_ret_angle == -1)
                 %We found a mismatch between inferred rotation and actual
                 %body rotation. In this case we are going to readjust the
                 %angles. Positive is an anticlockwise rotation, while
                 %negative is clockwise rotation
-                if (sign_return_angle > 0)
+                if (tem_sign_ret_angle > 0)
                     real_return_angle = real_return_angle - 360;
-                elseif (sign_return_angle < 0)
+                elseif (tem_sign_ret_angle < 0)
                     real_return_angle = real_return_angle + 360;
                 end
             end
 
-            InboundAngularRotation  = [InboundAngularRotation;ang_rotation];
+            InboundAngularRotation  = [InboundAngularRotation;ang_rotation]; % Always from body rotation
             SignInboundBodyRotation = [SignInboundBodyRotation;sign_ang_rotation];
-            InferredReturnAngle     = [InferredReturnAngle;f_return_angle];
-            SignInferredReturnAngle = [SignInferredReturnAngle;sign_return_angle];
-            RealReturnAngle         = [RealReturnAngle;real_return_angle];
+            InferredReturnAngle     = [InferredReturnAngle;f_return_angle]; % Always from trig pos
+            SignInferredReturnAngle = [SignInferredReturnAngle;sign_return_angle]; % Always from trig pos
+            OobReturnAngle          = [OobReturnAngle;oob_return_angle]; % Always from trig pos
+            SignOobReturnAngle      = [SignOobReturnAngle;sign_oob_return_angle]; % Always from trig pos
+            
+            RealReturnAngle         = [RealReturnAngle;real_return_angle]; % From trig pos or oob pos depending on cases. Quantity to be input to the model.
 
             %% Calculating speed and tracked distances
             % VARIABLE NAMES --> l1real l1realsmoothed
@@ -272,6 +309,8 @@ function [outGroup] = CalculateTrackingPath(Group, config)
         Group.Reconstructed{1,pId}.SignBodyRotation = SignInboundBodyRotation;
         Group.Reconstructed{1,pId}.InferredReturnAngle = InferredReturnAngle;
         Group.Reconstructed{1,pId}.SignInferredReturnAngle = SignInferredReturnAngle;
+        Group.Reconstructed{1,pId}.OobReturnAngle = OobReturnAngle;
+        Group.Reconstructed{1,pId}.SignOobReturnAngle = SignOobReturnAngle;
         Group.Reconstructed{1,pId}.RealReturnAngle = RealReturnAngle;
     end
 

@@ -21,10 +21,6 @@ Trig_pos      = Group.TrigPos{1,pId}{trialId,1};
 Extracted_pos = Group.Path{1,pId}{trialId,1};
 Extracted_pos = array2table(Extracted_pos,"VariableNames",{'Time' 'Pos_X' 'Pos_Y' 'Pos_Z' 'Forward_X' 'Forward_Y' 'Forward_Z'});
 
-dir_23   = [(Cone_pos(3,1) - Cone_pos(2,1)) (Cone_pos(3,3) - Cone_pos(2,3))];
-dir_trig = [(Trig_pos(1,1) - Cone_pos(3,1)) (Trig_pos(1,3) - Cone_pos(3,3))];
-f_return_angle = anglebetween(dir_23,dir_trig);
-
 if(~isfield(Group,'Reconstructed'))
     disp('Please run CalculateTrckingPath first');
     return;
@@ -51,6 +47,7 @@ end
 
 calculatedAngle = Group.Reconstructed{1,pId}.InboundBodyRotation(trialId);
 real_return_angle = Group.Reconstructed{1,pId}.RealReturnAngle(trialId);
+f_return_angle = Group.Reconstructed{1,pId}.InferredReturnAngle(trialId);
 
 close all; clc;
 
@@ -78,13 +75,16 @@ ax.FontSize = 20;
 ax.FontName = 'Times New Roman';
 
 % Dinamically calculate bounds
-maxX = max(abs([Cone_pos(:,1); Trig_pos(1,1)]));
-maxY = max(abs([Cone_pos(:,3); Trig_pos(1,3)]));
+maxX = max([Cone_pos(:,1); Trig_pos(1,1)]);
+maxY = max([Cone_pos(:,3); Trig_pos(1,3)]);
+minX = min([Cone_pos(:,1); Trig_pos(1,1)]);
+minY = min([Cone_pos(:,3); Trig_pos(1,3)]);
 absMax = ceil(max(maxX, maxY));
-offSetFromMax = 0.5;
+absMin = floor(min(minX,minY));
+offSetFromMax = 0.3;
 
-xlim([-absMax-offSetFromMax absMax+offSetFromMax]);
-ylim([-absMax-offSetFromMax absMax+offSetFromMax]);
+xlim([absMin-offSetFromMax absMax+offSetFromMax]);
+ylim([absMin-offSetFromMax absMax+offSetFromMax]);
 
 xlabel('x (m)')
 ylabel('y (m)')

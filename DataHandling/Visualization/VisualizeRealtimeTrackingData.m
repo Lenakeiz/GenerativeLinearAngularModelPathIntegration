@@ -51,8 +51,8 @@ f_return_angle = Group.Reconstructed{1,pId}.InferredReturnAngle(trialId);
 
 close all; clc;
 
-OoB = [100 0 100];
-ReconstrutedOoB = [100 0 100];
+OoB = [nan 0 nan];
+ReconstrutedOoB = [nan 0 nan];
 if (outofbound == 1)
     OoB = Group.OutOfBoundPos{1,pId}{trialId,1};
     if(isfield(Group,'ReconstructedOOB'))
@@ -75,10 +75,10 @@ ax.FontSize = 20;
 ax.FontName = 'Times New Roman';
 
 % Dinamically calculate bounds
-maxX = max([Cone_pos(:,1); Trig_pos(1,1)]);
-maxY = max([Cone_pos(:,3); Trig_pos(1,3)]);
-minX = min([Cone_pos(:,1); Trig_pos(1,1)]);
-minY = min([Cone_pos(:,3); Trig_pos(1,3)]);
+maxX = max([Cone_pos(:,1); Trig_pos(1,1); OoB(1,1)]);
+maxY = max([Cone_pos(:,3); Trig_pos(1,3); OoB(1,3)]);
+minX = min([Cone_pos(:,1); Trig_pos(1,1); OoB(1,1)]);
+minY = min([Cone_pos(:,3); Trig_pos(1,3); OoB(1,3)]);
 absMax = ceil(max(maxX, maxY));
 absMin = floor(min(minX,minY));
 offSetFromMax = 0.5;
@@ -143,9 +143,7 @@ for k = 2 : tracking_size
     qv.LineWidth = 5;
     qv.MaxHeadSize = 2;
     
-    drawnow
-
-    pause(playbackSpeed);
+    drawnow; pause(playbackSpeed);
 
     if(k > 2 && k < tracking_size)
         delete(qv);

@@ -1,4 +1,4 @@
-function VisualizeRealtimeTrackingData(Group, pId, trialId, playbackSpeed,varargin)
+function VisualizeRealtimeTrackingData(Group, pId, trialId, playbackSpeed, varargin)
 
 anglebetween = @(v,w) atan2d(w(:,2).*v(:,1) - v(:,2).*w(:,1), v(:,1).*w(:,1) + v(:,2).*w(:,2));
 
@@ -58,7 +58,9 @@ OoB = [100 0 100];
 ReconstrutedOoB = [100 0 100];
 if (outofbound == 1)
     OoB = Group.OutOfBoundPos{1,pId}{trialId,1};
-    ReconstrutedOoB = Group.ReconstructedOOB{1,pId}.ReconstructedOoB{trialId,1};
+    if(isfield(Group,'ReconstructedOOB'))
+        ReconstrutedOoB = Group.ReconstructedOOB{1,pId}.ReconstructedOoB{trialId,1};
+    end    
 end
 
 % Extracting after reaching cone 3
@@ -74,8 +76,15 @@ hold all
 ax = gca;
 ax.FontSize = 20;
 ax.FontName = 'Times New Roman';
-xlim([-2 5])
-ylim([-2 5])
+
+% Dinamically calculate bounds
+maxX = max(abs([Cone_pos(:,1); Trig_pos(1,1)]));
+maxY = max(abs([Cone_pos(:,3); Trig_pos(1,3)]));
+absMax = ceil(max(maxX, maxY));
+offSetFromMax = 0.5;
+
+xlim([-absMax-offSetFromMax absMax+offSetFromMax]);
+ylim([-absMax-offSetFromMax absMax+offSetFromMax]);
 
 xlabel('x (m)')
 ylabel('y (m)')

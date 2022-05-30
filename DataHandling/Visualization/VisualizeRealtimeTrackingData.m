@@ -81,7 +81,7 @@ minX = min([Cone_pos(:,1); Trig_pos(1,1)]);
 minY = min([Cone_pos(:,3); Trig_pos(1,3)]);
 absMax = ceil(max(maxX, maxY));
 absMin = floor(min(minX,minY));
-offSetFromMax = 0.3;
+offSetFromMax = 0.5;
 
 xlim([absMin-offSetFromMax absMax+offSetFromMax]);
 ylim([absMin-offSetFromMax absMax+offSetFromMax]);

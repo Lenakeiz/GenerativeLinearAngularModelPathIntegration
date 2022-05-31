@@ -15,37 +15,44 @@ config.Speed.velocityCutoff                         = 0.2;                 % vel
 config.Speed.timeOffsetForDetectedTemporalWindow    = 0.4;                 % time in seconds that will push earlier/ the detected rising edge
 config.UseGlobalSearch                              = true;
 
-resultfolder = savefolder+"PaperFigs/OurDataResults/Fig3_NoOoB";
+
+%% Model fitting
+%Model related parameters
+%Model related parameters
+% config.ModelName        = "ConstSpeedModelDistAngleGain";
+% config.ParamName        = ["beta", "sigma", "g3", "nu"];
+
+config.ModelName        = "ConstSpeedModelDistAngleRGb";
+config.ParamName        = ["beta", "sigma", "g3", "b", "nu"];
+
+config.includeStand     = false;
+config.useOoBTrial      = false;
+config.useweber         = false; %only true when use weber law in simple generative models
+config.NumParams   = length(config.ParamName);
+
+config.includeStand     = false;
+config.useOoBTrial      = false;
+config.useweber         = false; %only true when use weber law in simple generative models
+config.NumParams   = length(config.ParamName);
+
+resultfolder = savefolder+"PaperFigs/SeparateEstimation/Fig1_"+config.ModelName;
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
    mkdir(resultfolder);
 end
 
-%% Model fitting
-%Model related parameters
-config.ModelName        = "ConstSpeedModel";
-config.ParamName        = ["beta", "bG3", "g2", "g3", 'b', "sigma", "nu"];
-config.subtype          = "DistAng_RGmean";%choose from 1,egoNoise / 2, onlyDist / 3, onlyAng_RGb, 
-                                                      %4, onlyAng_RGmean / 5, DistAng_RGb / 6, DistAng_RGmean
-config.includeStand     = true;
-config.useOoBTrial      = false;
-config.useweber         = false; %only true when use weber law in simple generative models
-config.NumParams   = length(config.ParamName);
-
 %% Model fitting for YoungControl data
 config.Speed.tresholdForBadParticipantL1Recontruction = 1.55;   % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
-%transform data
 YoungControls = TransformPaths(YoungControls);
 YoungControls   = CalculateTrackingPath(YoungControls, config);
 [AllYoungParams, ~, ~, ~, ~] = getResultsAllConditions(YoungControls, config);
 
 %% Model fitting for HealthyOld data
 config.Speed.tresholdForBadParticipantL1Recontruction = 2.0; 
-%transform data
 HealthyControls = TransformPaths(HealthyControls);
 HealthyControls   = CalculateTrackingPath(HealthyControls, config);
-[AllHealthyOldParams, ~, ~, ~, ~] = getResultsAllConditions(HealthyControls, config);
+[AllHealthyOldParams, ~, ~, ~, ~] = getResultsAllConditions(HealthyOld, config);
 
 %% Model fitting for MCIPos
 config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
@@ -56,6 +63,7 @@ ManuallyScoringMCIPos;
 [AllMCIPosParams,  ~, ~, ~, ~] = getResultsAllConditions(MCIPos, config);
 
 %% Model fitting for MCINeg
+config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
 config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
 %transform data
 MCINeg = TransformPaths(MCINeg);

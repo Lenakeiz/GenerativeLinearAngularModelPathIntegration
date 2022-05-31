@@ -139,6 +139,9 @@ BadExecution = zeros(trialsize,1);
 % Check the following quantity as well to see what s going to be input on
 % the model Unknown.Reconstructed{1,1}.RealReturnAngle
 % Write here all the bad trials after visual inspection
+BadExecution(8,1) = 1;
+BadExecution(25,1) = 1;
+BadExecution(26,1) = 1;
 
 %Save the information in the Reconstructed Structure
 Unknown.Reconstructed{1,8}.BadExecution = BadExecution;
@@ -176,6 +179,98 @@ BadExecution = zeros(trialsize,1);
 % Check the following quantity as well to see what s going to be input on
 % the model Unknown.Reconstructed{1,1}.RealReturnAngle
 % Write here all the bad trials after visual inspection
+Unknown.Reconstructed{1,11}.RealReturnAngle(5) = Unknown.Reconstructed{1,11}.InferredReturnAngle(5);
 
 %Save the information in the Reconstructed Structure
 Unknown.Reconstructed{1,11}.BadExecution = BadExecution;
+%% Participant 12
+trialsize = height(Unknown.Reconstructed{1,12});
+% Prepare structure
+BadExecution = zeros(trialsize,1);
+
+% Check each single trial by calling VisualizeRealtimeTrackingData(Unknown,1,1,0.0001,'cutconethree',true)
+% Check the following quantity as well to see what s going to be input on
+% the model Unknown.Reconstructed{1,1}.RealReturnAngle
+% Write here all the bad trials after visual inspection
+
+%Save the information in the Reconstructed Structure
+Unknown.Reconstructed{1,12}.BadExecution = BadExecution;
+%% Participant 13
+trialsize = height(Unknown.Reconstructed{1,13});
+% Prepare structure
+BadExecution = zeros(trialsize,1);
+
+% Check each single trial by calling VisualizeRealtimeTrackingData(Unknown,1,1,0.0001,'cutconethree',true)
+% Check the following quantity as well to see what s going to be input on
+% the model Unknown.Reconstructed{1,1}.RealReturnAngle
+% Write here all the bad trials after visual inspection
+
+%Save the information in the Reconstructed Structure
+Unknown.Reconstructed{1,13}.BadExecution = BadExecution;
+%% Participant 14
+trialsize = height(Unknown.Reconstructed{1,14});
+% Prepare structure
+BadExecution = zeros(trialsize,1);
+
+% Check each single trial by calling VisualizeRealtimeTrackingData(Unknown,1,1,0.0001,'cutconethree',true)
+% Check the following quantity as well to see what s going to be input on
+% the model Unknown.Reconstructed{1,1}.RealReturnAngle
+% Write here all the bad trials after visual inspection
+Unknown.Reconstructed{1,14}.RealReturnAngle(4) = Unknown.Reconstructed{1,14}.RealReturnAngle(4) - 360;
+Unknown.Reconstructed{1,14}.RealReturnAngle(26) = Unknown.Reconstructed{1,14}.RealReturnAngle(26) + 360;
+
+%Save the information in the Reconstructed Structure
+Unknown.Reconstructed{1,14}.BadExecution = BadExecution;
+%% Participant 15
+trialsize = height(Unknown.Reconstructed{1,15});
+% Prepare structure
+BadExecution = zeros(trialsize,1);
+
+% Check each single trial by calling VisualizeRealtimeTrackingData(Unknown,1,1,0.0001,'cutconethree',true)
+% Check the following quantity as well to see what s going to be input on
+% the model Unknown.Reconstructed{1,1}.RealReturnAngle
+% Write here all the bad trials after visual inspection
+BadExecution(4,1) = 1;
+Unknown.Reconstructed{1,15}.RealReturnAngle(14) = Unknown.Reconstructed{1,15}.RealReturnAngle(14) - 360;
+
+%Save the information in the Reconstructed Structure
+Unknown.Reconstructed{1,15}.BadExecution = BadExecution;
+%% Participant 16
+%% THIS PARTICIPANT HAS THE OLD PATHS AS WELL! Check if to EXCLUDE (see trial 1 for example
+trialsize = height(Unknown.Reconstructed{1,16});
+% Prepare structure
+BadExecution = zeros(trialsize,1);
+
+% Check each single trial by calling VisualizeRealtimeTrackingData(Unknown,1,1,0.0001,'cutconethree',true)
+% Check the following quantity as well to see what s going to be input on
+% the model Unknown.Reconstructed{1,1}.RealReturnAngle
+% Write here all the bad trials after visual inspection
+Unknown.Reconstructed{1,16}.RealReturnAngle(14) = Unknown.Reconstructed{1,16}.InferredReturnAngle(14);
+
+%Save the information in the Reconstructed Structure
+Unknown.Reconstructed{1,16}.BadExecution = BadExecution;
+%% Participant 17
+trialsize = height(Unknown.Reconstructed{1,17});
+% Prepare structure
+BadExecution = zeros(trialsize,1);
+
+% Check each single trial by calling VisualizeRealtimeTrackingData(Unknown,1,1,0.0001,'cutconethree',true)
+% Check the following quantity as well to see what s going to be input on
+% the model Unknown.Reconstructed{1,1}.RealReturnAngle
+% Write here all the bad trials after visual inspection
+BadExecution(2,1) = 1;
+
+%Save the information in the Reconstructed Structure
+Unknown.Reconstructed{1,17}.BadExecution = BadExecution;
+%% Participant 18
+trialsize = height(Unknown.Reconstructed{1,18});
+% Prepare structure
+BadExecution = zeros(trialsize,1);
+
+% Check each single trial by calling VisualizeRealtimeTrackingData(Unknown,1,1,0.0001,'cutconethree',true)
+% Check the following quantity as well to see what s going to be input on
+% the model Unknown.Reconstructed{1,1}.RealReturnAngle
+% Write here all the bad trials after visual inspection
+
+%Save the information in the Reconstructed Structure
+Unknown.Reconstructed{1,18}.BadExecution = BadExecution;

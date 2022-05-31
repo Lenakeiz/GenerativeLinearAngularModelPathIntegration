@@ -5,11 +5,15 @@ anglebetween = @(v,w) atan2d(w(:,2).*v(:,1) - v(:,2).*w(:,1), v(:,1).*w(:,1) + v
 % Reconstructing a visualization of participants walk and head drection after reaching the third
 % cone
 config.cutFromConeThree = false;
+config.videoplot = true;
 
 if exist('varargin','var')
     for i = 1:2:nargin-4
         if(strcmpi(varargin{i},'cutconethree'))
             config.cutFromConeThree = varargin{i+1};
+        end
+        if(strcmpi(varargin{i},'videoplot'))
+            config.videoplot = varargin{i+1};
         end
     end
 end
@@ -123,33 +127,56 @@ leg = legend([pCone1 pCone2 pCone3 pTrigPos pOoB pRecconstructedOoB], 'Cone 1', 
 leg.Location = 'northeastoutside';
 leg.FontSize = 15;
 
-for k = 2 : tracking_size
-
-    tempPos = Extracted_pos(k-1:k,[2 4]);
+if(config.videoplot)
+    for k = 2 : tracking_size        
+        tempPos = Extracted_pos(k-1:k,[2 4]);
+        
+        % Current path
+        plot(tempPos.Pos_X,tempPos.Pos_Z,'Marker','none','LineStyle','-','LineWidth',2.5,'Color',config.color_scheme_npg(4,:));
+        
+        % Adding an arrow to visualize the orientation of the participant at
+        % the second point    
+        % Extracting direction on the xz plane (the projection on the floor)
+        tempDir = [Extracted_pos.Forward_X(k) Extracted_pos.Forward_Z(k)];
+        tempDir = tempDir/norm(tempDir);
+        % Making it smaller for visualization
+        tempDir = tempDir.*0.5;
     
-    % Current path
-    plot(tempPos.Pos_X,tempPos.Pos_Z,'Marker','none','LineStyle','-','LineWidth',2.5,'Color',config.color_scheme_npg(4,:));
+        qv = quiver(Extracted_pos.Pos_X(k),Extracted_pos.Pos_Z(k),tempDir(1), tempDir(2), 'off');
+        qv.Color = config.color_scheme_npg(5,:);
+        qv.LineWidth = 5;
+        qv.MaxHeadSize = 2;
+        
+        drawnow; pause(playbackSpeed);
     
-    % Adding an arrow to visualize the orientation of the participant at
-    % the second point    
-    % Extracting direction on the xz plane (the projection on the floor)
-    tempDir = [Extracted_pos.Forward_X(k) Extracted_pos.Forward_Z(k)];
+        if(k > 2 && k < tracking_size)
+            delete(qv);
+        end        
+    end
+else
+    tempDir = [Extracted_pos.Forward_X(2) Extracted_pos.Forward_Z(2)];
     tempDir = tempDir/norm(tempDir);
     % Making it smaller for visualization
     tempDir = tempDir.*0.5;
 
-    qv = quiver(Extracted_pos.Pos_X(k),Extracted_pos.Pos_Z(k),tempDir(1), tempDir(2), 'off');
+    qv = quiver(Extracted_pos.Pos_X(2),Extracted_pos.Pos_Z(2),tempDir(1), tempDir(2), 'off');
     qv.Color = config.color_scheme_npg(5,:);
     qv.LineWidth = 5;
     qv.MaxHeadSize = 2;
-    
-    drawnow; pause(playbackSpeed);
 
-    if(k > 2 && k < tracking_size)
-        delete(qv);
-    end
+    tempDir = [Extracted_pos.Forward_X(tracking_size) Extracted_pos.Forward_Z(tracking_size)];
+    tempDir = tempDir/norm(tempDir);
+    % Making it smaller for visualization
+    tempDir = tempDir.*0.5;
 
+    qv = quiver(Extracted_pos.Pos_X(tracking_size),Extracted_pos.Pos_Z(tracking_size),tempDir(1), tempDir(2), 'off');
+    qv.Color = config.color_scheme_npg(5,:);
+    qv.LineWidth = 5;
+    qv.MaxHeadSize = 2;
+
+    plot(Extracted_pos.Pos_X,Extracted_pos.Pos_Z,'Marker','none','LineStyle','-','LineWidth',2.5,'Color',config.color_scheme_npg(4,:));
 end
+
 
 hold off
 

@@ -5,7 +5,6 @@ function Results = PerformGroupFit(GroupData, config)
 % nsamples is the number of random samples to be taken when modelling the
 % final position
 
-
 TRIAL_FILTER = config.TrialFilter;          %load configurations necessary for the script
 sampleSize = size(GroupData.FlagPos,2);     % Calculating sample size
 
@@ -63,7 +62,9 @@ for j = 1:sampleSize
         ICAng{j}.bic           =   nan;
         ICAng{j}.negll         =   nan;
         ICAng{j}.likelihood    =   nan;
-        flagOoB{j}          =   [];
+        flagOoB{j}             =   [];
+        BadExecutionTrials     =   [];
+
         disp(['%%%%%%%%%%%%%%% Skipping PARTICIPANT ' num2str(j) ' ---- because of bad trials%%%%%%%%%%%%%%%']);
         continue
     end%% read and process data 
@@ -71,6 +72,7 @@ for j = 1:sampleSize
         %processing the data from all conditions
         flagpos{j}  = GroupData.FlagPos{j};
         OoBLen{j} = GroupData.Errors{j}.OoBLength;
+        BadExecutionTrials = GroupData.Reconstructed{j}.BadExecution;
         for idx = 1:size(GroupData.TrigPos{j},1)
             %If not out of bound or out of bound data is not present then take the trigpos
             if(GroupData.CondTable{j}.OutOfBound(idx) == 0 | isnan(GroupData.OutOfBoundPos{1,j}{idx}(1,1)))
@@ -85,6 +87,7 @@ for j = 1:sampleSize
         %processing data according to "TRIAL_FILTER", with 1 no change, 2 no distal cues, 3 no optic flow
         flagpos{j}  = GroupData.FlagPos{j}(GroupData.CondTable{1,j}.Condition == TRIAL_FILTER);
         OoBLen{j}   = GroupData.Errors{j}.OoBLength(GroupData.CondTable{1,j}.Condition == TRIAL_FILTER);
+        BadExecutionTrials = GroupData.Reconstructed{j}.BadExecution(GroupData.CondTable{1,j}.Condition == TRIAL_FILTER);
         tempCnt     = 1;
         for idx = 1:size(GroupData.TrigPos{j},1)
             if(GroupData.CondTable{1,j}.Condition(idx) == TRIAL_FILTER)
@@ -142,8 +145,9 @@ for j = 1:sampleSize
         segments{j}{tr}  =      X{j}{tr}(2:end,:) - X{j}{tr}(1:end-1,:);
         DX{j}{tr}        =      sqrt(sum(segments{j}{tr}.^2,2));        
      
-        outer_rad        =      deg2rad([0; anglebetween(segments{j}{tr}(1:end-1,:), segments{j}{tr}(2:end,:))]);   
-        THETADX{j}{tr}   =      mod(outer_rad, 2*pi);%wrap the angle into (0,2pi)
+        outer_rad        =      [0; anglebetween(segments{j}{tr}(1:end-1,:), segments{j}{tr}(2:end,:))];
+        outer_rad(3,1)   =      GroupData.Reconstructed{j}.RealReturnAngle;     
+        THETADX{j}{tr}   =      deg2rad(outer_rad);%wrap the angle into (0,2pi)
 
         %extract the projected speed information along with the time information on outbound path
         L1_Vel_proj             =       GroupData.TrackedL1{j}{tr}.Vel_proj;
@@ -169,15 +173,16 @@ for j = 1:sampleSize
 
 
     %% put all of things we need into a struct for sending to FitData
-    Input.DX            =   DX{j};
-    Input.THETADX       =   THETADX{j};
-    Input.X             =   X{j};
-    Input.flagOoB       =   flagOoB{j};
-    Input.ProjSpeedL1   =   ProjSpeedL1{j};
-    Input.ProjSpeedL2   =   ProjSpeedL2{j};
-    Input.L1Dur         =   L1Dur{j};
-    Input.L2Dur         =   L2Dur{j};
-    Input.StandingDur   =   StandingDur{j};
+    Input.DX                 =   DX{j};
+    Input.THETADX            =   THETADX{j};
+    Input.X                  =   X{j};
+    Input.flagOoB            =   flagOoB{j};
+    Input.ProjSpeedL1        =   ProjSpeedL1{j};
+    Input.ProjSpeedL2        =   ProjSpeedL2{j};
+    Input.L1Dur              =   L1Dur{j};
+    Input.L2Dur              =   L2Dur{j};
+    Input.StandingDur        =   StandingDur{j};
+    Input.BadExecutionsTrial =   BadExecutionTrials; 
 
     %% Do the data fitting
     disp(['%%%%%%%%%%%%%%% STARTING FIT PER PARTICIPANT ' num2str(j) ' %%%%%%%%%%%%%%%']);

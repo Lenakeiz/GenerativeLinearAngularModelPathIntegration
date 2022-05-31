@@ -16,7 +16,7 @@ function [negloglikelihood] = EstimateGamma(gamma, G3, g2, g3, b, sigma, nu, Inp
 X        =   Input.X;
 DX       =   Input.DX;
 THETAX   =   Input.THETADX;
-
+BadExecutions = Input.BadExecutionsTrial;
 sampleSize = size(X,2);
 negloglikelihood = 0;
 

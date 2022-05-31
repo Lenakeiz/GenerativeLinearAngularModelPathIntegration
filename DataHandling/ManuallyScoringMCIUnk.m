@@ -259,6 +259,7 @@ BadExecution = zeros(trialsize,1);
 % the model Unknown.Reconstructed{1,1}.RealReturnAngle
 % Write here all the bad trials after visual inspection
 BadExecution(2,1) = 1;
+BadExecution(9,1) = 1;
 
 %Save the information in the Reconstructed Structure
 Unknown.Reconstructed{1,17}.BadExecution = BadExecution;
@@ -271,6 +272,12 @@ BadExecution = zeros(trialsize,1);
 % Check the following quantity as well to see what s going to be input on
 % the model Unknown.Reconstructed{1,1}.RealReturnAngle
 % Write here all the bad trials after visual inspection
+Unknown.Reconstructed{1,18}.RealReturnAngle(3)  = Unknown.Reconstructed{1,18}.RealReturnAngle(3) + 360;
+BadExecution(4,1) = 1;
+Unknown.Reconstructed{1,18}.RealReturnAngle(7)  = Unknown.Reconstructed{1,18}.RealReturnAngle(7) + 360;
+Unknown.Reconstructed{1,18}.RealReturnAngle(8)  = Unknown.Reconstructed{1,18}.RealReturnAngle(8) + 360;
+Unknown.Reconstructed{1,18}.RealReturnAngle(25) = Unknown.Reconstructed{1,18}.RealReturnAngle(25) - 360;
+Unknown.Reconstructed{1,18}.RealReturnAngle(27) = Unknown.Reconstructed{1,18}.RealReturnAngle(27) + 360;
 
 %Save the information in the Reconstructed Structure
 Unknown.Reconstructed{1,18}.BadExecution = BadExecution;

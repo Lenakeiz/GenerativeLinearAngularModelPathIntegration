@@ -48,31 +48,13 @@ for j = 1:sampleSize
         disp(['%%%%%%%%%%%%%%% Skipping PARTICIPANT ' num2str(j) ' ---- because of bad trials%%%%%%%%%%%%%%%']);
         continue
     end
-    
-    %filter out participants who did short walking
-    if ismember(j, [0])
-        % set results to nan for later processing
-        GroupParameters{j}  =   NaN(config.NumParams,1);
-        ICDist{j}.aic           =   nan;
-        ICDist{j}.bic           =   nan;
-        ICDist{j}.negll         =   nan;
-        ICDist{j}.likelihood    =   nan;
 
-        ICAng{j}.aic           =   nan;
-        ICAng{j}.bic           =   nan;
-        ICAng{j}.negll         =   nan;
-        ICAng{j}.likelihood    =   nan;
-        flagOoB{j}             =   [];
-        BadExecutionTrials     =   [];
-
-        disp(['%%%%%%%%%%%%%%% Skipping PARTICIPANT ' num2str(j) ' ---- because of bad trials%%%%%%%%%%%%%%%']);
-        continue
-    end%% read and process data 
     if(TRIAL_FILTER == 0)
         %processing the data from all conditions
         flagpos{j}  = GroupData.FlagPos{j};
         OoBLen{j} = GroupData.Errors{j}.OoBLength;
         BadExecutionTrials = GroupData.Reconstructed{j}.BadExecution;
+        realReturnAngles   = GroupData.Reconstructed{j}.RealReturnAngle;
         for idx = 1:size(GroupData.TrigPos{j},1)
             %If not out of bound or out of bound data is not present then take the trigpos
             if(GroupData.CondTable{j}.OutOfBound(idx) == 0 | isnan(GroupData.OutOfBoundPos{1,j}{idx}(1,1)))
@@ -88,6 +70,7 @@ for j = 1:sampleSize
         flagpos{j}  = GroupData.FlagPos{j}(GroupData.CondTable{1,j}.Condition == TRIAL_FILTER);
         OoBLen{j}   = GroupData.Errors{j}.OoBLength(GroupData.CondTable{1,j}.Condition == TRIAL_FILTER);
         BadExecutionTrials = GroupData.Reconstructed{j}.BadExecution(GroupData.CondTable{1,j}.Condition == TRIAL_FILTER);
+        realReturnAngles   = GroupData.Reconstructed{j}.RealReturnAngle(GroupData.CondTable{1,j}.Condition == TRIAL_FILTER);
         tempCnt     = 1;
         for idx = 1:size(GroupData.TrigPos{j},1)
             if(GroupData.CondTable{1,j}.Condition(idx) == TRIAL_FILTER)
@@ -103,6 +86,12 @@ for j = 1:sampleSize
             end
         end
     end
+
+    flagpos{j}          = flagpos{j}(BadExecutionTrials == 0);
+    OoBLen{j}           = OoBLen{j}(BadExecutionTrials == 0);
+    realReturnAngles    = realReturnAngles(BadExecutionTrials == 0);
+    finalpos{j}         = finalpos{j}(BadExecutionTrials == 0);
+    flagOoB{j}          = flagOoB{j}(BadExecutionTrials == 0); 
 
     if length(flagpos{j}) < config.NumParams
         disp("%%%%%%%%%%%%%%% Skipping participant " + num2str(j) + ...
@@ -146,7 +135,7 @@ for j = 1:sampleSize
         DX{j}{tr}        =      sqrt(sum(segments{j}{tr}.^2,2));        
      
         outer_rad        =      [0; anglebetween(segments{j}{tr}(1:end-1,:), segments{j}{tr}(2:end,:))];
-        outer_rad(3,1)   =      GroupData.Reconstructed{j}.RealReturnAngle;     
+        outer_rad(3,1)   =      realReturnAngles(tr);     
         THETADX{j}{tr}   =      deg2rad(outer_rad);%wrap the angle into (0,2pi)
 
         %extract the projected speed information along with the time information on outbound path
@@ -182,7 +171,6 @@ for j = 1:sampleSize
     Input.L1Dur              =   L1Dur{j};
     Input.L2Dur              =   L2Dur{j};
     Input.StandingDur        =   StandingDur{j};
-    Input.BadExecutionsTrial =   BadExecutionTrials; 
 
     %% Do the data fitting
     disp(['%%%%%%%%%%%%%%% STARTING FIT PER PARTICIPANT ' num2str(j) ' %%%%%%%%%%%%%%%']);

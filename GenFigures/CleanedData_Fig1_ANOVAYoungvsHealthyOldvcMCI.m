@@ -14,7 +14,7 @@ config.Speed.smoothWindow                           = 10;                  % tra
 config.Speed.velocityCutoff                         = 0.2;                 % velocity cutoff to select only the walking part of the reconstructed velocity
 config.Speed.timeOffsetForDetectedTemporalWindow    = 0.4;                 % time in seconds that will push earlier/ the detected rising edge
 config.UseGlobalSearch                              = true;
-
+config.TrackedInboundAngularDeltaT                  = 1;
 
 %% Model fitting
 %Model related parameters
@@ -75,6 +75,7 @@ config.Speed.tresholdForBadParticipantL1Recontruction = 0.0;
 %transform data
 MCIUnk = TransformPaths(Unknown);
 MCIUnk   = CalculateTrackingPath(MCIUnk, config);
+ManuallyScoringMCIUnk
 [AllMCIUnkParams,  ~, ~, ~, ~] = getResultsAllConditions(MCIUnk, config);
 
 %% Setting colors for using in plots

@@ -20,6 +20,7 @@ sampleSize      =   size(DX,2);
 NLL_Angle       =   0;
 
 for tr = 1:sampleSize
+
     %% extract the physical data info
     l1          =       DX{tr}(1);
     l2          =       DX{tr}(2);

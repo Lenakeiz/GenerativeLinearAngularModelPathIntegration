@@ -44,11 +44,10 @@ trialsize = height(MCINeg.Reconstructed{1,4});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
+BadExecution(7,1) = 1;
 BadExecution(8,1) = 1;
 BadExecution(10,1) = 1;
 BadExecution(12,1) = 1;
-
-MCINeg.Reconstructed{1,4}.RealReturnAngle(7) = MCINeg.Reconstructed{1,4}.RealReturnAngle(7) + 360;
 
 %Save the information in the Reconstructed Structure
 MCINeg.Reconstructed{1,4}.BadExecution = BadExecution;
@@ -79,8 +78,6 @@ trialsize = height(MCINeg.Reconstructed{1,7});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
-BadExecution(1,1) = 1;
-
 %Save the information in the Reconstructed Structure
 MCINeg.Reconstructed{1,7}.BadExecution = BadExecution;
 
@@ -89,7 +86,7 @@ trialsize = height(MCINeg.Reconstructed{1,8});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
-BadExecution(1,1) = 1;
+MCINeg.Reconstructed{1,8}.RealReturnAngle(1) = MCINeg.Reconstructed{1,8}.RealReturnAngle(1) - 360;
 
 %Save the information in the Reconstructed Structure
 MCINeg.Reconstructed{1,8}.BadExecution = BadExecution;
@@ -120,5 +117,38 @@ trialsize = height(MCINeg.Reconstructed{1,11});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
+MCINeg.Reconstructed{1,11}.RealReturnAngle(25) = MCINeg.Reconstructed{1,11}.RealReturnAngle(25) + 360;
+
 %Save the information in the Reconstructed Structure
 MCINeg.Reconstructed{1,11}.BadExecution = BadExecution;
+
+%% Participant 12
+trialsize = height(MCINeg.Reconstructed{1,12});
+% Prepare structure
+BadExecution = zeros(trialsize,1);
+
+MCINeg.Reconstructed{1,12}.RealReturnAngle(17) = MCINeg.Reconstructed{1,12}.RealReturnAngle(17) + 360;
+MCINeg.Reconstructed{1,12}.RealReturnAngle(24) = MCINeg.Reconstructed{1,12}.RealReturnAngle(24) + 360;
+MCINeg.Reconstructed{1,12}.RealReturnAngle(25) = MCINeg.Reconstructed{1,12}.RealReturnAngle(25) + 360;
+
+%Save the information in the Reconstructed Structure
+MCINeg.Reconstructed{1,12}.BadExecution = BadExecution;
+
+%% Participant 13
+trialsize = height(MCINeg.Reconstructed{1,13});
+% Prepare structure
+BadExecution = zeros(trialsize,1);
+
+MCINeg.Reconstructed{1,13}.RealReturnAngle(1) = MCINeg.Reconstructed{1,13}.RealReturnAngle(1) - 360;
+
+
+%Save the information in the Reconstructed Structure
+MCINeg.Reconstructed{1,13}.BadExecution = BadExecution;
+
+%% Participant 14
+trialsize = height(MCINeg.Reconstructed{1,14});
+% Prepare structure
+BadExecution = zeros(trialsize,1);
+
+%Save the information in the Reconstructed Structure
+MCINeg.Reconstructed{1,14}.BadExecution = BadExecution;

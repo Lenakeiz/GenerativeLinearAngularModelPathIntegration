@@ -25,7 +25,7 @@ end
 %% Model fitting for YoungControl data
 %% calculating tracking path and transoform data
 config.Speed.tresholdForBadParticipantL1Recontruction = 1.55;   % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
-YoungControls   = TransformPaths(YoungControls);%transform data
+YoungControls   = TransformPaths(YoungControls); %transform data
 YoungControls   = CalculateTrackingPath(YoungControls, config);
 %VisualizeRealtimeTrackingData(YoungControls,1, 1, 0.0001, 'cutconethree',true);
 

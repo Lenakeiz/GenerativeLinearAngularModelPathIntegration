@@ -20,7 +20,6 @@ L2Dur           =       cell(1, sampleSize);% walking duration at leg2
 StandingDur     =       cell(1, sampleSize);% standing duration at cone2
 flagpos         =       cell(1, sampleSize);% flagpos
 flagOoB         =       cell(1, sampleSize);% OoB flag
-OoBLen          =       cell(1, sampleSize);% OoB length
 GroupParameters =       cell(1, sampleSize);% Output value
 ICDist          =       cell(1, sampleSize);  
 ICAng           =       cell(1, sampleSize);  
@@ -30,7 +29,7 @@ anglebetween = @(va,vb) atan2d(va(:,1).*vb(:,2) - va(:,2).*vb(:,1), va(:,1).*vb(
 
 for j = 1:sampleSize
 
-    %filter out participants who did short walking
+    %filter out participants who did short walking, happend in Young and HealthyOld, those out of distribution 
     if ismember(j, GroupData.BadPptIdxs)
         % set results to nan for later processing
         GroupParameters{j}  =   NaN(config.NumParams,1);
@@ -45,50 +44,32 @@ for j = 1:sampleSize
         ICAng{j}.likelihood    =   nan;
 
         flagOoB{j}          =   [];
-        disp(['%%%%%%%%%%%%%%% Skipping PARTICIPANT ' num2str(j) ' ---- because of bad trials%%%%%%%%%%%%%%%']);
+        disp(['%%%%%%%%%%%%%%% Skipping PARTICIPANT ' num2str(j) ' ---- because they did a short walk%%%%%%%%%%%%%%%']);
         continue
     end
 
-    if(TRIAL_FILTER == 0)
-        %processing the data from all conditions
-        flagpos{j}  = GroupData.FlagPos{j};
-        OoBLen{j} = GroupData.Errors{j}.OoBLength;
-        BadExecutionTrials = GroupData.Reconstructed{j}.BadExecution;
-        realReturnAngles   = GroupData.Reconstructed{j}.RealReturnAngle;
-        for idx = 1:size(GroupData.TrigPos{j},1)
+    %%filter trails based on the TRIAL_FILTER, with 1 no change, 2 no distal cues, 3 no optic flow
+    Idx_Cond            = GroupData.CondTable{j}.Condition == TRIAL_FILTER; 
+    flagpos{j}          = GroupData.FlagPos{j}(Idx_Cond);
+    BadExecutionTrials  = GroupData.Reconstructed{j}.BadExecution(Idx_Cond);
+    realReturnAngles    = GroupData.Reconstructed{j}.RealReturnAngle(Idx_Cond);
+
+    tempCnt             = 1;
+    for idx = 1:size(GroupData.TrigPos{j},1) %for each trial, if belongs to TRIAL_FILTER, go into
+        if(GroupData.CondTable{j}.Condition(idx) == TRIAL_FILTER)
             %If not out of bound or out of bound data is not present then take the trigpos
             if(GroupData.CondTable{j}.OutOfBound(idx) == 0 | isnan(GroupData.OutOfBoundPos{1,j}{idx}(1,1)))
-                finalpos{j,1}(idx,1) = GroupData.TrigPos{j}(idx);
-                flagOoB{j}(idx) = 0; %OoB flag is 0, i.e., not OoB trial
+                finalpos{j,1}(tempCnt,1) = GroupData.TrigPos{j}(idx);
+                flagOoB{j}(tempCnt) = 0; %OoB flag is 0, i.e., not OoB trial
             elseif(GroupData.CondTable{j}.OutOfBound(idx) == 1)
-                finalpos{j,1}(idx,1) = GroupData.ReconstructedOOB{j}.ReconstructedOoB(idx);
-                flagOoB{j}(idx) = 1; %OoB flag is 0, i.e., it is OoB trial
+                finalpos{j,1}(tempCnt,1) = GroupData.ReconstructedOOB{j}.ReconstructedOoB(idx);
+                flagOoB{j}(tempCnt) = 1; %OoB flag is 1, i.e., it is OoB trial
             end
-        end
-    else
-        %processing data according to "TRIAL_FILTER", with 1 no change, 2 no distal cues, 3 no optic flow
-        flagpos{j}  = GroupData.FlagPos{j}(GroupData.CondTable{1,j}.Condition == TRIAL_FILTER);
-        OoBLen{j}   = GroupData.Errors{j}.OoBLength(GroupData.CondTable{1,j}.Condition == TRIAL_FILTER);
-        BadExecutionTrials = GroupData.Reconstructed{j}.BadExecution(GroupData.CondTable{1,j}.Condition == TRIAL_FILTER);
-        realReturnAngles   = GroupData.Reconstructed{j}.RealReturnAngle(GroupData.CondTable{1,j}.Condition == TRIAL_FILTER);
-        tempCnt     = 1;
-        for idx = 1:size(GroupData.TrigPos{j},1)
-            if(GroupData.CondTable{1,j}.Condition(idx) == TRIAL_FILTER)
-                %If not out of bound or out of bound data is not present then take the trigpos
-                if(GroupData.CondTable{j}.OutOfBound(idx) == 0 | isnan(GroupData.OutOfBoundPos{1,j}{idx}(1,1)))
-                    finalpos{j,1}(tempCnt,1) = GroupData.TrigPos{j}(idx);
-                    flagOoB{j}(tempCnt) = 0; %OoB flag is 0, i.e., not OoB trial
-                elseif(GroupData.CondTable{j}.OutOfBound(idx) == 1)
-                    finalpos{j,1}(tempCnt,1) = GroupData.ReconstructedOOB{j}.ReconstructedOoB(idx);
-                    flagOoB{j}(tempCnt) = 1; %OoB flag is 1, i.e., it is OoB trial
-                end
-                tempCnt = tempCnt + 1;
-            end
+            tempCnt = tempCnt + 1;
         end
     end
 
     flagpos{j}          = flagpos{j}(BadExecutionTrials == 0);
-    OoBLen{j}           = OoBLen{j}(BadExecutionTrials == 0);
     realReturnAngles    = realReturnAngles(BadExecutionTrials == 0);
     finalpos{j}         = finalpos{j}(BadExecutionTrials == 0);
     flagOoB{j}          = flagOoB{j}(BadExecutionTrials == 0); 
@@ -112,18 +93,6 @@ for j = 1:sampleSize
         continue;
     end
 
-    %% Create structures to save the data for each trial
-    DX{j}           =   cell(1,length(flagpos{j}));
-    THETADX{j}      =   cell(1,length(flagpos{j}));
-    X{j}            =   cell(1,length(flagpos{j}));
-    segments{j}     =   cell(1,length(flagpos{j}));
-    ProjSpeedL1{j}  =   cell(2,length(flagpos{j}));
-    ProjSpeedL2{j}  =   cell(2,length(flagpos{j}));
-    L1Dur{j}        =   cell(1, length(flagpos{j}));
-    L2Dur{j}        =   cell(1, length(flagpos{j}));
-    StandingDur{j}  =   cell(1, length(flagpos{j}));
-
-    Idx_Cond                =       GroupData.CondTable{j}.Condition == TRIAL_FILTER;
     leg1_duration           =       GroupData.Reconstructed{j}.T_L1(Idx_Cond);          %filter the duration of subject j at leg 1
     leg2_duration           =       GroupData.Reconstructed{j}.T_L2(Idx_Cond);          %filter the duration of subject j at leg 2
     standing_duration       =       GroupData.Reconstructed{j}.T_Standing(Idx_Cond);    %filter the duration of subject j standing at cone2 

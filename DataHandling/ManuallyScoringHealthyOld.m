@@ -294,8 +294,6 @@ trialsize = height(HealthyControls.Reconstructed{1,24});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
-BadExecution(trial,1) = 1;
-
 %Save the information in the Reconstructed Structure
 HealthyControls.Reconstructed{1,24}.BadExecution = BadExecution;
 
@@ -304,7 +302,7 @@ trialsize = height(HealthyControls.Reconstructed{1,25});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
-BadExecution(trial,1) = 1;
+HealthyControls.Reconstructed{1,25}.RealReturnAngle(20) = HealthyControls.Reconstructed{1,25}.RealReturnAngle(20) + 360;
 
 %Save the information in the Reconstructed Structure
 HealthyControls.Reconstructed{1,25}.BadExecution = BadExecution;
@@ -314,7 +312,15 @@ trialsize = height(HealthyControls.Reconstructed{1,26});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
-BadExecution(trial,1) = 1;
+% double check: is 16 a bad trial (little walking) ad why the real interred
+% angle is so large?
+%is 21 a bad trial(very little walking)?
+BadExecution(16,1) = 1;
+BadExecution(21,1) = 1;
+BadExecution(21,1) = 1;
+
+HealthyControls.Reconstructed{1,26}.RealReturnAngle(4) = HealthyControls.Reconstructed{1,26}.RealReturnAngle(4) + 360;
+HealthyControls.Reconstructed{1,26}.RealReturnAngle(23) = HealthyControls.Reconstructed{1,26}.RealReturnAngle(23) + 360;
 
 %Save the information in the Reconstructed Structure
 HealthyControls.Reconstructed{1,26}.BadExecution = BadExecution;
@@ -324,7 +330,15 @@ trialsize = height(HealthyControls.Reconstructed{1,27});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
-BadExecution(trial,1) = 1;
+% ATTENTION: NAN OUT-OF-BOUND TRIAL!!!
+BadExecution(5,1) = 1;
+BadExecution(12,1) = 1;
+BadExecution(23,1) = 1;
+BadExecution(25,1) = 1;
+
+HealthyControls.Reconstructed{1,27}.RealReturnAngle(8) = HealthyControls.Reconstructed{1,27}.RealReturnAngle(8) + 360;
+% double check trial 9 - walking backwards??
+HealthyControls.Reconstructed{1,26}.RealReturnAngle(9) = HealthyControls.Reconstructed{1,26}.RealReturnAngle(9) + 360;
 
 %Save the information in the Reconstructed Structure
 HealthyControls.Reconstructed{1,27}.BadExecution = BadExecution;
@@ -334,7 +348,7 @@ trialsize = height(HealthyControls.Reconstructed{1,28});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
-BadExecution(trial,1) = 1;
+HealthyControls.Reconstructed{1,28}.RealReturnAngle(21) = HealthyControls.Reconstructed{1,28}.RealReturnAngle(21) + 360;
 
 %Save the information in the Reconstructed Structure
 HealthyControls.Reconstructed{1,28}.BadExecution = BadExecution;
@@ -344,7 +358,8 @@ trialsize = height(HealthyControls.Reconstructed{1,29});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
-BadExecution(trial,1) = 1;
+%ATTENTION - DOUBLE CHECK TRIAL 14
+BadExecution(14,1) = 1;
 
 %Save the information in the Reconstructed Structure
 HealthyControls.Reconstructed{1,29}.BadExecution = BadExecution;
@@ -354,7 +369,7 @@ trialsize = height(HealthyControls.Reconstructed{1,30});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
-BadExecution(trial,1) = 1;
+HealthyControls.Reconstructed{1,30}.RealReturnAngle(21) = HealthyControls.Reconstructed{1,30}.RealReturnAngle(21) + 360;
 
 %Save the information in the Reconstructed Structure
 HealthyControls.Reconstructed{1,30}.BadExecution = BadExecution;
@@ -364,7 +379,10 @@ trialsize = height(HealthyControls.Reconstructed{1,31});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
-BadExecution(trial,1) = 1;
+%check trial 6
+
+HealthyControls.Reconstructed{1,31}.RealReturnAngle(1) = HealthyControls.Reconstructed{1,31}.RealReturnAngle(1) + 360;
+HealthyControls.Reconstructed{1,31}.RealReturnAngle(20) = HealthyControls.Reconstructed{1,31}.RealReturnAngle(20) + 360;
 
 %Save the information in the Reconstructed Structure
 HealthyControls.Reconstructed{1,31}.BadExecution = BadExecution;
@@ -374,7 +392,12 @@ trialsize = height(HealthyControls.Reconstructed{1,32});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
-BadExecution(trial,1) = 1;
+% double check trial 10
+
+% double check trial 6
+HealthyControls.Reconstructed{1,32}.RealReturnAngle(6) = HealthyControls.Reconstructed{1,32}.RealReturnAngle(6) + 360;
+HealthyControls.Reconstructed{1,32}.RealReturnAngle(18) = HealthyControls.Reconstructed{1,32}.RealReturnAngle(18) + 360;
+HealthyControls.Reconstructed{1,32}.RealReturnAngle(19) = HealthyControls.Reconstructed{1,32}.RealReturnAngle(19) + 360;
 
 %Save the information in the Reconstructed Structure
 HealthyControls.Reconstructed{1,32}.BadExecution = BadExecution;
@@ -384,8 +407,6 @@ trialsize = height(HealthyControls.Reconstructed{1,33});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
-BadExecution(trial,1) = 1;
-
 %Save the information in the Reconstructed Structure
 HealthyControls.Reconstructed{1,33}.BadExecution = BadExecution;
 
@@ -393,8 +414,6 @@ HealthyControls.Reconstructed{1,33}.BadExecution = BadExecution;
 trialsize = height(HealthyControls.Reconstructed{1,34});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
-
-BadExecution(trial,1) = 1;
 
 %Save the information in the Reconstructed Structure
 HealthyControls.Reconstructed{1,34}.BadExecution = BadExecution;
@@ -404,7 +423,7 @@ trialsize = height(HealthyControls.Reconstructed{1,35});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
-BadExecution(trial,1) = 1;
+HealthyControls.Reconstructed{1,35}.RealReturnAngle(24) = HealthyControls.Reconstructed{1,35}.RealReturnAngle(24) + 360;
 
 %Save the information in the Reconstructed Structure
 HealthyControls.Reconstructed{1,35}.BadExecution = BadExecution;
@@ -413,8 +432,6 @@ HealthyControls.Reconstructed{1,35}.BadExecution = BadExecution;
 trialsize = height(HealthyControls.Reconstructed{1,36});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
-
-BadExecution(trial,1) = 1;
 
 %Save the information in the Reconstructed Structure
 HealthyControls.Reconstructed{1,36}.BadExecution = BadExecution;

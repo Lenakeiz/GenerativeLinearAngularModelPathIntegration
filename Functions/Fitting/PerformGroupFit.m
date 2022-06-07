@@ -68,11 +68,21 @@ for j = 1:sampleSize
             tempCnt = tempCnt + 1;
         end
     end
+    
+    Idx_GoodTrials      = BadExecutionTrials == 0;
+    flagpos{j}          = flagpos{j}(Idx_GoodTrials);
+    realReturnAngles    = realReturnAngles(Idx_GoodTrials);
+    finalpos{j}         = finalpos{j}(Idx_GoodTrials);
+    flagOoB{j}          = flagOoB{j}(Idx_GoodTrials); 
 
-    flagpos{j}          = flagpos{j}(BadExecutionTrials == 0);
-    realReturnAngles    = realReturnAngles(BadExecutionTrials == 0);
-    finalpos{j}         = finalpos{j}(BadExecutionTrials == 0);
-    flagOoB{j}          = flagOoB{j}(BadExecutionTrials == 0); 
+    leg1_duration       = GroupData.Reconstructed{j}.T_L1(Idx_Cond);          %filter the duration of subject j at leg 1
+    leg1_duration       = leg1_duration(Idx_GoodTrials);  
+
+    leg2_duration       = GroupData.Reconstructed{j}.T_L2(Idx_Cond);          %filter the duration of subject j at leg 2
+    leg2_duration       = leg2_duration(Idx_GoodTrials);
+    
+    standing_duration   = GroupData.Reconstructed{j}.T_Standing(Idx_Cond);    %filter the duration of subject j standing at cone2 
+    standing_duration   = standing_duration(Idx_GoodTrials);
 
     if length(flagpos{j}) < config.NumParams
         disp("%%%%%%%%%%%%%%% Skipping participant " + num2str(j) + ...
@@ -92,10 +102,6 @@ for j = 1:sampleSize
         flagOoB{j}          =   [];
         continue;
     end
-
-    leg1_duration           =       GroupData.Reconstructed{j}.T_L1(Idx_Cond);          %filter the duration of subject j at leg 1
-    leg2_duration           =       GroupData.Reconstructed{j}.T_L2(Idx_Cond);          %filter the duration of subject j at leg 2
-    standing_duration       =       GroupData.Reconstructed{j}.T_Standing(Idx_Cond);    %filter the duration of subject j standing at cone2 
 
     for tr = 1:length(flagpos{j})
         

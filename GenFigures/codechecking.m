@@ -24,6 +24,12 @@ config.ModelName        = "ConstSpeedModelDistAngleRGb";
 config.ParamName        = ["beta", "sigma", "g3", "b", "nu"];
 config.NumParams        = length(config.ParamName);
 
+%% Model fitting for HealthyOld
+config.Speed.tresholdForBadParticipantL1Recontruction = 2.0; 
+HealthyControls = TransformPaths(HealthyControls);
+HealthyControls   = CalculateTrackingPath(HealthyControls, config);
+ManuallyScoringHealthyOld;
+
 %% Model fitting for MCIPos
 config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
 MCIPos = TransformPaths(MCIPos);%transform data

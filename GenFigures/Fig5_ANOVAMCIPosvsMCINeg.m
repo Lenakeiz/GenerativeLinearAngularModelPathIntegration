@@ -44,8 +44,8 @@ end
 
 %% Model fitting for MCIPos
 config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
-MCIPos   = CalculateTrackingPath(MCIPos, config);
 MCIPos = TransformPaths(MCIPos);%transform data
+MCIPos   = CalculateTrackingPath(MCIPos, config);
 [AllMCIPosParams, AllMCIPosX, AllMCIPosDX, AllMCIPosTheta, AllMCIPosIC] = getResultsAllConditions(MCIPos, config);
 
 %% Model fitting for MCINeg

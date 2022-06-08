@@ -20,6 +20,10 @@ config.TrackedInboundAngularDeltaT                  = 1;
 
 config.ModelName        = "ConstSpeedModelwith_g2";
 config.ParamName        = ["beta", "g2", "g3", "sigma", "nu"];
+
+% config.ModelName        = "ConstSpeedModelwith_g2_k3";
+% config.ParamName        = ["beta", "g2", "g3", "k3", "sigma", "nu"];
+
 config.includeStand     = false;
 config.useweber         = false; %only true when use weber law in simple generative models
 config.NumParams   = length(config.ParamName);
@@ -74,8 +78,8 @@ function BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, confi
         end
 
         %remove Nan rows (nan coz of 1, removing participants with short walking length; 2, not enough trials for parameter estimation)
-        MCIPosParamAllConds = removeNanRows(MCIPosParamAllConds);
-        MCINegParamAllConds = removeNanRows(MCINegParamAllConds);
+        nonNAN_MCIPosParamAllConds = removeNanRows(MCIPosParamAllConds);
+        nonNAN_MCINegParamAllConds = removeNanRows(MCINegParamAllConds);
     
         %% set figure info
         f = figure('visible','off','Position', [100 100 1000 500]);
@@ -157,8 +161,8 @@ function BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, confi
                     'LineWidth',scatter_marker_edgeWidth); 
             hold on
             %add errorbar
-            mean_MCIPos = mean(MCIPosParamAllConds(:,i));
-            sem_MCIPos = std(MCIPosParamAllConds(:,i))./sqrt(length(MCIPosParamAllConds(:,i)));
+            mean_MCIPos = mean(nonNAN_MCIPosParamAllConds(:,i));
+            sem_MCIPos = std(nonNAN_MCIPosParamAllConds(:,i))./sqrt(length(nonNAN_MCIPosParamAllConds(:,i)));
             errorbar(i-shift_value,mean_MCIPos,sem_MCIPos,'k','LineStyle','None', 'LineWidth', 2,  'CapSize', 14);    
             hold on
             %add mean point
@@ -180,8 +184,8 @@ function BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, confi
                     'LineWidth',scatter_marker_edgeWidth); 
             hold on
             %add errorbar
-            mean_MCI = mean(MCINegParamAllConds(:,i));
-            sem_MCI = std(MCINegParamAllConds(:,i))./sqrt(length(MCINegParamAllConds(:,i)));
+            mean_MCI = mean(nonNAN_MCINegParamAllConds(:,i));
+            sem_MCI = std(nonNAN_MCINegParamAllConds(:,i))./sqrt(length(nonNAN_MCINegParamAllConds(:,i)));
             errorbar(i+shift_value,mean_MCI,sem_MCI,'k','LineStyle','None', 'LineWidth', 2,  'CapSize', 14); 
             hold on
             %add mean point

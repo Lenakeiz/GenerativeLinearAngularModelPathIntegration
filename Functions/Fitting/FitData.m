@@ -257,6 +257,37 @@ elseif Model_Name == "ConstSpeedModelwith_g2"
     ICDist = 0;
     ICAng  = 0;
 
+elseif Model_Name == "ConstSpeedModelwith_g2_k3"
+    %set parameter lower bound and up bound
+    %     1, beta        2-g2     3-g3    4-k3    5-sigma      6-nu
+    lb  = [-1.0,         0,       0,      0,      0.1,         0.1];
+    ub  = [1.0,          3,       3,      pi,     2.0,         3.14]; 
+
+    %calculate the likelihood function
+    estFnc = @(FP) EstimateConstSpeedwith_g2_k3(FP(1),FP(2),FP(3),FP(4),FP(5), FP(6), Input, config);  
+
+    %Generating random start in the range
+    FitParams0 = (ub - lb)'.*rand(size(lb,2),1) + lb';
+    disp("Initial parameters: "+num2str(FitParams0'));
+    %setting optimization options
+    optim_options = optimoptions(@fmincon, 'Algorithm','sqp', 'MaxFunctionEvaluations',1e4);
+
+    %finding the best local minima with globalsearch
+    problem = createOptimProblem('fmincon','objective', estFnc,'x0',FitParams0, ...
+                                 'Aineq',[],'bineq',[], ...
+                                 'Aeq',[],'beq',[], ...
+                                 'lb',lb,'ub',ub, ...
+                                 'nonlcon', [], ...
+                                 'options',optim_options);
+    gs = GlobalSearch('NumTrialPoints', 1000);
+    [FitAllParams,negloglikelihood] = run(gs,problem);
+
+    disp("Fitted parameters: "+num2str(FitAllParams'));
+    disp("Negative LogLikelihood=" + num2str(negloglikelihood));
+    disp(" ");disp(" ");disp(" ");
+    ICDist = 0;
+    ICAng  = 0;
+
 elseif Model_Name == "IntSpeedModel"
     %set parameter lower bound and up bound
     %     1, beta    2-G3     3-g2     4-g3     5-b      6-sigma      7-nu

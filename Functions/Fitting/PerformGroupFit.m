@@ -6,28 +6,28 @@ function Results = PerformGroupFit(GroupData, config)
 % final position
 
 TRIAL_FILTER = config.TrialFilter;          %load configurations necessary for the script
-sampleSize = size(GroupData.FlagPos,2);     % Calculating sample size
+subjectNum = size(GroupData.FlagPos,2);     % Calculating sample size
 
 %% Initialize empty cell fro storing data
-X               =       cell(1, sampleSize);% Actual positions
-DX              =       cell(1, sampleSize);% Distances between subsequent points - segments li
-THETADX         =       cell(1, sampleSize);% These are the angles between two subsequent segments. The angle indicate the rotation from the first segment towards the second, so it s the outer angle of the triangle.
-segments        =       cell(1, length(sampleSize));
-ProjSpeedL1     =       cell(1, sampleSize);% projected speed within detected start-to-end time window at leg 1
-ProjSpeedL2     =       cell(1, sampleSize);% projected speed within detected start-to-end time window at leg 2
-L1Dur           =       cell(1, sampleSize);% walking duration at leg 1
-L2Dur           =       cell(1, sampleSize);% walking duration at leg2
-StandingDur     =       cell(1, sampleSize);% standing duration at cone2
-flagpos         =       cell(1, sampleSize);% flagpos
-flagOoB         =       cell(1, sampleSize);% OoB flag
-GroupParameters =       cell(1, sampleSize);% Output value
-ICDist          =       cell(1, sampleSize);  
-ICAng           =       cell(1, sampleSize);  
+X               =       cell(1, subjectNum);% Actual positions
+DX              =       cell(1, subjectNum);% Distances between subsequent points - segments li
+THETADX         =       cell(1, subjectNum);% These are the angles between two subsequent segments. The angle indicate the rotation from the first segment towards the second, so it s the outer angle of the triangle.
+segments        =       cell(1, subjectNum);
+ProjSpeedL1     =       cell(1, subjectNum);% projected speed within detected start-to-end time window at leg 1
+ProjSpeedL2     =       cell(1, subjectNum);% projected speed within detected start-to-end time window at leg 2
+L1Dur           =       cell(1, subjectNum);% walking duration at leg 1
+L2Dur           =       cell(1, subjectNum);% walking duration at leg2
+StandingDur     =       cell(1, subjectNum);% standing duration at cone2
+flagpos         =       cell(1, subjectNum);% flagpos
+flagOoB         =       cell(1, subjectNum);% OoB flag
+GroupParameters =       cell(1, subjectNum);% Output value
+ICDist          =       cell(1, subjectNum);  
+ICAng           =       cell(1, subjectNum);  
 
 %help function to calculate the angle between two vector
 anglebetween = @(va,vb) atan2d(va(:,1).*vb(:,2) - va(:,2).*vb(:,1), va(:,1).*vb(:,1) + va(:,2).*vb(:,2));
 
-for j = 1:sampleSize
+for j = 1:subjectNum
 
     %filter out participants who did short walking, happend in Young and HealthyOld, those out of distribution 
     if ismember(j, GroupData.BadPptIdxs)
@@ -55,14 +55,17 @@ for j = 1:sampleSize
     realReturnAngles    = GroupData.Reconstructed{j}.RealReturnAngle(Idx_Cond);
 
     tempCnt             = 1;
-    for idx = 1:size(GroupData.TrigPos{j},1) %for each trial, if belongs to TRIAL_FILTER, go into
+    TrialNum            = size(GroupData.TrigPos{j},1);
+
+    %get the final position and OoB flag 
+    for idx = 1:TrialNum %for each trial, if belongs to TRIAL_FILTER, go into
         if(GroupData.CondTable{j}.Condition(idx) == TRIAL_FILTER)
             %If not out of bound or out of bound data is not present then take the trigpos
             if(GroupData.CondTable{j}.OutOfBound(idx) == 0 | isnan(GroupData.OutOfBoundPos{1,j}{idx}(1,1)))
-                finalpos{j,1}(tempCnt,1) = GroupData.TrigPos{j}(idx);
+                finalpos{j}(tempCnt) = GroupData.TrigPos{j}(idx);
                 flagOoB{j}(tempCnt) = 0; %OoB flag is 0, i.e., not OoB trial
             elseif(GroupData.CondTable{j}.OutOfBound(idx) == 1)
-                finalpos{j,1}(tempCnt,1) = GroupData.ReconstructedOOB{j}.ReconstructedOoB(idx);
+                finalpos{j}(tempCnt) = GroupData.ReconstructedOOB{j}.ReconstructedOoB(idx);
                 flagOoB{j}(tempCnt) = 1; %OoB flag is 1, i.e., it is OoB trial
             end
             tempCnt = tempCnt + 1;
@@ -80,11 +83,18 @@ for j = 1:sampleSize
 
     leg2_duration       = GroupData.Reconstructed{j}.T_L2(Idx_Cond);          %filter the duration of subject j at leg 2
     leg2_duration       = leg2_duration(Idx_GoodTrials);
-    
+
     standing_duration   = GroupData.Reconstructed{j}.T_Standing(Idx_Cond);    %filter the duration of subject j standing at cone2 
     standing_duration   = standing_duration(Idx_GoodTrials);
 
+    TrackedL1           = GroupData.TrackedL1{j}(Idx_Cond);
+    TrackedL1           = TrackedL1(Idx_GoodTrials);
+
+    TrackedL2           = GroupData.TrackedL2{j}(Idx_Cond);
+    TrackedL2           = TrackedL2(Idx_GoodTrials);
+
     if length(flagpos{j}) < config.NumParams
+        %lack of trials, skip estimation
         disp("%%%%%%%%%%%%%%% Skipping participant " + num2str(j) + ...
             ", because only "+ length(flagpos{j}) + ...
             " datapoints available for parameter estimation%%%%%%%%%%%%%%%\n");
@@ -102,7 +112,8 @@ for j = 1:sampleSize
         flagOoB{j}          =   [];
         continue;
     end
-
+    
+    %get X, segments, DX etc....
     for tr = 1:length(flagpos{j})
         
         X{j}{tr}         =      [flagpos{j}{tr}(:,[1,3]);finalpos{j}{tr}([1,3])];
@@ -114,17 +125,17 @@ for j = 1:sampleSize
         THETADX{j}{tr}   =      deg2rad(outer_rad);%wrap the angle into (0,2pi)
 
         %extract the projected speed information along with the time information on outbound path
-        L1_Vel_proj             =       GroupData.TrackedL1{j}{tr}.Vel_proj;
-        L1_Time                 =       GroupData.TrackedL1{j}{tr}.Time;
-        L1_Filtered_Vel_proj    =       GroupData.TrackedL1{j}{tr}.Filtered_Vel_proj;
+        L1_Vel_proj             =       TrackedL1{tr}.Vel_proj;
+        L1_Time                 =       TrackedL1{tr}.Time;
+        L1_Filtered_Vel_proj    =       TrackedL1{tr}.Filtered_Vel_proj;
         L1_Vel_proj_selected    =       L1_Vel_proj(L1_Filtered_Vel_proj);
         L1_Time_selected        =       L1_Time(L1_Filtered_Vel_proj);
         ProjSpeedL1{j}{1,tr}    =       L1_Time_selected;  %selected time in a start-to-end range
         ProjSpeedL1{j}{2,tr}    =       L1_Vel_proj_selected;  %selected speed in a start-to-end range
 
-        L2_Vel_proj             =       GroupData.TrackedL2{j}{tr}.Vel_proj;
-        L2_Time                 =       GroupData.TrackedL2{j}{tr}.Time;
-        L2_Filtered_Vel_proj    =       GroupData.TrackedL2{j}{tr}.Filtered_Vel_proj;
+        L2_Vel_proj             =       TrackedL2{tr}.Vel_proj;
+        L2_Time                 =       TrackedL2{tr}.Time;
+        L2_Filtered_Vel_proj    =       TrackedL2{tr}.Filtered_Vel_proj;
         L2_Vel_proj_selected    =       L2_Vel_proj(L2_Filtered_Vel_proj);
         L2_Time_selected        =       L2_Time(L2_Filtered_Vel_proj);
         ProjSpeedL2{j}{1, tr}   =       L2_Time_selected;  %selected time in a start-to-end range

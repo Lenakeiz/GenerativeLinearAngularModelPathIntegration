@@ -1,4 +1,4 @@
 function NonNanDat = removeNanRows(Dat)
 %remove Nan Rows in Dat (2D array)
-nanIdx = isnan(Dat(:,1));
+nanIdx = isnan(sum(Dat,2));
 NonNanDat = Dat(~nanIdx,:);

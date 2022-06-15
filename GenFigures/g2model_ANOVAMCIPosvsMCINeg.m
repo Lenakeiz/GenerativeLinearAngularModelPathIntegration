@@ -1,7 +1,7 @@
 %% Cleaning variables
 clearvars; clear all; close all; clc;
-rng('default'); %for code reproducibility
-%rng(1122); %for code reproducibility
+%rng('default'); %for code reproducibility
+rng(1111); %for code reproducibility
 
 %% Loading data
 disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');

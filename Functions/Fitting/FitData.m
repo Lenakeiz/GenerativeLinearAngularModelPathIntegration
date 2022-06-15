@@ -260,8 +260,8 @@ elseif Model_Name == "ConstSpeedModelwith_g2"
 elseif Model_Name == "ConstSpeedModelwith_g2_k3"
     %set parameter lower bound and up bound
     %     1, beta        2-g2     3-g3    4-k3    5-sigma      6-nu
-    lb  = [-1.0,         0,       0,      0,      0.1,         0.1];
-    ub  = [1.0,          3,       3,      pi,     2.0,         3.14]; 
+    lb  = [-1.0,         0,       0,      0,      0.0,         0.0];
+    ub  = [1.0,          3,       3,      pi,     4.0,         pi]; 
 
     %calculate the likelihood function
     estFnc = @(FP) EstimateConstSpeedwith_g2_k3(FP(1),FP(2),FP(3),FP(4),FP(5), FP(6), Input, config);  

@@ -47,51 +47,80 @@ for j = 1:subjectNum
         disp(['%%%%%%%%%%%%%%% Skipping PARTICIPANT ' num2str(j) ' ---- because they did a short walk%%%%%%%%%%%%%%%']);
         continue
     end
-
-    %%filter trails based on the TRIAL_FILTER, with 1 no change, 2 no distal cues, 3 no optic flow
-    Idx_Cond            = GroupData.CondTable{j}.Condition == TRIAL_FILTER; 
-    flagpos{j}          = GroupData.FlagPos{j}(Idx_Cond);
-    BadExecutionTrials  = GroupData.Reconstructed{j}.BadExecution(Idx_Cond);
-    realReturnAngles    = GroupData.Reconstructed{j}.RealReturnAngle(Idx_Cond);
-
-    tempCnt             = 1;
-    TrialNum            = size(GroupData.TrigPos{j},1);
-
-    %get the final position and OoB flag 
-    for idx = 1:TrialNum %for each trial, if belongs to TRIAL_FILTER, go into
-        if(GroupData.CondTable{j}.Condition(idx) == TRIAL_FILTER)
+    
+    if(TRIAL_FILTER == 0)
+        %merge all three conditions
+        flagpos{j}  = GroupData.FlagPos{j};
+        BadExecutionTrials  = GroupData.Reconstructed{j}.BadExecution;
+        realReturnAngles    = GroupData.Reconstructed{j}.RealReturnAngle;
+        TrialNum    = size(GroupData.TrigPos{j},1);
+        for idx = 1:TrialNum
             %If not out of bound or out of bound data is not present then take the trigpos
             if(GroupData.CondTable{j}.OutOfBound(idx) == 0 | isnan(GroupData.OutOfBoundPos{1,j}{idx}(1,1)))
-                finalpos{j}(tempCnt) = GroupData.TrigPos{j}(idx);
-                flagOoB{j}(tempCnt) = 0; %OoB flag is 0, i.e., not OoB trial
+                finalpos{j}(idx) = GroupData.TrigPos{j}(idx);
+                flagOoB{j}(idx) = 0; %OoB flag is 0, i.e., not OoB trial
             elseif(GroupData.CondTable{j}.OutOfBound(idx) == 1)
-                finalpos{j}(tempCnt) = GroupData.ReconstructedOOB{j}.ReconstructedOoB(idx);
-                flagOoB{j}(tempCnt) = 1; %OoB flag is 1, i.e., it is OoB trial
+                finalpos{j}(idx) = GroupData.ReconstructedOOB{j}.ReconstructedOoB(idx);
+                flagOoB{j}(idx) = 1; %OoB flag is 0, i.e., it is OoB trial
             end
-            tempCnt = tempCnt + 1;
-        end
-    end
+        end   
+        Idx_GoodTrials      = BadExecutionTrials == 0;
+        flagpos{j}          = flagpos{j}(Idx_GoodTrials);
+        realReturnAngles    = realReturnAngles(Idx_GoodTrials);
+        finalpos{j}         = finalpos{j}(Idx_GoodTrials);
+        flagOoB{j}          = flagOoB{j}(Idx_GoodTrials); 
     
-    Idx_GoodTrials      = BadExecutionTrials == 0;
-    flagpos{j}          = flagpos{j}(Idx_GoodTrials);
-    realReturnAngles    = realReturnAngles(Idx_GoodTrials);
-    finalpos{j}         = finalpos{j}(Idx_GoodTrials);
-    flagOoB{j}          = flagOoB{j}(Idx_GoodTrials); 
-
-    leg1_duration       = GroupData.Reconstructed{j}.T_L1(Idx_Cond);          %filter the duration of subject j at leg 1
-    leg1_duration       = leg1_duration(Idx_GoodTrials);  
-
-    leg2_duration       = GroupData.Reconstructed{j}.T_L2(Idx_Cond);          %filter the duration of subject j at leg 2
-    leg2_duration       = leg2_duration(Idx_GoodTrials);
-
-    standing_duration   = GroupData.Reconstructed{j}.T_Standing(Idx_Cond);    %filter the duration of subject j standing at cone2 
-    standing_duration   = standing_duration(Idx_GoodTrials);
-
-    TrackedL1           = GroupData.TrackedL1{j}(Idx_Cond);
-    TrackedL1           = TrackedL1(Idx_GoodTrials);
-
-    TrackedL2           = GroupData.TrackedL2{j}(Idx_Cond);
-    TrackedL2           = TrackedL2(Idx_GoodTrials);
+        leg1_duration       = GroupData.Reconstructed{j}.T_L1(Idx_GoodTrials);          %filter the duration of subject j at leg 1
+        leg2_duration       = GroupData.Reconstructed{j}.T_L2(Idx_GoodTrials);          %filter the duration of subject j at leg 2
+        standing_duration   = GroupData.Reconstructed{j}.T_Standing(Idx_GoodTrials);    %filter the duration of subject j standing at cone2 
+        TrackedL1           = GroupData.TrackedL1{j}(Idx_GoodTrials);
+        TrackedL2           = GroupData.TrackedL2{j}(Idx_GoodTrials);
+    else
+        %%filter trails based on the TRIAL_FILTER, with 1 no change, 2 no distal cues, 3 no optic flow
+        Idx_Cond            = GroupData.CondTable{j}.Condition == TRIAL_FILTER; 
+        flagpos{j}          = GroupData.FlagPos{j}(Idx_Cond);
+        BadExecutionTrials  = GroupData.Reconstructed{j}.BadExecution(Idx_Cond);
+        realReturnAngles    = GroupData.Reconstructed{j}.RealReturnAngle(Idx_Cond);
+    
+        tempCnt             = 1;
+        TrialNum            = size(GroupData.TrigPos{j},1);
+    
+        %get the final position and OoB flag 
+        for idx = 1:TrialNum %for each trial, if belongs to TRIAL_FILTER, go into
+            if(GroupData.CondTable{j}.Condition(idx) == TRIAL_FILTER)
+                %If not out of bound or out of bound data is not present then take the trigpos
+                if(GroupData.CondTable{j}.OutOfBound(idx) == 0 | isnan(GroupData.OutOfBoundPos{1,j}{idx}(1,1)))
+                    finalpos{j}(tempCnt) = GroupData.TrigPos{j}(idx);
+                    flagOoB{j}(tempCnt) = 0; %OoB flag is 0, i.e., not OoB trial
+                elseif(GroupData.CondTable{j}.OutOfBound(idx) == 1)
+                    finalpos{j}(tempCnt) = GroupData.ReconstructedOOB{j}.ReconstructedOoB(idx);
+                    flagOoB{j}(tempCnt) = 1; %OoB flag is 1, i.e., it is OoB trial
+                end
+                tempCnt = tempCnt + 1;
+            end
+        end
+        
+        Idx_GoodTrials      = BadExecutionTrials == 0;
+        flagpos{j}          = flagpos{j}(Idx_GoodTrials);
+        realReturnAngles    = realReturnAngles(Idx_GoodTrials);
+        finalpos{j}         = finalpos{j}(Idx_GoodTrials);
+        flagOoB{j}          = flagOoB{j}(Idx_GoodTrials); 
+    
+        leg1_duration       = GroupData.Reconstructed{j}.T_L1(Idx_Cond);          %filter the duration of subject j at leg 1
+        leg1_duration       = leg1_duration(Idx_GoodTrials);  
+    
+        leg2_duration       = GroupData.Reconstructed{j}.T_L2(Idx_Cond);          %filter the duration of subject j at leg 2
+        leg2_duration       = leg2_duration(Idx_GoodTrials);
+    
+        standing_duration   = GroupData.Reconstructed{j}.T_Standing(Idx_Cond);    %filter the duration of subject j standing at cone2 
+        standing_duration   = standing_duration(Idx_GoodTrials);
+    
+        TrackedL1           = GroupData.TrackedL1{j}(Idx_Cond);
+        TrackedL1           = TrackedL1(Idx_GoodTrials);
+    
+        TrackedL2           = GroupData.TrackedL2{j}(Idx_Cond);
+        TrackedL2           = TrackedL2(Idx_GoodTrials);
+    end
 
     if length(flagpos{j}) < config.NumParams
         %lack of trials, skip estimation

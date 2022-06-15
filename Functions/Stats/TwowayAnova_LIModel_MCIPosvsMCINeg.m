@@ -39,21 +39,21 @@ function [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnov
         %Do multiple comparisons on main effect 1
         result = multcompare(stats,'Dimension',[1],'CType','bonferroni');
         multicomp_tab1{param_idx} = result;
-        title("Multiple comparisons with bonferroni correction of parameter: "+param_name);
+        title("parameter: "+param_name);
         saveas(gcf,savefoldername+"MultiCompME1_"+param_name+".png");
         close(gcf);
     
         %Do multiple comparisons on main effect 2
         result = multcompare(stats,'Dimension',[2],'CType','bonferroni');
         multicomp_tab2{param_idx} = result;
-        title("Multiple comparisons with bonferroni correction of parameter: "+param_name);
+        title("parameter: "+param_name);
         saveas(gcf,savefoldername+"MultiCompME2_"+param_name+".png");
         close(gcf);
     
         %Do multiple comparisons on main effect 1&2
         result = multcompare(stats,'Dimension',[1,2],'CType','bonferroni');
         multicomp_tab12{param_idx} = result;
-        title("Multiple comparisons with bonferroni correction of parameter: "+param_name);
+        title("parameter: "+param_name);
         saveas(gcf,savefoldername+"MultiCompME1ME2_"+param_name+".png");
         close(gcf);    
     end

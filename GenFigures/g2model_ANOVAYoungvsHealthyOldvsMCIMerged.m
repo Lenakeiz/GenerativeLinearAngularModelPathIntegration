@@ -18,11 +18,11 @@ config.TrackedInboundAngularDeltaT                  = 1;
 
 %% Model fitting
 
-config.ModelName        = "ConstSpeedModelwith_g2";
-config.ParamName        = ["beta", "g2", "g3", "sigma", "nu"];
+% config.ModelName        = "ConstSpeedModelwith_g2";
+% config.ParamName        = ["beta", "g2", "g3", "sigma", "nu"];
 
-% config.ModelName        = "ConstSpeedModelwith_g2_k3";
-% config.ParamName        = ["beta", "g2", "g3", "k3", "sigma", "nu"];
+config.ModelName        = "ConstSpeedModelwith_g2_k3";
+config.ParamName        = ["beta", "g2", "g3", "k3", "sigma", "nu"];
 
 config.includeStand     = false;
 config.useweber         = false; %only true when use weber law in simple generative models

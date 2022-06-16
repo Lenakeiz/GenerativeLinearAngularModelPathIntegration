@@ -21,14 +21,17 @@ config.TrackedInboundAngularDeltaT                  = 1;
 % config.ModelName        = "ConstSpeedModelwith_g2";
 % config.ParamName        = ["beta", "g2", "g3", "sigma", "nu"];
 
-config.ModelName        = "ConstSpeedModelwith_g2_k3";
-config.ParamName        = ["beta", "g2", "g3", "k3", "sigma", "nu"];
+% config.ModelName        = "ConstSpeedModelwith_g2_k3";
+% config.ParamName        = ["beta", "g2", "g3", "k3", "sigma", "nu"];
+
+config.ModelName        = "ConstSpeedModelwith_g2_RGmean";
+config.ParamName        = ["beta", "g2", "g3", "sigma", "nu"];
 
 config.includeStand     = false;
 config.useweber         = false; %only true when use weber law in simple generative models
 config.NumParams        = length(config.ParamName);
 
-resultfolder = savefolder+"PaperFigs/ModelAfterDataCleaning/Fig1_"+config.ModelName;
+resultfolder = savefolder+"PaperFigs/ModelAfterDataCleaning/Fig1_Young_HealthyOld_MCI_"+config.ModelName;
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')

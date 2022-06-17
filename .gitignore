@@ -1,5 +1,6 @@
 # Customized gitignore
 Output/*
 Learning/*
+Data/*
 *.asv
 debug.ps

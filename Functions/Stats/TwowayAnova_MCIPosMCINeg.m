@@ -1,7 +1,7 @@
 %% Two-way anova on all Groups
 % five groups:          Young / HealthyOld / MCIPos / MCINeg / MCIUnk
 % three conditions:     no changed / no distal cue / no optical flow
-function [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_LIModel_MCIPosvsMCINeg(AllMCIPos, AllMCINeg, config)
+function [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_MCIPosMCINeg(AllMCIPos, AllMCINeg, config)
 
     %load configurations necessary for the script
     resultfolder = config.ResultFolder;

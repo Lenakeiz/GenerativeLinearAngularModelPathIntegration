@@ -1,82 +1,88 @@
-%% Cleaning variables
-clearvars; clear all; close all; clc;
-rng('default'); %for code reproducibility
+%% Cleaning variables and set intial seed for code reproducibility
+clearvars; close all; clc;
+rng('default'); 
 
 %% Loading data
 disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
 load('Data/AllDataErrors2018_V3.mat');
-savefolder = pwd + "/Output/";
 
 %% setting the configuration
-config.Speed.alpha                                  = 0.9;                 %Paramanter for running speed calculation
-config.Speed.timeOffsetAfterFlagReach               = 1.5;                 %Time to track after flag reached in seconds 
-config.Speed.smoothWindow                           = 10;                  % tracking rate should be 10Hz so 4 secs window is 40 datapoints
-config.Speed.velocityCutoff                         = 0.2;                 % velocity cutoff to select only the walking part of the reconstructed velocity
-config.Speed.timeOffsetForDetectedTemporalWindow    = 0.4;                 % time in seconds that will push earlier/ the detected rising edge
+config.Speed.alpha                                  = 0.9;    % Paramanter for running speed calculation
+config.Speed.timeOffsetAfterFlagReach               = 1.5;    % Time to track after flag reached in seconds 
+config.Speed.smoothWindow                           = 10;     % tracking rate should be 10Hz so 4 secs window is 40 datapoints
+config.Speed.velocityCutoff                         = 0.2;    % velocity cutoff to select only the walking part of the reconstructed velocity
+config.Speed.timeOffsetForDetectedTemporalWindow    = 0.4;    % time in seconds that will push earlier/ the detected rising edge
 config.UseGlobalSearch                              = true;
+config.TrackedInboundAngularDeltaT                  = 1;
+config.includeStand                                 = false;
+config.useweber                                     = false;  % only true when use weber law in simple generative models
 
-resultfolder = savefolder+"PaperFigs/OurDataResults/Fig3_NoOoB";
-config.ResultFolder = resultfolder;
+%% Model fitting
+
+% config.ModelName        = "beta_g2_g3_k3_sigma_nu";
+% config.ParamName        = ["beta", "g2", "g3", "k3", "sigma", "nu"];
+
+config.ModelName        =   "beta_g2_g3_sigma_nu";
+config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
+
+config.NumParams        =   length(config.ParamName);
+resultfolder            =   pwd + "/Output/ModelFigures/Young_HealthyOld_MCICombined_"+config.ModelName;
+config.ResultFolder     =   resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
    mkdir(resultfolder);
 end
 
-%% Model fitting
-%Model related parameters
-config.ModelName        = "ConstSpeedModel";
-config.ParamName        = ["beta", "bG3", "g2", "g3", 'b', "sigma", "nu"];
-config.subtype          = "DistAng_RGmean";%choose from 1,egoNoise / 2, onlyDist / 3, onlyAng_RGb, 
-                                                      %4, onlyAng_RGmean / 5, DistAng_RGb / 6, DistAng_RGmean
-config.includeStand     = true;
-config.useOoBTrial      = false;
-config.useweber         = false; %only true when use weber law in simple generative models
-config.NumTotalParams   = length(config.ParamName);
-config.NumFreeParams    = 4;
-
 %% Model fitting for YoungControl data
-config.Speed.tresholdForBadParticipantL1Recontruction = 1.55;   % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
-YoungControls   = CalculateTrackingPath(YoungControls, config);
+% threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
+config.Speed.tresholdForBadParticipantL1Recontruction = 1.55;  
 %transform data
-YoungControls = TransformPaths(YoungControls);
-[AllYoungParams, ~, ~, ~, ~] = getResultsAllConditions(YoungControls, config);
+YoungControls                   =   TransformPaths(YoungControls);
+YoungControls                   =   CalculateTrackingPath(YoungControls, config);
+ManuallyScoringYoung;
+[AllYoungParams, ~, ~, ~, ~]    =   getResultsAllConditions(YoungControls, config);
 
 %% Model fitting for HealthyOld data
+% threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
 config.Speed.tresholdForBadParticipantL1Recontruction = 2.0; 
-HealthyControls   = CalculateTrackingPath(HealthyControls, config);
 %transform data
-HealthyOld = TransformPaths(HealthyControls);
-[AllHealthyOldParams, ~, ~, ~, ~] = getResultsAllConditions(HealthyOld, config);
+HealthyControls                 =   TransformPaths(HealthyControls);
+HealthyControls                 =   CalculateTrackingPath(HealthyControls, config);
+ManuallyScoringHealthyOld;
+[AllHealthyOldParams, ~, ~, ~, ~] = getResultsAllConditions(HealthyControls, config);
 
 %% Model fitting for MCIPos
 config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
-MCIPos   = CalculateTrackingPath(MCIPos, config);
 %transform data
-MCIPos = TransformPaths(MCIPos);
-[AllMCIPosParams,  ~, ~, ~, ~] = getResultsAllConditions(MCIPos, config);
+MCIPos                          =   TransformPaths(MCIPos);
+MCIPos                          =   CalculateTrackingPath(MCIPos, config);
+ManuallyScoringMCIPos;
+[AllMCIPosParams,  ~, ~, ~, ~]  =   getResultsAllConditions(MCIPos, config);
 
 %% Model fitting for MCINeg
 config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
-MCINeg   = CalculateTrackingPath(MCINeg, config);
 %transform data
-MCINeg = TransformPaths(MCINeg);
-[AllMCINegParams,  ~, ~, ~, ~] = getResultsAllConditions(MCINeg, config);
+MCINeg                          =   TransformPaths(MCINeg);
+MCINeg                          =   CalculateTrackingPath(MCINeg, config);
+ManuallyScoringMCINeg;
+[AllMCINegParams,  ~, ~, ~, ~]  =   getResultsAllConditions(MCINeg, config);
 
 %% Model fitting for MCIUnk
 config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
-Unknown   = CalculateTrackingPath(Unknown, config);
 %transform data
-MCIUnk = TransformPaths(Unknown);
-[AllMCIUnkParams,  ~, ~, ~, ~] = getResultsAllConditions(MCIUnk, config);
+MCIUnk                          =   TransformPaths(Unknown);
+MCIUnk                          =   CalculateTrackingPath(MCIUnk, config);
+ManuallyScoringMCIUnk;
+[AllMCIUnkParams,  ~, ~, ~, ~]  =   getResultsAllConditions(MCIUnk, config);
 
 %% Setting colors for using in plots
 ColorPattern; 
 
-%% merge MCI together
+%% merge MCI together to get MCICombined
 AllMCIParams = MergeMCI(AllMCIPosParams, AllMCINegParams, AllMCIUnkParams);
 
 %% TwowayAnova
-[anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_LIModel_MCIMerged(AllYoungParams, AllHealthyOldParams, AllMCIParams, config);
+[anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_YoungHealthyOldMCICombined(AllYoungParams, AllHealthyOldParams, AllMCIParams, config);
 
 %% BarScatter Plot between Young and HealthyOld for all Fitted Params
 BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams, anova_tab, config);

@@ -1,7 +1,7 @@
 %% Two-way anova 
 % three groups:         Young      /     HealthyOld    /    MCIMerged
 % three conditions:     no changed /     no distal cue /    no optical flow
-function [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_LIModel_MCIMerged(AllYoung, AllHealthyOld, AllMCI, config)
+function [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_YoungHealthyOldMCICombined(AllYoung, AllHealthyOld, AllMCI, config)
 
     %load configurations necessary for the script
     resultfolder = config.ResultFolder;

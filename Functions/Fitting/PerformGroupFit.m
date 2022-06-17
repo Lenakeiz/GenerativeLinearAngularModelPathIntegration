@@ -8,7 +8,7 @@ function Results = PerformGroupFit(GroupData, config)
 TRIAL_FILTER = config.TrialFilter;          %load configurations necessary for the script
 subjectNum = size(GroupData.FlagPos,2);     % Calculating sample size
 
-%% Initialize empty cell fro storing data
+%% Initialize empty cell for storing data
 X               =       cell(1, subjectNum);% Actual positions
 DX              =       cell(1, subjectNum);% Distances between subsequent points - segments li
 THETADX         =       cell(1, subjectNum);% These are the angles between two subsequent segments. The angle indicate the rotation from the first segment towards the second, so it s the outer angle of the triangle.
@@ -21,28 +21,22 @@ StandingDur     =       cell(1, subjectNum);% standing duration at cone2
 flagpos         =       cell(1, subjectNum);% flagpos
 flagOoB         =       cell(1, subjectNum);% OoB flag
 GroupParameters =       cell(1, subjectNum);% Output value
-ICDist          =       cell(1, subjectNum);  
-ICAng           =       cell(1, subjectNum);  
+IC              =       cell(1, subjectNum);  
 
-%help function to calculate the angle between two vector
+%% help function to calculate the angle between two vector
 anglebetween = @(va,vb) atan2d(va(:,1).*vb(:,2) - va(:,2).*vb(:,1), va(:,1).*vb(:,1) + va(:,2).*vb(:,2));
 
+%%
 for j = 1:subjectNum
 
     %filter out participants who did short walking, happend in Young and HealthyOld, those out of distribution 
     if ismember(j, GroupData.BadPptIdxs)
         % set results to nan for later processing
         GroupParameters{j}  =   NaN(config.NumParams,1);
-        ICDist{j}.aic           =   nan;
-        ICDist{j}.bic           =   nan;
-        ICDist{j}.negll         =   nan;
-        ICDist{j}.likelihood    =   nan;
-
-        ICAng{j}.aic           =   nan;
-        ICAng{j}.bic           =   nan;
-        ICAng{j}.negll         =   nan;
-        ICAng{j}.likelihood    =   nan;
-
+        IC{j}.aic           =   nan;
+        IC{j}.bic           =   nan;
+        IC{j}.negll         =   nan;
+        IC{j}.likelihood    =   nan;
         flagOoB{j}          =   [];
         disp(['%%%%%%%%%%%%%%% Skipping PARTICIPANT ' num2str(j) ' ---- because they did a short walk%%%%%%%%%%%%%%%']);
         continue
@@ -129,15 +123,10 @@ for j = 1:subjectNum
             " datapoints available for parameter estimation%%%%%%%%%%%%%%%\n");
         % set results to nan for later processing
         GroupParameters{j}  =   NaN(config.NumParams,1);
-        ICDist{j}.aic           =   nan;
-        ICDist{j}.bic           =   nan;
-        ICDist{j}.negll         =   nan;
-        ICDist{j}.likelihood    =   nan;
-
-        ICAng{j}.aic           =   nan;
-        ICAng{j}.bic           =   nan;
-        ICAng{j}.negll         =   nan;
-        ICAng{j}.likelihood    =   nan;
+        IC{j}.aic           =   nan;
+        IC{j}.bic           =   nan;
+        IC{j}.negll         =   nan;
+        IC{j}.likelihood    =   nan;
         flagOoB{j}          =   [];
         continue;
     end
@@ -176,7 +165,7 @@ for j = 1:subjectNum
     end
 
 
-    %% put all of things we need into a struct for sending to FitData
+    %% put all of the things we need into a struct for sending to FitData
     Input.DX                 =   DX{j};
     Input.THETADX            =   THETADX{j};
     Input.X                  =   X{j};
@@ -189,8 +178,9 @@ for j = 1:subjectNum
 
     %% Do the data fitting
     disp(['%%%%%%%%%%%%%%% STARTING FIT PER PARTICIPANT ' num2str(j) ' %%%%%%%%%%%%%%%']);
-    [GroupParameters{j}, ICDist{j}, ICAng{j}] = FitData(Input, config);
+    [GroupParameters{j}, IC{j}] = FitData(Input, config);
 end
+
 %%
 %Transforming the fitted parameters from cell to array
 [~, rows]       = size(GroupParameters);
@@ -205,8 +195,7 @@ Results.estimatedParams =   estimatedParams;
 Results.X               =   X;
 Results.DX              =   DX;
 Results.THETADX         =   THETADX;
-Results.ICDist          =   ICDist;
-Results.ICAng           =   ICAng;
+Results.IC              =   IC;
 Results.flagOoB         =   flagOoB;
 
 end

@@ -1,10 +1,11 @@
-function [NLL_Angle] = EstimateConstSpeed_AngleGain(g3, nu, beta, Input, config)
-%   Angle parameter estimation
-%   Args:    
-%       g3 is the rotation angle from the direction of leg 3
-%       nu decribes the noise strength in the Von Mises distribution
+function [negloglikelihood] = Estimate_beta_g2_g3_k3_sigma_nu(beta, g2, g3, k3, sigma, nu, Input, config)
+%   EstimateConstSpeed means using the constant speed model when estimating the parameters
+%   Args:
 %       beta is the leaky integration decay factor
+%       g2 is the rotation angle from the direction of leg 2
+%       g3 is the rotation angle from the direction of leg 3
 %       sigma is the standard deviation for the Gaussian distribution of the return point
+%       nu decribes the noise strength in the Von Mises distribution
 %       Input contains all the data information for estimating, see PerformGroupFit for how it was generated
 %       config: self-explained
 
@@ -14,14 +15,16 @@ THETAX          =   Input.THETADX;
 L1Dur           =   Input.L1Dur;
 L2Dur           =   Input.L2Dur;
 StandingDur     =   Input.StandingDur;
+flagOoB         =   Input.flagOoB;
 
-sampleSize      =   size(DX,2);
-NLL_Angle       =   0;
+sampleSize          =   size(DX,2);
+negloglikelihood    =   0;
 
 for tr = 1:sampleSize
     %% extract the physical data info
     l1          =       DX{tr}(1);
     l2          =       DX{tr}(2);
+    l3          =       DX{tr}(3);
     theta2      =       THETAX{tr}(2); 
     theta3      =       THETAX{tr}(3); 
     durationL1  =       L1Dur{tr}; 
@@ -34,6 +37,7 @@ for tr = 1:sampleSize
     else
         scale = 1; %noise scale
     end
+    sigma_scaled = scale*sigma;
     nu_scaled = scale*nu;
 
     %mental point 1 (asuming a constant speed)
@@ -45,35 +49,48 @@ for tr = 1:sampleSize
     end
     men_p1 = [men_length1,0];
     
-    theta2_prime = theta2; %considering no encoding error in the turning
+    theta2_prime = g2*theta2;
+    %theta2_prime = theta2;
 
     %mental point 2, (asuming a constant speed)
     men_length2 = l2*(1-exp(-beta*durationL2))/(beta*durationL2);
     men_p2      = [men_length1+men_length2*cos(theta2_prime),men_length2*sin(theta2_prime)];
 
+    %calculate length of mental vector 3
+    h           = norm(men_p2);
     %calculate turn angle of mental vector 3
     vec1        = men_p2-men_p1; 
     vec2        = [0,0]-men_p2;
     alpha       = atan2d(vec1(1)*vec2(2)-vec1(2)*vec2(1),vec1(1)*vec2(1)+vec1(2)*vec2(2));
     alpha       = deg2rad(alpha);   %transfer from degree to radians
-    alpha       = mod(alpha, 2*pi); %wrap to (0,2pi)
-
-    %angular excution as a gain function
-    theta3_prime = g3*alpha;
-
-    %also wrap theta3_prime to (0,2pi) (We don't have to coz of the 'cos' below, 
-    %also coz of the nonconstriant (if there is) which restrict theta3_prime in [0,2pi]).
-    theta3_prime = mod(theta3_prime, 2*pi);
+    
+    %mental turning angle
+    sign_alpha = sign(alpha);
+    theta3_prime = g3*abs(alpha)+k3*(1-g3);
+    theta3_prime = sign_alpha*theta3_prime;
     
     %angular noise difference
     angluar_diff = theta3-theta3_prime;
     %the negative loglikelihood of angle
-    neg_ll_angle = log(2*pi) + log(besseli(0,nu_scaled)) - nu_scaled*cos(angluar_diff);
-    
-    %cumulating negative loglikelihood
-    NLL_Angle = NLL_Angle + neg_ll_angle;
+    %neg_ll_angle = log(2*pi) + log(besseli(0,nu_scaled)) - nu_scaled*cos(angluar_diff);
+    neg_ll_angle = 1/2*log(2*pi) + log(nu_scaled) + (angluar_diff^2)/(2*nu_scaled^2);
+
+    %distance noise difference
+    l3_prime    = h;
+    dist_diff   = l3-l3_prime;
+
+    %     %the negative loglikelihood of distance on non-OoB trials
+    if flagOoB(tr)==0
+        %this is a non-OoB trial
+        neg_ll_dist = 1/2*log(2*pi) + log(sigma_scaled) + (dist_diff^2)/(2*sigma_scaled^2);
+    else
+        %this is an OoB trial
+        neg_ll_dist = 0;
+    end
+
+    %total negative loglikelihood
+    neg_ll = neg_ll_angle + neg_ll_dist;
+
+    negloglikelihood = negloglikelihood + neg_ll;
 end
 end
-
-
-

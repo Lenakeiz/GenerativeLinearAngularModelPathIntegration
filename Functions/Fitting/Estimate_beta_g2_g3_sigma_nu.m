@@ -1,9 +1,9 @@
-function [negloglikelihood] = EstimateConstSpeed5Params(beta, g3, b, sigma, nu, Input, config)
+function [negloglikelihood] = Estimate_beta_g2_g3_sigma_nu(beta, g2, g3, sigma, nu, Input, config)
 %   EstimateConstSpeed means using the constant speed model when estimating the parameters
 %   Args:
 %       beta is the leaky integration decay factor
+%       g2 is the rotation angle from the direction of leg 2
 %       g3 is the rotation angle from the direction of leg 3
-%       b is the systematic bias in the execution error
 %       sigma is the standard deviation for the Gaussian distribution of the return point
 %       nu decribes the noise strength in the Von Mises distribution
 %       Input contains all the data information for estimating, see PerformGroupFit for how it was generated
@@ -39,15 +39,6 @@ for tr = 1:sampleSize
 end
 mean_angle = mean(Alphas);
 
-%% find the actual mean return angle based on all trials 
-% Alphas = zeros(sampleSize,1);
-% for tr = 1:sampleSize
-%     %extract the physical data info
-%     theta3  = THETAX{tr}(3);
-%     Alphas(tr) = theta3;
-% end
-% mean_angle = mean(Alphas);
-
 for tr = 1:sampleSize
     %% extract the physical data info
     l1          =       DX{tr}(1);
@@ -77,7 +68,8 @@ for tr = 1:sampleSize
     end
     men_p1 = [men_length1,0];
     
-    theta2_prime = theta2;
+    theta2_prime = g2*theta2;
+    %theta2_prime = theta2;
 
     %mental point 2, (asuming a constant speed)
     men_length2 = l2*(1-exp(-beta*durationL2))/(beta*durationL2);
@@ -90,45 +82,34 @@ for tr = 1:sampleSize
     vec2        = [0,0]-men_p2;
     alpha       = atan2d(vec1(1)*vec2(2)-vec1(2)*vec2(1),vec1(1)*vec2(1)+vec1(2)*vec2(2));
     alpha       = deg2rad(alpha);   %transfer from degree to radians
-    alpha       = mod(alpha, 2*pi); %wrap to (0,2pi)
-
-    %whether to regress to the mean correct return angle
-    theta3_prime = g3*alpha+(1-g3)*b;
     
-    %also wrap theta3_prime to (0,2pi) (We don't have to coz of the 'cos' below, 
-    %also coz of the nonconstriant (if there is) which restrict theta3_prime in [0,2pi]).
-    theta3_prime = mod(theta3_prime, 2*pi);
+    %mental turning angle
+    sign_alpha = sign(alpha);
+    theta3_prime = g3*abs(alpha)+mean_angle*(1-g3); %reress to mean correct return angle
+    theta3_prime = sign_alpha*theta3_prime;
     
     %angular noise difference
     angluar_diff = theta3-theta3_prime;
     %the negative loglikelihood of angle
-    neg_ll_angle = log(2*pi) + log(besseli(0,nu_scaled)) - nu_scaled*cos(angluar_diff);
+    %neg_ll_angle = log(2*pi) + log(besseli(0,nu_scaled)) - nu_scaled*cos(angluar_diff);
+    neg_ll_angle = 1/2*log(2*pi) + log(nu_scaled) + (angluar_diff^2)/(2*nu_scaled^2);
 
     %distance noise difference
     l3_prime    = h;
     dist_diff   = l3-l3_prime;
 
-    if config.useOoBTrial == true 
-        %use OoB trials with the walking length replaced by the mean walking lenghth of good trials
-        %the negative loglikelihood of distance on all trials 
+    %     %the negative loglikelihood of distance on non-OoB trials
+    if flagOoB(tr)==0
+        %this is a non-OoB trial
         neg_ll_dist = 1/2*log(2*pi) + log(sigma_scaled) + (dist_diff^2)/(2*sigma_scaled^2);
     else
-        %     %the negative loglikelihood of distance on non-OoB trials
-        if flagOoB(tr)==0
-            %this is a non-OoB trial
-            neg_ll_dist = 1/2*log(2*pi) + log(sigma) + (dist_diff^2)/(2*sigma^2);
-        else
-            %this is an OoB trial
-            neg_ll_dist = 0;
-        end
+        %this is an OoB trial
+        neg_ll_dist = 0;
     end
-    
+
     %total negative loglikelihood
     neg_ll = neg_ll_angle + neg_ll_dist;
 
     negloglikelihood = negloglikelihood + neg_ll;
 end
 end
-
-
-

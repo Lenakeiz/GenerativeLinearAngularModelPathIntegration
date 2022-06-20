@@ -1,74 +1,69 @@
-%% Cleaning variables
-clearvars; clear all; close all; clc;
-rng('default'); %for code reproducibility
+%% Cleaning variables and set intial seed for code reproducibility
+clearvars; close all; clc;
+rng('default'); 
 
 %% Loading data
 disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
 load('AllDataErrorsPrevent.mat');
-savefolder = pwd + "/Output/";
 
 %% setting the configuration
-config.Speed.alpha                                      = 0.9;                  %Paramanter for running speed calculation
-config.Speed.timeOffsetAfterFlagReach                   = 1.5;                  %Time to track after flag reached in seconds 
-config.Speed.smoothWindow                               = 10;                   % tracking rate should be 10Hz so 4 secs window is 40 datapoints
-config.Speed.velocityCutoff                             = 0.2;                  % velocity cutoff to select only the walking part of the reconstructed velocity
-config.Speed.timeOffsetForDetectedTemporalWindow        = 0.4;                  % time in seconds that will push earlier/ the detected rising edge
-config.Speed.tresholdForBadParticipantL1Recontruction   = 0;                    % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
+config.Speed.alpha                                      = 0.9;    % Paramanter for running speed calculation
+config.Speed.timeOffsetAfterFlagReach                   = 1.5;    % Time to track after flag reached in seconds 
+config.Speed.smoothWindow                               = 10;     % tracking rate should be 10Hz so 4 secs window is 40 datapoints
+config.Speed.velocityCutoff                             = 0.2;    % velocity cutoff to select only the walking part of the reconstructed velocity
+config.Speed.timeOffsetForDetectedTemporalWindow        = 0.4;    % time in seconds that will push earlier/ the detected rising edge
 config.UseGlobalSearch                                  = true;
 config.TrackedInboundAngularDeltaT                      = 1;
+config.includeStand                                     = false;
+config.useweber                                         = false;  % only true when use weber law in simple generative models
+config.Speed.tresholdForBadParticipantL1Recontruction   = 0.0;    % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
+
 %% Model fitting
 %Model related parameters
-config.ModelName        = "ConstSpeedModelwith_g2_k3";
-config.ParamName        = ["beta", "g2", "g3", "k3", "sigma", "nu"];
 
-% config.ModelName        = "ConstSpeedModelwith_g2_RGmean";
-% config.ParamName        = ["beta", "g2", "g3", "sigma", "nu"];
+% config.ModelName        = "beta_g2_g3_k3_sigma_nu";
+% config.ParamName        = ["beta", "g2", "g3", "k3", "sigma", "nu"];
 
-config.includeStand     = false;
-config.useweber         = false; %only true when use weber law in simple generative models
+config.ModelName        = "beta_g2_g3_sigma_nu";
+config.ParamName        = ["beta", "g2", "g3", "sigma", "nu"];
+
 config.NumParams        = length(config.ParamName);
 
-config.UseGlobalSearch = true;
-resultfolder = savefolder+"PaperFigs/ModelAfterDataCleaning/Fig4_Apoe_"+config.ModelName;
+resultfolder = pwd + "/Output/ModelFigures/ApoePos_ApoeNeg_"+config.ModelName;
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
    mkdir(resultfolder);
 end
 
-%% Model fitting for Pos data
-ApoePos   = TransformPaths(ApoePos);%transform data
-ApoePos   = CalculateTrackingPath(ApoePos, config);
-ApoePos = addBadExecution(ApoePos);
-%%
+%% Model fitting for ApoePos data
+ApoePos     = TransformPaths(ApoePos);    %transform data
+ApoePos     = CalculateTrackingPath(ApoePos, config);
+%add zero column of BadExecution
+ApoePos     = addBadExecution(ApoePos);
 [AllApoePosParams, ~, ~, ~, ~] = getResultsAllConditions(ApoePos, config);
 
-%% Model fitting for Neg data
 %% Model fitting for ApoeNeg data
-ApoeNeg   = TransformPaths(ApoeNeg);%transform data
-ApoeNeg   = CalculateTrackingPath(ApoeNeg, config);
-%add zero array of BadExecution
-ApoeNeg = addBadExecution(ApoeNeg);
-%%
+ApoeNeg     = TransformPaths(ApoeNeg);    %transform data
+ApoeNeg     = CalculateTrackingPath(ApoeNeg, config);
+%add zero column of BadExecution
+ApoeNeg     = addBadExecution(ApoeNeg);
 [AllApoeNegParams, ~, ~, ~, ~] = getResultsAllConditions(ApoeNeg, config);
 
 %% Setting colors for using in plots
 ColorPattern; 
 
-%% TwowayAnova
-[anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_LIModel_CocoData(AllApoePosParams, AllApoeNegParams, config);
-
+% %% TwowayAnova and BarScatter Plot
+% [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_CocoData(AllApoePosParams, AllApoeNegParams, config);
+% BoxPlotOfFittedParam(AllApoePosParams, AllApoeNegParams, anova_tab, config);
+% BoxPlotOfFittedParamMergeCondition(AllApoePosParams, AllApoeNegParams, multicomp_tab1, config);
 
 %% ThreewayAnova
-% config.Gender_Pos = ApoePos.Gender;
-% config.Gender_Neg = ApoeNeg.Gender;
-% [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab3, multicomp_tab12] = ThreewayAnova_LIModel_CocoData(AllApoePosParams, AllApoeNegParams, config);
+config.Gender_Pos = ApoePos.Gender;
+config.Gender_Neg = ApoeNeg.Gender;
+[anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab3, multicomp_tab12] = ThreewayAnova_CocoData(AllApoePosParams, AllApoeNegParams, config);
 
-%% BarScatter Plot between Pos and Neg for all Fitted Params
-BoxPlotOfFittedParam(AllApoePosParams, AllApoeNegParams, anova_tab, config);
-BoxPlotOfFittedParamMergeCondition(AllApoePosParams, AllApoeNegParams, multicomp_tab1, config)
-
-%%
+%% add zero column of BadExecution
 function Data = addBadExecution(Data)
     %add zero array of BadExecution
     numSubjs = length(Data.Reconstructed);
@@ -78,7 +73,7 @@ function Data = addBadExecution(Data)
     end
 end
 
-%%
+%% BoxPlotOfFittedParam
 function BoxPlotOfFittedParam(AllPosParams, AllNegParams, anova_tab, config)
     
     numConds = 3; %3 is the condition number
@@ -262,7 +257,7 @@ function BoxPlotOfFittedParam(AllPosParams, AllNegParams, anova_tab, config)
     end
 end
 
-%%
+%% BoxPlotOfFittedParamMergeCondition
 function BoxPlotOfFittedParamMergeCondition(AllPosParams, AllNegParams, multicomp_tab1, config)
     
     numConds = 3; %3 is the condition number

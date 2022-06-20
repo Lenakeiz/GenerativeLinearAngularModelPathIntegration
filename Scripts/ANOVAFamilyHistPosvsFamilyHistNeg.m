@@ -1,35 +1,37 @@
-%% Cleaning variables
-clearvars; clear all; close all; clc;
-rng('default'); %for code reproducibility
+%% Cleaning variables and set intial seed for code reproducibility
+clearvars; close all; clc;
+rng('default'); 
 
 %% Loading data
 disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
 load('AllDataErrorsPrevent.mat');
-savefolder = pwd + "/Output/";
 
 %% setting the configuration
-config.Speed.alpha                                      = 0.9;                  %Paramanter for running speed calculation
-config.Speed.timeOffsetAfterFlagReach                   = 1.5;                  %Time to track after flag reached in seconds 
-config.Speed.smoothWindow                               = 10;                   % tracking rate should be 10Hz so 4 secs window is 40 datapoints
-config.Speed.velocityCutoff                             = 0.2;                  % velocity cutoff to select only the walking part of the reconstructed velocity
-config.Speed.timeOffsetForDetectedTemporalWindow        = 0.4;                  % time in seconds that will push earlier/ the detected rising edge
-config.Speed.tresholdForBadParticipantL1Recontruction   = 0;                    % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
+config.Speed.alpha                                      = 0.9;    % Paramanter for running speed calculation
+config.Speed.timeOffsetAfterFlagReach                   = 1.5;    % Time to track after flag reached in seconds 
+config.Speed.smoothWindow                               = 10;     % tracking rate should be 10Hz so 4 secs window is 40 datapoints
+config.Speed.velocityCutoff                             = 0.2;    % velocity cutoff to select only the walking part of the reconstructed velocity
+config.Speed.timeOffsetForDetectedTemporalWindow        = 0.4;    % time in seconds that will push earlier/ the detected rising edge
 config.UseGlobalSearch                                  = true;
 config.TrackedInboundAngularDeltaT                      = 1;
+config.includeStand                                     = false;
+config.useweber                                         = false;  % only true when use weber law in simple generative models
+config.Speed.tresholdForBadParticipantL1Recontruction   = 0.0;    % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
+
 %% Model fitting
 %Model related parameters
-% config.ModelName        = "ConstSpeedModelwith_g2_k3";
-% config.ParamName        = ["beta", "g2", "g3", "k3", "sigma", "nu"];
+% config.ModelName        = "beta_g3_sigma_nu";
+% config.ParamName        = ["beta", "g3", "sigma", "nu"];
 
-config.ModelName        = "ConstSpeedModelwith_g2_RGmean";
+config.ModelName        = "beta_g2_g3_sigma_nu";
 config.ParamName        = ["beta", "g2", "g3", "sigma", "nu"];
 
-config.includeStand     = false;
-config.useweber         = false; %only true when use weber law in simple generative models
+% config.ModelName        = "beta_g2_g3_k3_sigma_nu";
+% config.ParamName        = ["beta", "g2", "g3", "k3", "sigma", "nu"];
+
 config.NumParams        = length(config.ParamName);
 
-config.UseGlobalSearch = true;
-resultfolder = savefolder+"PaperFigs/ModelAfterDataCleaning/Fig3_FamilyHist_"+config.ModelName;
+resultfolder = pwd + "/Output/ModelFigures/FamilyHistPos_FamilyHistNeg_"+config.ModelName;
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
@@ -39,43 +41,29 @@ end
 %% Model fitting for Pos data
 FamilyHistPos   = TransformPaths(FamilyHistPos);%transform data
 FamilyHistPos   = CalculateTrackingPath(FamilyHistPos, config);
-%add zero array of BadExecution
-FamilyHistPos = addBadExecution(FamilyHistPos);
+ManuallyScoringFamilyHistPos;
 %%
 [AllFamilyHistPosParams, ~, ~, ~, ~] = getResultsAllConditions(FamilyHistPos, config);
 
 %% Model fitting for Neg data
 FamilyHistNeg   = TransformPaths(FamilyHistNeg);%transform data
 FamilyHistNeg   = CalculateTrackingPath(FamilyHistNeg, config);
-%add zero array of BadExecution
-FamilyHistNeg = addBadExecution(FamilyHistNeg);
+ManuallyScoringFamilyHistNeg;
 %%
 [AllFamilyHistNegParams, ~, ~, ~, ~] = getResultsAllConditions(FamilyHistNeg, config);
 
 %% Setting colors for using in plots
 ColorPattern; 
 
-%% TwowayAnova
-[anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_LIModel_CocoData(AllFamilyHistPosParams, AllFamilyHistNegParams, config);
-
-%% ThreewayAnova
-% config.Gender_Pos = FamilyHistPos.Gender;
-% config.Gender_Neg = FamilyHistNeg.Gender;
-% [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab3, multicomp_tab12] = ThreewayAnova_LIModel_CocoData(AllFamilyHistPosParams, AllFamilyHistNegParams, config);
-
-%% BarScatter Plot between Pos and Neg for all Fitted Params
+%% TwowayAnova and BarScatter Plot
+[anova_tab,multicomp_tab1,~, ~] = TwowayAnova_CocoData(AllFamilyHistPosParams, AllFamilyHistNegParams, config);
 BoxPlotOfFittedParam(AllFamilyHistPosParams, AllFamilyHistNegParams, anova_tab, config);
 BoxPlotOfFittedParamMergeCondition(AllFamilyHistPosParams, AllFamilyHistNegParams, multicomp_tab1, config)
 
-%%
-function Data = addBadExecution(Data)
-    %add zero array of BadExecution
-    numSubjs = length(Data.Reconstructed);
-    for i=1:numSubjs
-        trialsize = height(Data.Reconstructed{1,i});
-        Data.Reconstructed{1,i}.BadExecution = zeros(trialsize,1);
-    end
-end
+%% ThreewayAnova
+config.Gender_Pos = FamilyHistPos.Gender;
+config.Gender_Neg = FamilyHistNeg.Gender;
+[anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab3, multicomp_tab12] = ThreewayAnova_CocoData(AllFamilyHistPosParams, AllFamilyHistNegParams, config);
 
 %%
 function BoxPlotOfFittedParam(AllPosParams, AllNegParams, anova_tab, config)

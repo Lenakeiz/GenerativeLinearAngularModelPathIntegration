@@ -13,6 +13,10 @@ X               =       cell(1, subjectNum);% Actual positions
 DX              =       cell(1, subjectNum);% Distances between subsequent points - segments li
 THETADX         =       cell(1, subjectNum);% These are the angles between two subsequent segments. The angle indicate the rotation from the first segment towards the second, so it s the outer angle of the triangle.
 segments        =       cell(1, subjectNum);
+correctReDist   =       cell(1, subjectNum);
+correctReAngle  =       cell(1, subjectNum);
+DistErr         =       cell(1, subjectNum);
+AngleErr        =       cell(1, subjectNum);
 ProjSpeedL1     =       cell(1, subjectNum);% projected speed within detected start-to-end time window at leg 1
 ProjSpeedL2     =       cell(1, subjectNum);% projected speed within detected start-to-end time window at leg 2
 L1Dur           =       cell(1, subjectNum);% walking duration at leg 1
@@ -115,21 +119,6 @@ for j = 1:subjectNum
         TrackedL2           = GroupData.TrackedL2{j}(Idx_Cond);
         TrackedL2           = TrackedL2(Idx_GoodTrials);
     end
-
-    if length(flagpos{j}) < config.NumParams
-        %lack of trials, skip estimation
-        disp("%%%%%%%%%%%%%%% Skipping participant " + num2str(j) + ...
-            ", because only "+ length(flagpos{j}) + ...
-            " datapoints available for parameter estimation%%%%%%%%%%%%%%%\n");
-        % set results to nan for later processing
-        GroupParameters{j}  =   NaN(config.NumParams,1);
-        IC{j}.aic           =   nan;
-        IC{j}.bic           =   nan;
-        IC{j}.negll         =   nan;
-        IC{j}.likelihood    =   nan;
-        flagOoB{j}          =   [];
-        continue;
-    end
     
     %get X, segments, DX etc....
     for tr = 1:length(flagpos{j})
@@ -141,6 +130,20 @@ for j = 1:subjectNum
         outer_rad        =      [0; anglebetween(segments{j}{tr}(1:end-1,:), segments{j}{tr}(2:end,:))];
         outer_rad(3,1)   =      realReturnAngles(tr);     
         THETADX{j}{tr}   =      deg2rad(outer_rad);%wrap the angle into (0,2pi)
+        
+        %extract correct return distance and angle
+        x_2 = X{j}{tr}(3,:);
+        correctReDist{j}{tr} = sqrt(sum(x_2.^2));
+        p1 = X{j}{tr}(1,:);
+        p2 = X{j}{tr}(2,:);
+        p3 = X{j}{tr}(3,:);
+        vec1 = p3-p2; 
+        vec2 = p1-p3;
+        correctReAngle{j}{tr} = anglebetween(vec1, vec2);
+
+        %calculate distance error and angular error
+        DistErr{j}{tr} = DX{j}{tr}(3)-correctReDist{j}{tr};
+        AngleErr{j}{tr} = realReturnAngles(tr)-correctReAngle{j}{tr};
 
         %extract the projected speed information along with the time information on outbound path
         L1_Vel_proj             =       TrackedL1{tr}.Vel_proj;
@@ -176,6 +179,21 @@ for j = 1:subjectNum
     Input.L2Dur              =   L2Dur{j};
     Input.StandingDur        =   StandingDur{j};
 
+    if length(flagpos{j}) < config.NumParams
+        %lack of trials, skip estimation
+        disp("%%%%%%%%%%%%%%% Skipping participant " + num2str(j) + ...
+            ", because only "+ length(flagpos{j}) + ...
+            " datapoints available for parameter estimation%%%%%%%%%%%%%%%\n");
+        % set results to nan for later processing
+        GroupParameters{j}  =   NaN(config.NumParams,1);
+        IC{j}.aic           =   nan;
+        IC{j}.bic           =   nan;
+        IC{j}.negll         =   nan;
+        IC{j}.likelihood    =   nan;
+        flagOoB{j}          =   [];
+        continue;
+    end
+
     %% Do the data fitting
     disp(['%%%%%%%%%%%%%%% STARTING FIT PER PARTICIPANT ' num2str(j) ' %%%%%%%%%%%%%%%']);
     [GroupParameters{j}, IC{j}] = FitData(Input, config);
@@ -197,5 +215,9 @@ Results.DX              =   DX;
 Results.THETADX         =   THETADX;
 Results.IC              =   IC;
 Results.flagOoB         =   flagOoB;
+Results.correctReDist   =   correctReDist;
+Results.correctReAngle  =   correctReAngle;
+Results.DistErr         =   DistErr;
+Results.AngleErr        =   AngleErr;
 
 end

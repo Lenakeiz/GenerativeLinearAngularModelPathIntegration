@@ -131,19 +131,42 @@ for j = 1:subjectNum
         outer_rad(3,1)   =      realReturnAngles(tr);     
         THETADX{j}{tr}   =      deg2rad(outer_rad);%wrap the angle into (0,2pi)
         
+%         %extract correct return distance and angle
+%         if flagOoB{j}(tr) == 0
+%             x_2 = X{j}{tr}(3,:);
+%             correctReDist{j}{tr} = sqrt(sum(x_2.^2));
+% 
+%             p1 = X{j}{tr}(1,:);
+%             p2 = X{j}{tr}(2,:);
+%             p3 = X{j}{tr}(3,:);
+%             vec1 = p3-p2; 
+%             vec2 = p1-p3;
+%             correctReAngle{j}{tr} = anglebetween(vec1, vec2); 
+% 
+%             %calculate distance error and angular error
+%             DistErr{j}{tr} = correctReDist{j}{tr}-DX{j}{tr}(3);
+%             AngleErr{j}{tr} = correctReAngle{j}{tr}-realReturnAngles(tr);
+%         else 
+%             DistErr{j}{tr} = nan;
+%             AngleErr{j}{tr} = nan;
+%         end
+
         %extract correct return distance and angle
-        x_2 = X{j}{tr}(3,:);
-        correctReDist{j}{tr} = sqrt(sum(x_2.^2));
+        if flagOoB{j}(tr) == 0
+            x_2 = X{j}{tr}(3,:);
+            correctReDist{j}{tr} = sqrt(sum(x_2.^2));
+            DistErr{j}{tr} = correctReDist{j}{tr}-DX{j}{tr}(3);
+        else 
+            DistErr{j}{tr} = nan;
+        end
+
         p1 = X{j}{tr}(1,:);
         p2 = X{j}{tr}(2,:);
         p3 = X{j}{tr}(3,:);
         vec1 = p3-p2; 
         vec2 = p1-p3;
-        correctReAngle{j}{tr} = anglebetween(vec1, vec2);
-
-        %calculate distance error and angular error
-        DistErr{j}{tr} = DX{j}{tr}(3)-correctReDist{j}{tr};
-        AngleErr{j}{tr} = realReturnAngles(tr)-correctReAngle{j}{tr};
+        correctReAngle{j}{tr} = anglebetween(vec1, vec2); 
+        AngleErr{j}{tr} = correctReAngle{j}{tr}-realReturnAngles(tr);
 
         %extract the projected speed information along with the time information on outbound path
         L1_Vel_proj             =       TrackedL1{tr}.Vel_proj;
@@ -190,7 +213,7 @@ for j = 1:subjectNum
         IC{j}.bic           =   nan;
         IC{j}.negll         =   nan;
         IC{j}.likelihood    =   nan;
-        flagOoB{j}          =   [];
+        %flagOoB{j}          =   [];
         continue;
     end
 
@@ -215,8 +238,6 @@ Results.DX              =   DX;
 Results.THETADX         =   THETADX;
 Results.IC              =   IC;
 Results.flagOoB         =   flagOoB;
-Results.correctReDist   =   correctReDist;
-Results.correctReAngle  =   correctReAngle;
 Results.DistErr         =   DistErr;
 Results.AngleErr        =   AngleErr;
 

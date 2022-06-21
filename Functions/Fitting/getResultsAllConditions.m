@@ -1,5 +1,5 @@
 %% A function for getting Results from All Conditions
-function [AllParams, AllX, AllDX, AllTheta, AllDistErr, AllAngleErr, AllIC] = getResultsAllConditions(TransformedData, config)
+function [AllParams, AllX, AllDX, AllTheta, AllDistErr, AllAngleErr, AllFlagOoB, AllIC] = getResultsAllConditions(TransformedData, config)
     %get the estimated parameters, X, DX, Theta, IC for all trial conditions for each group of data.
     for TRIAL_FILTER=1:3
         disp('%%%%%%%%%%%%%%% PERFORMING FITTING %%%%%%%%%%%%%%%');
@@ -12,5 +12,6 @@ function [AllParams, AllX, AllDX, AllTheta, AllDistErr, AllAngleErr, AllIC] = ge
         AllIC{TRIAL_FILTER}             =       Results.IC;
         AllDistErr{TRIAL_FILTER}        =       Results.DistErr;
         AllAngleErr{TRIAL_FILTER}       =       Results.AngleErr;
+        AllFlagOoB{TRIAL_FILTER}        =       Results.flagOoB;
     end
 end    

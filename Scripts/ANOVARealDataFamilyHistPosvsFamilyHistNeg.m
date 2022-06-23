@@ -19,6 +19,7 @@ config.useweber                                         = false;  % only true wh
 config.Speed.tresholdForBadParticipantL1Recontruction   = 0.0;    % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
 config.NumParams                                        = 1000;
 config.ModelName                                        = "beta_g2_g3_sigma_nu";
+config.useOoBtrials                                     = true;
 
 resultfolder = pwd + "/Output/DataFigures/FamilyHistPos_FamilyHistNeg";
 config.ResultFolder = resultfolder;
@@ -30,6 +31,7 @@ end
 %% Pos data
 FamilyHistPos   = TransformPaths(FamilyHistPos);%transform data
 FamilyHistPos   = CalculateTrackingPath(FamilyHistPos, config);
+%FamilyHistPos   = addBadExecution(FamilyHistPos);
 ManuallyScoringFamilyHistPos;
 %%
 [~, FHPosX, FHPosDX, FHPosTheta, FHPosDistErr, FHPosAngleErr, FHPosFlagOoB, ~] = getResultsAllConditions(FamilyHistPos, config);
@@ -37,6 +39,7 @@ ManuallyScoringFamilyHistPos;
 %% Model fitting for Neg data
 FamilyHistNeg   = TransformPaths(FamilyHistNeg);%transform data
 FamilyHistNeg   = CalculateTrackingPath(FamilyHistNeg, config);
+%FamilyHistNeg   = addBadExecution(FamilyHistNeg);
 ManuallyScoringFamilyHistNeg;
 %%
 [~, FHNegX, FHNegDX, FHNegTheta, FHNegDistErr, FHNegAngleErr, FHNegFlagOoB, ~] = getResultsAllConditions(FamilyHistNeg, config);
@@ -45,14 +48,24 @@ ManuallyScoringFamilyHistNeg;
 ColorPattern; 
 
 %% Error plot
-GenderPos = FamilyHistPos.Gender;
-GenderNeg = FamilyHistNeg.Gender;
+GenderPos           = FamilyHistPos.Gender;
+GenderNeg           = FamilyHistNeg.Gender;
 ErrPlot(FHPosDistErr, FHNegDistErr, GenderPos, GenderNeg, 'dist', config)
 ErrPlot(FHPosAngleErr, FHNegAngleErr, GenderPos, GenderNeg, 'angle', config)
 
 %% Scatter Error Plot
 ScatterErrPlot(FHPosAngleErr, FHNegAngleErr, GenderPos, GenderNeg, FHPosFlagOoB, FHNegFlagOoB, 'male', config)
 ScatterErrPlot(FHPosAngleErr, FHNegAngleErr, GenderPos, GenderNeg, FHPosFlagOoB, FHNegFlagOoB, 'female', config)
+
+%%
+function Data = addBadExecution(Data)
+    %add zero array of BadExecution
+    numSubjs = length(Data.Reconstructed);
+    for i=1:numSubjs
+        trialsize = height(Data.Reconstructed{1,i});
+        Data.Reconstructed{1,i}.BadExecution = zeros(trialsize,1);
+    end
+end
 
 %%
 function ScatterErrPlot(FHPosErr, FHNegErr, GenderPos, GenderNeg, FHPosFlagOoB, FHNegFlagOoB, gender, config)
@@ -412,8 +425,8 @@ function ErrPlot(FHPosErr, FHNegErr, GenderPos, GenderNeg, type, config)
         ylabel('Angular error (rads)')
         %ylim = [-30,30];
         %ytick=[0,10,20];
-        ylim = [-10,20];
-        ytick=[-10,0,10,20];
+        ylim = [-20,10];
+        ytick=[-20,-10,0,10];
     else
         %
     end

@@ -131,42 +131,57 @@ for j = 1:subjectNum
         outer_rad(3,1)   =      realReturnAngles(tr);     
         THETADX{j}{tr}   =      deg2rad(outer_rad);%wrap the angle into (0,2pi)
         
-%         %extract correct return distance and angle
-%         if flagOoB{j}(tr) == 0
-%             x_2 = X{j}{tr}(3,:);
-%             correctReDist{j}{tr} = sqrt(sum(x_2.^2));
-% 
-%             p1 = X{j}{tr}(1,:);
-%             p2 = X{j}{tr}(2,:);
-%             p3 = X{j}{tr}(3,:);
-%             vec1 = p3-p2; 
-%             vec2 = p1-p3;
-%             correctReAngle{j}{tr} = anglebetween(vec1, vec2); 
-% 
-%             %calculate distance error and angular error
-%             DistErr{j}{tr} = correctReDist{j}{tr}-DX{j}{tr}(3);
-%             AngleErr{j}{tr} = correctReAngle{j}{tr}-realReturnAngles(tr);
-%         else 
-%             DistErr{j}{tr} = nan;
-%             AngleErr{j}{tr} = nan;
-%         end
-
-        %extract correct return distance and angle
-        if flagOoB{j}(tr) == 0
-            x_2 = X{j}{tr}(3,:);
-            correctReDist{j}{tr} = sqrt(sum(x_2.^2));
-            DistErr{j}{tr} = correctReDist{j}{tr}-DX{j}{tr}(3);
-        else 
-            DistErr{j}{tr} = nan;
+        if config.useOoBtrials == true
+            %extract correct return distance and angle
+            %consider InB trials and the angular information in OoB trails
+            if flagOoB{j}(tr) == 0
+                x_2 = X{j}{tr}(3,:);
+                correctReDist{j}{tr} = sqrt(sum(x_2.^2));
+                DistErr{j}{tr} = correctReDist{j}{tr}-DX{j}{tr}(3);
+            else 
+                DistErr{j}{tr} = nan;
+            end
+    
+            p1 = X{j}{tr}(1,:);
+            p2 = X{j}{tr}(2,:);
+            p3 = X{j}{tr}(3,:);
+            vec1 = p3-p2; 
+            vec2 = p1-p3;
+            correctReAngle{j}{tr} = anglebetween(vec1, vec2); 
+            %AngleErr{j}{tr} = correctReAngle{j}{tr}-realReturnAngles(tr);
+            %wrap the real return angle to 360
+            %AngleErr{j}{tr} = correctReAngle{j}{tr}-wrapTo360(realReturnAngles(tr));
+            %wrap the angular error to [-180,180] 
+            AngleErr{j}{tr} = wrapTo180(correctReAngle{j}{tr}-realReturnAngles(tr)); 
+        else
+            %use only InB trials
+            %extract correct return distance and angle
+            %consider only InB trials
+            if flagOoB{j}(tr) == 0
+                x_2 = X{j}{tr}(3,:);
+                correctReDist{j}{tr} = sqrt(sum(x_2.^2));
+    
+                p1 = X{j}{tr}(1,:);
+                p2 = X{j}{tr}(2,:);
+                p3 = X{j}{tr}(3,:);
+                vec1 = p3-p2; 
+                vec2 = p1-p3;
+                correctReAngle{j}{tr} = anglebetween(vec1, vec2); 
+    
+                %calculate distance error and angular error
+                DistErr{j}{tr} = correctReDist{j}{tr}-DX{j}{tr}(3);
+                
+                %no wrap
+                %AngleErr{j}{tr} = correctReAngle{j}{tr}-realReturnAngles(tr);
+                %wrap the real return angle to [0,360]
+                %AngleErr{j}{tr} = correctReAngle{j}{tr}-wrapTo360(realReturnAngles(tr));
+                %wrap the angular error to [-180,180]
+                AngleErr{j}{tr} = wrapTo180(correctReAngle{j}{tr}-realReturnAngles(tr));            
+            else 
+                DistErr{j}{tr} = nan;
+                AngleErr{j}{tr} = nan;
+            end
         end
-
-        p1 = X{j}{tr}(1,:);
-        p2 = X{j}{tr}(2,:);
-        p3 = X{j}{tr}(3,:);
-        vec1 = p3-p2; 
-        vec2 = p1-p3;
-        correctReAngle{j}{tr} = anglebetween(vec1, vec2); 
-        AngleErr{j}{tr} = correctReAngle{j}{tr}-realReturnAngles(tr);
 
         %extract the projected speed information along with the time information on outbound path
         L1_Vel_proj             =       TrackedL1{tr}.Vel_proj;

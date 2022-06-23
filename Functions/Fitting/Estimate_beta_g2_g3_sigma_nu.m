@@ -93,27 +93,8 @@ for tr = 1:sampleSize
     %neg_ll_angle = log(2*pi) + log(besseli(0,nu_scaled)) -
     %nu_scaled*cos(angluar_diff); %Von Mises distribution
 
-%     neg_ll_angle = 1/2*log(2*pi) + log(nu_scaled) + (angluar_diff^2)/(2*nu_scaled^2); %Gaussian distribution
+    neg_ll_angle = 1/2*log(2*pi) + log(nu_scaled) + (angluar_diff^2)/(2*nu_scaled^2); %Gaussian distribution
 
-%     %distance noise difference
-%     l3_prime    = h;
-%     dist_diff   = l3-l3_prime;
-% 
-%     %     %the negative loglikelihood of distance on non-OoB trials
-%     if flagOoB(tr)==0
-%         %this is a non-OoB trial
-%         neg_ll_dist = 1/2*log(2*pi) + log(sigma_scaled) + (dist_diff^2)/(2*sigma_scaled^2);
-%     else
-%         %this is an OoB trial
-%         neg_ll_dist = 0;
-%     end
-% 
-%     %total negative loglikelihood
-%     neg_ll = neg_ll_angle + neg_ll_dist;
-% 
-%     negloglikelihood = negloglikelihood + neg_ll;
-
-    
     %distance noise difference
     l3_prime    = h;
     dist_diff   = l3-l3_prime;
@@ -121,12 +102,31 @@ for tr = 1:sampleSize
     %     %the negative loglikelihood of distance on non-OoB trials
     if flagOoB(tr)==0
         %this is a non-OoB trial
-        neg_ll_angle = 1/2*log(2*pi) + log(nu_scaled) + (angluar_diff^2)/(2*nu_scaled^2); %Gaussian distribution
         neg_ll_dist = 1/2*log(2*pi) + log(sigma_scaled) + (dist_diff^2)/(2*sigma_scaled^2);
-        %total negative loglikelihood
-        neg_ll = neg_ll_angle + neg_ll_dist;
-        negloglikelihood = negloglikelihood + neg_ll;
+    else
+        %this is an OoB trial
+        neg_ll_dist = 0;
     end
+
+    %total negative loglikelihood
+    neg_ll = neg_ll_angle + neg_ll_dist;
+
+    negloglikelihood = negloglikelihood + neg_ll;
+
+    
+%     %distance noise difference
+%     l3_prime    = h;
+%     dist_diff   = l3-l3_prime;
+% 
+%     %     %the negative loglikelihood of distance on non-OoB trials
+%     if flagOoB(tr)==0
+%         %this is a non-OoB trial
+%         neg_ll_angle = 1/2*log(2*pi) + log(nu_scaled) + (angluar_diff^2)/(2*nu_scaled^2); %Gaussian distribution
+%         neg_ll_dist = 1/2*log(2*pi) + log(sigma_scaled) + (dist_diff^2)/(2*sigma_scaled^2);
+%         %total negative loglikelihood
+%         neg_ll = neg_ll_angle + neg_ll_dist;
+%         negloglikelihood = negloglikelihood + neg_ll;
+%     end
 
 
 

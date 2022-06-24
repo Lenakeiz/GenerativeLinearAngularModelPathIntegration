@@ -1,4 +1,4 @@
 # Customized gitignore
 Output/*
-Data/*
 *.asv
+*.DS_Store

@@ -5,4 +5,11 @@
 % script has been correctly executed. For additional dependecies please
 % refer to the README file.
 
-%% Loading the data
+%% Cleaning variables
+clearvars; clear all; close all; clc;
+rng('default'); %for code reproducibility
+
+%% Loading data
+disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
+load('Data/HowettBrain2019_Dataset.mat');
+savefolder = pwd + "/Output/";

@@ -48,14 +48,18 @@ ManuallyScoringFamilyHistNeg;
 ColorPattern; 
 
 %% Error plot
-GenderPos           = FamilyHistPos.Gender;
-GenderNeg           = FamilyHistNeg.Gender;
-ErrPlot(FHPosDistErr, FHNegDistErr, GenderPos, GenderNeg, 'dist', config)
-ErrPlot(FHPosAngleErr, FHNegAngleErr, GenderPos, GenderNeg, 'angle', config)
+config.Gender_Pos = FamilyHistPos.Gender;
+config.Gender_Neg = FamilyHistNeg.Gender;
+ErrPlot(FHPosDistErr, FHNegDistErr, 'dist', config)
+ErrPlot(FHPosAngleErr, FHNegAngleErr, 'angle', config)
 
 %% Scatter Error Plot
-ScatterErrPlot(FHPosAngleErr, FHNegAngleErr, GenderPos, GenderNeg, FHPosFlagOoB, FHNegFlagOoB, 'male', config)
-ScatterErrPlot(FHPosAngleErr, FHNegAngleErr, GenderPos, GenderNeg, FHPosFlagOoB, FHNegFlagOoB, 'female', config)
+ScatterErrPlot(FHPosAngleErr, FHNegAngleErr, FHPosFlagOoB, FHNegFlagOoB, 'male', config)
+ScatterErrPlot(FHPosAngleErr, FHNegAngleErr, FHPosFlagOoB, FHNegFlagOoB, 'female', config)
+
+%% ThreewayAnova On Data
+%ThreewayAnova_CocoData(FHPosDistErr, FHNegDistErr, config);
+ThreewayAnova_CocoData(FHPosAngleErr, FHNegAngleErr, config);
 
 %%
 function Data = addBadExecution(Data)
@@ -68,7 +72,10 @@ function Data = addBadExecution(Data)
 end
 
 %%
-function ScatterErrPlot(FHPosErr, FHNegErr, GenderPos, GenderNeg, FHPosFlagOoB, FHNegFlagOoB, gender, config)
+function ScatterErrPlot(FHPosErr, FHNegErr, FHPosFlagOoB, FHNegFlagOoB, gender, config)
+    GenderPos = config.Gender_Pos;
+    GenderNeg = config.Gender_Neg;
+
     if gender=="male"
         flag=1;
     else
@@ -328,8 +335,10 @@ function ScatterErrPlot(FHPosErr, FHNegErr, GenderPos, GenderNeg, FHPosFlagOoB, 
 end
 
 %%
-function ErrPlot(FHPosErr, FHNegErr, GenderPos, GenderNeg, type, config)
+function ErrPlot(FHPosErr, FHNegErr, type, config)
     %% Pos 
+    GenderPos = config.Gender_Pos;
+    GenderNeg = config.Gender_Neg;
     PosmaleIdx = GenderPos==1;
     PosfemaleIdx = GenderPos==2;
 
@@ -422,7 +431,7 @@ function ErrPlot(FHPosErr, FHNegErr, GenderPos, GenderNeg, type, config)
         ylim = [0,1.2];
         ytick = [0,0.3,0.6,0.9];
     elseif type=="angle"
-        ylabel('Angular error (rads)')
+        ylabel('Angular error (degrees)')
         %ylim = [-30,30];
         %ytick=[0,10,20];
         ylim = [-20,10];

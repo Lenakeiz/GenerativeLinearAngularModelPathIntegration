@@ -61,6 +61,10 @@ trialsize = height(YoungControls.Reconstructed{1,2});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
+YoungControls.Reconstructed{1,2}.RealReturnAngle(15) = YoungControls.Reconstructed{1,2}.RealReturnAngle(15) + 360;
+YoungControls.Reconstructed{1,2}.RealReturnAngle(21) = YoungControls.Reconstructed{1,2}.RealReturnAngle(21) + 360;
+YoungControls.Reconstructed{1,2}.RealReturnAngle(25) = YoungControls.Reconstructed{1,2}.RealReturnAngle(25) + 360;
+
 %Save the information in the Reconstructed Structure
 YoungControls.Reconstructed{1,2}.BadExecution = BadExecution;
 
@@ -68,6 +72,10 @@ YoungControls.Reconstructed{1,2}.BadExecution = BadExecution;
 trialsize = height(YoungControls.Reconstructed{1,3});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
+
+BadExecution(11,1) = 1;
+
+YoungControls.Reconstructed{1,3}.RealReturnAngle(14) = YoungControls.Reconstructed{1,3}.RealReturnAngle(14) + 360;
 
 %Save the information in the Reconstructed Structure
 YoungControls.Reconstructed{1,3}.BadExecution = BadExecution;
@@ -77,6 +85,7 @@ trialsize = height(YoungControls.Reconstructed{1,4});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
+YoungControls.Reconstructed{1,4}.RealReturnAngle(24) = YoungControls.Reconstructed{1,4}.RealReturnAngle(24) - 360;
 %Save the information in the Reconstructed Structure
 YoungControls.Reconstructed{1,4}.BadExecution = BadExecution;
 
@@ -117,6 +126,11 @@ trialsize = height(YoungControls.Reconstructed{1,9});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
+YoungControls.Reconstructed{1,9}.RealReturnAngle(11) = YoungControls.Reconstructed{1,9}.RealReturnAngle(11) + 360;
+YoungControls.Reconstructed{1,9}.RealReturnAngle(17) = YoungControls.Reconstructed{1,9}.RealReturnAngle(17) + 360;
+YoungControls.Reconstructed{1,9}.RealReturnAngle(24) = YoungControls.Reconstructed{1,9}.RealReturnAngle(24) + 360;
+YoungControls.Reconstructed{1,9}.RealReturnAngle(34) = YoungControls.Reconstructed{1,9}.RealReturnAngle(34) + 360;
+
 %Save the information in the Reconstructed Structure
 YoungControls.Reconstructed{1,9}.BadExecution = BadExecution;
 
@@ -124,6 +138,9 @@ YoungControls.Reconstructed{1,9}.BadExecution = BadExecution;
 trialsize = height(YoungControls.Reconstructed{1,10});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
+
+YoungControls.Reconstructed{1,10}.RealReturnAngle(5) = YoungControls.Reconstructed{1,10}.RealReturnAngle(5) + 360;
+YoungControls.Reconstructed{1,10}.RealReturnAngle(7) = YoungControls.Reconstructed{1,10}.RealReturnAngle(7) + 360;
 
 %Save the information in the Reconstructed Structure
 YoungControls.Reconstructed{1,10}.BadExecution = BadExecution;
@@ -149,6 +166,7 @@ trialsize = height(YoungControls.Reconstructed{1,13});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
+YoungControls.Reconstructed{1,13}.RealReturnAngle(33) = YoungControls.Reconstructed{1,13}.RealReturnAngle(33) + 360;
 %Save the information in the Reconstructed Structure
 YoungControls.Reconstructed{1,13}.BadExecution = BadExecution;
 
@@ -181,6 +199,7 @@ trialsize = height(YoungControls.Reconstructed{1,17});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
+YoungControls.Reconstructed{1,17}.RealReturnAngle(23) = YoungControls.Reconstructed{1,17}.RealReturnAngle(23) + 360;
 %Save the information in the Reconstructed Structure
 YoungControls.Reconstructed{1,17}.BadExecution = BadExecution;
 
@@ -197,6 +216,9 @@ trialsize = height(YoungControls.Reconstructed{1,19});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
+BadExecution(7,1) = 1;
+
+YoungControls.Reconstructed{1,19}.RealReturnAngle(3) = YoungControls.Reconstructed{1,19}.RealReturnAngle(3) + 360;
 %Save the information in the Reconstructed Structure
 YoungControls.Reconstructed{1,19}.BadExecution = BadExecution;
 
@@ -237,6 +259,8 @@ trialsize = height(YoungControls.Reconstructed{1,24});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
+YoungControls.Reconstructed{1,24}.RealReturnAngle(1) = YoungControls.Reconstructed{1,24}.RealReturnAngle(1) + 360;
+YoungControls.Reconstructed{1,24}.RealReturnAngle(4) = YoungControls.Reconstructed{1,24}.RealReturnAngle(4) + 360;
 %Save the information in the Reconstructed Structure
 YoungControls.Reconstructed{1,24}.BadExecution = BadExecution;
 
@@ -261,6 +285,8 @@ trialsize = height(YoungControls.Reconstructed{1,27});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
+BadExecution(7,1) = 1;
+
 %Save the information in the Reconstructed Structure
 YoungControls.Reconstructed{1,27}.BadExecution = BadExecution;
 
@@ -277,6 +303,7 @@ trialsize = height(YoungControls.Reconstructed{1,29});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
+YoungControls.Reconstructed{1,29}.RealReturnAngle(31) = YoungControls.Reconstructed{1,29}.RealReturnAngle(31) + 360;
 %Save the information in the Reconstructed Structure
 YoungControls.Reconstructed{1,29}.BadExecution = BadExecution;
 
@@ -285,6 +312,9 @@ trialsize = height(YoungControls.Reconstructed{1,30});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
 
+BadExecution(17,1) = 1;
+BadExecution(23,1) = 1;
+
 %Save the information in the Reconstructed Structure
 YoungControls.Reconstructed{1,30}.BadExecution = BadExecution;
 
@@ -292,6 +322,11 @@ YoungControls.Reconstructed{1,30}.BadExecution = BadExecution;
 trialsize = height(YoungControls.Reconstructed{1,31});
 % Prepare structure
 BadExecution = zeros(trialsize,1);
+
+YoungControls.Reconstructed{1,31}.RealReturnAngle(12) = YoungControls.Reconstructed{1,31}.RealReturnAngle(12) + 360;
+YoungControls.Reconstructed{1,31}.RealReturnAngle(13) = YoungControls.Reconstructed{1,31}.RealReturnAngle(13) + 360;
+YoungControls.Reconstructed{1,31}.RealReturnAngle(26) = YoungControls.Reconstructed{1,31}.RealReturnAngle(26) + 360;
+YoungControls.Reconstructed{1,31}.RealReturnAngle(35) = YoungControls.Reconstructed{1,31}.RealReturnAngle(35) + 360;
 
 %Save the information in the Reconstructed Structure
 YoungControls.Reconstructed{1,31}.BadExecution = BadExecution;

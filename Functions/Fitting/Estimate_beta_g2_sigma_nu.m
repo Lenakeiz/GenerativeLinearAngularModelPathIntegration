@@ -1,8 +1,8 @@
-function [negloglikelihood] = Estimate_beta_g3_sigma_nu(beta, g3, sigma, nu, Input, config)
-%   find the likelihood of the beta - g3 - sigma - nu Model
+function [negloglikelihood] = Estimate_beta_g2_sigma_nu(beta, g2, sigma, nu, Input, config)
+%   find the likelihood of the beta - g2 - sigma - nu Model
 %   Args:
 %       beta is the decay factor for the mental distance
-%       g3 is the rotation gain for the return (measuring production error)
+%       g2 is the rotation gain for the second turn (measuring encoding error)
 %       sigma is the standard deviation for the Gaussian distribution of the return distance
 %       nu is the standard deviation for the Gaussian distribution of the return angle
 %       Input contains all the data information for estimating, see PerformGroupFit for how it was generated
@@ -18,25 +18,6 @@ flagOoB         =   Input.flagOoB;
 
 sampleSize          =   size(DX,2);
 negloglikelihood    =   0;
-
-%% find the correct mean return angle based on all trials 
-Alphas = zeros(sampleSize,1);
-for tr = 1:sampleSize
-    %extract the physical data info
-    l1      = DX{tr}(1);
-    l2      = DX{tr}(2);
-    theta2  = THETAX{tr}(2);
-
-    %calculate the correct return angle
-    phy_p1  = [l1,0];
-    phy_p2  = [l1+l2*cos(theta2),l2*sin(theta2)];
-    vec1    = phy_p2-phy_p1; vec2 = [0,0]-phy_p2;
-    alpha   = atan2d(vec1(1)*vec2(2)-vec1(2)*vec2(1),vec1(1)*vec2(1)+vec1(2)*vec2(2));
-    alpha   = deg2rad(alpha);%transfer from degree to radians
-    alpha   = mod(alpha, 2*pi);  %wrap to (0,2pi)  
-    Alphas(tr) = alpha;
-end
-mean_angle = mean(Alphas);
 
 for tr = 1:sampleSize
     %% extract the physical data info
@@ -67,7 +48,7 @@ for tr = 1:sampleSize
     end
     men_p1 = [men_length1,0];
     
-    theta2_prime = theta2;
+    theta2_prime = g2*theta2;
 
     %mental point 2, (asuming a constant speed)
     men_length2 = l2*(1-exp(-beta*durationL2))/(beta*durationL2);
@@ -81,10 +62,8 @@ for tr = 1:sampleSize
     alpha       = atan2d(vec1(1)*vec2(2)-vec1(2)*vec2(1),vec1(1)*vec2(1)+vec1(2)*vec2(2));
     alpha       = deg2rad(alpha);   %transfer from degree to radians
     
-    %mental turning angle
-    sign_alpha = sign(alpha);
-    theta3_prime = g3*abs(alpha)+mean_angle*(1-g3); %reress to mean correct return angle
-    theta3_prime = sign_alpha*theta3_prime;
+    %mental return angle
+    theta3_prime = alpha;
     
     %angular noise difference
     angluar_diff = theta3-theta3_prime;
@@ -96,7 +75,7 @@ for tr = 1:sampleSize
     l3_prime    = h;
     dist_diff   = l3-l3_prime;
 
-    %     %the negative loglikelihood of distance on non-OoB trials
+    %the negative loglikelihood of distance on non-OoB trials
     if flagOoB(tr)==0
         %this is a non-OoB trial
         neg_ll_dist = 1/2*log(2*pi) + log(sigma_scaled) + (dist_diff^2)/(2*sigma_scaled^2);

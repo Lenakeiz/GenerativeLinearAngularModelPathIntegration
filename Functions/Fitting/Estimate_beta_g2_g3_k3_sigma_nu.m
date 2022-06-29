@@ -1,11 +1,12 @@
 function [negloglikelihood] = Estimate_beta_g2_g3_k3_sigma_nu(beta, g2, g3, k3, sigma, nu, Input, config)
-%   EstimateConstSpeed means using the constant speed model when estimating the parameters
+%   find the likelihood of the beta - g2 - g3 - k3 - sigma - nu Model
 %   Args:
-%       beta is the leaky integration decay factor
-%       g2 is the rotation angle from the direction of leg 2
-%       g3 is the rotation angle from the direction of leg 3
-%       sigma is the standard deviation for the Gaussian distribution of the return point
-%       nu decribes the noise strength in the Von Mises distribution
+%       beta is the decay factor for the mental distance
+%       g2 is the rotation gain for the second turn (measuring encoding error)
+%       g3 is the rotation gain for the return (measuring production error)
+%       k3 is the repferred return angle (measuring production error)
+%       sigma is the standard deviation for the Gaussian distribution of the return distance
+%       nu is the standard deviation for the Gaussian distribution of the return angle
 %       Input contains all the data information for estimating, see PerformGroupFit for how it was generated
 %       config: self-explained
 

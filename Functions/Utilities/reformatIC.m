@@ -1,9 +1,10 @@
 function [AIC, BIC, NLL] = reformatIC(IC)
-%re-format IC from cell to array
+%Reformatting IC from cell to array for later figure plotting
 %Args:
 %   IC
 %Returns:
 %   AIC, BIC and Negative Loglikelihood
+
     numSubj = length(IC{1});
     AIC = zeros(numSubj,3); 
     BIC= zeros(numSubj,3); 
@@ -24,4 +25,5 @@ function [AIC, BIC, NLL] = reformatIC(IC)
     AIC = mean(AIC,2);
     BIC = mean(BIC,2);
     NLL = mean(NLL,2);
+    
 end

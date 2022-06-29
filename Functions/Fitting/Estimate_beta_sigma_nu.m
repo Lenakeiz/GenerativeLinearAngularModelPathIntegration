@@ -1,8 +1,7 @@
-function [negloglikelihood] = Estimate_beta_g3_sigma_nu(beta, g3, sigma, nu, Input, config)
-%   find the likelihood of the beta - g3 - sigma - nu Model
+function [negloglikelihood] = Estimate_beta_sigma_nu(beta, sigma, nu, Input, config)
+%   find the likelihood of the beta - sigma - nu Model
 %   Args:
 %       beta is the decay factor for the mental distance
-%       g3 is the rotation gain for the return (measuring production error)
 %       sigma is the standard deviation for the Gaussian distribution of the return distance
 %       nu is the standard deviation for the Gaussian distribution of the return angle
 %       Input contains all the data information for estimating, see PerformGroupFit for how it was generated
@@ -82,9 +81,7 @@ for tr = 1:sampleSize
     alpha       = deg2rad(alpha);   %transfer from degree to radians
     
     %mental turning angle
-    sign_alpha = sign(alpha);
-    theta3_prime = g3*abs(alpha)+mean_angle*(1-g3); %reress to mean correct return angle
-    theta3_prime = sign_alpha*theta3_prime;
+    theta3_prime = alpha;
     
     %angular noise difference
     angluar_diff = theta3-theta3_prime;

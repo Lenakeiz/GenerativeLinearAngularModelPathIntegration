@@ -14,6 +14,10 @@ disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
 load('Data/HowettBrain2019_Dataset.mat');
 savefolder = pwd + "/Output/";
 
+%% Definining global variables and anonymous functons
+anglebetween = @(v,w) atan2d(w(:,2).*v(:,1) - v(:,2).*w(:,1), v(:,1).*w(:,1) + v(:,2).*w(:,2));
+
+
 %% setting the configuration
 config.Speed.alpha                                      = 0.9;    % Paramanter for running speed calculation
 config.Speed.timeOffsetAfterFlagReach                   = 1.5;    % Time to track after flag reached in seconds 
@@ -30,27 +34,38 @@ config.useOoBtrials = true;
 %% Model fitting
 config.ModelName        =   "beta_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
-config.NumParams        = 100;
-%% Model fitting 
+config.NumParams        =   100; % Set here to avoid producing the model
+%% Model fitting for Young Controls
+disp("%%%%%%%%%%%%%%% Starting fit for young controls %%%%%%%%%%%%%%%");
 YoungControls = TransformPaths(YoungControls);%transform data
 YoungControls   = CalculateTrackingPath(YoungControls, config);
 ManuallyScoringYoung;
-[~, AllYoungX, ~, ~, ~, ~, ~, ~] = getResultsAllConditions(YoungControls, config);
+[~, YoungControls.X, YoungControls.DX, YoungControls.Theta, YoungControls.DistErr, YoungControls.AngErr, YoungControls.FlagOob, ~] = getResultsAllConditions(YoungControls, config);
 
-%% Model fitting for MCIPos
+%% Model fitting for Healthy Controls
+disp("%%%%%%%%%%%%%%% Starting fit for healthy controls %%%%%%%%%%%%%%%");
 HealthyControls = TransformPaths(HealthyControls);%transform data
 HealthyControls   = CalculateTrackingPath(HealthyControls, config);
 ManuallyScoringHealthyOld;
-[~, AllHCX, ~, ~, ~, ~, ~, ~] = getResultsAllConditions(HealthyControls, config);
+[~, HealthyControls.X, HealthyControls.DX, HealthyControls.Theta, HealthyControls.DistErr, HealthyControls.AngErr, HealthyControls.FlagOob, ~] = getResultsAllConditions(HealthyControls, config);
 
-%% Model fitting for MCIPos
+%% Model fitting for MCI Pos
+disp("%%%%%%%%%%%%%%% Starting fit for mci positive %%%%%%%%%%%%%%%");
 MCIPos = TransformPaths(MCIPos);%transform data
 MCIPos   = CalculateTrackingPath(MCIPos, config);
 ManuallyScoringMCIPos;
-[~, AllMCIPosX, ~, ~, ~, ~, ~, ~] = getResultsAllConditions(MCIPos, config);
+[~, MCIPos.X, MCIPos.DX, MCIPos.Theta, MCIPos.DistErr, MCIPos.AngErr, MCIPos.FlagOob, ~] = getResultsAllConditions(MCIPos, config);
 
-%% Model fitting for MCINeg
+%% Model fitting for MCI Neg
+disp("%%%%%%%%%%%%%%% Starting fit for mci negative %%%%%%%%%%%%%%%");
 MCINeg = TransformPaths(MCINeg);%transform data
 MCINeg   = CalculateTrackingPath(MCINeg, config);
 ManuallyScoringMCINeg;
-[~, AllMCINegX, ~, ~, ~, ~, ~, ~] = getResultsAllConditions(MCINeg, config);
+[~, MCINeg.X, MCINeg.DX, MCINeg.Theta, MCINeg.DistErr, MCINeg.AngErr, MCINeg.FlagOob, ~] = getResultsAllConditions(MCINeg, config);
+
+%% Model fitting for MCI Unk
+disp("%%%%%%%%%%%%%%% Starting fit for mci unknown %%%%%%%%%%%%%%%");
+MCIUnk = TransformPaths(Unknown);%transform data
+MCIUnk   = CalculateTrackingPath(MCIUnk, config);
+ManuallyScoringMCIUnk;
+[~, MCIUnk.X, MCIUnk.DX, MCIUnk.Theta, MCIUnk.DistErr, MCIUnk.AngErr, MCIUnk.FlagOob, ~] = getResultsAllConditions(MCIUnk, config);

@@ -330,3 +330,6 @@ YoungControls.Reconstructed{1,31}.RealReturnAngle(35) = YoungControls.Reconstruc
 
 %Save the information in the Reconstructed Structure
 YoungControls.Reconstructed{1,31}.BadExecution = BadExecution;
+
+%%
+clear trialsize BadExecution

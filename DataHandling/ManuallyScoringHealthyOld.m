@@ -435,3 +435,6 @@ BadExecution = zeros(trialsize,1);
 
 %Save the information in the Reconstructed Structure
 HealthyControls.Reconstructed{1,36}.BadExecution = BadExecution;
+
+%%
+clear trialsize BadExecution

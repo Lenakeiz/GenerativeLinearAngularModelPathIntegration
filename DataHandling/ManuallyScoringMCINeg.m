@@ -152,3 +152,6 @@ BadExecution = zeros(trialsize,1);
 
 %Save the information in the Reconstructed Structure
 MCINeg.Reconstructed{1,14}.BadExecution = BadExecution;
+
+%%
+clear trialsize BadExecution

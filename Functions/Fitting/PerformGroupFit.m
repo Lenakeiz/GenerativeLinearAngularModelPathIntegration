@@ -17,6 +17,8 @@ correctReDist   =       cell(1, subjectNum);
 correctReAngle  =       cell(1, subjectNum);
 DistErr         =       cell(1, subjectNum);
 AngleErr        =       cell(1, subjectNum);
+PropDistErr     =       cell(1, subjectNum);
+PropAngErr      =       cell(1, subjectNum);
 ProjSpeedL1     =       cell(1, subjectNum);% projected speed within detected start-to-end time window at leg 1
 ProjSpeedL2     =       cell(1, subjectNum);% projected speed within detected start-to-end time window at leg 2
 L1Dur           =       cell(1, subjectNum);% walking duration at leg 1
@@ -132,27 +134,36 @@ for j = 1:subjectNum
         THETADX{j}{tr}   =      deg2rad(outer_rad);%wrap the angle into (0,2pi)
         
         if config.useOoBtrials == true
+            
+            % Calculating triangle property
+            p1 = X{j}{tr}(1,:);
+            p2 = X{j}{tr}(2,:);
+            p3 = X{j}{tr}(3,:);
+            tp = X{j}{tr}(4,:);
+
+            vec1 = p3-p2; %second leg
+            vec2 = p1-p3; %third leg (real)
+            rvec = tp-p3; %participant return vector for current trial
             %extract correct return distance and angle
             %consider InB trials and the angular information in OoB trails
             if flagOoB{j}(tr) == 0
                 x_2 = X{j}{tr}(3,:);
                 correctReDist{j}{tr} = sqrt(sum(x_2.^2));
-                DistErr{j}{tr} = correctReDist{j}{tr}-DX{j}{tr}(3);
+                DistErr{j}{tr}       = correctReDist{j}{tr}-DX{j}{tr}(3);
+                realReturnLength     = norm(rvec);
+                PropDistErr{j}{tr}   = realReturnLength/correctReDist{j}{tr};
             else 
-                DistErr{j}{tr} = nan;
-            end
-    
-            p1 = X{j}{tr}(1,:);
-            p2 = X{j}{tr}(2,:);
-            p3 = X{j}{tr}(3,:);
-            vec1 = p3-p2; 
-            vec2 = p1-p3;
+                DistErr{j}{tr}       = nan;
+                PropDistErr{j}{tr}   = nan;
+            end    
+
             correctReAngle{j}{tr} = anglebetween(vec1, vec2); 
             %AngleErr{j}{tr} = correctReAngle{j}{tr}-realReturnAngles(tr);
             %wrap the real return angle to 360
             %AngleErr{j}{tr} = correctReAngle{j}{tr}-wrapTo360(realReturnAngles(tr));
             %wrap the angular error to [-180,180] 
-            AngleErr{j}{tr} = wrapTo180(correctReAngle{j}{tr}-realReturnAngles(tr)); 
+            AngleErr{j}{tr}   = wrapTo180(correctReAngle{j}{tr}-realReturnAngles(tr));
+            PropAngErr{j}{tr} = wrapTo360(realReturnAngles(tr))/correctReAngle{j}{tr};
         else
             %use only InB trials
             %extract correct return distance and angle
@@ -164,22 +175,28 @@ for j = 1:subjectNum
                 p1 = X{j}{tr}(1,:);
                 p2 = X{j}{tr}(2,:);
                 p3 = X{j}{tr}(3,:);
+                tp = X{j}{tr}(4,:);
                 vec1 = p3-p2; 
                 vec2 = p1-p3;
-                correctReAngle{j}{tr} = anglebetween(vec1, vec2); 
+                rvec = tp-p3;
+                correctReAngle{j}{tr} = anglebetween(vec1, vec2);
+                realReturnLength     = norm(rvec);
     
                 %calculate distance error and angular error
-                DistErr{j}{tr} = correctReDist{j}{tr}-DX{j}{tr}(3);
-                
+                DistErr{j}{tr}     = correctReDist{j}{tr}-DX{j}{tr}(3);
+                PropDistErr{j}{tr} = realReturnLength/correctReDist{j}{tr};
                 %no wrap
                 %AngleErr{j}{tr} = correctReAngle{j}{tr}-realReturnAngles(tr);
                 %wrap the real return angle to [0,360]
                 %AngleErr{j}{tr} = correctReAngle{j}{tr}-wrapTo360(realReturnAngles(tr));
                 %wrap the angular error to [-180,180]
-                AngleErr{j}{tr} = wrapTo180(correctReAngle{j}{tr}-realReturnAngles(tr));            
+                AngleErr{j}{tr}   = wrapTo180(correctReAngle{j}{tr}-realReturnAngles(tr));
+                PropAngErr{j}{tr} = wrapTo360(realReturnAngles(tr))/correctReAngle{j}{tr};
             else 
-                DistErr{j}{tr} = nan;
-                AngleErr{j}{tr} = nan;
+                DistErr{j}{tr}     = nan;
+                PropDistErr{j}{tr} = nan;
+                AngleErr{j}{tr}    = nan;
+                PropAngErr{j}{tr}  = nan;
             end
         end
 
@@ -255,5 +272,7 @@ Results.IC              =   IC;
 Results.flagOoB         =   flagOoB;
 Results.DistErr         =   DistErr;
 Results.AngleErr        =   AngleErr;
+Results.PropDistErr     =   PropDistErr;
+Results.PropAngErr      =   PropAngErr;
 
 end

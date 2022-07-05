@@ -173,3 +173,6 @@ BadExecution(17,1) = 1;
 
 %Save the information in the Reconstructed Structure
 MCIPos.Reconstructed{1,11}.BadExecution = BadExecution;
+
+%%
+clear trialsize BadExecution

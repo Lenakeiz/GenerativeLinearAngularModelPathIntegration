@@ -681,3 +681,6 @@ BadExecution = zeros(trialsize,1);
 
 %Save the information in the Reconstructed Structure
 FamilyHistPos.Reconstructed{1,62}.BadExecution = BadExecution;
+
+%%
+clear trialsize BadExecution

@@ -428,3 +428,6 @@ BadExecution(29,1) = 1;
 
 %Save the information in the Reconstructed Structure
 FamilyHistNeg.Reconstructed{1,38}.BadExecution = BadExecution;
+
+%%
+clear trialsize BadExecution

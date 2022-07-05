@@ -281,3 +281,6 @@ MCIUnk.Reconstructed{1,18}.RealReturnAngle(27) = MCIUnk.Reconstructed{1,18}.Real
 
 %Save the information in the Reconstructed Structure
 MCIUnk.Reconstructed{1,18}.BadExecution = BadExecution;
+
+%%
+clear trialsize BadExecution

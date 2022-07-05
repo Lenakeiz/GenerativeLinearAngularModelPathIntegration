@@ -4,7 +4,7 @@ rng('default');
 
 %% Loading data
 disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
-load('Data/AllDataErrors2018_V3.mat');
+load('Data/HowettBrain2019_Dataset.mat');
 
 %% setting the configuration
 config.Speed.alpha                                  = 0.9;    % Paramanter for running speed calculation
@@ -16,6 +16,7 @@ config.UseGlobalSearch                              = true;
 config.TrackedInboundAngularDeltaT                  = 1;
 config.includeStand                                 = false;
 config.useweber                                     = false;  % only true when use weber law in simple generative models
+config.useOoBtrials                                 = true;
 
 %% Model fitting
 

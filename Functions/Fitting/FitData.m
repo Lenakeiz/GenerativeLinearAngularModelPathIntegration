@@ -4,7 +4,16 @@ function [FitAllParams, IC] = FitData(Input,config)
 %load configurations necessary for the script
 Model_Name      =   config.ModelName;
 
-if Model_Name == "beta_sigma_nu"      %regressing to correct mean return angle
+if Model_Name == "sigma_nu"      %regressing to correct mean return angle
+    %set parameter lower bound and up bound
+    %      1-sigma    2-nu
+    lb  = [0.0,       0.0];
+    ub  = [4.0,       pi]; 
+
+    %defining likelihood function
+    estFnc = @(FP) Estimate_sigma_nu(FP(1), FP(2), Input, config);
+
+elseif Model_Name == "beta_sigma_nu"      %regressing to correct mean return angle
     %set parameter lower bound and up bound
     %     1, beta     2-sigma    3-nu
     lb  = [-1.0,      0.0,       0.0];

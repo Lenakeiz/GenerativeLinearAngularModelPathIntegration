@@ -16,6 +16,11 @@ end
 [MCIUnkPropDist, MCIUnkPropAng]                   = getProportionalLinearAndAngularError(MCIUnk);
 [MCINegPropDist, MCINegPropAng]                   = getProportionalLinearAndAngularError(MCINeg);
 [MCIPosPropDist, MCIPosPropAng]                   = getProportionalLinearAndAngularError(MCIPos);
+
+%%
+config.type = "Distance";
+TwowayAnovaOnDistanceOrAngle(YoungControlsPropDist, HealthyControlsPropDist, MCIPosPropDist, MCINegPropDist, MCIUnkPropDist, config);
+
 %% Plotting quantities
 plotBarScatterOfReturnDistance(YoungControlsPropDist, HealthyControlsPropDist, MCIPosPropDist, MCINegPropDist, MCIUnkPropDist, [], config);
 plotBarScatterOfReturnAngle   (YoungControlsPropAng , HealthyControlsPropAng , MCIPosPropAng , MCINegPropAng , MCIUnkPropAng , [], config);
@@ -45,9 +50,7 @@ function [PropDist, PropAng] = getProportionalLinearAndAngularError(Group)
         PropDist = [PropDist;CondPropDistMeanSubjs];
         PropAng  = [PropAng;CondPropAngleMeanSubjs];
     
-    end
-
-    
+    end    
 end
 
 %% plot Bar scatter of Return distance
@@ -313,3 +316,78 @@ function plotBarScatterOfReturnAngle(NormedAngleYoung, NormedAngleHealthyOld, No
 
 end
 
+%% Two-way anova on all Groups
+function [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnovaOnDistanceOrAngle(NormedYoung, NormedHealthyOld, NormedMCIPos, NormedMCINeg, NormedMCIUnk, config)
+
+    %load configurations necessary for the script
+    resultfolder = config.ResultFolder;
+    type = config.type;
+    
+    %create storing folder for trajectory if not exist
+    savefoldername = resultfolder+"/TwowayAnova_"+type+"/";
+    if ~exist(savefoldername, 'dir')
+       mkdir(savefoldername);
+    end
+
+    %processing the data into a long numeric vector 
+    [YoungY, YoungGroupNames, YoungConditionNames]=ReGroupData(NormedYoung,'Young');
+    [HealthyOldY, HealthyOldGroupNames, HealthyOldConditionNames]=ReGroupData(NormedHealthyOld,'HealthyOld');
+    [MCIPosY, MCIPosGroupNames, MCIPosConditionNames]=ReGroupData(NormedMCIPos,'MCIPos');
+    [MCINegY, MCINegGroupNames, MCINegConditionNames]=ReGroupData(NormedMCINeg,'MCIPNeg');
+    [MCIUnkY, MCIUnkGroupNames, MCIUnkConditionNames]=ReGroupData(NormedMCIUnk,'MCIPUnk');
+
+    AllY = [MCIPosY,MCINegY,MCIUnkY,YoungY,HealthyOldY];
+    AllGroupNames = [MCIPosGroupNames,MCINegGroupNames,MCIUnkGroupNames,YoungGroupNames,HealthyOldGroupNames];
+    AllConditionNames = [MCIPosConditionNames,MCINegConditionNames,MCIUnkConditionNames,YoungConditionNames,HealthyOldConditionNames];
+
+    %Do two-way anova with unbalanced design
+    [p,anova_tab, stats]= anovan(AllY,{AllGroupNames,AllConditionNames},'model','interaction','varnames',{'Groups','Conditions'},'display','on');
+
+    %Do multiple comparisons on main effect 1
+    multicomp_tab1 = multcompare(stats,'Dimension',[1],'CType','bonferroni');
+    title("Multiple comparisons with bonferroni correction of");
+    saveas(gcf,savefoldername+"MultiCompME1.png");
+    close(gcf);
+
+    %Do multiple comparisons on main effect 2
+    multicomp_tab2 = multcompare(stats,'Dimension',[2],'CType','bonferroni');
+    title("Multiple comparisons with bonferroni correction");
+    saveas(gcf,savefoldername+"MultiCompME2.png");
+    close(gcf);
+
+    %Do multiple comparisons on main effect 1&2
+    multicomp_tab12 = multcompare(stats,'Dimension',[1,2],'CType','bonferroni');
+    title("Multiple comparisons with bonferroni correction");
+    saveas(gcf,savefoldername+"MultiCompME1ME2.png");
+    close(gcf);
+    
+end
+
+%% 
+function [Y, GroupNames, ConditionNames]=ReGroupData(Data,groupname)
+%Group all the data from five groups and three conditions into a long
+%numeric vector for further two-way anova analysis 
+%and also output the factor names 
+
+% Removing nans
+isnan_idx = ~isnan(Data(1,:));
+nochange = Data(1,isnan_idx);
+isnan_idx = ~isnan(Data(2,:));
+nodistalcues = Data(1,isnan_idx);
+isnan_idx = ~isnan(Data(3,:));
+noopticflow = Data(1,isnan_idx);
+Y = [nochange, nodistalcues, noopticflow];
+
+numSubjsNoChange     = size(nochange,2);
+numSubjsNoDistalCues = size(nodistalcues,2);
+numSubjsNoOpticFlow  = size(noopticflow,2);
+
+GroupNames = [string(repmat({groupname},1,numSubjsNoChange)),...
+              string(repmat({groupname},1,numSubjsNoDistalCues)),...
+              string(repmat({groupname},1,numSubjsNoOpticFlow))];
+
+ConditionNames = [string(repmat({'NoChange'},1 ,numSubjsNoChange)),...
+                  string(repmat({'NoDistalCue'},1,numSubjsNoDistalCues)),...
+                  string(repmat({'NoOpticFlow'},1,numSubjsNoOpticFlow))];  
+
+end

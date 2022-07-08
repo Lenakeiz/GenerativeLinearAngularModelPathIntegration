@@ -18,7 +18,7 @@ config.includeStand                                     = false;
 config.useweber                                         = false;  % only true when use weber law in simple generative models
 config.useOoBtrials                                     = true;
 
-resultfolder = pwd+"/Output/ModelFigures/ModelComparison";
+resultfolder = pwd+"/Output/ModelFigures/ModelComparison_HC";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
@@ -26,69 +26,77 @@ if ~exist(resultfolder, 'dir')
 end
 
 %% calculating tracking path and transoform data
-config.Speed.tresholdForBadParticipantL1Recontruction = 1.55;   % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
-YoungControls                   =   TransformPaths(YoungControls);
-YoungControls                   =   CalculateTrackingPath(YoungControls, config);
-ManuallyScoringYoung;
+% config.Speed.tresholdForBadParticipantL1Recontruction = 1.55;   % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
+% YoungControls                   =   TransformPaths(YoungControls);
+% YoungControls                   =   CalculateTrackingPath(YoungControls, config);
+% ManuallyScoringYoung;
 
 %%
-% config.Speed.tresholdForBadParticipantL1Recontruction = 2.0; 
-% %transform data
-% HealthyControls                 =   TransformPaths(HealthyControls);
-% HealthyControls                 =   CalculateTrackingPath(HealthyControls, config);
-% ManuallyScoringHealthyOld;
+config.Speed.tresholdForBadParticipantL1Recontruction = 2.0; 
+%transform data
+HealthyControls                 =   TransformPaths(HealthyControls);
+HealthyControls                 =   CalculateTrackingPath(HealthyControls, config);
+ManuallyScoringHealthyOld;
+YoungControls = HealthyControls;
 
 %% 1, sigma nu Model --> egocentric noise only model
 config.ModelName        =   "sigma_nu";
 config.ParamName        =   ["sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-[~, ~, ~, ~, ~, ~, ~, sigma_nu_IC] = getResultsAllConditions(YoungControls, config);
+Results_sigma_nu        =   getResultsAllConditions(YoungControls, config);
+sigma_nu_IC             =   Results_sigma_nu.IC;
 
 %% 2, beta, sigma, nu Model --> only encoding errors in distance
 config.ModelName        =   "beta_sigma_nu";
 config.ParamName        =   ["beta", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-[~, ~, ~, ~, ~, ~, ~, beta_sigma_nu_IC] = getResultsAllConditions(YoungControls, config);
+Results_beta_sigma_nu   =   getResultsAllConditions(YoungControls, config);
+beta_sigma_nu_IC        =   Results_beta_sigma_nu.IC;
 
 %% 3, g2, g3, sigma, nu Model --> encoding errors and production errors in angle 
 config.ModelName        =   "g2_g3_sigma_nu";
 config.ParamName        =   ["g2", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-[~, ~, ~, ~, ~, ~, ~, g2_g3_sigma_nu_IC] = getResultsAllConditions(YoungControls, config);
+Results_g2_g3_sigma_nu  =   getResultsAllConditions(YoungControls, config);
+g2_g3_sigma_nu_IC        =   Results_g2_g3_sigma_nu.IC;
 
 %% 4, beta, g2, sigma, nu Model --> encoding error in distance and angle
 config.ModelName        =   "beta_g2_sigma_nu";
 config.ParamName        =   ["beta", "g2", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-[~, ~, ~, ~, ~, ~, ~, beta_g2_sigma_nu_IC] = getResultsAllConditions(YoungControls, config);
+Results_beta_g2_sigma_nu=   getResultsAllConditions(YoungControls, config);
+beta_g2_sigma_nu_IC        =   Results_beta_g2_sigma_nu.IC;
 
 %% 5, beta, g3, sigma, nu Model --> encoding errors in distance and production error in angle
 config.ModelName        =   "beta_g3_sigma_nu";
 config.ParamName        =   ["beta", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-[~, ~, ~, ~, ~, ~, ~, beta_g3_sigma_nu_IC] = getResultsAllConditions(YoungControls, config);
+Results_beta_g3_sigma_nu=   getResultsAllConditions(YoungControls, config);
+beta_g3_sigma_nu_IC        =   Results_beta_g3_sigma_nu.IC;
 
 %% 6, beta, g2, g3, sigma, nu Model --> encoding errors in distance and angles and production error in angle
 config.ModelName        =   "beta_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-[~, ~, ~, ~, ~, ~, ~, beta_g2_g3_sigma_nu_IC] = getResultsAllConditions(YoungControls, config);
+Results_beta_g2_g3_sigma_nu   =   getResultsAllConditions(YoungControls, config);
+beta_g2_g3_sigma_nu_IC        =   Results_beta_g2_g3_sigma_nu.IC;
 
-% %% 7, beta, g2, g3, k3, sigma, nu Model --> add another parameter k3 to the beta, g2, g3, sigma, nu Model
-% config.ModelName        =   "beta_g2_g3_k3_sigma_nu";
-% config.ParamName        =   ["beta", "g2", "g3", "k3", "sigma", "nu"];
-% config.NumParams        =   length(config.ParamName);
-% 
-% [~, ~, ~, ~, ~, ~, ~, beta_g2_g3_k3_sigma_nu_IC] = getResultsAllConditions(HealthyControls, config);
+%% 7, beta, g2, g3, k3, sigma, nu Model --> add another parameter k3 to the beta, g2, g3, sigma, nu Model
+config.ModelName        =   "beta_g2_g3_k3_sigma_nu";
+config.ParamName        =   ["beta", "g2", "g3", "k3", "sigma", "nu"];
+config.NumParams        =   length(config.ParamName);
+
+Results_beta_g2_g3_k3_sigma_nu   =   getResultsAllConditions(YoungControls, config);
+beta_g2_g3_k3_sigma_nu_IC           =   Results_beta_g2_g3_k3_sigma_nu.IC;
 
 %%
-ModelNames = {'M1', 'M2', 'M3', 'M4', 'M5', 'M6'};
+ModelNames = {'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7'};
 
 %% Setting colors for using in plots
 ColorPattern; 
@@ -107,21 +115,21 @@ for idx_ = 1:4
     [beta_g2_sigma_nu_AIC, beta_g2_sigma_nu_BIC, beta_g2_sigma_nu_NLL] = reformatIC(beta_g2_sigma_nu_IC, cond);
     [beta_g3_sigma_nu_AIC,beta_g3_sigma_nu_BIC, beta_g3_sigma_nu_NLL] = reformatIC(beta_g3_sigma_nu_IC, cond);
     [beta_g2_g3_sigma_nu_AIC, beta_g2_g3_sigma_nu_BIC,beta_g2_g3_sigma_nu_NLL] = reformatIC(beta_g2_g3_sigma_nu_IC, cond);
-    %[beta_g2_g3_k3_sigma_nu_AIC, beta_g2_g3_k3_sigma_nu_BIC,beta_g2_g3_k3_sigma_nu_NLL] = reformatIC(beta_g2_g3_k3_sigma_nu_IC, cond);
+    [beta_g2_g3_k3_sigma_nu_AIC, beta_g2_g3_k3_sigma_nu_BIC,beta_g2_g3_k3_sigma_nu_NLL] = reformatIC(beta_g2_g3_k3_sigma_nu_IC, cond);
     
     % Box Plot of AIC
     ICType = "AIC";
-    All_AIC = [sigma_nu_AIC, beta_sigma_nu_AIC, g2_g3_sigma_nu_AIC, beta_g2_sigma_nu_AIC, beta_g3_sigma_nu_AIC, beta_g2_g3_sigma_nu_AIC];
+    All_AIC = [sigma_nu_AIC, beta_sigma_nu_AIC, g2_g3_sigma_nu_AIC, beta_g2_sigma_nu_AIC, beta_g3_sigma_nu_AIC, beta_g2_g3_sigma_nu_AIC, beta_g2_g3_k3_sigma_nu_AIC];
     plotBoxPlot(All_AIC, ModelNames, ICType, config, cond);
     
     % Box Plot of BIC
     ICType = "BIC";
-    All_BIC = [sigma_nu_BIC, beta_sigma_nu_BIC, g2_g3_sigma_nu_BIC, beta_g2_sigma_nu_BIC, beta_g3_sigma_nu_BIC, beta_g2_g3_sigma_nu_BIC];
+    All_BIC = [sigma_nu_BIC, beta_sigma_nu_BIC, g2_g3_sigma_nu_BIC, beta_g2_sigma_nu_BIC, beta_g3_sigma_nu_BIC, beta_g2_g3_sigma_nu_BIC, beta_g2_g3_k3_sigma_nu_BIC];
     plotBoxPlot(All_BIC, ModelNames, ICType, config, cond);
     
     % Box Plot of AIC
     ICType = "NegLogLikelihood";
-    All_NLL = [sigma_nu_NLL, beta_sigma_nu_NLL, g2_g3_sigma_nu_NLL, beta_g2_sigma_nu_NLL, beta_g3_sigma_nu_NLL, beta_g2_g3_sigma_nu_NLL];
+    All_NLL = [sigma_nu_NLL, beta_sigma_nu_NLL, g2_g3_sigma_nu_NLL, beta_g2_sigma_nu_NLL, beta_g3_sigma_nu_NLL, beta_g2_g3_sigma_nu_NLL, beta_g2_g3_k3_sigma_nu_NLL];
     plotBoxPlot(All_NLL, ModelNames, ICType, config, cond);
 
 end
@@ -226,5 +234,5 @@ function plotBoxPlot(data, ModelNames, ICType, config, cond)
     
     %% save figure
     exportgraphics(f,config.ResultFolder+"/"+cond+"_"+ICType+".png",'Resolution',300);
-    %exportgraphics(f,config.ResultFolder+"/"+cond+"_"+ICType+".pdf",'Resolution',300,'ContentType','vector');
+    exportgraphics(f,config.ResultFolder+"/"+cond+"_"+ICType+".pdf",'Resolution',300,'ContentType','vector');
 end

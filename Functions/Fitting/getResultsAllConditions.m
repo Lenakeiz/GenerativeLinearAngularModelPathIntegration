@@ -5,15 +5,15 @@ function Results = getResultsAllConditions(TransformedData, config)
         disp('%%%%%%%%%%%%%%% PERFORMING FITTING %%%%%%%%%%%%%%%');
         config.TrialFilter                    =       TRIAL_FILTER;
         ModelFitResults                       =       PerformGroupFit(TransformedData, config);
-        Results{TRIAL_FILTER}.estimatedParams =       ModelFitResults.estimatedParams; 
-        Results{TRIAL_FILTER}.X               =       ModelFitResults.X;
-        Results{TRIAL_FILTER}.DX              =       ModelFitResults.DX;      
-        Results{TRIAL_FILTER}.THETADX         =       ModelFitResults.THETADX;
-        Results{TRIAL_FILTER}.IC              =       ModelFitResults.IC;
-        Results{TRIAL_FILTER}.DistErr         =       ModelFitResults.DistErr;
-        Results{TRIAL_FILTER}.AngleErr        =       ModelFitResults.AngleErr;
-        Results{TRIAL_FILTER}.PropDistErr     =       ModelFitResults.PropDistErr;
-        Results{TRIAL_FILTER}.PropAngErr      =       ModelFitResults.PropAngErr;
-        Results{TRIAL_FILTER}.flagOoB         =       ModelFitResults.flagOoB;
+        Results.estimatedParams{TRIAL_FILTER} =       ModelFitResults.estimatedParams; 
+        Results.X{TRIAL_FILTER}               =       ModelFitResults.X;
+        Results.DX{TRIAL_FILTER}              =       ModelFitResults.DX;      
+        Results.THETADX{TRIAL_FILTER}         =       ModelFitResults.THETADX;
+        Results.IC{TRIAL_FILTER}              =       ModelFitResults.IC;
+        Results.DistErr{TRIAL_FILTER}         =       ModelFitResults.DistErr;
+        Results.AngleErr{TRIAL_FILTER}        =       ModelFitResults.AngleErr;
+        Results.PropDistErr{TRIAL_FILTER}     =       ModelFitResults.PropDistErr;
+        Results.PropAngErr{TRIAL_FILTER}      =       ModelFitResults.PropAngErr;
+        Results.flagOoB{TRIAL_FILTER}         =       ModelFitResults.flagOoB;
     end
 end

@@ -3,5 +3,4 @@ Output/*
 *.asv
 *.DS_Store
 Learning/*
-Data/*
 debug.ps

@@ -11,13 +11,25 @@ if ~exist(resultfolder, 'dir')
    mkdir(resultfolder);
 end
 
-figureOpen = figure('visible','off','Position', [0 0 800 800]);
+figureOpen = figure('visible','off','Position', [100 100 850 500]);
+set(0,'DefaultAxesFontName','Arial')
+set(0,'DefaultTextFontName','Arial')
+set(0,'DefaultAxesFontSize',16)
+set(0,'DefaultTextFontSize',16)  
+
 
 % Reconstructing a visualization of participants walk and head drection after reaching the third
 % cone
 config.cutFromConeThree = false;
+% make an animation or not
 config.videoplot = true;
-config.cutseconds = -100;
+% seconds to start tracking before reaching cone 1 (-100 means get all
+% information in tracking path from the current trial. Current trial starts
+% when the participants ended the previous one.
+config.cutseconds = -100; 
+% diplay a legend with all the trial info. Necessary for the manual
+% checking of the data
+config.displayTrialInfo = false; 
 
 if exist('varargin','var')
     for i = 1:2:nargin-4
@@ -29,6 +41,9 @@ if exist('varargin','var')
         end
         if(strcmpi(varargin{i},'cutsecbeforecone1'))
             config.cutseconds = varargin{i+1};
+        end
+        if(strcmpi(varargin{i},'displaytrialinfo'))
+            config.displayTrialInfo = varargin{i+1};
         end
     end
 end
@@ -101,7 +116,7 @@ offSetFromMax = 0.5;
 xlabel('x (m)')
 ylabel('y (m)')
 
-title(['Path visualizer'],FontSize=25);
+%title(['Path visualizer'],FontSize=25);
 
 boxwidth = [0.15 0.2];
 leftCorner = [0.65 0.4];
@@ -117,11 +132,13 @@ str = {...
     ['\textit{Out of Bound:} ', outStr]...
     };
 
-ann = annotation('textbox',dim,String=str,FontSize=15,Interpreter='latex', FitBoxToText='on', FontUnits='points');
-ann.FontName = "Arial";
-ann.FontSize = 14;
-tracking_size = height(Extracted_pos);
+if(config.displayTrialInfo)
+    ann = annotation('textbox',dim,String=str,FontSize=15,Interpreter='latex', FitBoxToText='on', FontUnits='points');
+    ann.FontName = "Arial";
+    ann.FontSize = 14;
+end
 
+tracking_size = height(Extracted_pos);
 % Plot the position of the third cone
 pCone1 = plot(Cone_pos(1,1),Cone_pos(1,3),'Marker','d','LineStyle','none','MarkerFaceColor',config.color_scheme_npg(2,:),'MarkerEdgeColor','black','MarkerSize',18); 
 pCone2 = plot(Cone_pos(2,1),Cone_pos(2,3),'Marker','d','LineStyle','none','MarkerFaceColor',[0.5 0.5 0.5],'MarkerEdgeColor','black','MarkerSize',18); 
@@ -185,7 +202,7 @@ if(outofbound == 1)
 else
     leg = legend([pCone1 pCone2 pCone3 pTrigPos trackDataPlot], 'Cone 1', 'Cone 2', 'Cone 3','Response','Tracking data','AutoUpdate','off');
 end
-leg.Location = 'northeastoutside';
+leg.Location = 'northeast';
 leg.FontSize = 15;
 
 axis square
@@ -194,6 +211,9 @@ xlim([absMin-offSetFromMax absMax+offSetFromMax]);
 %xticks(absMin-offSetFromMax:1.0:absMax+offSetFromMax);
 ylim([absMin-offSetFromMax absMax+offSetFromMax]);
 yticks(xticks);
+
+ax = gca;
+ax.LineWidth = 2.0;
 
 hold off
 % save figure

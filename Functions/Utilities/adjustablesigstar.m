@@ -88,10 +88,12 @@ function varargout=adjustablesigstar(groups,stats,nosort,sigstaroptions)
         nosort=0;
         sigstaroptions.textSize  = 12;
         sigstaroptions.lineWidth = 1.5;
+        sigstaroptions.barSeparation = 0.05;
     end
     if nargin<4
         sigstaroptions.textSize  = 12;
         sigstaroptions.lineWidth = 1.5;
+        sigstaroptions.barSeparation = 0.05;
     end
 
     %Check the inputs are of the right sort
@@ -169,7 +171,7 @@ function varargout=adjustablesigstar(groups,stats,nosort,sigstaroptions)
     H=ones(length(groups),2); %The handles will be stored here
 
     y=ylim;
-    yd=myRange(y)*0.05; %separate sig bars vertically by 5% 
+    yd=myRange(y)*sigstaroptions.barSeparation; %separate sig bars vertically by 5% (0.05)
 
     for ii=1:length(groups)
         thisY=findMinY(xlocs(ii,:))+yd;

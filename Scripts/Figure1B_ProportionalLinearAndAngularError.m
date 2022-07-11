@@ -10,7 +10,6 @@ if ~exist(resultfolder, 'dir')
    mkdir(resultfolder);
 end
 
-
 %% Getting Information from results:
 [YoungControlsPropDist, YoungControlsPropAng]     = getProportionalLinearAndAngularError(YoungControls);
 [HealthyControlsPropDist, HealthyControlsPropAng] = getProportionalLinearAndAngularError(HealthyControls);
@@ -27,7 +26,8 @@ plotInfo.type = "Angle";
 [anova_tab_angle,multicomp_tab1_angle,multicomp_tab2_angle, multicomp_tab12_angle] = TwowayAnovaAllGroupsData(YoungControlsPropAng, HealthyControlsPropAng, MCIPosPropAng, MCINegPropAng, MCIUnkPropAng, config, plotInfo);
 
 %% Plotting quantities
-plotInfo.defaultTextSize = 14;
+plotInfo.defaultTextSize = 20;
+plotInfo.defaultLineSize = 2;
 plotInfo.barFaceAlpha = 0.5;
 plotInfo.barLineWidth = 1.5;
 plotInfo.scatterFaceAlpha = 0.2;
@@ -48,16 +48,20 @@ plotInfo.addSigmaStarbars = 1;
 plotInfo.sigmaStarBars = [4 5; 3 5; 2 5; 1 5];
 plotInfo.sigmaStarBarsPValues = [0.001; 0.001; 0.001; 0.001];
 plotInfo.sigmaStarLineWidth = 2.5;
-plotInfo.sigmaStarTextSize  = 30;
+plotInfo.sigmaStarTextSize  = 20;
+plotInfo.sigmaBarSeparation = 0.075;
 plotInfo.yLim = [0 1.75];
+plotInfo.ticksStep = 0.5;
 
 plotBarScatter(YoungControlsPropDist, HealthyControlsPropDist, MCIPosPropDist, MCINegPropDist, MCIUnkPropDist, anova_tab_dist, multicomp_tab1_dist, config, plotInfo);
 
 plotInfo.yLim = [0 1.75];
+plotInfo.ticksStep = 0.5;
 plotMergedBarScatter(mean(YoungControlsPropDist,1,'omitnan'), mean(HealthyControlsPropDist,1,'omitnan'), mean(MCIPosPropDist,1,'omitnan'), mean(MCINegPropDist,1,'omitnan'), mean(MCIUnkPropDist,1,'omitnan'), anova_tab_dist, multicomp_tab1_dist, config, plotInfo);
 
 %
-plotInfo.defaultTextSize = 14;
+plotInfo.defaultTextSize = 20;
+plotInfo.defaultLineSize = 2;
 plotInfo.barFaceAlpha = 0.5;
 plotInfo.barLineWidth = 1.5;
 plotInfo.scatterFaceAlpha = 0.2;
@@ -78,9 +82,10 @@ plotInfo.addSigmaStarbars = 1;
 plotInfo.sigmaStarBars = [4 5; 3 5; 2 5; 1 5];
 plotInfo.sigmaStarBarsPValues = [0.001; 0.001; 0.001; 0.001];
 plotInfo.sigmaStarLineWidth = 2.5;
-plotInfo.sigmaStarTextSize  = 30;
+plotInfo.sigmaStarTextSize  = 20;
+plotInfo.sigmaBarSeparation = 0.06;
 plotInfo.yLim = [0 2.5];
-
+plotInfo.ticksStep = 0.5;
 
 plotBarScatter(YoungControlsPropAng , HealthyControlsPropAng , MCIPosPropAng , MCINegPropAng , MCIUnkPropAng , anova_tab_angle, multicomp_tab1_angle, config, plotInfo);
 
@@ -97,11 +102,11 @@ function [PropDist, PropAng] = getProportionalLinearAndAngularError(Group)
     PropDist = [];
     PropAng  = [];
 
-    numConds = length(Group.Results);
+    numConds = length(Group.Results.PropDistErr);
     for TRIAL_FILTER = 1:numConds
         
-        CondPropDist  = Group.Results{TRIAL_FILTER}.PropDistErr;
-        CondPropAng   = Group.Results{TRIAL_FILTER}.PropAngErr;
+        CondPropDist  = Group.Results.PropDistErr{TRIAL_FILTER};
+        CondPropAng   = Group.Results.PropAngErr{TRIAL_FILTER};
         subjectSize   = size(CondPropDist,2);
 
         CondPropDistMeanSubjs  = zeros(1,subjectSize);
@@ -226,7 +231,7 @@ function plotBarScatter(YoungData, HealthyOldData, MCIPosData, MCINegData, MCIUn
         'XColor'      , [.1 .1 .1], ...
         'YColor'      , [.1 .1 .1], ...
         'XTick'       , (1:5),... 
-        'XTickLabel'  , ["Young", "HealthyOld", "MCIUnk", "MCINeg", "MCIPos"],...
+        'XTickLabel'  , ["Young", "Healthy Old", "MCI Unk", "MCI Neg", "MCI Pos"],...
         'LineWidth'   , .5        );
         %'Ytick'       , [0,0.5,1.0,1.5],...
         %'XLim'        , [0.5, 3.5],...
@@ -254,10 +259,13 @@ function plotBarScatter(YoungData, HealthyOldData, MCIPosData, MCINegData, MCIUn
 
     ylabel(plotInfo.YLabel);
     ylim(plotInfo.yLim);
-    yticks(0:0.25:plotInfo.yLim(2));
+    yticks(0:plotInfo.ticksStep:plotInfo.yLim(2));
 
     hold off;
     
+    ax = gca;
+    ax.LineWidth = plotInfo.defaultLineSize;
+
     % save figure
     exportgraphics(f,config.ResultFolder+"/BarNormedReturn" + plotInfo.type + ".png",'Resolution',300);
     exportgraphics(f,config.ResultFolder+"/BarNormedReturn" + plotInfo.type + ".pdf",'Resolution',300, 'ContentType','vector');
@@ -297,7 +305,7 @@ function plotMergedBarScatter(YoungData, HealthyOldData, MCIPosData, MCINegData,
     set(0,'DefaultAxesFontName','Arial')
     set(0,'DefaultTextFontName','Arial')
     set(0,'DefaultAxesFontSize',plotInfo.defaultTextSize)
-    set(0,'DefaultTextFontSize',plotInfo.defaultTextSize)     
+    set(0,'DefaultTextFontSize',plotInfo.defaultTextSize)
     
     %% Plotting the bar
     b = bar(mean_all, 'grouped');
@@ -340,14 +348,15 @@ function plotMergedBarScatter(YoungData, HealthyOldData, MCIPosData, MCINegData,
         'XColor'      , [.1 .1 .1], ...
         'YColor'      , [.1 .1 .1], ...
         'XTick'       , (1:5),... 
-        'XTickLabel'  , ["Young", "HealthyOld", "MCIUnk", "MCINeg", "MCIPos"],...
+        'XTickLabel'  , ["Young", "Healthy Old", "MCI Unk", "MCI Neg", "MCI Pos"],...
         'LineWidth'   , .5        );
         %'Ytick'       , [0,0.5,1.0,1.5],...
         %'XLim'        , [0.5, 3.5],...
         %'YLim'        , [0, 1.5],...   
 
-    sigstaroptions.textSize  = plotInfo.sigmaStarTextSize;
-    sigstaroptions.lineWidth = plotInfo.sigmaStarLineWidth;
+    sigstaroptions.textSize      = plotInfo.sigmaStarTextSize;
+    sigstaroptions.lineWidth     = plotInfo.sigmaStarLineWidth;
+    sigstaroptions.barSeparation = plotInfo.sigmaBarSeparation;
 
     if(plotInfo.addSigmaStarbars == 1)
         for j = 1:height(plotInfo.sigmaStarBars)
@@ -357,7 +366,10 @@ function plotMergedBarScatter(YoungData, HealthyOldData, MCIPosData, MCINegData,
         
     ylabel(plotInfo.YLabel);
     ylim(plotInfo.yLim);
-    yticks(0:0.25:plotInfo.yLim(2));
+    yticks(0:plotInfo.ticksStep:plotInfo.yLim(2));
+    
+    ax = gca;
+    ax.LineWidth = plotInfo.defaultLineSize;
 
     hold off;
     

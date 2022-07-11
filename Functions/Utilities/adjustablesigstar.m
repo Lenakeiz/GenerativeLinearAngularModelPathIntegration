@@ -1,4 +1,4 @@
-function varargout=sigstar(groups,stats,nosort)
+function varargout=adjustablesigstar(groups,stats,nosort,sigstaroptions)
     % sigstar - Add significance stars to bar charts, boxplots, line charts, etc,
     %
     % H = sigstar(groups,stats,nsort)
@@ -86,10 +86,13 @@ function varargout=sigstar(groups,stats,nosort)
     end
     if nargin<3
         nosort=0;
+        sigstaroptions.textSize  = 12;
+        sigstaroptions.lineWidth = 1.5;
     end
-
-
-
+    if nargin<4
+        sigstaroptions.textSize  = 12;
+        sigstaroptions.lineWidth = 1.5;
+    end
 
     %Check the inputs are of the right sort
     if ~iscell(groups)
@@ -103,11 +106,6 @@ function varargout=sigstar(groups,stats,nosort)
     if length(stats)~=length(groups)
         error('groups and stats must be the same length')
     end
-
-
-
-
-
 
     %Each member of the cell array groups may be one of three things:
     %1. A pair of indices.
@@ -152,11 +150,6 @@ function varargout=sigstar(groups,stats,nosort)
         error('Some groups were not found')
     end
 
-
-
-
-
-
     %Optionally sort sig bars from shortest to longest so we plot the shorter ones first
     %in the loop below. Usually this will result in the neatest plot. If we waned to 
     %optimise the order the sig bars are plotted to produce the neatest plot, then this 
@@ -167,8 +160,6 @@ function varargout=sigstar(groups,stats,nosort)
         xlocs=xlocs(ind,:);groups=groups(ind);
         stats=stats(ind);
     end
-
-
 
     %-----------------------------------------------------
     %Add the sig bar lines and asterisks 
@@ -182,12 +173,9 @@ function varargout=sigstar(groups,stats,nosort)
 
     for ii=1:length(groups)
         thisY=findMinY(xlocs(ii,:))+yd;
-        H(ii,:)=makeSignificanceBar(xlocs(ii,:),thisY,stats(ii));
+        H(ii,:)=makeSignificanceBar(xlocs(ii,:),thisY,stats(ii),sigstaroptions);
     end
     %-----------------------------------------------------
-
-
-
 
     %Now we can add the little downward ticks on the ends of each line. We are
     %being extra cautious and leaving this it to the end just in case the y limits
@@ -202,16 +190,12 @@ function varargout=sigstar(groups,stats,nosort)
         set(H(ii,1),'YData',y)
     end
 
-
-
-
     %Be neat and return hold state to whatever it was before we started
     if ~holdstate
         hold off
     elseif holdstate
         hold on
     end
-
 
     %Optionally return the handles to the plotted significance bars (first column of H)
     %and asterisks (second column of H).
@@ -222,15 +206,12 @@ function varargout=sigstar(groups,stats,nosort)
 
 end %close sigstar
 
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Internal functions
 
-function H=makeSignificanceBar(x,y,p)
+function H=makeSignificanceBar(x,y,p,sigstaroptions)
     %makeSignificanceBar produces the bar and defines how many asterisks we get for a 
     %given p-value
-
 
     if p<=1E-3
         stars='***'; 
@@ -247,7 +228,7 @@ function H=makeSignificanceBar(x,y,p)
     x=repmat(x,2,1);
     y=repmat(y,4,1);
 
-    H(1)=plot(x(:),y,'-k','LineWidth',1.5,'Tag','sigstar_bar');
+    H(1)=plot(x(:),y,'-k','LineWidth',sigstaroptions.lineWidth,'Tag','sigstar_bar');
 
     %Increase offset between line and text if we will print "n.s."
     %instead of a star. 
@@ -261,18 +242,17 @@ function H=makeSignificanceBar(x,y,p)
     H(2)=text(mean(x(:)),starY,stars,...
         'HorizontalAlignment','Center',...
         'BackGroundColor','none',...
-        'Tag','sigstar_stars');
+        'Tag','sigstar_stars',...
+        'FontSize',sigstaroptions.textSize);
 
     Y=ylim;
     if Y(2)<starY
         ylim([Y(1),starY+myRange(Y)*0.05])
     end
 
-
 end %close makeSignificanceBar
 
-
-
+%% Additional functions
 function Y=findMinY(x)
     % The significance bar needs to be plotted a reasonable distance above all the data points
     % found over a particular range of X values. So we need to find these data and calculat the 
@@ -299,7 +279,7 @@ function Y=findMinY(x)
 
 end %close findMinY
 
-
+%% Additional fucntion
 function rng=myRange(x)
     %replacement for stats toolbox range function
     rng = max(x) - min(x);

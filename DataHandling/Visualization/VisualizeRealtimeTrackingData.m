@@ -2,10 +2,22 @@ function VisualizeRealtimeTrackingData(Group, pId, trialId, playbackSpeed, varar
 
 anglebetween = @(v,w) atan2d(w(:,2).*v(:,1) - v(:,2).*w(:,1), v(:,1).*w(:,1) + v(:,2).*w(:,2));
 
+ColorPattern;
+savefolder = pwd + "/Output/";
+resultfolder = savefolder + "PaperFigs/Fig1C";
+config.ResultFolder = resultfolder;
+%create storing folder for trajectory if not exist
+if ~exist(resultfolder, 'dir')
+   mkdir(resultfolder);
+end
+
+figureOpen = figure('visible','off','Position', [0 0 800 800]);
+
 % Reconstructing a visualization of participants walk and head drection after reaching the third
 % cone
 config.cutFromConeThree = false;
 config.videoplot = true;
+config.cutseconds = -100;
 
 if exist('varargin','var')
     for i = 1:2:nargin-4
@@ -15,10 +27,11 @@ if exist('varargin','var')
         if(strcmpi(varargin{i},'videoplot'))
             config.videoplot = varargin{i+1};
         end
+        if(strcmpi(varargin{i},'cutsecbeforecone1'))
+            config.cutseconds = varargin{i+1};
+        end
     end
 end
-
-ColorPattern;
 
 Cone_pos      = Group.FlagPos{1,pId}{trialId,1};
 Trig_pos      = Group.TrigPos{1,pId}{trialId,1};
@@ -53,8 +66,6 @@ calculatedAngle = Group.Reconstructed{1,pId}.InboundBodyRotation(trialId);
 real_return_angle = Group.Reconstructed{1,pId}.RealReturnAngle(trialId);
 f_return_angle = Group.Reconstructed{1,pId}.InferredReturnAngle(trialId);
 
-close all; clc;
-
 OoB = [nan 0 nan];
 ReconstrutedOoB = [nan 0 nan];
 if (outofbound == 1)
@@ -68,15 +79,15 @@ end
 if(config.cutFromConeThree)
     Extracted_pos = Extracted_pos(Extracted_pos.Time > Group.FlagTrigTimes{1,pId}{trialId,3} - 2,:);
 end
+if(config.cutseconds > 0)
+    Extracted_pos = Extracted_pos(Extracted_pos.Time > Group.FlagTrigTimes{1,pId}{trialId,1} - config.cutseconds,:);
+end
 
-% Plotting according to the speed
-CreateCustomFigure;
-
-hold all
+hold on
 
 ax = gca;
 ax.FontSize = 20;
-ax.FontName = 'Times New Roman';
+ax.FontName = 'Arial';
 
 % Dinamically calculate bounds
 maxX = max([Cone_pos(:,1); Trig_pos(1,1); OoB(1,1)]);
@@ -87,18 +98,13 @@ absMax = ceil(max(maxX, maxY));
 absMin = floor(min(minX,minY));
 offSetFromMax = 0.5;
 
-xlim([absMin-offSetFromMax absMax+offSetFromMax]);
-ylim([absMin-offSetFromMax absMax+offSetFromMax]);
-
 xlabel('x (m)')
 ylabel('y (m)')
 
-title(['Path visualizer'],FontSize=20);
-
-axis square
+title(['Path visualizer'],FontSize=25);
 
 boxwidth = [0.15 0.2];
-leftCorner = [0.7 0.4];
+leftCorner = [0.65 0.4];
 dim = [leftCorner boxwidth];
 str = {...
     ['\textbf{Trial Info}'],...
@@ -111,8 +117,9 @@ str = {...
     ['\textit{Out of Bound:} ', outStr]...
     };
 
-annotation('textbox',dim,String=str,FontSize=15,Interpreter='latex', FitBoxToText='on');
-
+ann = annotation('textbox',dim,String=str,FontSize=15,Interpreter='latex', FitBoxToText='on', FontUnits='points');
+ann.FontName = "Arial";
+ann.FontSize = 14;
 tracking_size = height(Extracted_pos);
 
 % Plot the position of the third cone
@@ -122,10 +129,6 @@ pCone3 = plot(Cone_pos(3,1),Cone_pos(3,3),'Marker','d','LineStyle','none','Marke
 pOoB = plot(OoB(1,1),OoB(1,3),'Marker','*',Color=config.color_scheme_npg(4,:),MarkerSize=18, LineWidth=3);
 pRecconstructedOoB = plot(ReconstrutedOoB(1,1),ReconstrutedOoB(1,3),'Marker','*',Color=config.color_scheme_npg(7,:),MarkerSize=18,LineWidth=3);
 pTrigPos = plot(Trig_pos(1,1),Trig_pos(1,3),'Marker','x','LineStyle','none','MarkerFaceColor',config.color_scheme_npg(2,:),'MarkerEdgeColor','black','MarkerSize',18,LineWidth=3);
-
-leg = legend([pCone1 pCone2 pCone3 pTrigPos pOoB pRecconstructedOoB], 'Cone 1', 'Cone 2', 'Cone 3','Response','Out of Bound(OoB)','Reconstructed OoB','AutoUpdate','off');
-leg.Location = 'northeastoutside';
-leg.FontSize = 15;
 
 if(config.videoplot)
     for k = 2 : tracking_size        
@@ -174,10 +177,27 @@ else
     qv.LineWidth = 5;
     qv.MaxHeadSize = 2;
 
-    plot(Extracted_pos.Pos_X,Extracted_pos.Pos_Z,'Marker','none','LineStyle','-','LineWidth',2.5,'Color',config.color_scheme_npg(4,:));
+    trackDataPlot = plot(Extracted_pos.Pos_X,Extracted_pos.Pos_Z,'Marker','none','LineStyle','-','LineWidth',2.5,'Color',config.color_scheme_npg(4,:));
 end
 
+if(outofbound == 1)
+    leg = legend([pCone1 pCone2 pCone3 pTrigPos pOoB pRecconstructedOoB], 'Cone 1', 'Cone 2', 'Cone 3','Response','Out of Bound(OoB)','Reconstructed OoB','AutoUpdate','off');
+else
+    leg = legend([pCone1 pCone2 pCone3 pTrigPos trackDataPlot], 'Cone 1', 'Cone 2', 'Cone 3','Response','Tracking data','AutoUpdate','off');
+end
+leg.Location = 'northeastoutside';
+leg.FontSize = 15;
+
+axis square
+
+xlim([absMin-offSetFromMax absMax+offSetFromMax]);
+%xticks(absMin-offSetFromMax:1.0:absMax+offSetFromMax);
+ylim([absMin-offSetFromMax absMax+offSetFromMax]);
+yticks(xticks);
 
 hold off
-
+% save figure
+exportgraphics(figureOpen,config.ResultFolder+"/ExampleTrackingPath.png",'Resolution',300);
+exportgraphics(figureOpen,config.ResultFolder+"/ExampleTrackingPath.pdf",'Resolution',300, 'ContentType','vector');
+disp("Save complete!");
 end

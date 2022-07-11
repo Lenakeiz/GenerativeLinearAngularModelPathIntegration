@@ -10,6 +10,10 @@
                         0.4941    0.3804    0.2824; ...
                         0.6902    0.6118    0.5216 ];
 
+    % In the following order: Young, old, mci unk(grouped), mci neg, mci
+    % pos
+    config.color_scheme_group = config.color_scheme_npg([1 5 2 4 6],:);
+
     folder = pwd + "/Output/ColorPattern";
     %create storing folder for trajectory if not exist
     if ~exist(folder, 'dir')
@@ -24,7 +28,7 @@
     end
 
     text(1,1,'Young', 'Rotation',90, 'FontSize',25);
-    text(3,1,'MCI Grouped', 'Rotation',90, 'FontSize',25);
+    text(3,1,'MCI Grouped or unknown', 'Rotation',90, 'FontSize',25);
     text(7,1,'MCI negative', 'Rotation',90, 'FontSize',25);
     text(11,1,'MCI positive', 'Rotation',90, 'FontSize',25);
     text(9,1,'Healthy Older', 'Rotation',90, 'FontSize',25);
@@ -43,6 +47,6 @@
     set(gca,'ytick',[])
     set(gca,'yticklabel',[])
 
-    exportgraphics(f,folder+"/ColorPantter.png",'Resolution',300);
+    exportgraphics(f,folder+"/ColorPattern.png",'Resolution',300);
 
     clear folder f i

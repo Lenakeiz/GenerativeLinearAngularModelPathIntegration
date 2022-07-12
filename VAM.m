@@ -31,6 +31,7 @@ config.useOoBtrials = true;
 config.ModelName        =   "beta_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
 config.NumParams        =   100; % Set here to avoid producing the model
+
 %% Model fitting for Young Controls
 disp("%%%%%%%%%%%%%%% Starting fit for young controls %%%%%%%%%%%%%%%");
 YoungControls = TransformPaths(YoungControls);%transform data

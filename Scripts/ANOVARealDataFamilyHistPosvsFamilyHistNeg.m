@@ -31,18 +31,30 @@ end
 %% Pos data
 FamilyHistPos   = TransformPaths(FamilyHistPos);%transform data
 FamilyHistPos   = CalculateTrackingPath(FamilyHistPos, config);
-%FamilyHistPos   = addBadExecution(FamilyHistPos);
 ManuallyScoringFamilyHistPos;
-%%
-[~, FHPosX, FHPosDX, FHPosTheta, FHPosDistErr, FHPosAngleErr, FHPosFlagOoB, ~] = getResultsAllConditions(FamilyHistPos, config);
+
+FamilyHistPos.Results = getResultsAllConditions(FamilyHistPos, config);
 
 %% Model fitting for Neg data
 FamilyHistNeg   = TransformPaths(FamilyHistNeg);%transform data
 FamilyHistNeg   = CalculateTrackingPath(FamilyHistNeg, config);
-%FamilyHistNeg   = addBadExecution(FamilyHistNeg);
 ManuallyScoringFamilyHistNeg;
-%%
-[~, FHNegX, FHNegDX, FHNegTheta, FHNegDistErr, FHNegAngleErr, FHNegFlagOoB, ~] = getResultsAllConditions(FamilyHistNeg, config);
+FamilyHistNeg.Results = getResultsAllConditions(FamilyHistNeg, config);
+
+%% prepare data for Coco
+DataForCoco.FHPos.Code     = FamilyHistPos.Info;
+DataForCoco.FHPos.Gender   = FamilyHistPos.Gender;
+DataForCoco.FHPos.FlagOoB  = FamilyHistPos.Results.flagOoB;
+DataForCoco.FHPos.DistErr  = FamilyHistPos.Results.DistErr;
+DataForCoco.FHPos.AngleErr = FamilyHistPos.Results.AngleErr;
+
+DataForCoco.FHNeg.Code     = FamilyHistNeg.Info;
+DataForCoco.FHNeg.Gender   = FamilyHistNeg.Gender;
+DataForCoco.FHNeg.FlagOoB  = FamilyHistNeg.Results.flagOoB;
+DataForCoco.FHNeg.DistErr  = FamilyHistNeg.Results.DistErr;
+DataForCoco.FHNeg.AngleErr = FamilyHistNeg.Results.AngleErr;
+
+save ./Data/ProcessedDataForCoco.mat DataForCoco
 
 %% Setting colors for using in plots
 ColorPattern; 
@@ -50,12 +62,12 @@ ColorPattern;
 %% Error plot
 config.Gender_Pos = FamilyHistPos.Gender;
 config.Gender_Neg = FamilyHistNeg.Gender;
-ErrPlot(FHPosDistErr, FHNegDistErr, 'dist', config)
-ErrPlot(FHPosAngleErr, FHNegAngleErr, 'angle', config)
+ErrPlot(FamilyHistPos.Results.DistErr, FamilyHistNeg.Results.DistErr, 'dist', config)
+ErrPlot(FamilyHistPos.Results.AngleErr, FamilyHistNeg.Results.AngleErr, 'angle', config)
 
 %% Scatter Error Plot
-ScatterErrPlot(FHPosAngleErr, FHNegAngleErr, FHPosFlagOoB, FHNegFlagOoB, 'male', config)
-ScatterErrPlot(FHPosAngleErr, FHNegAngleErr, FHPosFlagOoB, FHNegFlagOoB, 'female', config)
+ScatterErrPlot(FamilyHistPos.Results.AngleErr, FamilyHistNeg.Results.AngleErr, FamilyHistPos.Results.flagOoB, FamilyHistNeg.Results.flagOoB, 'male', config)
+ScatterErrPlot(FamilyHistPos.Results.AngleErr, FamilyHistNeg.Results.AngleErr, FamilyHistPos.Results.flagOoB, FamilyHistNeg.Results.flagOoB, 'female', config)
 
 %% ThreewayAnova On Data
 %ThreewayAnova_CocoData(FHPosDistErr, FHNegDistErr, config);

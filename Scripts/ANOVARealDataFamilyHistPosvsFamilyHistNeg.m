@@ -32,7 +32,7 @@ end
 FamilyHistPos   = TransformPaths(FamilyHistPos);%transform data
 FamilyHistPos   = CalculateTrackingPath(FamilyHistPos, config);
 ManuallyScoringFamilyHistPos;
-
+%%
 FamilyHistPos.Results = getResultsAllConditions(FamilyHistPos, config);
 
 %% Model fitting for Neg data

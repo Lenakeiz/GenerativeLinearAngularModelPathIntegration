@@ -14,6 +14,7 @@ function Results = getResultsAllConditions(TransformedData, config)
         Results.AngleErr{TRIAL_FILTER}        =       ModelFitResults.AngleErr;
         Results.PropDistErr{TRIAL_FILTER}     =       ModelFitResults.PropDistErr;
         Results.PropAngErr{TRIAL_FILTER}      =       ModelFitResults.PropAngErr;
+        Results.LocationErr{TRIAL_FILTER}     =       ModelFitResults.LocationErr;
         Results.flagOoB{TRIAL_FILTER}         =       ModelFitResults.flagOoB;
     end
 end

@@ -19,6 +19,7 @@ DistErr         =       cell(1, subjectNum);
 AngleErr        =       cell(1, subjectNum);
 PropDistErr     =       cell(1, subjectNum);
 PropAngErr      =       cell(1, subjectNum);
+LocationErr     =       cell(1, subjectNum);
 ProjSpeedL1     =       cell(1, subjectNum);% projected speed within detected start-to-end time window at leg 1
 ProjSpeedL2     =       cell(1, subjectNum);% projected speed within detected start-to-end time window at leg 2
 L1Dur           =       cell(1, subjectNum);% walking duration at leg 1
@@ -152,9 +153,12 @@ for j = 1:subjectNum
                 DistErr{j}{tr}       = correctReDist{j}{tr}-DX{j}{tr}(3);
                 realReturnLength     = norm(rvec);
                 PropDistErr{j}{tr}   = realReturnLength/correctReDist{j}{tr};
+                x_3 = X{j}{tr}(4,:);   %trigger position
+                LocationErr{j}{tr}   = sqrt(sum(x_3.^2));
             else 
                 DistErr{j}{tr}       = nan;
                 PropDistErr{j}{tr}   = nan;
+                LocationErr{j}{tr}   = nan;
             end    
 
             correctReAngle{j}{tr} = anglebetween(vec1, vec2); 
@@ -192,11 +196,15 @@ for j = 1:subjectNum
                 %wrap the angular error to [-180,180]
                 AngleErr{j}{tr}   = wrapTo180(correctReAngle{j}{tr}-realReturnAngles(tr));
                 PropAngErr{j}{tr} = wrapTo360(realReturnAngles(tr))/correctReAngle{j}{tr};
+
+                x_3 = X{j}{tr}(4,:);   %trigger position
+                LocationErr{j}{tr}   = sqrt(sum(x_3.^2));         
             else 
                 DistErr{j}{tr}     = nan;
                 PropDistErr{j}{tr} = nan;
                 AngleErr{j}{tr}    = nan;
                 PropAngErr{j}{tr}  = nan;
+                LocationErr{j}{tr} = nan;
             end
         end
 
@@ -274,5 +282,6 @@ Results.DistErr         =   DistErr;
 Results.AngleErr        =   AngleErr;
 Results.PropDistErr     =   PropDistErr;
 Results.PropAngErr      =   PropAngErr;
+Results.LocationErr     =   LocationErr;
 
 end

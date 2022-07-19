@@ -1,82 +1,35 @@
-%% Cleaning variables and set intial seed for code reproducibility
-clearvars; close all; clc;
-rng('default'); 
+%% two-way Anova (group*condition) on Young Controls, Elderly Controls and MCI
+%% Cleaning variables
+clearvars; clear all; close all; clc;
+rng('default'); %for code reproducibility
 
-%% Loading data
-disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
-load('Data/HowettBrain2019_Dataset.mat');
-
-%% setting the configuration
-config.Speed.alpha                                  = 0.9;    % Paramanter for running speed calculation
-config.Speed.timeOffsetAfterFlagReach               = 1.5;    % Time to track after flag reached in seconds 
-config.Speed.smoothWindow                           = 10;     % tracking rate should be 10Hz so 4 secs window is 40 datapoints
-config.Speed.velocityCutoff                         = 0.2;    % velocity cutoff to select only the walking part of the reconstructed velocity
-config.Speed.timeOffsetForDetectedTemporalWindow    = 0.4;    % time in seconds that will push earlier/ the detected rising edge
-config.UseGlobalSearch                              = true;
-config.TrackedInboundAngularDeltaT                  = 1;
-config.includeStand                                 = false;
-config.useweber                                     = false;  % only true when use weber law in simple generative models
-config.useOoBtrials                                 = true;
-
-%% Model fitting
+%% Preparing the data and Slecting the Model
 
 % config.ModelName        = "beta_g2_g3_k3_sigma_nu";
 % config.ParamName        = ["beta", "g2", "g3", "k3", "sigma", "nu"];
 
 config.ModelName        =   "beta_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
-
 config.NumParams        =   length(config.ParamName);
-resultfolder            =   pwd + "/Output/ModelFigures/Young_HealthyOld_MCICombined_"+config.ModelName;
+
+%% loading data and model fitting
+LoadingFitting;
+
+AllYoungParams      =   YoungControls.Results.estimatedParams;
+AllHealthyOldParams =   HealthyControls.Results.estimatedParams;
+AllMCIPosParams     =   MCIPos.Results.estimatedParams;
+AllMCINegParams     =   MCINeg.Results.estimatedParams;
+AllMCIUnkParams     =   MCIUnk.Results.estimatedParams;
+
+%% Generate result folder and Setting colors for using in plots
+resultfolder            =   pwd + "/Output/ModelFigures/"+config.ModelName+"/Young_HealthyOld_MCICombinedX";
 config.ResultFolder     =   resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
    mkdir(resultfolder);
 end
 
-%% Model fitting for YoungControl data
-% threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
-config.Speed.tresholdForBadParticipantL1Recontruction = 1.55;  
-%transform data
-YoungControls                   =   TransformPaths(YoungControls);
-YoungControls                   =   CalculateTrackingPath(YoungControls, config);
-ManuallyScoringYoung;
-[AllYoungParams, ~, ~, ~, ~]    =   getResultsAllConditions(YoungControls, config);
-
-%% Model fitting for HealthyOld data
-% threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
-config.Speed.tresholdForBadParticipantL1Recontruction = 2.0; 
-%transform data
-HealthyControls                 =   TransformPaths(HealthyControls);
-HealthyControls                 =   CalculateTrackingPath(HealthyControls, config);
-ManuallyScoringHealthyOld;
-[AllHealthyOldParams, ~, ~, ~, ~] = getResultsAllConditions(HealthyControls, config);
-
-%% Model fitting for MCIPos
-config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
-%transform data
-MCIPos                          =   TransformPaths(MCIPos);
-MCIPos                          =   CalculateTrackingPath(MCIPos, config);
-ManuallyScoringMCIPos;
-[AllMCIPosParams,  ~, ~, ~, ~]  =   getResultsAllConditions(MCIPos, config);
-
-%% Model fitting for MCINeg
-config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
-%transform data
-MCINeg                          =   TransformPaths(MCINeg);
-MCINeg                          =   CalculateTrackingPath(MCINeg, config);
-ManuallyScoringMCINeg;
-[AllMCINegParams,  ~, ~, ~, ~]  =   getResultsAllConditions(MCINeg, config);
-
-%% Model fitting for MCIUnk
-config.Speed.tresholdForBadParticipantL1Recontruction = 0.0; 
-%transform data
-MCIUnk                          =   TransformPaths(Unknown);
-MCIUnk                          =   CalculateTrackingPath(MCIUnk, config);
-ManuallyScoringMCIUnk;
-[AllMCIUnkParams,  ~, ~, ~, ~]  =   getResultsAllConditions(MCIUnk, config);
-
-%% Setting colors for using in plots
+%generating color scheme
 ColorPattern; 
 
 %% merge MCI together to get MCICombined

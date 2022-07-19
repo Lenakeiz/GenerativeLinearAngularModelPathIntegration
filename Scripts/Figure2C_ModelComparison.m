@@ -87,16 +87,16 @@ config.NumParams        =   length(config.ParamName);
 Results_beta_g2_g3_sigma_nu   =   getResultsAllConditions(YoungControls, config);
 beta_g2_g3_sigma_nu_IC        =   Results_beta_g2_g3_sigma_nu.IC;
 
-%% 7, beta, g2, g3, k3, sigma, nu Model --> add another parameter k3 to the beta, g2, g3, sigma, nu Model
-config.ModelName        =   "beta_g2_g3_k3_sigma_nu";
-config.ParamName        =   ["beta", "g2", "g3", "k3", "sigma", "nu"];
-config.NumParams        =   length(config.ParamName);
-
-Results_beta_g2_g3_k3_sigma_nu   =   getResultsAllConditions(YoungControls, config);
-beta_g2_g3_k3_sigma_nu_IC           =   Results_beta_g2_g3_k3_sigma_nu.IC;
+% %% 7, beta, g2, g3, k3, sigma, nu Model --> add another parameter k3 to the beta, g2, g3, sigma, nu Model
+% config.ModelName        =   "beta_g2_g3_k3_sigma_nu";
+% config.ParamName        =   ["beta", "g2", "g3", "k3", "sigma", "nu"];
+% config.NumParams        =   length(config.ParamName);
+% 
+% Results_beta_g2_g3_k3_sigma_nu   =   getResultsAllConditions(YoungControls, config);
+% beta_g2_g3_k3_sigma_nu_IC           =   Results_beta_g2_g3_k3_sigma_nu.IC;
 
 %%
-ModelNames = {'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7'};
+ModelNames = {'M1', 'M2', 'M3', 'M4', 'M5', 'M6'};
 
 %% Setting colors for using in plots
 ColorPattern; 
@@ -115,21 +115,21 @@ for idx_ = 1:4
     [beta_g2_sigma_nu_AIC, beta_g2_sigma_nu_BIC, beta_g2_sigma_nu_NLL] = reformatIC(beta_g2_sigma_nu_IC, cond);
     [beta_g3_sigma_nu_AIC,beta_g3_sigma_nu_BIC, beta_g3_sigma_nu_NLL] = reformatIC(beta_g3_sigma_nu_IC, cond);
     [beta_g2_g3_sigma_nu_AIC, beta_g2_g3_sigma_nu_BIC,beta_g2_g3_sigma_nu_NLL] = reformatIC(beta_g2_g3_sigma_nu_IC, cond);
-    [beta_g2_g3_k3_sigma_nu_AIC, beta_g2_g3_k3_sigma_nu_BIC,beta_g2_g3_k3_sigma_nu_NLL] = reformatIC(beta_g2_g3_k3_sigma_nu_IC, cond);
+    %[beta_g2_g3_k3_sigma_nu_AIC, beta_g2_g3_k3_sigma_nu_BIC,beta_g2_g3_k3_sigma_nu_NLL] = reformatIC(beta_g2_g3_k3_sigma_nu_IC, cond);
     
     % Box Plot of AIC
     ICType = "AIC";
-    All_AIC = [sigma_nu_AIC, beta_sigma_nu_AIC, g2_g3_sigma_nu_AIC, beta_g2_sigma_nu_AIC, beta_g3_sigma_nu_AIC, beta_g2_g3_sigma_nu_AIC, beta_g2_g3_k3_sigma_nu_AIC];
+    All_AIC = [sigma_nu_AIC, beta_sigma_nu_AIC, g2_g3_sigma_nu_AIC, beta_g2_sigma_nu_AIC, beta_g3_sigma_nu_AIC, beta_g2_g3_sigma_nu_AIC];
     plotBoxPlot(All_AIC, ModelNames, ICType, config, cond);
     
     % Box Plot of BIC
     ICType = "BIC";
-    All_BIC = [sigma_nu_BIC, beta_sigma_nu_BIC, g2_g3_sigma_nu_BIC, beta_g2_sigma_nu_BIC, beta_g3_sigma_nu_BIC, beta_g2_g3_sigma_nu_BIC, beta_g2_g3_k3_sigma_nu_BIC];
+    All_BIC = [sigma_nu_BIC, beta_sigma_nu_BIC, g2_g3_sigma_nu_BIC, beta_g2_sigma_nu_BIC, beta_g3_sigma_nu_BIC, beta_g2_g3_sigma_nu_BIC];
     plotBoxPlot(All_BIC, ModelNames, ICType, config, cond);
     
     % Box Plot of AIC
     ICType = "NegLogLikelihood";
-    All_NLL = [sigma_nu_NLL, beta_sigma_nu_NLL, g2_g3_sigma_nu_NLL, beta_g2_sigma_nu_NLL, beta_g3_sigma_nu_NLL, beta_g2_g3_sigma_nu_NLL, beta_g2_g3_k3_sigma_nu_NLL];
+    All_NLL = [sigma_nu_NLL, beta_sigma_nu_NLL, g2_g3_sigma_nu_NLL, beta_g2_sigma_nu_NLL, beta_g3_sigma_nu_NLL, beta_g2_g3_sigma_nu_NLL];
     plotBoxPlot(All_NLL, ModelNames, ICType, config, cond);
 
 end

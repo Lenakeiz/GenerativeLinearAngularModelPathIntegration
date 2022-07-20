@@ -3,33 +3,14 @@
 % prepare the variables and runs the modelling described in the current
 % paper. Each figure will have a separate script that can be run after this
 % script has been correctly executed. For additional dependecies please
-% refer to the README file.
+% refer to the README file. 
+% This script requires a config variable set before running. An example of
+% the config variable can be created with VAM_PrepareBaseConfig
 
-%% Cleaning variables
-clearvars; clear all; close all; clc;
-rng('default'); %for code reproducibility
-
-%% Loading data
-disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
-load('Data/HowettBrain2019_Dataset.mat');
-savefolder = pwd + "/Output/";
-
-%% setting the configuration
-config.Speed.alpha                                      = 0.9;    % Paramanter for running speed calculation
-config.Speed.timeOffsetAfterFlagReach                   = 1.5;    % Time to track after flag reached in seconds 
-config.Speed.smoothWindow                               = 10;     % tracking rate should be 10Hz so 4 secs window is 40 datapoints
-config.Speed.velocityCutoff                             = 0.2;    % velocity cutoff to select only the walking part of the reconstructed velocity
-config.Speed.timeOffsetForDetectedTemporalWindow        = 0.4;    % time in seconds that will push earlier/ the detected rising edge
-config.UseGlobalSearch                                  = true;
-config.TrackedInboundAngularDeltaT                      = 1;
-config.includeStand                                     = false;
-config.useweber                                         = false;  % only true when use weber law in simple generative models
-config.useOoBtrials = true;
-
-%% Model fitting
-config.ModelName        =   "beta_g2_g3_sigma_nu";
-config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
-config.NumParams        =   5; % Set 100 here to avoid producing the model
+if (exist('config','var') == 0)
+    ME = MException("MyComponent:noSuchVariable","Config variable not found, please run VAM_PrepareBaseConfig to generate a base one");
+    throw(ME);
+end
 
 %% Model fitting for Young Controls
 config.Speed.tresholdForBadParticipantL1Recontruction   = 1.55;    % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.

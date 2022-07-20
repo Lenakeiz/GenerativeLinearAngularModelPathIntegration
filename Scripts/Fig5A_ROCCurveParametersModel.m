@@ -1,9 +1,15 @@
 %% Preparing the data
+VAM_PrepareBaseConfig
+%% 
+% Eventually modify config paramteters we are interested in. For example
+% for this graph we are not interested in running the model with splitted
+% conditions so we will set the relative config to false 
+% force it to not run
+config.useTrialFilter = false;
+%% Run the model
 VAM
-
-%% Setting colors for using in plots
-ColorPattern;
-resultfolder = savefolder + "PaperFigs/Fig5";
+%%
+resultfolder = pwd+"/Output/PaperFigs/Fig5A";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
@@ -11,18 +17,23 @@ if ~exist(resultfolder, 'dir')
 end
 
 clear resultfolder
-%% Aggregating the MCI sample
-AggregateMCI;
+
+%% Setting colors for using in plots
+ColorPattern;
+%% Getting Information from results:
+YoungControlsParameters   = YoungControls.Results.estimatedParams;
+HealthyControlsParameters = HealthyControls.Results.estimatedParams;
+MCIUnkParameters          = MCIUnk.Results.estimatedParams;
+MCINegParameters          = MCINeg.Results.estimatedParams;
+MCIPosParameters          = MCIPos.Results.estimatedParams;
+MCIAllParameters          = [MCIUnkParameters; MCINegParameters; MCIPosParameters];
 
 %% Creating the roc curves for MCI all vs HC
-
-close all;
-
-parametersName = [{'\gamma'},  {'g_3'}, {'b'}, {'\sigma'}, {'\nu'}];
+parametersName = [{'\beta'},  {'g_2'}, {'g_3'}, {'\sigma'}, {'\nu'}];
 
 % set figure info
 %f = figure('visible','off','Position', [100 100 1000 500]);
-f = figure('visible','off','Position', [100 100 500 500]);
+f = figure('visible','on','Position', [100 100 500 500]);
 %%% Font type and size setting %%%
 % Using Arial as default because all journals normally require the font to
 % be either Arial or Helvetica
@@ -33,8 +44,8 @@ set(0,'DefaultTextFontSize',12)
 
 hold on;
 
-AUC{1} = plotROCCurve(HealthyControlsParameters, MCIAllParameters, {'\gamma g3 b \sigma \nu'}, 'AllParamsMCIvsHC','HC', 'MCI', config.color_scheme_npg(4,:), config);
-legendText{1,1} = "AUC(" + convertCharsToStrings({'\gamma g3 b \sigma \nu'}) + ") = " + num2str(round(AUC{1}.Value(1),2),2);
+AUC{1} = plotROCCurve(HealthyControlsParameters, MCIAllParameters, {'\beta g_2 g_3 \sigma \nu'}, 'AllParamsMCIvsHC','HC', 'MCI', config.color_scheme_npg(4,:), config);
+legendText{1,1} = "AUC(" + convertCharsToStrings({'\beta g_2 g_3 \sigma \nu'}) + ") = " + num2str(round(AUC{1}.Value(1),2),2);
 % % Removing values that have hitted the boudary (b == 0)
 % allData = [HealthyControlsParameters; MCIAllParameters];
 % allDataLogicalResponse = (1:height(HealthyControlsParameters) + height(MCIAllParameters))' > height(HealthyControlsParameters);
@@ -54,8 +65,8 @@ MCIAllParametersFilter = MCIAllParameters(filter,:);
 
 clear filter
 
-parametersName = [{'\gamma'},  {'g3'}, {'b'}, {'\sigma'}, {'\nu'}];
-filesName = [{'GammaMCIvsHC'},  {'g3MCIvsHC'}, {'bMCIvsHC'}, {'SigmaMCIvsHC'}, {'NuMCIvsHC'}];
+parametersName = [{'\beta'},  {'g_2'}, {'g_3'}, {'\sigma'}, {'\nu'}];
+filesName = [{'BetaMCIvsHC'},  {'g2MCIvsHC'}, {'g3MCIvsHC'}, {'SigmaMCIvsHC'}, {'NuMCIvsHC'}];
 colors = config.color_scheme_npg([8 3 7 9 10],:);
 
 for i = 1:length(parametersName)
@@ -83,7 +94,7 @@ ll.FontSize = 12;
 
 ylabel('True Positive Rate');
 xlabel('False Positive Rate')
-title('MCI Merged / Healthy Old controls - Base Model');
+title('MCI / Healthy old controls - Full Model');
 
 %Further post-processing the figure
 set(gca, ...
@@ -104,11 +115,11 @@ clear parametersName filesName i colors f ll legendText
 %% Creating the roc curves for MCIpos vs MCIneg
 close all;
 
-parametersName = [{'\gamma'},  {'g3'}, {'b'}, {'\sigma'}, {'\nu'}];
+parametersName = [{'\beta'},  {'g_2'}, {'g_3'}, {'\sigma'}, {'\nu'}];
 
 % set figure info
 %f = figure('visible','off','Position', [100 100 1000 500]);
-f = figure('visible','off','Position', [100 100 500 500]);
+f = figure('visible','on','Position', [100 100 500 500]);
 %%% Font type and size setting %%%
 % Using Arial as default because all journals normally require the font to
 % be either Arial or Helvetica
@@ -119,8 +130,8 @@ set(0,'DefaultTextFontSize',12)
 
 hold on;
 
-AUC{1} = plotROCCurve(MCINegParameters, MCIPosParameters, {'\gamma g3 b \sigma \nu'}, 'AllParamsMCIvsHC','MCIneg', 'MCIpos', config.color_scheme_npg(4,:), config);
-legendText{1,1} = "AUC(" + convertCharsToStrings({'\gamma g3 b \sigma \nu'}) + ") = " + num2str(round(AUC{1}.Value(1),2),2);
+AUC{1} = plotROCCurve(MCINegParameters, MCIPosParameters, {'\beta g_2 g_3 \sigma \nu'}, 'AllParamsMCIvsHC','MCIneg', 'MCIpos', config.color_scheme_npg(4,:), config);
+legendText{1,1} = "AUC(" + convertCharsToStrings({'\beta g_2 g_3 \sigma \nu'}) + ") = " + num2str(round(AUC{1}.Value(1),2),2);
 % % Removing values that have hitted the boudary (b == 0)
 % allData = [HealthyControlsParameters; MCIAllParameters];
 % allDataLogicalResponse = (1:height(HealthyControlsParameters) + height(MCIAllParameters))' > height(HealthyControlsParameters);
@@ -140,8 +151,8 @@ MCIAllParametersFilter = MCIAllParameters(filter,:);
 
 clear filter
 
-parametersName = [{'\gamma'},  {'g3'}, {'b'}, {'\sigma'}, {'\nu'}];
-filesName = [{'GammaMCIvsHC'},  {'g3MCIvsHC'}, {'bMCIvsHC'}, {'SigmaMCIvsHC'}, {'NuMCIvsHC'}];
+parametersName = [{'\beta'},  {'g_2'}, {'g_3'}, {'\sigma'}, {'\nu'}];
+filesName = [{'BetaMCIPosvsMCINeg'},  {'G2MCIPosvsMCINeg'}, {'G3MCIPosvsMCINeg'}, {'SigmaMCIPosvsMCINeg'}, {'NuMCIPosvsMCINeg'}];
 colors = config.color_scheme_npg([8 3 7 9 10],:);
 
 for i = 1:length(parametersName)

@@ -1,8 +1,13 @@
 %% Preparing the data
+VAM_PrepareBaseConfig
+%% 
+% Eventually modify config paramteters we are interested in. For example
+% for this graph we are not interested in running the model so we will
+% force it to not run
+config.NumParams = 100;
+%% Run the model
 VAM
-
-%% Setting colors for using in plots
-ColorPattern;
+%%
 resultfolder = savefolder + "PaperFigs/Fig1B";
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
@@ -10,8 +15,10 @@ if ~exist(resultfolder, 'dir')
    mkdir(resultfolder);
 end
 
+clear resultfolder
+
 %% Getting Information from results:
-[YoungControlsPropDist, YoungControlsPropAng]     =getProportionalLinearAndAngularError(YoungControls);
+[YoungControlsPropDist, YoungControlsPropAng]     = getProportionalLinearAndAngularError(YoungControls);
 [HealthyControlsPropDist, HealthyControlsPropAng] = getProportionalLinearAndAngularError(HealthyControls);
 [MCIUnkPropDist, MCIUnkPropAng]                   = getProportionalLinearAndAngularError(MCIUnk);
 [MCINegPropDist, MCINegPropAng]                   = getProportionalLinearAndAngularError(MCINeg);

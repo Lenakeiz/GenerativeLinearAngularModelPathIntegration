@@ -102,12 +102,7 @@ function [PropDist, PropAng] = getProportionalLinearAndAngularError(Group)
     PropDist = [];
     PropAng  = [];
 
-<<<<<<< Updated upstream
-    numConds = length(Group.Results.PropDistErr);
-    for TRIAL_FILTER = 1:numConds
-=======
     for TRIAL_FILTER = 1:3
->>>>>>> Stashed changes
         
         CondPropDist  = Group.Results.PropDistErr{TRIAL_FILTER};
         CondPropAng   = Group.Results.PropAngErr{TRIAL_FILTER};

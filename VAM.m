@@ -24,15 +24,15 @@ config.UseGlobalSearch                                  = true;
 config.TrackedInboundAngularDeltaT                      = 1;
 config.includeStand                                     = false;
 config.useweber                                         = false;  % only true when use weber law in simple generative models
-config.Speed.tresholdForBadParticipantL1Recontruction   = 0.0;    % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
 config.useOoBtrials = true;
 
 %% Model fitting
 config.ModelName        =   "beta_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
-config.NumParams        =   100; % Set here to avoid producing the model
+config.NumParams        =   5; % Set 100 here to avoid producing the model
 
 %% Model fitting for Young Controls
+config.Speed.tresholdForBadParticipantL1Recontruction   = 1.55;    % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
 disp("%%%%%%%%%%%%%%% Starting fit for young controls %%%%%%%%%%%%%%%");
 YoungControls = TransformPaths(YoungControls);%transform data
 YoungControls   = CalculateTrackingPath(YoungControls, config);
@@ -40,6 +40,7 @@ ManuallyScoringYoung;
 YoungControls.Results = getResultsAllConditions(YoungControls, config);
 
 %% Model fitting for Healthy Controls
+config.Speed.tresholdForBadParticipantL1Recontruction   = 2.0;    % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
 disp("%%%%%%%%%%%%%%% Starting fit for healthy controls %%%%%%%%%%%%%%%");
 HealthyControls = TransformPaths(HealthyControls);%transform data
 HealthyControls   = CalculateTrackingPath(HealthyControls, config);
@@ -47,6 +48,7 @@ ManuallyScoringHealthyOld;
 HealthyControls.Results = getResultsAllConditions(HealthyControls, config);
 
 %% Model fitting for MCI Pos
+config.Speed.tresholdForBadParticipantL1Recontruction   = 0.0;    % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
 disp("%%%%%%%%%%%%%%% Starting fit for mci positive %%%%%%%%%%%%%%%");
 MCIPos = TransformPaths(MCIPos);%transform data
 MCIPos   = CalculateTrackingPath(MCIPos, config);

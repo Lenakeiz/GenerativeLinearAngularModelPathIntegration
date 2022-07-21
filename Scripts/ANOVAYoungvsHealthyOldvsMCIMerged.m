@@ -22,7 +22,7 @@ AllMCINegParams     =   MCINeg.Results.estimatedParams;
 AllMCIUnkParams     =   MCIUnk.Results.estimatedParams;
 
 %% Generate result folder and Setting colors for using in plots
-resultfolder           A =   pwd + "/Output/ModelFigures/"+config.ModelName+"/Young_HealthyOld_MCICombinedX";
+resultfolder            =   pwd + "/Output/ModelFigures/"+config.ModelName+"/Young_HealthyOld_MCICombined";
 config.ResultFolder     =   resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')

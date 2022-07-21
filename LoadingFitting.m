@@ -19,8 +19,8 @@ config.UseGlobalSearch                                  = true;
 config.TrackedInboundAngularDeltaT                      = 1;
 config.includeStand                                     = false;
 config.useweber                                         = false;  % only true when use weber law in simple generative models
-config.useOoBtrials = true;
-
+config.useOoBtrials                                     = true;
+config.useTrialFilter                                   = true;
 %% Model fitting for Young Controls
 disp("%%%%%%%%%%%%%%% Starting fit for young controls %%%%%%%%%%%%%%%");
 config.Speed.tresholdForBadParticipantL1Recontruction = 1.55;  

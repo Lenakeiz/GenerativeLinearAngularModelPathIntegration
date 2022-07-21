@@ -53,7 +53,7 @@ elseif Model_Name == "beta_g2_g3_sigma_nu"      %regressing to correct mean retu
     %set parameter lower bound and up bound
     %     1, beta        2-g2     3-g3     4-sigma      5-nu
     lb  = [-1.0,         0,       0,       0.0,         0.0];
-    ub  = [1.0,          4,       4,       4.0,         pi]; 
+    ub  = [1.0,          3,       3,       4.0,         pi]; 
 
     %defining likelihood function
     estFnc = @(FP) Estimate_beta_g2_g3_sigma_nu(FP(1),FP(2),FP(3),FP(4),FP(5), Input, config);  

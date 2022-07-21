@@ -22,7 +22,7 @@ AllMCINegParams     =   MCINeg.Results.estimatedParams;
 AllMCIUnkParams     =   MCIUnk.Results.estimatedParams;
 
 %% Generate result folder and Setting colors for using in plots
-resultfolder            =   pwd + "/Output/ModelFigures/"+config.ModelName+"/Young_HealthyOld_MCICombinedX";
+resultfolder           A =   pwd + "/Output/ModelFigures/"+config.ModelName+"/Young_HealthyOld_MCICombinedX";
 config.ResultFolder     =   resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
@@ -32,7 +32,7 @@ end
 %generating color scheme
 ColorPattern; 
 
-%% merge MCI together to get MCICombined
+%% merge MCI parameters together to get MCICombined
 AllMCIParams = MergeMCI(AllMCIPosParams, AllMCINegParams, AllMCIUnkParams);
 
 %% TwowayAnova

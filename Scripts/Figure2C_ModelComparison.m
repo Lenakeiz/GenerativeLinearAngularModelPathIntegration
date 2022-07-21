@@ -1,91 +1,62 @@
-%% Cleaning variables and set intial seed for code reproducibility
-clearvars; close all; clc;
-rng('default'); 
+%% Preparing the data
+VAM_PrepareBaseConfig
 
-%% Loading data
-disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
-load('Data/HowettBrain2019_Dataset.mat');
-
-%% setting the configuration
-config.Speed.alpha                                      = 0.9;    % Paramanter for running speed calculation
-config.Speed.timeOffsetAfterFlagReach                   = 1.5;    % Time to track after flag reached in seconds 
-config.Speed.smoothWindow                               = 10;     % tracking rate should be 10Hz so 4 secs window is 40 datapoints
-config.Speed.velocityCutoff                             = 0.2;    % velocity cutoff to select only the walking part of the reconstructed velocity
-config.Speed.timeOffsetForDetectedTemporalWindow        = 0.4;    % time in seconds that will push earlier/ the detected rising edge
-config.UseGlobalSearch                                  = true;
-config.TrackedInboundAngularDeltaT                      = 1;
-config.includeStand                                     = false;
-config.useweber                                         = false;  % only true when use weber law in simple generative models
-config.useOoBtrials                                     = true;
-
-resultfolder = pwd+"/Output/ModelFigures/ModelComparison_HC";
-config.ResultFolder = resultfolder;
-%create storing folder for trajectory if not exist
-if ~exist(resultfolder, 'dir')
-   mkdir(resultfolder);
-end
-
-%% calculating tracking path and transoform data
-% config.Speed.tresholdForBadParticipantL1Recontruction = 1.55;   % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
-% YoungControls                   =   TransformPaths(YoungControls);
-% YoungControls                   =   CalculateTrackingPath(YoungControls, config);
-% ManuallyScoringYoung;
-
-%%
-config.Speed.tresholdForBadParticipantL1Recontruction = 2.0; 
-%transform data
-HealthyControls                 =   TransformPaths(HealthyControls);
-HealthyControls                 =   CalculateTrackingPath(HealthyControls, config);
-ManuallyScoringHealthyOld;
-YoungControls = HealthyControls;
+%% Preprocessing the data
+VAM_PreprocessData
 
 %% 1, sigma nu Model --> egocentric noise only model
 config.ModelName        =   "sigma_nu";
 config.ParamName        =   ["sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
+% Run the model
+VAM
 
-Results_sigma_nu        =   getResultsAllConditions(YoungControls, config);
-sigma_nu_IC             =   Results_sigma_nu.IC;
+sigma_nu_IC             =   HealthyControls.Results.IC;
 
 %% 2, beta, sigma, nu Model --> only encoding errors in distance
 config.ModelName        =   "beta_sigma_nu";
 config.ParamName        =   ["beta", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
+% Run the model
+VAM
 
-Results_beta_sigma_nu   =   getResultsAllConditions(YoungControls, config);
-beta_sigma_nu_IC        =   Results_beta_sigma_nu.IC;
+beta_sigma_nu_IC        =   HealthyControls.Results.IC;
 
 %% 3, g2, g3, sigma, nu Model --> encoding errors and production errors in angle 
 config.ModelName        =   "g2_g3_sigma_nu";
 config.ParamName        =   ["g2", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
+% Run the model
+VAM
 
-Results_g2_g3_sigma_nu  =   getResultsAllConditions(YoungControls, config);
-g2_g3_sigma_nu_IC        =   Results_g2_g3_sigma_nu.IC;
+g2_g3_sigma_nu_IC       =   HealthyControls.Results.IC;
 
 %% 4, beta, g2, sigma, nu Model --> encoding error in distance and angle
 config.ModelName        =   "beta_g2_sigma_nu";
 config.ParamName        =   ["beta", "g2", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
+% Run the model
+VAM
 
-Results_beta_g2_sigma_nu=   getResultsAllConditions(YoungControls, config);
-beta_g2_sigma_nu_IC        =   Results_beta_g2_sigma_nu.IC;
+beta_g2_sigma_nu_IC     =   HealthyControls.Results.IC;
 
 %% 5, beta, g3, sigma, nu Model --> encoding errors in distance and production error in angle
 config.ModelName        =   "beta_g3_sigma_nu";
 config.ParamName        =   ["beta", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
+% Run the model
+VAM
 
-Results_beta_g3_sigma_nu=   getResultsAllConditions(YoungControls, config);
-beta_g3_sigma_nu_IC        =   Results_beta_g3_sigma_nu.IC;
+beta_g3_sigma_nu_IC     =   HealthyControls.Results.IC;
 
 %% 6, beta, g2, g3, sigma, nu Model --> encoding errors in distance and angles and production error in angle
 config.ModelName        =   "beta_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
+% Run the model
+VAM
 
-Results_beta_g2_g3_sigma_nu   =   getResultsAllConditions(YoungControls, config);
-beta_g2_g3_sigma_nu_IC        =   Results_beta_g2_g3_sigma_nu.IC;
+beta_g2_g3_sigma_nu_IC  =   HealthyControls.Results.IC;
 
 % %% 7, beta, g2, g3, k3, sigma, nu Model --> add another parameter k3 to the beta, g2, g3, sigma, nu Model
 % config.ModelName        =   "beta_g2_g3_k3_sigma_nu";
@@ -94,6 +65,13 @@ beta_g2_g3_sigma_nu_IC        =   Results_beta_g2_g3_sigma_nu.IC;
 % 
 % Results_beta_g2_g3_k3_sigma_nu   =   getResultsAllConditions(YoungControls, config);
 % beta_g2_g3_k3_sigma_nu_IC           =   Results_beta_g2_g3_k3_sigma_nu.IC;
+
+%%
+config.ResultFolder = pwd+"/Output/ModelFigures/ModelComparison_HC";;
+%create storing folder for trajectory if not exist
+if ~exist(config.ResultFolder, 'dir')
+   mkdir(config.ResultFolder);
+end
 
 %%
 ModelNames = {'M1', 'M2', 'M3', 'M4', 'M5', 'M6'};

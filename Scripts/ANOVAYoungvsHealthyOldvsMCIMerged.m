@@ -1,36 +1,36 @@
 %% two-way Anova (group*condition) on Young Controls, Elderly Controls and MCI
-%% Cleaning variables
-clearvars; clear all; close all; clc;
-rng('default'); %for code reproducibility
+
+%% Preparing the data
+VAM_PrepareBaseConfig;
+
+%% Preprocessing the data
+VAM_PreprocessData;
 
 %% Preparing the data and Slecting the Model
-
-% config.ModelName        = "beta_g2_g3_k3_sigma_nu";
-% config.ParamName        = ["beta", "g2", "g3", "k3", "sigma", "nu"];
 
 config.ModelName        =   "beta_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-%% loading data and model fitting
-LoadingFitting;
+% Run the model
+VAM;
 
+%% Model run completed, preparing the data for plotting figures
+config.ResultFolder     =   pwd + "/Output/ModelFigures/"+config.ModelName+"/Young_HealthyOld_MCICombined";
+%create storing folder for trajectory if not exist
+if ~exist(config.ResultFolder, 'dir')
+   mkdir(config.ResultFolder);
+end
+
+%% Generating color scheme
+ColorPattern; 
+
+%% Getting Information from results:
 AllYoungParams      =   YoungControls.Results.estimatedParams;
 AllHealthyOldParams =   HealthyControls.Results.estimatedParams;
 AllMCIPosParams     =   MCIPos.Results.estimatedParams;
 AllMCINegParams     =   MCINeg.Results.estimatedParams;
 AllMCIUnkParams     =   MCIUnk.Results.estimatedParams;
-
-%% Generate result folder and Setting colors for using in plots
-resultfolder            =   pwd + "/Output/ModelFigures/"+config.ModelName+"/Young_HealthyOld_MCICombined";
-config.ResultFolder     =   resultfolder;
-%create storing folder for trajectory if not exist
-if ~exist(resultfolder, 'dir')
-   mkdir(resultfolder);
-end
-
-%generating color scheme
-ColorPattern; 
 
 %% merge MCI parameters together to get MCICombined
 AllMCIParams = MergeMCI(AllMCIPosParams, AllMCINegParams, AllMCIUnkParams);

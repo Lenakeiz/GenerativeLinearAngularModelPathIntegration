@@ -1,24 +1,29 @@
 %% Preparing the data
 VAM_PrepareBaseConfig
-%% 
+
+%% Preprocessing the data
+VAM_PreprocessData
+
+%% Setting the model we are interested in
 % Eventually modify config paramteters we are interested in. For example
 % for this graph we are not interested in running the model with splitted
 % conditions so we will set the relative config to false 
 % force it to not run
 config.useTrialFilter = false;
-%% Run the model
+config.ModelName        =   "beta_g2_g3_sigma_nu";
+config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
+config.NumParams        =   length(config.ParamName); % Set 100 here to avoid producing the model
+% Run the model
 VAM
-%%
-resultfolder = pwd+"/Output/PaperFigs/Fig5A";
-config.ResultFolder = resultfolder;
+
+%% Model run completed, preparing the data for plotting figures
+config.ResultFolder = pwd + "/Output/PaperFigs/Fig5A";
 %create storing folder for trajectory if not exist
-if ~exist(resultfolder, 'dir')
-   mkdir(resultfolder);
+if ~exist(config.ResultFolder, 'dir')
+   mkdir(config.ResultFolder);
 end
 
-clear resultfolder
-
-%% Setting colors for using in plots
+%% Genarating color scheme
 ColorPattern;
 %% Getting Information from results:
 YoungControlsParameters   = YoungControls.Results.estimatedParams;

@@ -12,40 +12,29 @@ if (exist('config','var') == 0)
     throw(ME);
 end
 
+if (~isfield(config,'ModelName') | ~isfield(config,'ParamName') | ~isfield(config,'NumParams'))
+    ME = MException("MyComponent:noSuchVariable","Model variables must be specified before running the model: set ModelName, ParamName and NumParams in config struct");
+    throw(ME);
+end
+
 %% Model fitting for Young Controls
-config.Speed.tresholdForBadParticipantL1Recontruction   = 1.55;    % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
 disp("%%%%%%%%%%%%%%% Starting fit for young controls %%%%%%%%%%%%%%%");
-YoungControls = TransformPaths(YoungControls);%transform data
-YoungControls   = CalculateTrackingPath(YoungControls, config);
-ManuallyScoringYoung;
 YoungControls.Results = getResultsAllConditions(YoungControls, config);
 
 %% Model fitting for Healthy Controls
-config.Speed.tresholdForBadParticipantL1Recontruction   = 2.0;    % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
 disp("%%%%%%%%%%%%%%% Starting fit for healthy controls %%%%%%%%%%%%%%%");
-HealthyControls = TransformPaths(HealthyControls);%transform data
-HealthyControls   = CalculateTrackingPath(HealthyControls, config);
-ManuallyScoringHealthyOld;
 HealthyControls.Results = getResultsAllConditions(HealthyControls, config);
 
 %% Model fitting for MCI Pos
-config.Speed.tresholdForBadParticipantL1Recontruction   = 0.0;    % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
-disp("%%%%%%%%%%%%%%% Starting fit for mci positive %%%%%%%%%%%%%%%");
-MCIPos = TransformPaths(MCIPos);%transform data
-MCIPos   = CalculateTrackingPath(MCIPos, config);
-ManuallyScoringMCIPos;
+disp("%%%%%%%%%%%%%%% Starting fit for mci pos %%%%%%%%%%%%%%%");
 MCIPos.Results = getResultsAllConditions(MCIPos, config);
 
 %% Model fitting for MCI Neg
-disp("%%%%%%%%%%%%%%% Starting fit for mci negative %%%%%%%%%%%%%%%");
-MCINeg = TransformPaths(MCINeg);%transform data
-MCINeg   = CalculateTrackingPath(MCINeg, config);
-ManuallyScoringMCINeg;
+disp("%%%%%%%%%%%%%%% Starting fit for mci neg %%%%%%%%%%%%%%%");
 MCINeg.Results = getResultsAllConditions(MCINeg, config);
 
 %% Model fitting for MCI Unk
 disp("%%%%%%%%%%%%%%% Starting fit for mci unknown %%%%%%%%%%%%%%%");
-MCIUnk = TransformPaths(Unknown);%transform data
-MCIUnk   = CalculateTrackingPath(MCIUnk, config);
-ManuallyScoringMCIUnk;
 MCIUnk.Results = getResultsAllConditions(MCIUnk, config);
+
+disp("%%%%%%%%%%%%%%% Model fitting complete %%%%%%%%%%%%%%%");

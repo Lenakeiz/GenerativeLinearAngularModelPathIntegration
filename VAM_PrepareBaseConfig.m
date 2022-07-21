@@ -1,6 +1,8 @@
 %% Prepare a simple config file for the model to run
 %% Cleaning variables
 clearvars; clear all; close all; clc;
+rng('default'); %for code reproducibility
+
 %% Loading data
 disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
 load('Data/HowettBrain2019_Dataset.mat');
@@ -16,10 +18,5 @@ config.TrackedInboundAngularDeltaT                      = 1;
 config.includeStand                                     = false;
 config.useweber                                         = false;  % only true when use weber law in simple generative models
 config.useOoBtrials = true;
-config.Speed.tresholdForBadParticipantL1Recontruction   = 1.55;
+config.Speed.tresholdForBadParticipantL1Recontruction   = 0.0;
 config.useTrialFilter                                   = true;   % when true the model will be fitted for each of the task conditions separately. If false it will discard the
-
-%% Model fitting
-config.ModelName        =   "beta_g2_g3_sigma_nu";
-config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
-config.NumParams        =   length(config.ParamName); % Set 100 here to avoid producing the model

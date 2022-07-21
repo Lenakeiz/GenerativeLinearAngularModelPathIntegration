@@ -1,28 +1,28 @@
 %% two-way Anova (group*condition) on MCI+ and MCI-
-%% Cleaning variables
-clearvars; clear all; close all; clc;
-rng('default'); %for code reproducibility
+%% Preparing the data
+VAM_PrepareBaseConfig;
+
+%% Preprocessing the data
+VAM_PreprocessData;
 
 %% Preparing the data and Slecting the Model
 config.ModelName        =   "beta_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
-
-%% loading data and model fitting
-LoadingFitting;
+% Run the model
+VAM;
 
 AllMCIPosParams     =   MCIPos.Results.estimatedParams;
 AllMCINegParams     =   MCINeg.Results.estimatedParams;
 
 %% Generate result folder and Setting colors for using in plots
-resultfolder            =   pwd + "/Output/ModelFigures/"+config.ModelName+"/MCIPosvsMCINeg";
-config.ResultFolder     =   resultfolder;
+config.ResultFolder     =   pwd + "/Output/ModelFigures/"+config.ModelName+"/MCIPosvsMCINeg";
 %create storing folder for trajectory if not exist
-if ~exist(resultfolder, 'dir')
-   mkdir(resultfolder);
+if ~exist(config.ResultFolder, 'dir')
+   mkdir(config.ResultFolder);
 end
 
-%generating color scheme
+%% Generating color scheme
 ColorPattern; 
 
 %% TwowayAnova

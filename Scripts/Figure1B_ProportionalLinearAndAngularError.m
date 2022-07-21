@@ -1,21 +1,25 @@
 %% Preparing the data
 VAM_PrepareBaseConfig
-%% 
+
+%% Preprocessing the data
+VAM_PreprocessData
+
+%% Setting the model we are interested in
 % Eventually modify config paramteters we are interested in. For example
 % for this graph we are not interested in running the model so we will
 % force it to not run
+config.ModelName        =   "beta_g2_g3_sigma_nu";
+config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
 config.NumParams = 100;
-%% Run the model
+% Run the model
 VAM
-%%
-resultfolder = savefolder + "PaperFigs/Fig1B";
-config.ResultFolder = resultfolder;
-%create storing folder for trajectory if not exist
-if ~exist(resultfolder, 'dir')
-   mkdir(resultfolder);
-end
 
-clear resultfolder
+%% Model completed, preparing the data for plotting figures
+config.ResultFolder = pwd + "/Output/PaperFigs/Fig1B";
+%create storing folder for trajectory if not exist
+if ~exist(config.ResultFolder, 'dir')
+   mkdir(config.ResultFolder);
+end
 
 %% Getting Information from results:
 [YoungControlsPropDist, YoungControlsPropAng]     = getProportionalLinearAndAngularError(YoungControls);

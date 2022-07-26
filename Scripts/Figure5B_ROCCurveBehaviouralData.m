@@ -12,12 +12,12 @@ VAM_PreprocessData
 config.useTrialFilter = true;
 config.ModelName        =   "beta_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
-config.NumParams        =   length(config.ParamName); % Set 100 here to avoid producing the model
+config.NumParams        =   length(config.ParamName); %length(config.ParamName); % Set 100 here to avoid producing the model
 % Run the model
 VAM
 
 %% Model run completed, preparing the data for plotting figures
-config.ResultFolder = pwd + "/Output/PaperFigs/Fig5A";
+config.ResultFolder = pwd + "/Output/PaperFigs/Fig5B";
 % Create storing folder for trajectory if not exist
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
@@ -25,13 +25,31 @@ end
 
 %% Genarating color scheme
 ColorPattern;
-%% Getting Information from results:
-YoungControlsParameters   = averageAcrossConditions(YoungControls.Results.estimatedParams);
-HealthyControlsParameters = averageAcrossConditions(HealthyControls.Results.estimatedParams);
-MCIUnkParameters          = averageAcrossConditions(MCIUnk.Results.estimatedParams);
-MCINegParameters          = averageAcrossConditions(MCINeg.Results.estimatedParams);
-MCIPosParameters          = averageAcrossConditions(MCIPos.Results.estimatedParams);
-MCIAllParameters          = [MCIUnkParameters; MCINegParameters; MCIPosParameters]; 
+
+%%
+HealthyControlsLocationError = averageAcrossConditions(HealthyControls.Results.LocationErr);
+MCIUnkLocationError          = averageAcrossConditions(MCIUnk.Results.LocationErr);
+MCINegLocationError          = averageAcrossConditions(MCINeg.Results.LocationErr);
+MCIPosLocationError          = averageAcrossConditions(MCIPos.Results.LocationErr);
+MCIAllLocationError          = [MCIUnkLocationError; MCINegLocationError; MCIPosLocationError];
+
+HealthyControlsDistanceError = averageAcrossConditions(HealthyControls.Results.DistErr);
+MCIUnkDistanceError          = averageAcrossConditions(MCIUnk.Results.DistErr);
+MCINegDistanceError          = averageAcrossConditions(MCINeg.Results.DistErr);
+MCIPosDistanceError          = averageAcrossConditions(MCIPos.Results.DistErr);
+MCIAllDistanceError          = [MCIUnkDistanceError; MCINegDistanceError; MCIPosDistanceError]; 
+
+HealthyControlsAngErr        = averageAcrossConditions(HealthyControls.Results.AngleErr);
+MCIUnkAngErr                 = averageAcrossConditions(MCIUnk.Results.AngleErr);
+MCINegAngErr                 = averageAcrossConditions(MCINeg.Results.AngleErr);
+MCIPosAngErr                 = averageAcrossConditions(MCIPos.Results.AngleErr);
+MCIAllAngErr                 = [MCIUnkAngErr; MCINegAngErr; MCIPosAngErr];
+
+%
+allParamsHC        = [HealthyControlsLocationError HealthyControlsDistanceError HealthyControlsAngErr];
+allParamsPooledMCI = [MCIAllLocationError MCIAllDistanceError MCIAllAngErr];
+allParamsMCIPos    = [MCIPosLocationError MCIPosDistanceError MCIPosAngErr];
+allParamsMCINeg    = [MCINegLocationError MCINegDistanceError MCINegAngErr];
 
 %% Plotting roc curve HC vs pooled MCI and MCI negative vs MCI positive
 % Plotting variables
@@ -41,19 +59,18 @@ plotInfo.YLabel = "True positive rate";
 plotInfo.XLabel = "False positive rate";
 plotInfo.Title = "Healthy controls / pooled MCI";
 plotInfo.visible = "on";
+parametersName = [{'Location'},  {'Linear'}, {'Angular'}];
 
-plotROCParametersCurve(HealthyControlsParameters, MCIAllParameters,'HC', 'MCI', config, plotInfo);
+generateROCCurve(allParamsHC, allParamsPooledMCI,'HC', 'MCI', parametersName, config, plotInfo);
 
 plotInfo.Title = "MCI negative / MCI positive";
 
-plotROCParametersCurve(MCINegParameters, MCIPosParameters,'MCIneg', 'MCIpos', config, plotInfo);
+generateROCCurve(allParamsMCINeg, allParamsMCIPos,'MCIneg', 'MCIpos', parametersName, config, plotInfo);
 
 %%
-function plotROCParametersCurve(params1, params2, params1groupName, params2groupName, config, plotInfo)
+function generateROCCurve(params1, params2, params1groupName, params2groupName, parametersName, config, plotInfo)
 
-parametersName = [{'\beta'},  {'g_2'}, {'g_3'}, {'\sigma'}, {'\nu'}];
 colors = config.color_scheme_npg([8 3 7 9 10],:);
-
 % set figure info
 %f = figure('visible','off','Position', [100 100 1000 500]);
 f = figure('visible',plotInfo.visible,'Position', [100 100 600 600]);
@@ -67,20 +84,9 @@ set(0,'DefaultTextFontSize',12)
 
 hold on;
 
-AUC{1} = plotsingleROCCurve(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(4,:));
-legendText{1,1} = "AUC(" + convertCharsToStrings({'\beta g_2 g_3 \sigma \nu'}) + ") = " + num2str(round(AUC{1}.Value(1),2),2);
-
-% filter = ~(HealthyControlsParameters(:,3) == 0);
-% HealthyControlsParametersFilter = HealthyControlsParameters(filter,:);
-% 
-% filter = ~(MCIAllParameters(:,3) == 0);
-% MCIAllParametersFilter = MCIAllParameters(filter,:);
-
-% clear filter
-
 for i = 1:length(parametersName)
-    AUC{i + 1} = plotsingleROCCurve(params1(:,i), params2(:,i), params1groupName, params2groupName, colors(i,:));
-    legendText{1,i + 1} = "AUC(" + convertCharsToStrings(parametersName{i}) + ") = " + num2str(round(AUC{i + 1}.Value(1),2),2);
+    AUC{i} = plotsingleROCCurve(params1(:,i), params2(:,i), params1groupName, params2groupName, colors(i,:));
+    legendText{1,i} = "AUC(" + convertCharsToStrings(parametersName{i}) + ") = " + num2str(round(AUC{i}.Value(1),2),2);
 end
 
 hold off;
@@ -148,15 +154,16 @@ end
 function dataout = averageAcrossConditions(data)
 
     dataout = [];
-    pSize = length(data{1});
-    paramsSize = width(data{1});
+    pSize   = length(data{1});
+    condSize = width(data);
 
     for i = 1:pSize
         tempP = [];
-        for j = 1:paramsSize
-            tempP = [tempP mean([data{1}(i,j) data{2}(i,j) data{3}(i,j)],"omitnan")];
+        for j = 1:condSize % Trial conditions
+            tempP = [tempP cell2mat(data{j}{i})];
         end
-        dataout = [dataout;tempP];
+        tempavg = mean(tempP,"omitnan");
+        dataout = [dataout;tempavg];
     end
 
     dataout = removeNanRows(dataout);

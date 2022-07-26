@@ -65,7 +65,7 @@ function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
             MCIParamAllConds    = [MCIParamAllConds,MCIParam];            
         end
         
-        %remove Nan rows (nan coz of 1, removing participants with short walking length; 2, not enough trials for parameter estimation)
+        % remove Nan rows (nan because of 1, removing participants with short walking length; 2, not enough trials for parameter estimation)
         YoungParamAllConds      = removeNanRows(YoungParamAllConds);
         HealthyOldParamAllConds = removeNanRows(HealthyOldParamAllConds);
         MCIParamAllConds        = removeNanRows(MCIParamAllConds);

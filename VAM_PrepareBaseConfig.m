@@ -4,7 +4,7 @@ clearvars; clear all; close all; clc;
 rng('default'); %for code reproducibility
 
 %% Loading data
-disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
+disp('%%%%%%%%%%%%%%% Data loading ... %%%%%%%%%%%%%%%');
 load('Data/HowettBrain2019_Dataset.mat');
 
 %% setting the configuration
@@ -20,3 +20,5 @@ config.useweber                                         = false;  % only true wh
 config.useOoBtrials = true;
 config.Speed.tresholdForBadParticipantL1Recontruction   = 0.0;
 config.useTrialFilter                                   = true;   % when true the model will be fitted for each of the task conditions separately. If false it will discard the
+
+disp('%%%%%%%%%%%%%%% Data loading complete... %%%%%%%%%%%%%%%');

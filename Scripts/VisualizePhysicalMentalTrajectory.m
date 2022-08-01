@@ -30,6 +30,9 @@ AllMCIPosResults        =   MCIPos.Results;
 AllMCINegResults        =   MCINeg.Results;
 AllMCIUnkResults        =   MCIUnk.Results;
 
+%%
+VisualizeMenPhyTraj(AllHealthyOldResults, 1, 1, 1)
+
 %% Visualize mental physical trajectory
 function VisualizeMenPhyTraj(GroupResults, ID, Cond, TrialIdx)
     %extract the parameters
@@ -37,6 +40,9 @@ function VisualizeMenPhyTraj(GroupResults, ID, Cond, TrialIdx)
     cell_params = num2cell(parameters);
     [beta, g2, g3, sigma, nu] = deal(cell_params{:});
 
+    if isnan(beta)
+        error("NAN!")
+    end 
     %extract X
     X = GroupResults.X{Cond}{ID}{TrialIdx}; %X here is sufficient to plot the physical trajectory 
     
@@ -47,12 +53,12 @@ function VisualizeMenPhyTraj(GroupResults, ID, Cond, TrialIdx)
 
     %extract theta
     Theta           =       GroupResults.THETADX{Cond}{ID}{TrialIdx};
-    theta2          =       THETAX(2); 
-    theta3          =       THETAX(3); 
+    theta2          =       Theta(2); 
+    theta3          =       Theta(3); 
 
     %extract duration
-    L1Dur           =       GroupResults.L1Dur{Cond}{ID}{TrialIdx};
-    L2Dur           =       GroupResults.L2Dur{Cond}{ID}{TrialIdx};
+    durationL1      =       GroupResults.L1Dur{Cond}{ID}{TrialIdx};
+    durationL2      =       GroupResults.L2Dur{Cond}{ID}{TrialIdx};
 
     %calculate the mental trajectory
     men_length1     =       l1*(1-exp(-beta*durationL1))/(beta*durationL1)*exp(-beta*durationL2);
@@ -75,8 +81,11 @@ function VisualizeMenPhyTraj(GroupResults, ID, Cond, TrialIdx)
     sign_alpha      =       sign(alpha);
     theta3_prime    =       g3*abs(alpha)+mean_angle*(1-g3); %reress to mean correct return angle
     theta3_prime    =       sign_alpha*theta3_prime;
-
-    men_p3          =       [men_p2(1)+h*cos(theta3_prime), men_p2(2)+h*sin(theta3_prime)];
+        
+    
+    x3 = h*cos(theta2_prime)*cos(theta3_prime) - h*sin(theta2_prime)*sin(theta3_prime);
+    y3 = h*cos(theta2_prime)*sin(theta3_prime) + h*sin(theta2_prime)*cos(theta3_prime);
+    men_p3          =       [men_p2(1)+x3, men_p2(2)+y3];
 
 
     %% set figure info

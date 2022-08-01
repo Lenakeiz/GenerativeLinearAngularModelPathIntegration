@@ -283,5 +283,7 @@ Results.AngleErr        =   AngleErr;
 Results.PropDistErr     =   PropDistErr;
 Results.PropAngErr      =   PropAngErr;
 Results.LocationErr     =   LocationErr;
+Results.L1Dur           =   L1Dur;
+Results.L2Dur           =   L2Dur;
 
 end

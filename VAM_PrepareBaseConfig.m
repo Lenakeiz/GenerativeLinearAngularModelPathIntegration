@@ -17,7 +17,7 @@ config.UseGlobalSearch                                  = true;
 config.TrackedInboundAngularDeltaT                      = 1;
 config.includeStand                                     = false;
 config.useweber                                         = false;  % only true when use weber law in simple generative models
-config.useOoBtrials = true;
+config.useOoBtrials                                     = true;
 config.Speed.tresholdForBadParticipantL1Recontruction   = 0.0;
 config.useTrialFilter                                   = true;   % when true the model will be fitted for each of the task conditions separately. If false it will discard the
 

@@ -18,6 +18,8 @@ function Results = getResultsAllConditions(TransformedData, config)
             Results.PropAngErr{TRIAL_FILTER}      =       ModelFitResults.PropAngErr;
             Results.LocationErr{TRIAL_FILTER}     =       ModelFitResults.LocationErr;
             Results.flagOoB{TRIAL_FILTER}         =       ModelFitResults.flagOoB;
+            Results.L1Dur{TRIAL_FILTER}           =       ModelFitResults.L1Dur;
+            Results.L2Dur{TRIAL_FILTER}           =       ModelFitResults.L2Dur;
         end
     else
         config.TrialFilter                        =       0;

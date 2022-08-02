@@ -27,12 +27,6 @@ end
 ColorPattern;
 
 %%
-HealthyControlsLocationError = averageAcrossConditions(HealthyControls.Results.LocationErr);
-MCIUnkLocationError          = averageAcrossConditions(MCIUnk.Results.LocationErr);
-MCINegLocationError          = averageAcrossConditions(MCINeg.Results.LocationErr);
-MCIPosLocationError          = averageAcrossConditions(MCIPos.Results.LocationErr);
-MCIAllLocationError          = [MCIUnkLocationError; MCINegLocationError; MCIPosLocationError];
-
 HealthyControlsDistanceError = averageAcrossConditions(HealthyControls.Results.DistErr);
 MCIUnkDistanceError          = averageAcrossConditions(MCIUnk.Results.DistErr);
 MCINegDistanceError          = averageAcrossConditions(MCINeg.Results.DistErr);
@@ -46,10 +40,10 @@ MCIPosAngErr                 = averageAcrossConditions(MCIPos.Results.AngleErr);
 MCIAllAngErr                 = [MCIUnkAngErr; MCINegAngErr; MCIPosAngErr];
 
 %
-allParamsHC        = [HealthyControlsLocationError HealthyControlsDistanceError HealthyControlsAngErr];
-allParamsPooledMCI = [MCIAllLocationError MCIAllDistanceError MCIAllAngErr];
-allParamsMCIPos    = [MCIPosLocationError MCIPosDistanceError MCIPosAngErr];
-allParamsMCINeg    = [MCINegLocationError MCINegDistanceError MCINegAngErr];
+allParamsHC        = [HealthyControlsDistanceError HealthyControlsAngErr];
+allParamsPooledMCI = [MCIAllDistanceError MCIAllAngErr];
+allParamsMCIPos    = [MCIPosDistanceError MCIPosAngErr];
+allParamsMCINeg    = [MCINegDistanceError MCINegAngErr];
 
 %% Plotting roc curve HC vs pooled MCI and MCI negative vs MCI positive
 % Plotting variables
@@ -59,7 +53,7 @@ plotInfo.YLabel = "True positive rate";
 plotInfo.XLabel = "False positive rate";
 plotInfo.Title = "Healthy controls / pooled MCI";
 plotInfo.visible = "on";
-parametersName = [{'Location'},  {'Linear'}, {'Angular'}];
+parametersName = [{'Linear'}, {'Angular'}];
 
 generateROCCurve(allParamsHC, allParamsPooledMCI,'HC', 'MCI', parametersName, config, plotInfo);
 
@@ -84,9 +78,12 @@ set(0,'DefaultTextFontSize',12)
 
 hold on;
 
+AUC{1} = plotsingleROCCurve(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(4,:));
+legendText{1,1} = "AUC(" + convertCharsToStrings(parametersName{1}) + "," + convertCharsToStrings(parametersName{2}) + ") = " + num2str(round(AUC{1}.Value(1),2),2);
+
 for i = 1:length(parametersName)
-    AUC{i} = plotsingleROCCurve(params1(:,i), params2(:,i), params1groupName, params2groupName, colors(i,:));
-    legendText{1,i} = "AUC(" + convertCharsToStrings(parametersName{i}) + ") = " + num2str(round(AUC{i}.Value(1),2),2);
+    AUC{i+1} = plotsingleROCCurve(params1(:,i), params2(:,i), params1groupName, params2groupName, colors(i,:));
+    legendText{1,i+1} = "AUC(" + convertCharsToStrings(parametersName{i}) + ") = " + num2str(round(AUC{i+1}.Value(1),2),2);
 end
 
 hold off;

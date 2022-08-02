@@ -31,10 +31,11 @@ AllMCINegResults        =   MCINeg.Results;
 AllMCIUnkResults        =   MCIUnk.Results;
 
 %%
-VisualizeMenPhyTraj(AllHealthyOldResults, 1, 1, 1)
-
+%VisualizeMenPhyTraj(AllHealthyOldResults, 8, 1, 9)
+VisualizeMenPhyTraj(AllMCINegResults, 3, 1, 1)
 %% Visualize mental physical trajectory
 function VisualizeMenPhyTraj(GroupResults, ID, Cond, TrialIdx)
+
     %extract the parameters
     parameters = GroupResults.estimatedParams{Cond}(ID,:);
     cell_params = num2cell(parameters);
@@ -43,24 +44,49 @@ function VisualizeMenPhyTraj(GroupResults, ID, Cond, TrialIdx)
     if isnan(beta)
         error("NAN!")
     end 
-    %extract X
+
+    %% extract X
     X = GroupResults.X{Cond}{ID}{TrialIdx}; %X here is sufficient to plot the physical trajectory 
     
-    %extract DX, i.e., leg length
-    DX = GroupResults.DX{Cond}{ID}{TrialIdx}; 
+    %% extract DX, i.e., leg length
+    DX              =       GroupResults.DX{Cond}{ID}{TrialIdx}; 
     l1              =       DX(1);
     l2              =       DX(2);
 
-    %extract theta
+    %% extract theta
     Theta           =       GroupResults.THETADX{Cond}{ID}{TrialIdx};
     theta2          =       Theta(2); 
     theta3          =       Theta(3); 
 
-    %extract duration
+    %% find the correct mean return angle based on all trials 
+    sampleSize  =   length(GroupResults.DX{1}{ID})+length(GroupResults.DX{2}{ID})+length(GroupResults.DX{3}{ID});
+    Alphas      =   zeros(sampleSize,1);
+    index       =   0;
+    for condddd = 1:3
+        trial_num = length(GroupResults.DX{Cond}{ID});
+        for trial_id = 1:trial_num
+            index = index+1;
+            lll_1 = GroupResults.DX{condddd}{ID}{trial_id}(1);
+            lll_2 = GroupResults.DX{condddd}{ID}{trial_id}(2);
+            thetaaa_2 = GroupResults.THETADX{condddd}{ID}{trial_id}(2);
+            
+            %calculate the correct return angle
+            phy_p1  = [lll_1,0];
+            phy_p2  = [lll_1+lll_2*cos(thetaaa_2),lll_2*sin(thetaaa_2)];
+            vec1    = phy_p2-phy_p1; vec2 = [0,0]-phy_p2;
+            alpha   = atan2d(vec1(1)*vec2(2)-vec1(2)*vec2(1),vec1(1)*vec2(1)+vec1(2)*vec2(2));
+            alpha   = deg2rad(alpha);%transfer from degree to radians
+            alpha   = mod(alpha, 2*pi);  %wrap to (0,2pi)  
+            Alphas(index) = alpha;           
+        end
+    end
+    mean_angle = mean(Alphas);
+
+    %% extract duration
     durationL1      =       GroupResults.L1Dur{Cond}{ID}{TrialIdx};
     durationL2      =       GroupResults.L2Dur{Cond}{ID}{TrialIdx};
 
-    %calculate the mental trajectory
+    %% calculate the mental trajectory
     men_length1     =       l1*(1-exp(-beta*durationL1))/(beta*durationL1)*exp(-beta*durationL2);
     men_p1          =       [men_length1,0];
     
@@ -89,7 +115,7 @@ function VisualizeMenPhyTraj(GroupResults, ID, Cond, TrialIdx)
 
 
     %% set figure info
-    f = figure('visible','off','Position', [100 100 1000 500]);
+    f = figure('visible','on','Position', [100 100 1000 500]);
     %%% Font type and size setting %%%
     % Using Arial as default because all journals normally require the font to
     % be either Arial or Helvetica
@@ -110,4 +136,18 @@ function VisualizeMenPhyTraj(GroupResults, ID, Cond, TrialIdx)
     m_x         =       mentalxy(:,1); 
     m_y         =       mentalxy(:,2);
     plot(m_x', m_y', '.-', 'Markersize', 10,  LineWidth=1, Color='r');
+
+    set(gca, ...
+    'Box'         , 'off'     , ...
+    'TickDir'     , 'out'     , ...
+    'TickLength'  , [.01 .01] , ...
+    'XColor'      , [.1 .1 .1], ...
+    'YColor'      , [.1 .1 .1], ...
+    'XLim'        , [-4, 4],...
+    'YLim'        , [-4, 4],... 
+    'XTick'       , [-4,0,4],...
+    'YTick'       , [-4,0,4],...
+    'LineWidth'   , .5        );
+    xlabel('X (meters)');
+    ylabel('Y (meters)');
 end

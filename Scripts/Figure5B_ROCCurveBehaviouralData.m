@@ -55,13 +55,14 @@ plotInfo.axisSize = 14;
 plotInfo.YLabel = "True positive rate";
 plotInfo.XLabel = "False positive rate";
 plotInfo.Title = "Healthy controls / pooled MCI";
-plotInfo.visible = "on";
+plotInfo.visible = "off";
 parametersName = [{'Linear'}, {'Angular'}];
 
+disp("%%%%%%%%%%%%%%% ROC Curve pooled MCI vs HC - behavioural data %%%%%%%%%%%%%%%")
 generateROCCurve(allParamsHC, allParamsPooledMCI,'HC', 'MCI', parametersName, config, plotInfo);
 
 plotInfo.Title = "MCI negative / MCI positive";
-
+disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - behavioural data %%%%%%%%%%%%%%%")
 generateROCCurve(allParamsMCINeg, allParamsMCIPos,'MCIneg', 'MCIpos', parametersName, config, plotInfo);
 
 %%
@@ -83,10 +84,14 @@ hold on;
 
 AUC{1} = plotsingleROCCurve(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(4,:));
 legendText{1,1} = "AUC(" + convertCharsToStrings(parametersName{1}) + ", " + convertCharsToStrings(parametersName{2}) + ") = " + num2str(round(AUC{1}.Value(1),2),2);
+disp("AUC(" + convertCharsToStrings(parametersName{1}) + ", " + convertCharsToStrings(parametersName{2}) + ") CI = [" ...
+    + num2str(round(AUC{1}.Value(2),2),2) +  ", " + num2str(round(AUC{1}.Value(3),2),2) + "]")
 
 for i = 1:length(parametersName)
     AUC{i+1} = plotsingleROCCurve(params1(:,i), params2(:,i), params1groupName, params2groupName, colors(i,:));
     legendText{1,i+1} = "AUC(" + convertCharsToStrings(parametersName{i}) + ") = " + num2str(round(AUC{i+1}.Value(1),2),2);
+    disp("AUC(" + convertCharsToStrings(parametersName{i}) + ") CI = [" ...
+        + num2str(round(AUC{i + 1}.Value(2),2),2) +  ", " + num2str(round(AUC{i + 1}.Value(3),2),2) + "]")
 end
 
 hold off;
@@ -145,9 +150,7 @@ function AUC = plotsingleROCCurve(param1, param2, param1Label, param2Label, para
     mdl = fitglm(allData,allDatalogicalResponse,'Distribution', 'binomial','Link','logit');
     
     allDataScores = mdl.Fitted.Probability;
-    [X,Y,~,AUC.Value] = perfcurve(allLabels, allDataScores, param2Label, NBoot=10);
-    %[~,AUC.CI] = auc([allLabels allDataScores],0.05,'boot',100,'type','bca');
-    disp(AUC.CI);
+    [X,Y,~,AUC.Value] = perfcurve(allLabels, allDataScores, param2Label, NBoot=1000);
 
     plot(X(:,1),Y(:,1),...
         "Color",paramColor,...

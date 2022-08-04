@@ -36,7 +36,10 @@ MCIAllParameters          = [MCIUnkParameters; MCINegParameters; MCIPosParameter
 %% Plotting roc curve HC vs pooled MCI and MCI negative vs MCI positive
 % Plotting variables
 plotInfo.defaultTextSize = 20;
-plotInfo.defaultLineSize = 2;
+plotInfo.defaultLineSize = 1.3;
+plotInfo.titleFontSize = 16;
+plotInfo.labelSize = 15;
+plotInfo.axisSize = 14;
 plotInfo.YLabel = "True positive rate";
 plotInfo.XLabel = "False positive rate";
 plotInfo.Title = "Healthy controls / pooled MCI";
@@ -93,7 +96,7 @@ ylabel('True Positive Rate');
 xlabel('False Positive Rate')
 t = title(plotInfo.Title);
 
-t.FontSize = 20;
+t.FontSize = plotInfo.titleFontSize;
 
 %Further post-processing the figure
 set(gca, ...
@@ -108,6 +111,11 @@ axis square;
 
 ax = gca;
 ax.LineWidth = plotInfo.defaultLineSize;
+ax.XLabel.FontSize = plotInfo.labelSize;
+ax.YLabel.FontSize = plotInfo.labelSize;
+ax.XAxis.FontSize = plotInfo.axisSize;
+ax.YAxis.FontSize = plotInfo.axisSize;
+ax.YTick = 0:0.2:1.0;
 
 exportName = [params1groupName 'vs' params2groupName];
 

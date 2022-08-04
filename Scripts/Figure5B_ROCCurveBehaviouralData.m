@@ -48,7 +48,10 @@ allParamsMCINeg    = [MCINegDistanceError MCINegAngErr];
 %% Plotting roc curve HC vs pooled MCI and MCI negative vs MCI positive
 % Plotting variables
 plotInfo.defaultTextSize = 20;
-plotInfo.defaultLineSize = 2;
+plotInfo.defaultLineSize = 1.3;
+plotInfo.titleFontSize = 16;
+plotInfo.labelSize = 15;
+plotInfo.axisSize = 14;
 plotInfo.YLabel = "True positive rate";
 plotInfo.XLabel = "False positive rate";
 plotInfo.Title = "Healthy controls / pooled MCI";
@@ -79,7 +82,7 @@ set(0,'DefaultTextFontSize',12)
 hold on;
 
 AUC{1} = plotsingleROCCurve(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(4,:));
-legendText{1,1} = "AUC(" + convertCharsToStrings(parametersName{1}) + "," + convertCharsToStrings(parametersName{2}) + ") = " + num2str(round(AUC{1}.Value(1),2),2);
+legendText{1,1} = "AUC(" + convertCharsToStrings(parametersName{1}) + ", " + convertCharsToStrings(parametersName{2}) + ") = " + num2str(round(AUC{1}.Value(1),2),2);
 
 for i = 1:length(parametersName)
     AUC{i+1} = plotsingleROCCurve(params1(:,i), params2(:,i), params1groupName, params2groupName, colors(i,:));
@@ -96,7 +99,7 @@ ylabel('True Positive Rate');
 xlabel('False Positive Rate')
 t = title(plotInfo.Title);
 
-t.FontSize = 20;
+t.FontSize = plotInfo.titleFontSize;
 
 %Further post-processing the figure
 set(gca, ...
@@ -111,6 +114,11 @@ axis square;
 
 ax = gca;
 ax.LineWidth = plotInfo.defaultLineSize;
+ax.XLabel.FontSize = plotInfo.labelSize;
+ax.YLabel.FontSize = plotInfo.labelSize;
+ax.XAxis.FontSize = plotInfo.axisSize;
+ax.YAxis.FontSize = plotInfo.axisSize;
+ax.YTick = 0:0.2:1.0;
 
 exportName = [params1groupName 'vs' params2groupName];
 
@@ -138,7 +146,8 @@ function AUC = plotsingleROCCurve(param1, param2, param1Label, param2Label, para
     
     allDataScores = mdl.Fitted.Probability;
     [X,Y,~,AUC.Value] = perfcurve(allLabels, allDataScores, param2Label, NBoot=10);
-    %[~,AUC.CI] = auc([allLabels allDataScores],0.05,'boot',10000,'type','bca');
+    %[~,AUC.CI] = auc([allLabels allDataScores],0.05,'boot',100,'type','bca');
+    disp(AUC.CI);
 
     plot(X(:,1),Y(:,1),...
         "Color",paramColor,...

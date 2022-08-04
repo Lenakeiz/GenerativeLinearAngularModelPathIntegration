@@ -36,16 +36,21 @@ MCIAllParameters          = [MCIUnkParameters; MCINegParameters; MCIPosParameter
 %% Plotting roc curve HC vs pooled MCI and MCI negative vs MCI positive
 % Plotting variables
 plotInfo.defaultTextSize = 20;
-plotInfo.defaultLineSize = 2;
+plotInfo.defaultLineSize = 1.3;
+plotInfo.titleFontSize = 16;
+plotInfo.labelSize = 15;
+plotInfo.axisSize = 14;
 plotInfo.YLabel = "True positive rate";
 plotInfo.XLabel = "False positive rate";
 plotInfo.Title = "Healthy controls / pooled MCI";
-plotInfo.visible = "on";
+plotInfo.visible = "off";
 
+disp("%%%%%%%%%%%%%%% ROC MCI pooled vs HC - model parameters estimation %%%%%%%%%%%%%%%")
 plotROCParametersCurve(HealthyControlsParameters, MCIAllParameters,'HC', 'MCI', config, plotInfo);
 
 plotInfo.Title = "MCI negative / MCI positive";
 
+disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - model parameters estimation %%%%%%%%%%%%%%%")
 plotROCParametersCurve(MCINegParameters, MCIPosParameters,'MCIneg', 'MCIpos', config, plotInfo);
 
 %%
@@ -70,6 +75,8 @@ hold on;
 AUC{1} = plotsingleROCCurve(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(4,:));
 legendText{1,1} = "AUC(" + convertCharsToStrings({'\beta g_2 g_3 \sigma \nu'}) + ") = " + num2str(round(AUC{1}.Value(1),2),2);
 
+disp("AUC(" + convertCharsToStrings({'\beta g_2 g_3 \sigma \nu'}) + ") CI = [" ...
+    + num2str(round(AUC{1}.Value(2),2),2) +  ", " + num2str(round(AUC{1}.Value(3),2),2) + "]")
 % filter = ~(HealthyControlsParameters(:,3) == 0);
 % HealthyControlsParametersFilter = HealthyControlsParameters(filter,:);
 % 
@@ -81,6 +88,8 @@ legendText{1,1} = "AUC(" + convertCharsToStrings({'\beta g_2 g_3 \sigma \nu'}) +
 for i = 1:length(parametersName)
     AUC{i + 1} = plotsingleROCCurve(params1(:,i), params2(:,i), params1groupName, params2groupName, colors(i,:));
     legendText{1,i + 1} = "AUC(" + convertCharsToStrings(parametersName{i}) + ") = " + num2str(round(AUC{i + 1}.Value(1),2),2);
+    disp("AUC(" + convertCharsToStrings(parametersName{i}) + ") CI = [" ...
+        + num2str(round(AUC{i + 1}.Value(2),2),2) +  ", " + num2str(round(AUC{i + 1}.Value(3),2),2) + "]")
 end
 
 hold off;
@@ -93,7 +102,7 @@ ylabel('True Positive Rate');
 xlabel('False Positive Rate')
 t = title(plotInfo.Title);
 
-t.FontSize = 20;
+t.FontSize = plotInfo.titleFontSize;
 
 %Further post-processing the figure
 set(gca, ...
@@ -108,6 +117,11 @@ axis square;
 
 ax = gca;
 ax.LineWidth = plotInfo.defaultLineSize;
+ax.XLabel.FontSize = plotInfo.labelSize;
+ax.YLabel.FontSize = plotInfo.labelSize;
+ax.XAxis.FontSize = plotInfo.axisSize;
+ax.YAxis.FontSize = plotInfo.axisSize;
+ax.YTick = 0:0.2:1.0;
 
 exportName = [params1groupName 'vs' params2groupName];
 
@@ -134,8 +148,7 @@ function AUC = plotsingleROCCurve(param1, param2, param1Label, param2Label, para
     mdl = fitglm(allData,allDatalogicalResponse,'Distribution', 'binomial','Link','logit');
     
     allDataScores = mdl.Fitted.Probability;
-    [X,Y,~,AUC.Value] = perfcurve(allLabels, allDataScores, param2Label, NBoot=10);
-    %[~,AUC.CI] = auc([allLabels allDataScores],0.05,'boot',10000,'type','bca');
+    [X,Y,~,AUC.Value] = perfcurve(allLabels, allDataScores, param2Label, NBoot=100);
 
     plot(X(:,1),Y(:,1),...
         "Color",paramColor,...

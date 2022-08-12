@@ -37,9 +37,9 @@ AllMCIUnkResults        =   MCIUnk.Results;
 
 %% do stats
 %loop over IDs
-% name = "Young";
-% name = "HealthyOld";
-name = "MCIMerged";
+%name = "Young";
+ name = "HealthyOld";
+%name = "MCIMerged";
 
 if name == "Young"
     [Physical_Pos, Mental_Pos] = extractAllFinalPoints(AllYoungResults, config);

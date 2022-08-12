@@ -20,6 +20,7 @@ config.Speed.tresholdForBadParticipantL1Recontruction   = 0.0;    % threshold fo
 config.NumParams                                        = 1000;
 config.ModelName                                        = "beta_g2_g3_sigma_nu";
 config.useOoBtrials                                     = true;
+config.useTrialFilter                                   = true;
 
 resultfolder = pwd + "/Output/DataFigures/FamilyHistPos_FamilyHistNeg";
 config.ResultFolder = resultfolder;
@@ -47,12 +48,16 @@ DataForCoco.FHPos.Gender   = FamilyHistPos.Gender;
 DataForCoco.FHPos.FlagOoB  = FamilyHistPos.Results.flagOoB;
 DataForCoco.FHPos.DistErr  = FamilyHistPos.Results.DistErr;
 DataForCoco.FHPos.AngleErr = FamilyHistPos.Results.AngleErr;
+DataForCoco.FHPos.ResultsTab   = FamilyHistPos.Reconstructed;
+DataForCoco.FHPos.ConditionTab = FamilyHistPos.CondTable;
 
 DataForCoco.FHNeg.Code     = FamilyHistNeg.Info;
 DataForCoco.FHNeg.Gender   = FamilyHistNeg.Gender;
 DataForCoco.FHNeg.FlagOoB  = FamilyHistNeg.Results.flagOoB;
 DataForCoco.FHNeg.DistErr  = FamilyHistNeg.Results.DistErr;
 DataForCoco.FHNeg.AngleErr = FamilyHistNeg.Results.AngleErr;
+DataForCoco.FHNeg.ResultsTab   = FamilyHistNeg.Reconstructed;
+DataForCoco.FHNeg.ConditionTab = FamilyHistNeg.CondTable;
 
 save ./Data/ProcessedDataForCoco.mat DataForCoco
 

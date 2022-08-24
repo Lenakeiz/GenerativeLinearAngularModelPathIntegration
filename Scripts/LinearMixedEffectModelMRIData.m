@@ -50,29 +50,51 @@ rhs = "Sex + Age + norm_ErC + norm_hippocampus + norm_subiculum + norm_isthmusci
 disp("%%%%%%%%%%%%%%% PERFORMING LINEAR MIXED EFFECT MODELS - LARGE MODEL %%%%%%%%%%%%%%%");
 
 lhs = "beta";
-performLinearMixedEffectModel(MRIModelParamsDataTable, lhs, rhs)
+[betalme,betastats]   = performLinearMixedEffectModel(MRIModelParamsDataTable, lhs, rhs);
 lhs = "g2";
-performLinearMixedEffectModel(MRIModelParamsDataTable, lhs, rhs)
+[g2lme,g2stats]       = performLinearMixedEffectModel(MRIModelParamsDataTable, lhs, rhs);
 lhs = "g3";
-performLinearMixedEffectModel(MRIModelParamsDataTable, lhs, rhs)
+[g3lme,g3stats]       = performLinearMixedEffectModel(MRIModelParamsDataTable, lhs, rhs);
 lhs = "sigma";
-performLinearMixedEffectModel(MRIModelParamsDataTable, lhs, rhs)
+[sigmalme,sigmastats] = performLinearMixedEffectModel(MRIModelParamsDataTable, lhs, rhs);
 lhs = "nu";
-performLinearMixedEffectModel(MRIModelParamsDataTable, lhs, rhs)
+[nulme,nustats]       = performLinearMixedEffectModel(MRIModelParamsDataTable, lhs, rhs);
 
-rhs = "Sex + Age + norm_ErC + norm_hippocampus + norm_subiculum + norm_isthmuscingulate_volume_Dest + (1 | MCI)";
+%% Plotting selected variables
+plotInfo.defaultTextSize = 20;
+plotInfo.defaultLineSize = 1.3;
+plotInfo.titleFontSize = 16;
+plotInfo.labelSize = 15;
+plotInfo.axisSize = 14;
+plotInfo.visible = "true";
 
-disp("%%%%%%%%%%%%%%% PERFORMING LINEAR MIXED EFFECT MODELS - CLOSE MODEL %%%%%%%%%%%%%%%");
-lhs = "beta";
-performLinearMixedEffectModel(MRIModelParamsDataTable, lhs, rhs)
-lhs = "g2";
-performLinearMixedEffectModel(MRIModelParamsDataTable, lhs, rhs)
-lhs = "g3";
-performLinearMixedEffectModel(MRIModelParamsDataTable, lhs, rhs)
-lhs = "sigma";
-performLinearMixedEffectModel(MRIModelParamsDataTable, lhs, rhs)
-lhs = "nu";
-performLinearMixedEffectModel(MRIModelParamsDataTable, lhs, rhs)
+plotInfo.XLabel = "Subiculum";
+plotInfo.YLabel = '\beta';
+plotSelectedQuantities(MRIModelParamsDataTable.beta, MRIModelParamsDataTable.norm_subiculum, plotInfo);
+
+plotInfo.XLabel = "Hippocampus";
+plotInfo.YLabel = '\beta';
+plotSelectedQuantities(MRIModelParamsDataTable.beta, MRIModelParamsDataTable.norm_hippocampus, plotInfo);
+
+plotInfo.XLabel = "Inferior parietal";
+plotInfo.YLabel = 'g_{2}';
+plotSelectedQuantities(MRIModelParamsDataTable.g2, MRIModelParamsDataTable.norm_inferiorparietal_volume_Dest, plotInfo);
+
+plotInfo.XLabel = "Subiculum";
+plotInfo.YLabel = 'g_{3}';
+plotSelectedQuantities(MRIModelParamsDataTable.g3, MRIModelParamsDataTable.norm_subiculum, plotInfo);
+
+plotInfo.XLabel = "Hippocampus";
+plotInfo.YLabel = 'g_{3}';
+plotSelectedQuantities(MRIModelParamsDataTable.g3, MRIModelParamsDataTable.norm_hippocampus, plotInfo);
+
+plotInfo.XLabel = "Entorhinal Cortex";
+plotInfo.YLabel = '\nu';
+plotSelectedQuantities(MRIModelParamsDataTable.nu, MRIModelParamsDataTable.norm_ErC, plotInfo);
+
+plotInfo.XLabel = "Inferior Parietal";
+plotInfo.YLabel = '\nu';
+plotSelectedQuantities(MRIModelParamsDataTable.nu, MRIModelParamsDataTable.norm_inferiorparietal_volume_Dest, plotInfo);
 
 %% get the model parameters, average across the conditions
 % remove nans if the row after mergin still contains nans
@@ -99,7 +121,7 @@ function dataout = createLMETable(MRI, GroupParams)
 end
 
 %% Perform a linear mized effect model with hypothesis areas
-function performLinearMixedEffectModel(MRIModelParamsDataTable,leftHandSide, rightHandSide)
+function [lme,stats] = performLinearMixedEffectModel(MRIModelParamsDataTable,leftHandSide, rightHandSide)
 
     modelFormula = leftHandSide + " ~ " + rightHandSide;
     MRIModelParamsDataTable.CSF = nominal(MRIModelParamsDataTable.CSF);
@@ -122,9 +144,27 @@ function performLinearMixedEffectModel(MRIModelParamsDataTable,leftHandSide, rig
 
     disp("%%%%%%%%%%%%%%% LME - " + leftHandSide + " %%%%%%%%%%%%%%%");
     lme = fitglme(MRIModelParamsDataTable,modelFormula)
+    stats = anova(lme);
 
 end
 
 %%
-function plotSelectedQuantities(x,y)
+function plotSelectedQuantities(x, y, plotInfo)
+    % set figure info
+    %f = figure('visible','off','Position', [100 100 1000 500]);
+    f = figure('visible', plotInfo.visible, 'Position', [100 100 600 600]);
+    %%% Font type and size setting %%%
+    % Using Arial as default because all journals normally require the font to
+    % be either Arial or Helvetica
+    set(0,'DefaultAxesFontName','Arial')
+    set(0,'DefaultTextFontName','Arial')
+    set(0,'DefaultAxesFontSize',12)
+    set(0,'DefaultTextFontSize',12)
+
+    mdl = fitlm(x,y);
+    plot(mdl);
+
+    xlabel(plotInfo.XLabel);
+    ylabel(plotInfo.YLabel);
+
 end

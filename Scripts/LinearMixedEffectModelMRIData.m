@@ -61,40 +61,42 @@ lhs = "nu";
 [nulme,nustats]       = performLinearMixedEffectModel(MRIModelParamsDataTable, lhs, rhs);
 
 %% Plotting selected variables
+close all;
+
 plotInfo.defaultTextSize = 20;
 plotInfo.defaultLineSize = 1.3;
 plotInfo.titleFontSize = 16;
 plotInfo.labelSize = 15;
 plotInfo.axisSize = 14;
-plotInfo.visible = "true";
-
+plotInfo.visible = "off";
+plotInfo.ResultFolder = config.ResultFolder;
 plotInfo.XLabel = "Subiculum";
-plotInfo.YLabel = '\beta';
-plotSelectedQuantities(MRIModelParamsDataTable.beta, MRIModelParamsDataTable.norm_subiculum, plotInfo);
+plotInfo.YLabel = {'\beta'};
+plotSelectedQuantities(MRIModelParamsDataTable.norm_subiculum, MRIModelParamsDataTable.beta, plotInfo);
 
 plotInfo.XLabel = "Hippocampus";
 plotInfo.YLabel = '\beta';
-plotSelectedQuantities(MRIModelParamsDataTable.beta, MRIModelParamsDataTable.norm_hippocampus, plotInfo);
+plotSelectedQuantities(MRIModelParamsDataTable.norm_hippocampus, MRIModelParamsDataTable.beta, plotInfo);
 
 plotInfo.XLabel = "Inferior parietal";
 plotInfo.YLabel = 'g_{2}';
-plotSelectedQuantities(MRIModelParamsDataTable.g2, MRIModelParamsDataTable.norm_inferiorparietal_volume_Dest, plotInfo);
+plotSelectedQuantities(MRIModelParamsDataTable.norm_inferiorparietal_volume_Dest, MRIModelParamsDataTable.g2, plotInfo);
 
 plotInfo.XLabel = "Subiculum";
 plotInfo.YLabel = 'g_{3}';
-plotSelectedQuantities(MRIModelParamsDataTable.g3, MRIModelParamsDataTable.norm_subiculum, plotInfo);
+plotSelectedQuantities(MRIModelParamsDataTable.norm_subiculum, MRIModelParamsDataTable.g3, plotInfo);
 
 plotInfo.XLabel = "Hippocampus";
 plotInfo.YLabel = 'g_{3}';
-plotSelectedQuantities(MRIModelParamsDataTable.g3, MRIModelParamsDataTable.norm_hippocampus, plotInfo);
+plotSelectedQuantities(MRIModelParamsDataTable.norm_hippocampus, MRIModelParamsDataTable.g3,plotInfo);
 
 plotInfo.XLabel = "Entorhinal Cortex";
 plotInfo.YLabel = '\nu';
-plotSelectedQuantities(MRIModelParamsDataTable.nu, MRIModelParamsDataTable.norm_ErC, plotInfo);
+plotSelectedQuantities(MRIModelParamsDataTable.norm_ErC, MRIModelParamsDataTable.nu, plotInfo);
 
 plotInfo.XLabel = "Inferior Parietal";
 plotInfo.YLabel = '\nu';
-plotSelectedQuantities(MRIModelParamsDataTable.nu, MRIModelParamsDataTable.norm_inferiorparietal_volume_Dest, plotInfo);
+plotSelectedQuantities(MRIModelParamsDataTable.norm_inferiorparietal_volume_Dest, MRIModelParamsDataTable.nu, plotInfo);
 
 %% get the model parameters, average across the conditions
 % remove nans if the row after mergin still contains nans
@@ -164,7 +166,21 @@ function plotSelectedQuantities(x, y, plotInfo)
     mdl = fitlm(x,y);
     plot(mdl);
 
-    xlabel(plotInfo.XLabel);
-    ylabel(plotInfo.YLabel);
+    xlabel(plotInfo.XLabel, Interpreter="tex");
+    ylabel(plotInfo.YLabel, Interpreter="tex");
+
+    title("");
+
+    ax = gca;
+    ax.LineWidth = plotInfo.defaultLineSize;
+    ax.XLabel.FontSize = plotInfo.labelSize;
+    ax.YLabel.FontSize = plotInfo.labelSize;
+    ax.XAxis.FontSize = plotInfo.axisSize;
+    ax.YAxis.FontSize = plotInfo.axisSize;
+
+    filename = convertCharsToStrings(plotInfo.YLabel) + "vs" + convertCharsToStrings(plotInfo.XLabel);
+    
+    exportgraphics(f,plotInfo.ResultFolder+"/"+filename+".png",'Resolution',300);
+    exportgraphics(f,plotInfo.ResultFolder+"/"+filename+".pdf",'Resolution',300, 'ContentType','vector');
 
 end

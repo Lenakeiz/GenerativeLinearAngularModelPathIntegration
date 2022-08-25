@@ -4,22 +4,25 @@
 %
 %% Loading MRI data
 opts = detectImportOptions("Data\HowettBrain2019_NeuroPsych.csv");
-neuroPsychData = readtable("Data\HowettBrain2019_MRI.csv", opts);
+neuroPsychData = readtable("Data\HowettBrain2019_NeuroPsych.csv", opts);
 
 clear opts
 %% Importing mri data into main structures
-Unknown         = LoadMRIIntoGroup(Unknown,mriData);
-MCINeg          = LoadMRIIntoGroup(MCINeg,mriData);
-MCIPos          = LoadMRIIntoGroup(MCIPos,mriData);
-HealthyControls = LoadMRIIntoGroup(HealthyControls,mriData);
+Unknown         = AddNeuroPsychData(Unknown,neuroPsychData);
+MCINeg          = AddNeuroPsychData(MCINeg,neuroPsychData);
+MCIPos          = AddNeuroPsychData(MCIPos,neuroPsychData);
+HealthyControls = AddNeuroPsychData(HealthyControls,neuroPsychData);
 
-clear mriData
+clear neuroPsychData
 %%
-function Group = LoadMRIIntoGroup(Group, mriData)
+function Group = AddNeuroPsychData(Group, neuroPsychData)
     %% Importing the data
-    ids = cellstr(mriData.ID);
-    MRI = table(); % not copying the ID
-    %MRI.Properties.VariableNames = mriData.Properties.VariableNames(2:end);
+    ids = cellstr(neuroPsychData.ID);
+    NeuroPsych = table();
+
+    % Add here the columns you are interested to get from the
+    % neuropsych data, if wanted to check for more
+    neuroPsychIndices = [15 16 20];
 
     for i = 1:length(Group.Info)
         extractID = Group.Info{i};
@@ -33,17 +36,19 @@ function Group = LoadMRIIntoGroup(Group, mriData)
         else
             searchpid = append("A093863_",pid);
         end
-        
+
         pidx = find(strcmp(ids,searchpid));
         if(~isempty(pidx))
-            MRI = [MRI; mriData(pidx,1:end)];
+
+            % collected neuropsych tests
+            NeuroPsych = [NeuroPsych; neuroPsychData(pidx,neuroPsychIndices)];
         else
-            emptyTable = array2table(nan(1,width(mriData)));
-            emptyTable.Properties.VariableNames = mriData.Properties.VariableNames;
-            MRI = [MRI; emptyTable];
+            emptyTable = array2table(nan(1,length(neuroPsychIndices)));
+            emptyTable.Properties.VariableNames = neuroPsychData.Properties.VariableNames(neuroPsychIndices);
+            NeuroPsych = [NeuroPsych; emptyTable];
         end    
     end
 
-    Group.MRI = MRI;
+    Group.NeuroPsychTable = NeuroPsych;
 
 end

@@ -11,6 +11,10 @@ load('Data/HowettBrain2019_Dataset.mat');
 disp('%%%%%%%%%%%%%%% Adding MRI data ... %%%%%%%%%%%%%%%');
 LoadMRIData;
 
+%% Loading NeuroPsychological data
+disp('%%%%%%%%%%%%%%% Adding NeuroPsychological data ... %%%%%%%%%%%%%%%');
+LoadNeuroPsychData;
+
 %% setting the configuration
 config.Speed.alpha                                      = 0.9;    % Paramanter for running speed calculation
 config.Speed.timeOffsetAfterFlagReach                   = 1.5;    % Time to track after flag reached in seconds 

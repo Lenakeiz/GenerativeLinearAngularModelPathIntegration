@@ -3,9 +3,9 @@
 % 
 %
 %% Loading MRI data
-opts = detectImportOptions("Data\HowettBrain2019_MRI.csv");
+opts = detectImportOptions("./Data/HowettBrain2019_MRI.csv");
 opts = setvartype(opts,{'ID','CSF','Sex'},'string');
-mriData = readtable("Data\HowettBrain2019_MRI.csv", opts);
+mriData = readtable("./Data/HowettBrain2019_MRI.csv", opts);
 vNames = mriData.Properties.VariableNames;
 vNamesFilter = contains(vNames,"norm_");
 vNamesFilter(1:6) = ones(1,6);

@@ -3,8 +3,8 @@
 % 
 %
 %% Loading MRI data
-opts = detectImportOptions("Data\HowettBrain2019_NeuroPsych.csv");
-neuroPsychData = readtable("Data\HowettBrain2019_NeuroPsych.csv", opts);
+opts = detectImportOptions("./Data/HowettBrain2019_NeuroPsych.csv");
+neuroPsychData = readtable("./Data/HowettBrain2019_NeuroPsych.csv", opts);
 
 clear opts
 %% Importing mri data into main structures

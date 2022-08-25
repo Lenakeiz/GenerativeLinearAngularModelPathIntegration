@@ -49,6 +49,6 @@ function Group = AddNeuroPsychData(Group, neuroPsychData)
         end    
     end
 
-    Group.NeuroPsychTable = NeuroPsych;
+    Group.NeuroPsych = NeuroPsych;
 
 end

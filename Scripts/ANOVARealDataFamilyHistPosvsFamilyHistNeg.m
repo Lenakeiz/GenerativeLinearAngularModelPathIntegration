@@ -4,7 +4,8 @@ rng('default');
 
 %% Loading data
 disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
-load('AllDataErrorsPrevent.mat');
+%load('AllDataErrorsPrevent.mat');
+load('AllDataErrorsPreventFH.mat');
 
 %% setting the configuration
 config.Speed.alpha                                      = 0.9;    % Paramanter for running speed calculation

@@ -28,5 +28,6 @@ config.Speed.tresholdForBadParticipantL1Recontruction   = 0.0;
 MCIUnk = TransformPaths(Unknown);%transform data
 MCIUnk   = CalculateTrackingPath(MCIUnk, config);
 ManuallyScoringMCIUnk;
+clear Unknown % removing duplicate
 
 disp("%%%%%%%%%%%%%%% Preprocessing complete %%%%%%%%%%%%%%%");

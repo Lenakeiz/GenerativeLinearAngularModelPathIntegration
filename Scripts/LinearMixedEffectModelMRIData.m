@@ -23,6 +23,8 @@ if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
 end
 
+ColorPattern;
+
 %% Getting Information from results:
 YoungControlsParameters   = averageAcrossConditions(YoungControls.Results.estimatedParams);
 HealthyControlsParameters = averageAcrossConditions(HealthyControls.Results.estimatedParams);
@@ -45,9 +47,9 @@ clear filter
 
 %% Performing mixedeffectmodel
 clc;
-rhs = "Sex + Age + norm_ErC + norm_hippocampus + norm_subiculum + norm_isthmuscingulate_volume_Dest + norm_inferiorparietal_volume_Dest + norm_superiorparietal_volume_Dest + (1 | MCI)";
+rhs = "Sex + Age + norm_ErC + norm_hippocampus + norm_isthmuscingulate_volume_Dest + norm_inferiorparietal_volume_Dest + norm_superiorparietal_volume_Dest + (1 | MCI)";
 
-disp("%%%%%%%%%%%%%%% PERFORMING LINEAR MIXED EFFECT MODELS - LARGE MODEL %%%%%%%%%%%%%%%");
+disp("%%%%%%%%%%%%%%% PERFORMING LINEAR MIXED EFFECT MODELS %%%%%%%%%%%%%%%");
 
 lhs = "beta";
 [betalme,betastats]   = performLinearMixedEffectModel(MRIModelParamsDataTable, lhs, rhs);
@@ -62,41 +64,45 @@ lhs = "nu";
 
 %% Plotting selected variables
 close all;
+clc;
 
-plotInfo.defaultTextSize = 20;
+plotInfo.defaultTextSize = 14;
 plotInfo.defaultLineSize = 1.3;
-plotInfo.titleFontSize = 16;
-plotInfo.labelSize = 15;
-plotInfo.axisSize = 14;
+plotInfo.titleFontSize = 18;
+plotInfo.labelSize = 19;
+plotInfo.axisSize = 16;
+plotInfo.dataSize = 80;
+plotInfo.legendFontSize = 15;
 plotInfo.visible = "off";
 plotInfo.ResultFolder = config.ResultFolder;
-plotInfo.XLabel = "Subiculum";
-plotInfo.YLabel = {'\beta'};
-plotSelectedQuantities(MRIModelParamsDataTable.norm_subiculum, MRIModelParamsDataTable.beta, plotInfo);
+plotInfo.color_scheme_group = config.color_scheme_group;
+% plotInfo.XLabel = "Subiculum";
+% plotInfo.YLabel = {'\beta'};
+% plotSelectedQuantities(MRIModelParamsDataTable.norm_subiculum, MRIModelParamsDataTable.beta, plotInfo);
 
-plotInfo.XLabel = "Hippocampus";
-plotInfo.YLabel = '\beta';
-plotSelectedQuantities(MRIModelParamsDataTable.norm_hippocampus, MRIModelParamsDataTable.beta, plotInfo);
+% plotInfo.XLabel = "Hippocampus";
+% plotInfo.YLabel = '\beta';
+% plotSelectedQuantities(MRIModelParamsDataTable.norm_hippocampus, MRIModelParamsDataTable.beta, plotInfo);
 
 plotInfo.XLabel = "Inferior parietal";
 plotInfo.YLabel = 'g_{2}';
-plotSelectedQuantities(MRIModelParamsDataTable.norm_inferiorparietal_volume_Dest, MRIModelParamsDataTable.g2, plotInfo);
+plotSelectedQuantities(MRIModelParamsDataTable.norm_inferiorparietal_volume_Dest, MRIModelParamsDataTable.g2, csfStatus, plotInfo);
 
-plotInfo.XLabel = "Subiculum";
-plotInfo.YLabel = 'g_{3}';
-plotSelectedQuantities(MRIModelParamsDataTable.norm_subiculum, MRIModelParamsDataTable.g3, plotInfo);
+% plotInfo.XLabel = "Subiculum";
+% plotInfo.YLabel = 'g_{3}';
+% plotSelectedQuantities(MRIModelParamsDataTable.norm_subiculum, MRIModelParamsDataTable.g3, plotInfo);
 
 plotInfo.XLabel = "Hippocampus";
 plotInfo.YLabel = 'g_{3}';
-plotSelectedQuantities(MRIModelParamsDataTable.norm_hippocampus, MRIModelParamsDataTable.g3,plotInfo);
+plotSelectedQuantities(MRIModelParamsDataTable.norm_hippocampus, MRIModelParamsDataTable.g3, csfStatus, plotInfo);
 
 plotInfo.XLabel = "Entorhinal Cortex";
 plotInfo.YLabel = '\nu';
-plotSelectedQuantities(MRIModelParamsDataTable.norm_ErC, MRIModelParamsDataTable.nu, plotInfo);
+plotSelectedQuantities(MRIModelParamsDataTable.norm_ErC, MRIModelParamsDataTable.nu, csfStatus, plotInfo);
 
-plotInfo.XLabel = "Inferior Parietal";
+plotInfo.XLabel = "Inferior parietal";
 plotInfo.YLabel = '\nu';
-plotSelectedQuantities(MRIModelParamsDataTable.norm_inferiorparietal_volume_Dest, MRIModelParamsDataTable.nu, plotInfo);
+plotSelectedQuantities(MRIModelParamsDataTable.norm_inferiorparietal_volume_Dest, MRIModelParamsDataTable.nu, csfStatus, plotInfo);
 
 %% get the model parameters, average across the conditions
 % remove nans if the row after mergin still contains nans
@@ -126,13 +132,13 @@ end
 function [lme,stats] = performLinearMixedEffectModel(MRIModelParamsDataTable,leftHandSide, rightHandSide)
 
     modelFormula = leftHandSide + " ~ " + rightHandSide;
+    MRIModelParamsDataTable.Sex = nominal(MRIModelParamsDataTable.Sex);
     MRIModelParamsDataTable.CSF = nominal(MRIModelParamsDataTable.CSF);
     MRIModelParamsDataTable.MCI = nominal(MRIModelParamsDataTable.MCI);
 
     MRIModelParamsDataTable.norm_ErC                          = zscore(MRIModelParamsDataTable.norm_ErC);
     MRIModelParamsDataTable.norm_AntLat                       = zscore(MRIModelParamsDataTable.norm_AntLat);
     MRIModelParamsDataTable.norm_PosMed                       = zscore(MRIModelParamsDataTable.norm_PosMed);
-    MRIModelParamsDataTable.norm_entorhinal                   = zscore(MRIModelParamsDataTable.norm_entorhinal);
     MRIModelParamsDataTable.norm_TE35                         = zscore(MRIModelParamsDataTable.norm_TE35);
     MRIModelParamsDataTable.norm_hippocampus                  = zscore(MRIModelParamsDataTable.norm_hippocampus);
     MRIModelParamsDataTable.norm_subiculum                    = zscore(MRIModelParamsDataTable.norm_subiculum);
@@ -151,25 +157,47 @@ function [lme,stats] = performLinearMixedEffectModel(MRIModelParamsDataTable,lef
 end
 
 %%
-function plotSelectedQuantities(x, y, plotInfo)
+function plotSelectedQuantities(x, y, csfStatus, plotInfo)
     % set figure info
     %f = figure('visible','off','Position', [100 100 1000 500]);
-    f = figure('visible', plotInfo.visible, 'Position', [100 100 600 600]);
+    f = figure('visible', plotInfo.visible, 'Position', [0 0 500 400]);
     %%% Font type and size setting %%%
     % Using Arial as default because all journals normally require the font to
     % be either Arial or Helvetica
     set(0,'DefaultAxesFontName','Arial')
     set(0,'DefaultTextFontName','Arial')
-    set(0,'DefaultAxesFontSize',12)
-    set(0,'DefaultTextFontSize',12)
+    set(0,'DefaultAxesFontSize',plotInfo.axisSize)
+    set(0,'DefaultTextFontSize',plotInfo.axisSize)
 
     mdl = fitlm(x,y);
-    plot(mdl);
+    
+    labels = ["HC", "Unknown", "Negative", "Positive"];
+
+    hold on;
+
+    for i = 1:4
+        axSc{i} = scatter(x(csfStatus == labels(i)),y((csfStatus == labels(i))), plotInfo.dataSize);
+        axSc{i}.MarkerFaceColor = plotInfo.color_scheme_group(1+i,:);
+        axSc{i}.MarkerEdgeColor = plotInfo.color_scheme_group(1+i,:) * 0.8;
+        axSc{i}.MarkerFaceAlpha = 0.9; axSc{i}.MarkerEdgeAlpha = 0.9;
+    end
+
+    axLine = plot(mdl);
+    axLine(1).Marker = 'none';
+    axLine(2).Color = [0.2 0.2 0.2];
+    axLine(3).Color = [0.2 0.2 0.2];
+    axLine(4).Color = [0.2 0.2 0.2];
+    axLine(2).LineWidth = plotInfo.defaultLineSize;
+    axLine(3).LineWidth = plotInfo.defaultLineSize;
+    axLine(4).LineWidth = plotInfo.defaultLineSize;
 
     xlabel(plotInfo.XLabel, Interpreter="tex");
     ylabel(plotInfo.YLabel, Interpreter="tex");
 
     title("");
+    legplotInfo = legend([axSc{1}, axSc{2}, axSc{3}, axSc{4}], {'HC' 'MCI unk' 'MCI-' 'MCI+'}, "Location", "northeast", "AutoUpdate", "off");
+    legplotInfo.FontSize = plotInfo.legendFontSize;
+    hold off;
 
     ax = gca;
     ax.LineWidth = plotInfo.defaultLineSize;
@@ -177,9 +205,19 @@ function plotSelectedQuantities(x, y, plotInfo)
     ax.YLabel.FontSize = plotInfo.labelSize;
     ax.XAxis.FontSize = plotInfo.axisSize;
     ax.YAxis.FontSize = plotInfo.axisSize;
+    ax.XAxis.ExponentMode = "manual";
+    ax.XAxis.Exponent = -3;
+    ax.XAxis.TickValues = ax.XAxis.TickValues(2:2:end);
+    ylim([0 3 ]);
+    ax.YAxis.TickValues = [0 1 2 3];
+    ax.YTick = [0 1 2 3];
 
     filename = convertCharsToStrings(plotInfo.YLabel) + "vs" + convertCharsToStrings(plotInfo.XLabel);
     
+    if exist(plotInfo.ResultFolder+"/"+filename+".png","file") == 2
+        delete(plotInfo.ResultFolder+"/"+filename+".png");
+    end
+
     exportgraphics(f,plotInfo.ResultFolder+"/"+filename+".png",'Resolution',300);
     exportgraphics(f,plotInfo.ResultFolder+"/"+filename+".pdf",'Resolution',300, 'ContentType','vector');
 

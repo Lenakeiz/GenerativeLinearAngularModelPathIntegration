@@ -73,7 +73,7 @@ plotInfo.labelSize = 19;
 plotInfo.axisSize = 16;
 plotInfo.dataSize = 80;
 plotInfo.legendFontSize = 15;
-plotInfo.visible = "on";
+plotInfo.visible = "off";
 plotInfo.ResultFolder = config.ResultFolder;
 plotInfo.color_scheme_group = config.color_scheme_group;
 % plotInfo.XLabel = "Subiculum";
@@ -151,7 +151,7 @@ function [lme,stats] = performLinearMixedEffectModel(MRIModelParamsDataTable,lef
     MRIModelParamsDataTable.norm_superiorparietal_volume_DK   = zscore(MRIModelParamsDataTable.norm_superiorparietal_volume_DK);
 
     disp("%%%%%%%%%%%%%%% LME - " + leftHandSide + " %%%%%%%%%%%%%%%");
-    lme = fitlme(MRIModelParamsDataTable,modelFormula)
+    lme = fitglme(MRIModelParamsDataTable,modelFormula)
     disp("%%%%%%%%%%%%%%% Model RSqaured + " + lme.Rsquared.Ordinary + " %%%%%%%%%%%%%%%");
 
     stats = anova(lme);
@@ -221,7 +221,7 @@ function plotSelectedQuantities(x, y, csfStatus, plotInfo, addLine)
     end
 
     hold off;
-    
+
     filename = convertCharsToStrings(plotInfo.YLabel) + "vs" + convertCharsToStrings(plotInfo.XLabel);
     
     if exist(plotInfo.ResultFolder+"/"+filename+".png","file") == 2

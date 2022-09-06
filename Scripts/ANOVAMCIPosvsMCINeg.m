@@ -63,6 +63,7 @@ function BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, confi
         set(0,'DefaultTextFontName','Arial')
         set(0,'DefaultAxesFontSize',12)
         set(0,'DefaultTextFontSize',12)     
+
         %%% Color definition %%%
         colorForMCIPos = config.color_scheme_npg(6,:);
         colorForMCINeg = config.color_scheme_npg(3,:);
@@ -259,7 +260,7 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
         median_lineWidth            =   2;
         median_color                =   'k';
         scatter_jitter_value        =   0.2;
-        scatter_markerSize          =   10;
+        scatter_markerSize          =   30;
         scatter_marker_edgeColor    =   'k';
         scatter_marker_edgeWidth    =   0.5;
         scatter_color_transparency  =   0.7; %faceAlpha        
@@ -319,7 +320,7 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
         errorbar(1,mean_MCIPos,sem_MCIPos,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 18);    
         hold on
         %add mean point
-        scatter(1, mean_MCIPos, 2*scatter_markerSize, 'd',...
+        scatter(1, mean_MCIPos, 3*scatter_markerSize, 'd',...
                 'filled','MarkerEdgeColor','k', ...
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);
@@ -342,17 +343,38 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
         errorbar(2,mean_MCINeg,sem_MCINeg,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 18); 
         hold on
         %add mean point
-        scatter(2, mean_MCINeg, 2*scatter_markerSize, 'd',...
+        scatter(2, mean_MCINeg, 3*scatter_markerSize, 'd',...
                 'filled','MarkerEdgeColor','k', ...
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);        
+
+        %add yline
+        if ParamName(ParamIndx)=="beta"
+            yline(0,Color='r',LineStyle='--',LineWidth=2);
+        elseif ParamName(ParamIndx)=="g2"
+            yline(1,Color='r',LineStyle='--',LineWidth=2);
+        elseif ParamName(ParamIndx)=="g3"
+            yline(1,Color='r',LineStyle='--',LineWidth=2);
+        end
 
         %% Further post-processing the figure
         %calculate the ylim
         alldata = [MCIPosParamMean;MCINegParamMean];
         maxdata = max(alldata,[],'all');
         mindata = min(alldata, [], 'all');
-        lowupYlim = [mindata-.1*(maxdata-mindata)-eps, maxdata+.1*(maxdata-mindata)+eps]; 
+        
+        if ParamName(ParamIndx)=="g2" | ParamName(ParamIndx)=="g3" | ParamName(ParamIndx)=="nu" 
+            lowupYlim = [0, 3];
+            yticks = [0,1,2,3];
+        elseif ParamName(ParamIndx)=="beta"
+            lowupYlim = [-0.1, 0.5];
+            yticks = [-0.1, 0, 0.1, 0.3, 0.5];
+        elseif ParamName(ParamIndx)=="sigma"
+            lowupYlim = [0, 1.5];    
+            yticks = [0, 0.5, 1.0, 1.5];
+        end
+
+        %lowupYlim = [mindata-.1*(maxdata-mindata)-eps, maxdata+.1*(maxdata-mindata)+eps]; 
         %eps to make sure when mindata=maxdata, there won't be an error
 
         set(gca, ...
@@ -364,6 +386,7 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
             'XTick'       , (1:2),... 
             'XLim'        , [0.5, 2.5],...
             'YLim'        , lowupYlim,...   
+            'YTick'       , yticks,...
             'XTickLabel'  , {'MCIPos','MCINeg'},...
             'LineWidth'   , .5        );
         ylabel(ParamName(ParamIndx));

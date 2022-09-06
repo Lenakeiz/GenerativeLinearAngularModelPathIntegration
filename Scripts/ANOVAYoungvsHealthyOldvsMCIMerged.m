@@ -321,7 +321,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         median_lineWidth            =   2;
         median_color                =   'k';
         scatter_jitter_value        =   0.2;
-        scatter_markerSize          =   10;
+        scatter_markerSize          =   30;
         scatter_marker_edgeColor    =   'k';
         scatter_marker_edgeWidth    =   0.5;
         scatter_color_transparency  =   0.7; %faceAlpha        
@@ -398,7 +398,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         errorbar(1,mean_Young,sem_Young,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 18); 
         hold on
         %add mean point
-        scatter(1, mean_Young, 2*scatter_markerSize, 'd',...
+        scatter(1, mean_Young, 3*scatter_markerSize, 'd',...
                 'filled','MarkerEdgeColor','k', ...
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);    
@@ -421,7 +421,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         errorbar(2,mean_Hold,sem_Hold,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 18);    
         hold on
         %add mean point
-        scatter(2, mean_Hold, 2*scatter_markerSize, 'd',...
+        scatter(2, mean_Hold, 3*scatter_markerSize, 'd',...
                 'filled','MarkerEdgeColor','k', ...
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);    
@@ -444,10 +444,19 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         errorbar(3,mean_MCI,sem_MCI,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 18); 
         hold on
         %add mean point
-        scatter(3, mean_MCI, 2*scatter_markerSize, 'd',...
+        scatter(3, mean_MCI, 3*scatter_markerSize, 'd',...
                 'filled','MarkerEdgeColor','k', ...
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);     
+        
+        %add yline
+        if ParamName(ParamIndx)=="beta"
+            yline(0,Color='r',LineStyle='--',LineWidth=2);
+        elseif ParamName(ParamIndx)=="g2"
+            yline(1,Color='r',LineStyle='--',LineWidth=2);
+        elseif ParamName(ParamIndx)=="g3"
+            yline(1,Color='r',LineStyle='--',LineWidth=2);
+        end
 
         %% Further post-processing the figure
 
@@ -455,8 +464,20 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         alldata = [YoungParamMean;HealthyOldParamMean;MCIParamMean];
         maxdata = max(alldata,[],'all');
         mindata = min(alldata, [], 'all');
-        lowupYlim = [mindata-.1*(maxdata-mindata)-eps, maxdata+.1*(maxdata-mindata)+eps]; 
-        %eps to make sure when mindata=maxdata, there won't be an error
+
+        if ParamName(ParamIndx)=="g2" | ParamName(ParamIndx)=="g3" | ParamName(ParamIndx)=="nu" 
+            lowupYlim = [0, 3];
+            yticks = [0,1,2,3];
+        elseif ParamName(ParamIndx)=="beta"
+            lowupYlim = [-0.1, 0.5];
+            yticks = [-0.1, 0, 0.1, 0.3, 0.5];
+        elseif ParamName(ParamIndx)=="sigma"
+            lowupYlim = [0, 1.5];    
+            yticks = [0, 0.5, 1.0, 1.5];
+        end
+
+%         lowupYlim = [mindata-.1*(maxdata-mindata)-eps, maxdata+.1*(maxdata-mindata)+eps]; 
+%         %eps to make sure when mindata=maxdata, there won't be an error
 
         set(gca, ...
             'Box'         , 'off'     , ...
@@ -467,8 +488,11 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
             'XTick'       , (1:3),... 
             'XLim'        , [0.5, 3.5],...
             'YLim'        , lowupYlim,...
+            'YTick'       , yticks,...
             'XTickLabel'  , {'Young','HealthyOld','MCI'},...
             'LineWidth'   , .5        );
+        %ylabel
+        %Names = ["beta", "g2", "g3", "sigma", "nu"];
         ylabel(ParamName(ParamIndx));
 
         %extract pvalue for multicomparison of Group effect for showing on the figure

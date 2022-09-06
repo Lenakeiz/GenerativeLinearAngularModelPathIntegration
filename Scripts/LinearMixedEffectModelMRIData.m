@@ -86,7 +86,7 @@ plotInfo.color_scheme_group = config.color_scheme_group;
 
 plotInfo.XLabel = "Inferior parietal";
 plotInfo.YLabel = 'g_{2}';
-plotSelectedQuantities(MRIModelParamsDataTable.norm_inferiorparietal_volume_Dest, MRIModelParamsDataTable.g2, csfStatus, plotInfo);
+plotSelectedQuantities(MRIModelParamsDataTable.norm_inferiorparietal_volume_Dest, MRIModelParamsDataTable.g2, MRIModelParamsDataTable.CSF, plotInfo, 1);
 
 % plotInfo.XLabel = "Subiculum";
 % plotInfo.YLabel = 'g_{3}';
@@ -94,15 +94,15 @@ plotSelectedQuantities(MRIModelParamsDataTable.norm_inferiorparietal_volume_Dest
 
 plotInfo.XLabel = "Hippocampus";
 plotInfo.YLabel = 'g_{3}';
-plotSelectedQuantities(MRIModelParamsDataTable.norm_hippocampus, MRIModelParamsDataTable.g3, csfStatus, plotInfo);
+plotSelectedQuantities(MRIModelParamsDataTable.norm_hippocampus, MRIModelParamsDataTable.g3, MRIModelParamsDataTable.CSF, plotInfo, 1);
 
 plotInfo.XLabel = "Entorhinal Cortex";
 plotInfo.YLabel = '\nu';
-plotSelectedQuantities(MRIModelParamsDataTable.norm_ErC, MRIModelParamsDataTable.nu, csfStatus, plotInfo);
+plotSelectedQuantities(MRIModelParamsDataTable.norm_ErC, MRIModelParamsDataTable.nu, MRIModelParamsDataTable.CSF, plotInfo, 0);
 
 plotInfo.XLabel = "Inferior parietal";
 plotInfo.YLabel = '\nu';
-plotSelectedQuantities(MRIModelParamsDataTable.norm_inferiorparietal_volume_Dest, MRIModelParamsDataTable.nu, csfStatus, plotInfo);
+plotSelectedQuantities(MRIModelParamsDataTable.norm_inferiorparietal_volume_Dest, MRIModelParamsDataTable.nu, MRIModelParamsDataTable.CSF, plotInfo, 0);
 
 %% get the model parameters, average across the conditions
 % remove nans if the row after mergin still contains nans
@@ -152,12 +152,14 @@ function [lme,stats] = performLinearMixedEffectModel(MRIModelParamsDataTable,lef
 
     disp("%%%%%%%%%%%%%%% LME - " + leftHandSide + " %%%%%%%%%%%%%%%");
     lme = fitglme(MRIModelParamsDataTable,modelFormula)
+    disp("%%%%%%%%%%%%%%% Model RSqaured + " + lme.Rsquared.Ordinary + " %%%%%%%%%%%%%%%");
+
     stats = anova(lme);
 
 end
 
 %%
-function plotSelectedQuantities(x, y, csfStatus, plotInfo)
+function plotSelectedQuantities(x, y, csfStatus, plotInfo, addLine)
     % set figure info
     %f = figure('visible','off','Position', [100 100 1000 500]);
     f = figure('visible', plotInfo.visible, 'Position', [0 0 500 400]);
@@ -197,7 +199,7 @@ function plotSelectedQuantities(x, y, csfStatus, plotInfo)
     title("");
     legplotInfo = legend([axSc{1}, axSc{2}, axSc{3}, axSc{4}], {'HC' 'MCI unk' 'MCI-' 'MCI+'}, "Location", "northeast", "AutoUpdate", "off");
     legplotInfo.FontSize = plotInfo.legendFontSize;
-    hold off;
+    
 
     ax = gca;
     ax.LineWidth = plotInfo.defaultLineSize;
@@ -208,9 +210,17 @@ function plotSelectedQuantities(x, y, csfStatus, plotInfo)
     ax.XAxis.ExponentMode = "manual";
     ax.XAxis.Exponent = -3;
     ax.XAxis.TickValues = ax.XAxis.TickValues(2:2:end);
-    ylim([0 3 ]);
+    ylim([-0.5 3]);
     ax.YAxis.TickValues = [0 1 2 3];
     ax.YTick = [0 1 2 3];
+
+    if addLine ==  1
+        % Plotting y = 1
+        tempX = [ax.XAxis.Limits(1):0.0001:ax.XAxis.Limits(2)];
+        plot(tempX,ones(length(tempX)),"r--", LineWidth=plotInfo.defaultLineSize-0.2);
+    end
+
+    hold off;
 
     filename = convertCharsToStrings(plotInfo.YLabel) + "vs" + convertCharsToStrings(plotInfo.XLabel);
     

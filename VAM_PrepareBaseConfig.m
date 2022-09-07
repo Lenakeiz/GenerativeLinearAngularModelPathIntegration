@@ -8,12 +8,12 @@ disp('%%%%%%%%%%%%%%% Data loading ... %%%%%%%%%%%%%%%');
 load('Data/HowettBrain2019_Dataset.mat');
 
 %% Loading MRI data
-disp('%%%%%%%%%%%%%%% Adding MRI data ... %%%%%%%%%%%%%%%');
-LoadMRIData;
+% disp('%%%%%%%%%%%%%%% Adding MRI data ... %%%%%%%%%%%%%%%');
+% LoadMRIData;
 
 %% Loading NeuroPsychological data
-disp('%%%%%%%%%%%%%%% Adding NeuroPsychological data ... %%%%%%%%%%%%%%%');
-LoadNeuroPsychData;
+% disp('%%%%%%%%%%%%%%% Adding NeuroPsychological data ... %%%%%%%%%%%%%%%');
+% LoadNeuroPsychData;
 
 %% setting the configuration
 config.Speed.alpha                                      = 0.9;    % Paramanter for running speed calculation

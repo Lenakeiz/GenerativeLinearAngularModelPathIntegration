@@ -36,14 +36,15 @@ MCIAllParameters          = [MCIUnkParameters; MCINegParameters; MCIPosParameter
 %% Plotting roc curve HC vs pooled MCI and MCI negative vs MCI positive
 % Plotting variables
 plotInfo.defaultTextSize = 20;
-plotInfo.defaultLineSize = 1.3;
+plotInfo.defaultLineSize = 1.4;
 plotInfo.titleFontSize = 16;
 plotInfo.labelSize = 15;
 plotInfo.axisSize = 14;
+plotInfo.lineAlpha = 0.6;
 plotInfo.YLabel = "True positive rate";
 plotInfo.XLabel = "False positive rate";
 plotInfo.Title = "Healthy controls / pooled MCI";
-plotInfo.visible = "off";
+plotInfo.visible = "on";
 
 disp("%%%%%%%%%%%%%%% ROC MCI pooled vs HC - model parameters estimation %%%%%%%%%%%%%%%")
 plotROCParametersCurve(HealthyControlsParameters, MCIAllParameters,'HC', 'MCI', config, plotInfo);
@@ -61,18 +62,18 @@ colors = config.color_scheme_npg([8 3 7 9 10],:);
 
 % set figure info
 %f = figure('visible','off','Position', [100 100 1000 500]);
-f = figure('visible',plotInfo.visible,'Position', [100 100 600 600]);
+f = figure('visible', plotInfo.visible, 'Position', [0 0 500 400]);
 %%% Font type and size setting %%%
 % Using Arial as default because all journals normally require the font to
 % be either Arial or Helvetica
 set(0,'DefaultAxesFontName','Arial')
 set(0,'DefaultTextFontName','Arial')
-set(0,'DefaultAxesFontSize',12)
-set(0,'DefaultTextFontSize',12)
+set(0,'DefaultAxesFontSize',plotInfo.axisSize)
+set(0,'DefaultTextFontSize',plotInfo.axisSize)
 
 hold on;
 
-AUC{1} = plotsingleROCCurve(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(4,:));
+AUC{1} = plotsingleROCCurve(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(4,:), plotInfo);
 legendText{1,1} = "AUC(" + convertCharsToStrings({'\beta g_2 g_3 \sigma \nu'}) + ") = " + num2str(round(AUC{1}.Value(1),2),2);
 
 disp("AUC(" + convertCharsToStrings({'\beta g_2 g_3 \sigma \nu'}) + ") CI = [" ...
@@ -86,7 +87,7 @@ disp("AUC(" + convertCharsToStrings({'\beta g_2 g_3 \sigma \nu'}) + ") CI = [" .
 % clear filter
 
 for i = 1:length(parametersName)
-    AUC{i + 1} = plotsingleROCCurve(params1(:,i), params2(:,i), params1groupName, params2groupName, colors(i,:));
+    AUC{i + 1} = plotsingleROCCurve(params1(:,i), params2(:,i), params1groupName, params2groupName, colors(i,:), plotInfo);
     legendText{1,i + 1} = "AUC(" + convertCharsToStrings(parametersName{i}) + ") = " + num2str(round(AUC{i + 1}.Value(1),2),2);
     disp("AUC(" + convertCharsToStrings(parametersName{i}) + ") CI = [" ...
         + num2str(round(AUC{i + 1}.Value(2),2),2) +  ", " + num2str(round(AUC{i + 1}.Value(3),2),2) + "]")
@@ -132,7 +133,7 @@ clear parametersName filesName i colors f ll legendText
 end
 
 %%
-function AUC = plotsingleROCCurve(param1, param2, param1Label, param2Label, paramColor)
+function AUC = plotsingleROCCurve(param1, param2, param1Label, param2Label, paramColor, plotInfo)
     % Preparing the logistic regression
     allData = [param1; param2];
     allDatalogicalResponse = (1:height(param1) + height(param2))' > height(param1);
@@ -150,10 +151,13 @@ function AUC = plotsingleROCCurve(param1, param2, param1Label, param2Label, para
     allDataScores = mdl.Fitted.Probability;
     [X,Y,~,AUC.Value] = perfcurve(allLabels, allDataScores, param2Label, NBoot=100);
 
-    plot(X(:,1),Y(:,1),...
+    lineplot = plot(X(:,1),Y(:,1),...
         "Color",paramColor,...
-        'LineWidth',1.0...
+        'LineWidth',2.0...
         );
+
+    lineplot.Color = [lineplot.Color plotInfo.lineAlpha];
+
 end
 
 %% get the model parameters, average across the conditions

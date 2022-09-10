@@ -68,7 +68,7 @@ ColorPattern;
 %% Error plot
 config.Gender_Pos = FamilyHistPos.Gender;
 config.Gender_Neg = FamilyHistNeg.Gender;
-ErrPlot(FamilyHistPos.Results.DistErr, FamilyHistNeg.Results.DistErr, 'dist', config)
+%ErrPlot(FamilyHistPos.Results.DistErr, FamilyHistNeg.Results.DistErr, 'dist', config)
 ErrPlot(FamilyHistPos.Results.AngleErr, FamilyHistNeg.Results.AngleErr, 'angle', config)
 
 %% Scatter Error Plot
@@ -364,7 +364,7 @@ function ErrPlot(FHPosErr, FHNegErr, type, config)
     PosFemale = zeros(sum(PosfemaleIdx),3);
     
     %swap last two condition
-    Condition = [1,3,2];
+    Condition = [1,2,3];
     for i=1:3
         cond = Condition(i);
         PosMale_cond_i = FHPosErr{cond}(PosmaleIdx);

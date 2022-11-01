@@ -10,7 +10,7 @@ VAM_PreprocessData
 % force it to not run
 config.ModelName        =   "beta_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
-config.NumParams = 100;
+config.NumParams = 100; % Set this here to prevent the modelling to run
 % Run the model
 VAM
 
@@ -36,7 +36,10 @@ plotInfo.type = "Distance";
 plotInfo.type = "Angle";
 [anova_tab_angle,multicomp_tab1_angle,multicomp_tab2_angle, multicomp_tab12_angle] = TwowayAnovaAllGroupsData(YoungControlsPropAng, HealthyControlsPropAng, MCIPosPropAng, MCINegPropAng, MCIUnkPropAng, config, plotInfo);
 
-%% Plotting quantities
+%% Plotting
+ColorPattern;
+
+%%
 plotInfo.defaultTextSize = 20;
 plotInfo.defaultLineSize = 2;
 plotInfo.barFaceAlpha = 0.5;

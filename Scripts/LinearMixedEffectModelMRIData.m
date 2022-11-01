@@ -200,7 +200,6 @@ function plotSelectedQuantities(x, y, csfStatus, plotInfo, addLine)
     legplotInfo = legend([axSc{1}, axSc{2}, axSc{3}, axSc{4}], {'HC' 'MCI unk' 'MCI-' 'MCI+'}, "Location", "northeast", "AutoUpdate", "off");
     legplotInfo.FontSize = plotInfo.legendFontSize;
     
-
     ax = gca;
     ax.LineWidth = plotInfo.defaultLineSize;
     ax.XLabel.FontSize = plotInfo.labelSize;

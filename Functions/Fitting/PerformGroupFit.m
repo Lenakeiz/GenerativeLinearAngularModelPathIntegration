@@ -162,7 +162,7 @@ for j = 1:subjectNum
             end    
 
             correctReAngle{j}{tr} = anglebetween(vec1, vec2); 
-            %AngleErr{j}{tr} = correctReAngle{j}{tr}-realReturnAngles(tr);
+            %AngleErr{j}{tr} = abs(correctReAngle{j}{tr}-realReturnAngles(tr));
             %wrap the real return angle to 360
             %AngleErr{j}{tr} = correctReAngle{j}{tr}-wrapTo360(realReturnAngles(tr));
             %wrap the angular error to [-180,180] 
@@ -190,7 +190,7 @@ for j = 1:subjectNum
                 DistErr{j}{tr}     = correctReDist{j}{tr}-DX{j}{tr}(3);
                 PropDistErr{j}{tr} = realReturnLength/correctReDist{j}{tr};
                 %no wrap
-                %AngleErr{j}{tr} = correctReAngle{j}{tr}-realReturnAngles(tr);
+                %AngleErr{j}{tr} = abs(correctReAngle{j}{tr}-realReturnAngles(tr));
                 %wrap the real return angle to [0,360]
                 %AngleErr{j}{tr} = correctReAngle{j}{tr}-wrapTo360(realReturnAngles(tr));
                 %wrap the angular error to [-180,180]

@@ -26,10 +26,11 @@ function [AIC, BIC, NLL] = reformatIC(IC, cond)
             NLL(subj, cond_idx) = IC{cond_idx}{subj}.negll;
         end
     end
-    %remove nan rows from array
-    AIC = removeNanRows(AIC);
-    BIC = removeNanRows(BIC);
-    NLL = removeNanRows(NLL);
+
+%     %remove nan rows from array
+%     AIC = removeNanRows(AIC);
+%     BIC = removeNanRows(BIC);
+%     NLL = removeNanRows(NLL);
     
     if cond=="all"
         %average over conditions to get the IC mean

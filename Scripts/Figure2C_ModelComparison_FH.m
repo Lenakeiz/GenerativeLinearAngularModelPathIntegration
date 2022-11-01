@@ -1,112 +1,86 @@
-%% Preparing the data
-VAM_PrepareBaseConfig
-
-%% Preprocessing the data
-VAM_PreprocessData
+%add loading data later
 
 %% 1, sigma nu Model --> egocentric noise only model
 config.ModelName        =   "sigma_nu";
 config.ParamName        =   ["sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 % Run the model
-VAM
+FamilyHistPos.Results = getResultsAllConditions(FamilyHistPos, config);
+sigma_nu_IC_FHPos             =   FamilyHistPos.Results.IC;
 
-sigma_nu_IC             =   HealthyControls.Results.IC;
+%
+FamilyHistNeg.Results = getResultsAllConditions(FamilyHistNeg, config);
+sigma_nu_IC_FHNeg             =   FamilyHistNeg.Results.IC;
 
 %% 2, beta, sigma, nu Model --> only encoding errors in distance
 config.ModelName        =   "beta_sigma_nu";
 config.ParamName        =   ["beta", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
-% Run the model
-VAM
+% Run the model on FHPos
+FamilyHistPos.Results = getResultsAllConditions(FamilyHistPos, config);
+beta_sigma_nu_IC_FHPos        =   FamilyHistPos.Results.IC;
 
-beta_sigma_nu_IC        =   HealthyControls.Results.IC;
+%% Run the model on FHNeg
+FamilyHistNeg.Results = getResultsAllConditions(FamilyHistNeg, config);
+beta_sigma_nu_IC_FHNeg        =   FamilyHistNeg.Results.IC;
 
 %% 3, g2, g3, sigma, nu Model --> encoding errors and production errors in angle 
 config.ModelName        =   "g2_g3_sigma_nu";
 config.ParamName        =   ["g2", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 % Run the model
-VAM
+FamilyHistPos.Results = getResultsAllConditions(FamilyHistPos, config);
+g2_g3_sigma_nu_IC_FHPos       =   FamilyHistPos.Results.IC;
 
-g2_g3_sigma_nu_IC       =   HealthyControls.Results.IC;
+%% Run the model on FHNeg
+FamilyHistNeg.Results = getResultsAllConditions(FamilyHistNeg, config);
+g2_g3_sigma_nu_IC_FHNeg       =   FamilyHistNeg.Results.IC;
 
 %% 4, beta, g2, sigma, nu Model --> encoding error in distance and angle
 config.ModelName        =   "beta_g2_sigma_nu";
 config.ParamName        =   ["beta", "g2", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 % Run the model
-VAM
+FamilyHistPos.Results = getResultsAllConditions(FamilyHistPos, config);
+beta_g2_sigma_nu_IC_FHPos     =   FamilyHistPos.Results.IC;
 
-beta_g2_sigma_nu_IC     =   HealthyControls.Results.IC;
+% Run the model on FHNeg
+FamilyHistNeg.Results = getResultsAllConditions(FamilyHistNeg, config);
+beta_g2_sigma_nu_IC_FHNeg     =   FamilyHistNeg.Results.IC;
 
 %% 5, beta, g3, sigma, nu Model --> encoding errors in distance and production error in angle
 config.ModelName        =   "beta_g3_sigma_nu";
 config.ParamName        =   ["beta", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 % Run the model
-VAM
+FamilyHistPos.Results = getResultsAllConditions(FamilyHistPos, config);
+beta_g3_sigma_nu_IC_FHPos     =   FamilyHistPos.Results.IC;
 
-beta_g3_sigma_nu_IC     =   HealthyControls.Results.IC;
+%% Run the model on FHNeg
+FamilyHistNeg.Results = getResultsAllConditions(FamilyHistNeg, config);
+beta_g3_sigma_nu_IC_FHNeg     =   FamilyHistNeg.Results.IC;
 
 %% 6, beta, g2, g3, sigma, nu Model --> encoding errors in distance and angles and production error in angle
 config.ModelName        =   "beta_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 % Run the model
-VAM
+FamilyHistPos.Results = getResultsAllConditions(FamilyHistPos, config);
+beta_g2_g3_sigma_nu_IC_FHPos  =   FamilyHistPos.Results.IC;
 
-beta_g2_g3_sigma_nu_IC  =   HealthyControls.Results.IC;
-
-%% 7, beta, g2, g3, k3, sigma, nu Model --> add another parameter k3 to the beta, g2, g3, sigma, nu Model
-config.ModelName        =   "beta_g2_g3_k3_sigma_nu";
-config.ParamName        =   ["beta", "g2", "g3", "k3", "sigma", "nu"];
-config.NumParams        =   length(config.ParamName);
-
-% Run the model
-VAM
-
-beta_g2_g3_k3_sigma_nu_IC           =   HealthyControls.Results.IC;
-
-%% 8, beta, g2, g3, m3, sigma, nu Model --> add another parameter k3 to the beta, g2, m3, sigma, nu Model
-config.ModelName        =   "beta_g2_g3_m3_sigma_nu";
-config.ParamName        =   ["beta", "g2", "g3", "m3", "sigma", "nu"];
-config.NumParams        =   length(config.ParamName);
-
-% Run the model
-VAM
-
-beta_g2_g3_m3_sigma_nu_IC           =   HealthyControls.Results.IC;
-
-%% 9, beta, g2, g3, k3, m3, sigma, nu Model
-config.ModelName        =   "beta_g2_g3_k3_m3_sigma_nu";
-config.ParamName        =   ["beta", "g2", "g3", "k3", "m3", "sigma", "nu"];
-config.NumParams        =   length(config.ParamName);
-
-% Run the model
-VAM
-
-beta_g2_g3_k3_m3_sigma_nu_IC           =   HealthyControls.Results.IC;
-
-%% 10, beta, g2, g3, k3, m3, n3, sigma, nu Model
-config.ModelName        =   "beta_g2_g3_k3_m3_n3_sigma_nu";
-config.ParamName        =   ["beta", "g2", "g3", "k3", "m3", "n3", "sigma", "nu"];
-config.NumParams        =   length(config.ParamName);
-
-% Run the model
-VAM
-
-beta_g2_g3_k3_m3_n3_sigma_nu_IC           =   HealthyControls.Results.IC;
+% Run the model on FHNeg
+FamilyHistNeg.Results = getResultsAllConditions(FamilyHistNeg, config);
+beta_g2_g3_sigma_nu_IC_FHNeg  =   FamilyHistNeg.Results.IC;
 
 %%
-config.ResultFolder = pwd+"/Output/ModelFigures/ModelComparison_HC";
+config.ResultFolder = pwd+"/Output/ModelFigures/ModelComparison_FH";
 %create storing folder for trajectory if not exist
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
 end
 
 %%
-ModelNames = {'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10'};
+ModelNames = {'M1', 'M2', 'M3', 'M4', 'M5', 'M6'};
 
 %% Setting colors for using in plots
 ColorPattern; 
@@ -119,61 +93,63 @@ for idx_ = 1:4
     %cond = "no optical flow";
     %cond = "all";
     cond = CondList(idx_);
-    [sigma_nu_AIC,sigma_nu_BIC, sigma_nu_NLL] = reformatIC(sigma_nu_IC, cond);
-    [beta_sigma_nu_AIC,beta_sigma_nu_BIC, beta_sigma_nu_NLL] = reformatIC(beta_sigma_nu_IC, cond);
-    [g2_g3_sigma_nu_AIC,g2_g3_sigma_nu_BIC, g2_g3_sigma_nu_NLL] = reformatIC(g2_g3_sigma_nu_IC, cond);
-    [beta_g2_sigma_nu_AIC, beta_g2_sigma_nu_BIC, beta_g2_sigma_nu_NLL] = reformatIC(beta_g2_sigma_nu_IC, cond);
-    [beta_g3_sigma_nu_AIC,beta_g3_sigma_nu_BIC, beta_g3_sigma_nu_NLL] = reformatIC(beta_g3_sigma_nu_IC, cond);
-    [beta_g2_g3_sigma_nu_AIC, beta_g2_g3_sigma_nu_BIC,beta_g2_g3_sigma_nu_NLL] = reformatIC(beta_g2_g3_sigma_nu_IC, cond);
-    [beta_g2_g3_k3_sigma_nu_AIC, beta_g2_g3_k3_sigma_nu_BIC,beta_g2_g3_k3_sigma_nu_NLL] = reformatIC(beta_g2_g3_k3_sigma_nu_IC, cond);
-    [beta_g2_g3_m3_sigma_nu_AIC, beta_g2_g3_m3_sigma_nu_BIC,beta_g2_g3_m3_sigma_nu_NLL] = reformatIC(beta_g2_g3_m3_sigma_nu_IC, cond);
-    [beta_g2_g3_k3_m3_sigma_nu_AIC, beta_g2_g3_k3_m3_sigma_nu_BIC,beta_g2_g3_k3_m3_sigma_nu_NLL] = reformatIC(beta_g2_g3_k3_m3_sigma_nu_IC, cond);
-    [beta_g2_g3_k3_m3_n3_sigma_nu_AIC, beta_g2_g3_k3_m3_n3_sigma_nu_BIC,beta_g2_g3_k3_m3_n3_sigma_nu_NLL] = reformatIC(beta_g2_g3_k3_m3_n3_sigma_nu_IC, cond);
-        
+
+    [sigma_nu_AIC_Pos,sigma_nu_BIC_Pos, sigma_nu_NLL_Pos] = reformatIC(sigma_nu_IC_FHPos, cond);
+    [sigma_nu_AIC_Neg,sigma_nu_BIC_Neg, sigma_nu_NLL_Neg] = reformatIC(sigma_nu_IC_FHNeg, cond);
+    sigma_nu_AIC = [sigma_nu_AIC_Pos; sigma_nu_AIC_Neg];
+    sigma_nu_BIC = [sigma_nu_BIC_Pos; sigma_nu_BIC_Neg];
+    sigma_nu_NLL = [sigma_nu_NLL_Pos; sigma_nu_NLL_Neg];
+
+    [beta_sigma_nu_AIC_Pos,beta_sigma_nu_BIC_Pos, beta_sigma_nu_NLL_Pos] = reformatIC(beta_sigma_nu_IC_FHPos, cond);
+    [beta_sigma_nu_AIC_Neg,beta_sigma_nu_BIC_Neg, beta_sigma_nu_NLL_Neg] = reformatIC(beta_sigma_nu_IC_FHNeg, cond);
+    beta_sigma_nu_AIC = [beta_sigma_nu_AIC_Pos; beta_sigma_nu_AIC_Neg];
+    beta_sigma_nu_BIC = [beta_sigma_nu_BIC_Pos; beta_sigma_nu_BIC_Neg];
+    beta_sigma_nu_NLL = [beta_sigma_nu_NLL_Pos; beta_sigma_nu_NLL_Neg];
+
+
+    [g2_g3_sigma_nu_AIC_Pos,g2_g3_sigma_nu_BIC_Pos, g2_g3_sigma_nu_NLL_Pos] = reformatIC(g2_g3_sigma_nu_IC_FHPos, cond);
+    [g2_g3_sigma_nu_AIC_Neg,g2_g3_sigma_nu_BIC_Neg, g2_g3_sigma_nu_NLL_Neg] = reformatIC(g2_g3_sigma_nu_IC_FHNeg, cond);
+    g2_g3_sigma_nu_AIC = [g2_g3_sigma_nu_AIC_Pos; g2_g3_sigma_nu_AIC_Neg];
+    g2_g3_sigma_nu_BIC = [g2_g3_sigma_nu_BIC_Pos; g2_g3_sigma_nu_BIC_Neg];
+    g2_g3_sigma_nu_NLL = [g2_g3_sigma_nu_NLL_Pos; g2_g3_sigma_nu_NLL_Neg];
+
+    [beta_g2_sigma_nu_AIC_Pos, beta_g2_sigma_nu_BIC_Pos, beta_g2_sigma_nu_NLL_Pos] = reformatIC(beta_g2_sigma_nu_IC_FHPos, cond);
+    [beta_g2_sigma_nu_AIC_Neg, beta_g2_sigma_nu_BIC_Neg, beta_g2_sigma_nu_NLL_Neg] = reformatIC(beta_g2_sigma_nu_IC_FHNeg, cond);
+    beta_g2_sigma_nu_AIC = [beta_g2_sigma_nu_AIC_Pos; beta_g2_sigma_nu_AIC_Neg];
+    beta_g2_sigma_nu_BIC = [beta_g2_sigma_nu_BIC_Pos; beta_g2_sigma_nu_BIC_Neg];
+    beta_g2_sigma_nu_NLL = [beta_g2_sigma_nu_NLL_Pos; beta_g2_sigma_nu_NLL_Neg];
+
+    [beta_g3_sigma_nu_AIC_Pos,beta_g3_sigma_nu_BIC_Pos, beta_g3_sigma_nu_NLL_Pos] = reformatIC(beta_g3_sigma_nu_IC_FHPos, cond);
+    [beta_g3_sigma_nu_AIC_Neg,beta_g3_sigma_nu_BIC_Neg, beta_g3_sigma_nu_NLL_Neg] = reformatIC(beta_g3_sigma_nu_IC_FHNeg, cond);
+    beta_g3_sigma_nu_AIC = [beta_g3_sigma_nu_AIC_Pos; beta_g3_sigma_nu_AIC_Neg];
+    beta_g3_sigma_nu_BIC = [beta_g3_sigma_nu_BIC_Pos; beta_g3_sigma_nu_BIC_Neg];
+    beta_g3_sigma_nu_NLL = [beta_g3_sigma_nu_NLL_Pos; beta_g3_sigma_nu_NLL_Neg];
+
+
+    [beta_g2_g3_sigma_nu_AIC_Pos, beta_g2_g3_sigma_nu_BIC_Pos,beta_g2_g3_sigma_nu_NLL_Pos] = reformatIC(beta_g2_g3_sigma_nu_IC_FHPos, cond);  
+    [beta_g2_g3_sigma_nu_AIC_Neg, beta_g2_g3_sigma_nu_BIC_Neg,beta_g2_g3_sigma_nu_NLL_Neg] = reformatIC(beta_g2_g3_sigma_nu_IC_FHNeg, cond);    
+    beta_g2_g3_sigma_nu_AIC = [beta_g2_g3_sigma_nu_AIC_Pos; beta_g2_g3_sigma_nu_AIC_Neg];
+    beta_g2_g3_sigma_nu_BIC = [beta_g2_g3_sigma_nu_BIC_Pos; beta_g2_g3_sigma_nu_BIC_Neg];
+    beta_g2_g3_sigma_nu_NLL = [beta_g2_g3_sigma_nu_NLL_Pos; beta_g2_g3_sigma_nu_NLL_Neg];
+    
+    %
     % Box Plot of AIC
     ICType = "AIC";
-    All_AIC = [sigma_nu_AIC,... 
-               beta_sigma_nu_AIC,...
-               g2_g3_sigma_nu_AIC,...
-               beta_g2_sigma_nu_AIC,...
-               beta_g3_sigma_nu_AIC,...
-               beta_g2_g3_sigma_nu_AIC,...
-               beta_g2_g3_k3_sigma_nu_AIC,...
-               beta_g2_g3_m3_sigma_nu_AIC,...
-               beta_g2_g3_k3_m3_sigma_nu_AIC,...
-               beta_g2_g3_k3_m3_n3_sigma_nu_AIC];
-
+    All_AIC = [sigma_nu_AIC, beta_sigma_nu_AIC, g2_g3_sigma_nu_AIC, beta_g2_sigma_nu_AIC, beta_g3_sigma_nu_AIC, beta_g2_g3_sigma_nu_AIC];
     plotBoxPlot(All_AIC, ModelNames, ICType, config, cond);
     
     % Box Plot of BIC
     ICType = "BIC";
-    All_BIC = [sigma_nu_BIC,...
-               beta_sigma_nu_BIC,...
-               g2_g3_sigma_nu_BIC,...
-               beta_g2_sigma_nu_BIC,...
-               beta_g3_sigma_nu_BIC,...
-               beta_g2_g3_sigma_nu_BIC,...
-               beta_g2_g3_k3_sigma_nu_BIC,...
-               beta_g2_g3_m3_sigma_nu_BIC,...
-               beta_g2_g3_k3_m3_sigma_nu_BIC,...
-               beta_g2_g3_k3_m3_n3_sigma_nu_BIC];
+    All_BIC = [sigma_nu_BIC, beta_sigma_nu_BIC, g2_g3_sigma_nu_BIC, beta_g2_sigma_nu_BIC, beta_g3_sigma_nu_BIC, beta_g2_g3_sigma_nu_BIC];
     plotBoxPlot(All_BIC, ModelNames, ICType, config, cond);
     
-    % Box Plot of NLL
+    % Box Plot of AIC
     ICType = "NegLogLikelihood";
-    All_NLL = [sigma_nu_NLL,...
-               beta_sigma_nu_NLL,...
-               g2_g3_sigma_nu_NLL,... 
-               beta_g2_sigma_nu_NLL,...
-               beta_g3_sigma_nu_NLL,...
-               beta_g2_g3_sigma_nu_NLL,...
-               beta_g2_g3_k3_sigma_nu_NLL,...
-               beta_g2_g3_m3_sigma_nu_NLL,...
-               beta_g2_g3_k3_m3_sigma_nu_NLL,...
-               beta_g2_g3_k3_m3_n3_sigma_nu_NLL];
+    All_NLL = [sigma_nu_NLL, beta_sigma_nu_NLL, g2_g3_sigma_nu_NLL, beta_g2_sigma_nu_NLL, beta_g3_sigma_nu_NLL, beta_g2_g3_sigma_nu_NLL];
     plotBoxPlot(All_NLL, ModelNames, ICType, config, cond);
 
 end
+
 %% function for Box plot
 function plotBoxPlot(data, ModelNames, ICType, config, cond)
     f = figure('visible','off','Position', [100 100 600 400]);
@@ -249,7 +225,7 @@ function plotBoxPlot(data, ModelNames, ICType, config, cond)
                 'MarkerFaceAlpha',scatter_color_transparency,...
                 'LineWidth',scatter_marker_edgeWidth); 
         hold on
-        scatter(i, mean(data(:,i)), 4*scatter_markerSize, 'd',...
+        scatter(i, mean(data(:,i), 'omitnan'), 4*scatter_markerSize, 'd',...
                 'filled','MarkerEdgeColor','k', ...
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);

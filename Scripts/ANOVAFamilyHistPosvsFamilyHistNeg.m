@@ -17,11 +17,16 @@ config.TrackedInboundAngularDeltaT                      = 1;
 config.includeStand                                     = false;
 config.useweber                                         = false;  % only true when use weber law in simple generative models
 config.Speed.tresholdForBadParticipantL1Recontruction   = 0.0;    % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.
+config.useOoBtrials                                     = true;
+config.useTrialFilter                                   = true;
 
 %% Model fitting
 %Model related parameters
 % config.ModelName        = "beta_g3_sigma_nu";
 % config.ParamName        = ["beta", "g3", "sigma", "nu"];
+
+% config.ModelName        = "beta_g2_sigma_nu";
+% config.ParamName        = ["beta", "g2", "sigma", "nu"];
 
 config.ModelName        = "beta_g2_g3_sigma_nu";
 config.ParamName        = ["beta", "g2", "g3", "sigma", "nu"];
@@ -43,14 +48,18 @@ FamilyHistPos   = TransformPaths(FamilyHistPos);%transform data
 FamilyHistPos   = CalculateTrackingPath(FamilyHistPos, config);
 ManuallyScoringFamilyHistPos;
 %%
-[AllFamilyHistPosParams, ~, ~, ~, ~] = getResultsAllConditions(FamilyHistPos, config);
+FamilyHistPos.Results = getResultsAllConditions(FamilyHistPos, config);
 
 %% Model fitting for Neg data
 FamilyHistNeg   = TransformPaths(FamilyHistNeg);%transform data
 FamilyHistNeg   = CalculateTrackingPath(FamilyHistNeg, config);
 ManuallyScoringFamilyHistNeg;
 %%
-[AllFamilyHistNegParams, ~, ~, ~, ~] = getResultsAllConditions(FamilyHistNeg, config);
+FamilyHistNeg.Results = getResultsAllConditions(FamilyHistNeg, config);
+
+%%
+AllFamilyHistPosParams     =   FamilyHistPos.Results.estimatedParams;
+AllFamilyHistNegParams     =   FamilyHistNeg.Results.estimatedParams;
 
 %% Setting colors for using in plots
 ColorPattern; 

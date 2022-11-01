@@ -41,6 +41,7 @@ FamilyHistPos.Results = getResultsAllConditions(FamilyHistPos, config);
 FamilyHistNeg   = TransformPaths(FamilyHistNeg);%transform data
 FamilyHistNeg   = CalculateTrackingPath(FamilyHistNeg, config);
 ManuallyScoringFamilyHistNeg;
+%%
 FamilyHistNeg.Results = getResultsAllConditions(FamilyHistNeg, config);
 
 %% prepare data for Coco
@@ -68,7 +69,7 @@ ColorPattern;
 %% Error plot
 config.Gender_Pos = FamilyHistPos.Gender;
 config.Gender_Neg = FamilyHistNeg.Gender;
-%ErrPlot(FamilyHistPos.Results.DistErr, FamilyHistNeg.Results.DistErr, 'dist', config)
+ErrPlot(FamilyHistPos.Results.DistErr, FamilyHistNeg.Results.DistErr, 'dist', config)
 ErrPlot(FamilyHistPos.Results.AngleErr, FamilyHistNeg.Results.AngleErr, 'angle', config)
 
 %% Scatter Error Plot
@@ -76,8 +77,8 @@ ScatterErrPlot(FamilyHistPos.Results.AngleErr, FamilyHistNeg.Results.AngleErr, F
 ScatterErrPlot(FamilyHistPos.Results.AngleErr, FamilyHistNeg.Results.AngleErr, FamilyHistPos.Results.flagOoB, FamilyHistNeg.Results.flagOoB, 'female', config)
 
 %% ThreewayAnova On Data
-%ThreewayAnova_CocoData(FHPosDistErr, FHNegDistErr, config);
-ThreewayAnova_CocoData(FHPosAngleErr, FHNegAngleErr, config);
+ThreewayAnova_CocoData(FamilyHistPos.Results.DistErr, FamilyHistNeg.Results.DistErr, config);
+ThreewayAnova_CocoData(FamilyHistPos.Results.AngleErr, FamilyHistNeg.Results.AngleErr, config);
 
 %%
 function Data = addBadExecution(Data)
@@ -364,7 +365,7 @@ function ErrPlot(FHPosErr, FHNegErr, type, config)
     PosFemale = zeros(sum(PosfemaleIdx),3);
     
     %swap last two condition
-    Condition = [1,2,3];
+    Condition = [1,3,2];
     for i=1:3
         cond = Condition(i);
         PosMale_cond_i = FHPosErr{cond}(PosmaleIdx);
@@ -464,11 +465,9 @@ function ErrPlot(FHPosErr, FHNegErr, type, config)
         'TickLength'  , [.01 .01] , ...
         'XColor'      , [.1 .1 .1], ...
         'YColor'      , [.1 .1 .1], ...
-        'XTick'       , (1:3),... 
-        'YTick'       , ytick,... 
+        'XTick'       , (1:3),... %'YTick'       , ytick,... 
         'XTickLabel'  , {'No Change','No Optical Flow', 'No Distal Cue'},...
-        'XLim'        , [0.5, 3.5],...
-        'YLim'        , ylim,...
+        'XLim'        , [0.5, 3.5],...%'YLim'        , ylim,...
         'LineWidth'   , .5        );
 
     title('Male')

@@ -199,8 +199,11 @@ function plotBoxPlot(data, ModelNames, ICType, config, cond)
     set(0,'DefaultTextFontName','Arial')
     set(0,'DefaultAxesFontSize',12)
     set(0,'DefaultTextFontSize',12)
-   
-    box_colors = config.color_scheme_npg(1:num_boxplots,:);
+    
+    N = size(config.color_scheme_npg,1)-2;
+    color_scheme = config.color_scheme_npg(1:N,:);
+    %idxs = randsample(N-2,num_boxplots, true);
+    %box_colors = config.color_scheme_npg(1:num_boxplots,:);
     
     %% main boxplot one box for each column in data
     bp = boxplot(data, 'whisker',whisker_value,'symbol','', ... %symbol ='' making outlier invisible
@@ -223,9 +226,10 @@ function plotBoxPlot(data, ModelNames, ICType, config, cond)
     
     %% Coloring each box
     h = findobj(gca,'Tag','Box');
-    for i = 1:length(h)
+    for i = length(h):-1:1
         %note that first getting the most right box, so do "length(h)-i+1"
-        patch(get(h(i),'XData'),get(h(i),'YData'),box_colors(i,:),'FaceAlpha',box_color_transparency);
+        c_idx = mod(i,N)+1;
+        patch(get(h(i),'XData'),get(h(i),'YData'),color_scheme(c_idx,:),'FaceAlpha',box_color_transparency);
     end
     % Sending patch to back of the figure so that median can be drawn on top of it
     set(gca,'children',flipud(get(gca,'children'))) 
@@ -242,10 +246,12 @@ function plotBoxPlot(data, ModelNames, ICType, config, cond)
     num_boxplots = size(data,2);
     for i=1:size(data,2)
         hold on
+        c_idx = mod(10-i+1,N)+1;
+
         x = i*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
         scatter(x, data(:,i), scatter_markerSize, ...
                 'filled','MarkerEdgeColor',scatter_marker_edgeColor, ...
-                'MarkerFaceColor',box_colors(num_boxplots-i+1,:), ...
+                'MarkerFaceColor', color_scheme(c_idx,:),...
                 'MarkerFaceAlpha',scatter_color_transparency,...
                 'LineWidth',scatter_marker_edgeWidth); 
         hold on

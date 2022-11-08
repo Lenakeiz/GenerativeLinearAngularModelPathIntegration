@@ -17,7 +17,7 @@ config.NumParams        =   length(config.ParamName); %length(config.ParamName);
 VAM
 
 %% Model run completed, preparing the data for plotting figures
-config.ResultFolder = pwd + "/Output/PaperFigs/Fig5B";
+config.ResultFolder = pwd + "/Output/PaperFigs/Fig5B/ProportionalError";
 % Create storing folder for trajectory if not exist
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
@@ -27,16 +27,16 @@ end
 ColorPattern;
 
 %%
-HealthyControlsDistanceError = averageAcrossConditions(HealthyControls.Results.DistErr);
-MCIUnkDistanceError          = averageAcrossConditions(MCIUnk.Results.DistErr);
-MCINegDistanceError          = averageAcrossConditions(MCINeg.Results.DistErr);
-MCIPosDistanceError          = averageAcrossConditions(MCIPos.Results.DistErr);
+HealthyControlsDistanceError = averageAcrossConditions(HealthyControls.Results.PropDistErr);
+MCIUnkDistanceError          = averageAcrossConditions(MCIUnk.Results.PropDistErr);
+MCINegDistanceError          = averageAcrossConditions(MCINeg.Results.PropDistErr);
+MCIPosDistanceError          = averageAcrossConditions(MCIPos.Results.PropDistErr);
 MCIAllDistanceError          = [MCIUnkDistanceError; MCINegDistanceError; MCIPosDistanceError]; 
 
-HealthyControlsAngErr        = averageAcrossConditions(HealthyControls.Results.AngleErr);
-MCIUnkAngErr                 = averageAcrossConditions(MCIUnk.Results.AngleErr);
-MCINegAngErr                 = averageAcrossConditions(MCINeg.Results.AngleErr);
-MCIPosAngErr                 = averageAcrossConditions(MCIPos.Results.AngleErr);
+HealthyControlsAngErr        = averageAcrossConditions(HealthyControls.Results.PropAngErr);
+MCIUnkAngErr                 = averageAcrossConditions(MCIUnk.Results.PropAngErr);
+MCINegAngErr                 = averageAcrossConditions(MCINeg.Results.PropAngErr);
+MCIPosAngErr                 = averageAcrossConditions(MCIPos.Results.PropAngErr);
 MCIAllAngErr                 = [MCIUnkAngErr; MCINegAngErr; MCIPosAngErr];
 
 %
@@ -61,11 +61,11 @@ plotInfo.Title = "Healthy controls / pooled MCI";
 plotInfo.visible = "on";
 parametersName = [{'Linear'}, {'Angular'}];
 
-disp("%%%%%%%%%%%%%%% ROC Curve pooled MCI vs HC - behavioural data %%%%%%%%%%%%%%%")
+disp("%%%%%%%%%%%%%%% ROC Curve pooled MCI vs HC - behavioural data - proportional %%%%%%%%%%%%%%%")
 generateROCCurve(allParamsHC, allParamsPooledMCI,'HC', 'MCI', parametersName, config, plotInfo);
 
 plotInfo.Title = "MCI negative / MCI positive";
-disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - behavioural data %%%%%%%%%%%%%%%")
+disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - behavioural data - proportional %%%%%%%%%%%%%%%")
 generateROCCurve(allParamsMCINeg, allParamsMCIPos,'MCIneg', 'MCIpos', parametersName, config, plotInfo);
 
 %%

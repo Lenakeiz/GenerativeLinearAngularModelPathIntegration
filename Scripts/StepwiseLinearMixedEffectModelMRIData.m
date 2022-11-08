@@ -32,8 +32,52 @@ MCIUnkParameters          = averageAcrossConditions(MCIUnk.Results.estimatedPara
 MCINegParameters          = averageAcrossConditions(MCINeg.Results.estimatedParams);
 MCIPosParameters          = averageAcrossConditions(MCIPos.Results.estimatedParams);
 
-%% 
+%% Preparing linear mixed effect table
+HealthyControls_lmetable = createLMETable(HealthyControls.MRI,HealthyControlsParameters);
+MCIUnk_lmetable = createLMETable(MCIUnk.MRI,MCIUnkParameters);
+MCINeg_lmetable = createLMETable(MCINeg.MRI,MCINegParameters);
+MCIPos_lmetable = createLMETable(MCIPos.MRI,MCIPosParameters);
 
+MRIModelParamsDataTable = [HealthyControls_lmetable; MCIUnk_lmetable; MCINeg_lmetable; MCIPos_lmetable];
+
+%Removing nans (either from Nan parameters model or missing mri data)
+filter = isnan(MRIModelParamsDataTable.beta) | isnan(MRIModelParamsDataTable.MCI);
+MRIModelParamsDataTable = MRIModelParamsDataTable(~filter,:);
+clear filter
+%% 
+% For each of the parameter we are trying to fit we calculate a stepwise
+% general linear model to check what could be the best volumetric areas to
+% predict that fitted value
+
+% Using the Destrieux atlas from free surfer (https://www.sciencedirect.com/science/article/pii/S1053811910008542?via%3Dihub)
+destVolumesIdx = [12 17 20:21 28 46:78];
+removeThreshold = 0.05;
+
+parameterName = "beta";
+modelBeta = performStepwiseGLM(MRIModelParamsDataTable,parameterName,destVolumesIdx,removeThreshold);
+%
+parameterName = "g2";
+modelG2 = performStepwiseGLM(MRIModelParamsDataTable,parameterName,destVolumesIdx,removeThreshold);
+%
+parameterName = "g3";
+modelG3 = performStepwiseGLM(MRIModelParamsDataTable,parameterName,destVolumesIdx,removeThreshold);
+%
+parameterName = "sigma";
+modelSigma = performStepwiseGLM(MRIModelParamsDataTable,parameterName,destVolumesIdx,removeThreshold);
+%
+parameterName = "nu";
+modelNu = performStepwiseGLM(MRIModelParamsDataTable,parameterName,destVolumesIdx,removeThreshold);
+%%
+function modelOut = performStepwiseGLM(MRIModelParamsDataTable,parameterName,destVolumesIdx,removeThreshold)
+    %mdl = stepwiseglm(MRIModelParamsDataTable,"linear","ResponseVar", parameterName, "PredictorVars ", destVolumesIdx,"Criterion","PRemove",0.1)
+    modelOut = stepwiselm(MRIModelParamsDataTable,"linear","Upper","linear","PredictorVars",destVolumesIdx,"ResponseVar",parameterName,"Criterion","aic","PRemove",removeThreshold)
+end
+
+%% Creates a unique table between mri and model parameters
+function dataout = createLMETable(MRI, GroupParams)
+    GroupParamsTable = array2table(GroupParams, "VariableNames", {'beta', 'g2', 'g3', 'sigma', 'nu'});
+    dataout = [GroupParamsTable,MRI];
+end
 
 %% get the model parameters, average across the conditions
 % remove nans if the row after mergin still contains nans

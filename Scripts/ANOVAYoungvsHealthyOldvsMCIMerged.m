@@ -8,8 +8,10 @@ VAM_PreprocessData;
 
 %% Preparing the data and Slecting the Model
 
-config.ModelName        =   "beta_g2_g3_sigma_nu";
-config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
+%config.ModelName        =   "beta_g2_g3_sigma_nu";
+%config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
+config.ModelName        =   "stangl";
+config.ParamName        =   ["beta", "alpha", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
 % Run the model

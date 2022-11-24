@@ -1,5 +1,5 @@
 %% Cleaning variables and set intial seed for code reproducibility
-clearvars; close all; clc;
+%clearvars; close all; clc;
 rng('default'); 
 
 %% Loading data

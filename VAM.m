@@ -18,23 +18,23 @@ if (~isfield(config,'ModelName') | ~isfield(config,'ParamName') | ~isfield(confi
 end
 
 %% Model fitting for Young Controls
-disp("%%%%%%%%%%%%%%% Starting fit for young controls %%%%%%%%%%%%%%%");
-YoungControls.Results = getResultsAllConditions(YoungControls, config);
+% disp("%%%%%%%%%%%%%%% Starting fit for young controls %%%%%%%%%%%%%%%");
+% YoungControls.Results = getResultsAllConditions(YoungControls, config);
 
 %% Model fitting for Healthy Controls
 disp("%%%%%%%%%%%%%%% Starting fit for healthy controls %%%%%%%%%%%%%%%");
 HealthyControls.Results = getResultsAllConditions(HealthyControls, config);
 
-%% Model fitting for MCI Pos
-disp("%%%%%%%%%%%%%%% Starting fit for mci pos %%%%%%%%%%%%%%%");
-MCIPos.Results = getResultsAllConditions(MCIPos, config);
-
-%% Model fitting for MCI Neg
-disp("%%%%%%%%%%%%%%% Starting fit for mci neg %%%%%%%%%%%%%%%");
-MCINeg.Results = getResultsAllConditions(MCINeg, config);
-
-%% Model fitting for MCI Unk
-disp("%%%%%%%%%%%%%%% Starting fit for mci unknown %%%%%%%%%%%%%%%");
-MCIUnk.Results = getResultsAllConditions(MCIUnk, config);
-
-disp("%%%%%%%%%%%%%%% Model fitting complete %%%%%%%%%%%%%%%");
+% %% Model fitting for MCI Pos
+% disp("%%%%%%%%%%%%%%% Starting fit for mci pos %%%%%%%%%%%%%%%");
+% MCIPos.Results = getResultsAllConditions(MCIPos, config);
+% 
+% %% Model fitting for MCI Neg
+% disp("%%%%%%%%%%%%%%% Starting fit for mci neg %%%%%%%%%%%%%%%");
+% MCINeg.Results = getResultsAllConditions(MCINeg, config);
+% 
+% %% Model fitting for MCI Unk
+% disp("%%%%%%%%%%%%%%% Starting fit for mci unknown %%%%%%%%%%%%%%%");
+% MCIUnk.Results = getResultsAllConditions(MCIUnk, config);
+% 
+% disp("%%%%%%%%%%%%%%% Model fitting complete %%%%%%%%%%%%%%%");

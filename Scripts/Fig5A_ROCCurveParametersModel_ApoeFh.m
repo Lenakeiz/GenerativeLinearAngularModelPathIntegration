@@ -1,23 +1,6 @@
-%% Preparing the data
-VAM_PrepareBaseConfig
-
-%% Preprocessing the data
-VAM_PreprocessData
-
-%% Setting the model we are interested in
-% Eventually modify config paramteters we are interested in. For example
-% for this graph we are not interested in running the model with splitted
-% conditions so we will set the relative config to false 
-% force it to not run
-config.useTrialFilter = true;
-config.ModelName        =   "beta_g2_g3_sigma_nu";
-config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
-config.NumParams        =   100; %length(config.ParamName); % Set 100 here to avoid producing the model
-% Run the model
-VAM
 
 %% Model run completed, preparing the data for plotting figures
-config.ResultFolder = pwd + "/Output/DataFigures/ROC_HealthyoldMCI";
+config.ResultFolder = pwd + "/Output/ModelFigures/ROC_ApoeFh";
 % Create storing folder for trajectory if not exist
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
@@ -25,55 +8,35 @@ end
 
 %% Genarating color scheme
 ColorPattern;
-
-%%
-HealthyControlsDistanceError = averageAcrossConditions(HealthyControls.Results.DistErr);
-MCIUnkDistanceError          = averageAcrossConditions(MCIUnk.Results.DistErr);
-MCINegDistanceError          = averageAcrossConditions(MCINeg.Results.DistErr);
-MCIPosDistanceError          = averageAcrossConditions(MCIPos.Results.DistErr);
-MCIAllDistanceError          = [MCIUnkDistanceError; MCINegDistanceError; MCIPosDistanceError]; 
-
-HealthyControlsAngErr        = averageAcrossConditions(HealthyControls.Results.AngleErr);
-MCIUnkAngErr                 = averageAcrossConditions(MCIUnk.Results.AngleErr);
-MCINegAngErr                 = averageAcrossConditions(MCINeg.Results.AngleErr);
-MCIPosAngErr                 = averageAcrossConditions(MCIPos.Results.AngleErr);
-MCIAllAngErr                 = [MCIUnkAngErr; MCINegAngErr; MCIPosAngErr];
-
-%
-allParamsHC        = [HealthyControlsDistanceError HealthyControlsAngErr];
-allParamsPooledMCI = [MCIAllDistanceError MCIAllAngErr];
-allParamsMCIPos    = [MCIPosDistanceError MCIPosAngErr];
-allParamsMCINeg    = [MCINegDistanceError MCINegAngErr];
+%% Getting Information from results:
+DoubleNegParameters          = averageAcrossConditions(DoubleNeg.Results.estimatedParams);
+DoublePosParameters          = averageAcrossConditions(DoublePos.Results.estimatedParams); 
 
 %% Plotting roc curve HC vs pooled MCI and MCI negative vs MCI positive
 % Plotting variables
-close all;
-
 plotInfo.defaultTextSize = 20;
 plotInfo.defaultLineSize = 1.4;
-plotInfo.titleFontSize = 14;
-plotInfo.labelSize = 14;
+plotInfo.titleFontSize = 16;
+plotInfo.labelSize = 15;
 plotInfo.axisSize = 14;
 plotInfo.lineAlpha = 0.6;
 plotInfo.YLabel = "True positive rate";
 plotInfo.XLabel = "False positive rate";
-plotInfo.Title = "Healthy elder / MCI";
 plotInfo.visible = "on";
-parametersName = ["Linear", "Angular"];
 
-disp("%%%%%%%%%%%%%%% ROC Curve pooled MCI vs HC - behavioural data %%%%%%%%%%%%%%%")
-generateROCCurve(allParamsHC, allParamsPooledMCI,'HC', 'MCI', parametersName, config, plotInfo);
+plotInfo.Title = "Apoe+FH Neg / Double positive";
 
-%%
-plotInfo.Title = "MCI negative / MCI positive";
-disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - behavioural data %%%%%%%%%%%%%%%")
-generateROCCurve(allParamsMCINeg, allParamsMCIPos,'MCI-', 'MCI+', parametersName, config, plotInfo);
+disp("%%%%%%%%%%%%%%% ROC FH positive vs FH negative - model parameters estimation %%%%%%%%%%%%%%%")
+plotROCParametersCurve(DoubleNegParameters, DoublePosParameters,'Apoe+FH Neg', 'Apoe+FH Pos', config, plotInfo);
 
 %%
-function generateROCCurve(params1, params2, params1groupName, params2groupName, parametersName, config, plotInfo)
+function plotROCParametersCurve(params1, params2, params1groupName, params2groupName, config, plotInfo)
 
+parametersName = [{'\beta'},  {'g_2'}, {'g_3'}, {'\sigma'}, {'\nu'}];
 colors = config.color_scheme_npg([8 3 7 9 10],:);
+
 % set figure info
+%f = figure('visible','off','Position', [100 100 1000 500]);
 f = figure('visible', plotInfo.visible, 'Position', [0 0 500 400]);
 %%% Font type and size setting %%%
 % Using Arial as default because all journals normally require the font to
@@ -86,7 +49,7 @@ set(0,'DefaultTextFontSize',plotInfo.axisSize)
 hold on;
 
 AUC = plotsingleROCCurve(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(4,:));
-legendText{1,1} = "AUC(" + parametersName(1) + ", " + parametersName(2) + ") = "+num2str(round(AUC,2));
+legendText{1,1} = "AUC(" + convertCharsToStrings({'\beta g_2 g_3 \sigma \nu'}) + ") = " + num2str(round(AUC,2),2);
 
 for i = 1:length(parametersName)
     AUC = plotsingleROCCurve(params1(:,i), params2(:,i), params1groupName, params2groupName, colors(i,:));
@@ -100,10 +63,9 @@ hline.LineStyle = '--';
 
 hold off;
 
-legend('Location','southeast')
 ll = legend('Location','southeast');
 ll.String = legendText;
-ll.FontSize = 8;
+ll.FontSize = 10;
 
 ylabel('True Positive Rate');
 xlabel('False Positive Rate')
@@ -153,7 +115,7 @@ function AUC_mean = plotsingleROCCurve(param1, param2, param1Label, param2Label,
     label2(:)  = {param2Label};
     allLabels  = [label1;label2];
 
-    M=200;
+    M=500;
     N = ceil(0.3*size(allData,1));
     X_All = cell(1,M);
     Y_All = cell(1,M);
@@ -173,8 +135,9 @@ function AUC_mean = plotsingleROCCurve(param1, param2, param1Label, param2Label,
         %testLabel = allDatalogicalResponse(cv.test,:);
 
         % Fitting the logistic regression
-        mdl = fitglm(trainData,trainLabel,'Distribution', 'binomial','Link','logit');
-        
+        %mdl = fitglm(trainData,trainLabel,'Distribution', 'binomial','Link','logit');
+        mdl = fitglm(trainData,trainLabel);
+
         %predict on leave-out testing data
         testScore = predict(mdl, testData);
 
@@ -204,7 +167,7 @@ function AUC_mean = plotsingleROCCurve(param1, param2, param1Label, param2Label,
     X_mean = mean(cell2mat(X_All),2); %X_std = std(New_X_All,0,2);
     Y_mean = mean(cell2mat(Y_All),2); Y_std = std(cell2mat(Y_All),0,2);
     AUC_mean = mean(AUC_All,2);
-
+    std(AUC_All)
     plot(X_mean,Y_mean, "Color",paramColor,'LineWidth',2.0);
     hold on
     patch([X_mean; flipud(X_mean)], [Y_mean+Y_std; flipud(Y_mean-Y_std)], paramColor, 'EdgeColor','none', 'FaceAlpha',0.2, 'HandleVisibility','off')
@@ -216,16 +179,15 @@ end
 function dataout = averageAcrossConditions(data)
 
     dataout = [];
-    pSize   = length(data{1});
-    condSize = width(data);
+    pSize = length(data{1});
+    paramsSize = width(data{1});
 
     for i = 1:pSize
         tempP = [];
-        for j = 1:condSize % Trial conditions
-            tempP = [tempP cell2mat(data{j}{i})];
+        for j = 1:paramsSize
+            tempP = [tempP mean([data{1}(i,j) data{2}(i,j) data{3}(i,j)],"omitnan")];
         end
-        tempavg = mean(tempP,"omitnan");
-        dataout = [dataout;tempavg];
+        dataout = [dataout;tempP];
     end
 
     dataout = removeNanRows(dataout);

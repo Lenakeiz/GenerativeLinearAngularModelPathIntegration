@@ -12,6 +12,7 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 sigma_nu_IC             =   HealthyControls.Results.IC;
+%sigma_nu_IC             =   YoungControls.Results.IC;
 
 %% 2, beta, sigma, nu Model --> only encoding errors in distance
 config.ModelName        =   "beta_sigma_nu";
@@ -21,7 +22,16 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 beta_sigma_nu_IC        =   HealthyControls.Results.IC;
+%beta_sigma_nu_IC        =   YoungControls.Results.IC;
+%% 2.x g3, sigma, nu model --> exuection error only model
+config.ModelName        =   "g3_sigma_nu";
+config.ParamName        =   ["g3", "sigma", "nu"];
+config.NumParams        =   length(config.ParamName);
+% Run the model
+VAM
 
+g3_sigma_nu_IC     =   HealthyControls.Results.IC;
+%g3_sigma_nu_IC     =   YoungControls.Results.IC;
 %% 3, g2, g3, sigma, nu Model --> encoding errors and production errors in angle 
 config.ModelName        =   "g2_g3_sigma_nu";
 config.ParamName        =   ["g2", "g3", "sigma", "nu"];
@@ -30,7 +40,7 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 g2_g3_sigma_nu_IC       =   HealthyControls.Results.IC;
-
+%g2_g3_sigma_nu_IC       =   YoungControls.Results.IC;
 %% 4, beta, g2, sigma, nu Model --> encoding error in distance and angle
 config.ModelName        =   "beta_g2_sigma_nu";
 config.ParamName        =   ["beta", "g2", "sigma", "nu"];
@@ -39,7 +49,7 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 beta_g2_sigma_nu_IC     =   HealthyControls.Results.IC;
-
+%beta_g2_sigma_nu_IC     =   YoungControls.Results.IC;
 %% 5, beta, g3, sigma, nu Model --> encoding errors in distance and production error in angle
 config.ModelName        =   "beta_g3_sigma_nu";
 config.ParamName        =   ["beta", "g3", "sigma", "nu"];
@@ -48,7 +58,16 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 beta_g3_sigma_nu_IC     =   HealthyControls.Results.IC;
+%beta_g3_sigma_nu_IC     =   YoungControls.Results.IC;
+%% 5.x g3,m3, sigma, nu model --> exuection error only model
+config.ModelName        =   "g3_m3_sigma_nu";
+config.ParamName        =   ["g3", "m3", "sigma", "nu"];
+config.NumParams        =   length(config.ParamName);
+% Run the model
+VAM
 
+g3_m3_sigma_nu_IC     =   HealthyControls.Results.IC;
+%g3_m3_sigma_nu_IC     =   YoungControls.Results.IC;
 %% 6, beta, g2, g3, sigma, nu Model --> encoding errors in distance and angles and production error in angle
 config.ModelName        =   "beta_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
@@ -57,7 +76,7 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 beta_g2_g3_sigma_nu_IC  =   HealthyControls.Results.IC;
-
+%beta_g2_g3_sigma_nu_IC  =   YoungControls.Results.IC;
 %% 7, beta, g2, g3, k3, sigma, nu Model --> add another parameter k3 to the beta, g2, g3, sigma, nu Model
 config.ModelName        =   "beta_g2_g3_k3_sigma_nu";
 config.ParamName        =   ["beta", "g2", "g3", "k3", "sigma", "nu"];
@@ -67,7 +86,7 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 beta_g2_g3_k3_sigma_nu_IC           =   HealthyControls.Results.IC;
-
+%beta_g2_g3_k3_sigma_nu_IC           =   YoungControls.Results.IC;
 %% 8, beta, g2, g3, m3, sigma, nu Model --> add another parameter k3 to the beta, g2, m3, sigma, nu Model
 config.ModelName        =   "beta_g2_g3_m3_sigma_nu";
 config.ParamName        =   ["beta", "g2", "g3", "m3", "sigma", "nu"];
@@ -77,7 +96,7 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 beta_g2_g3_m3_sigma_nu_IC           =   HealthyControls.Results.IC;
-
+%beta_g2_g3_m3_sigma_nu_IC           =   YoungControls.Results.IC;
 %% 9, beta, g2, g3, k3, m3, sigma, nu Model
 config.ModelName        =   "beta_g2_g3_k3_m3_sigma_nu";
 config.ParamName        =   ["beta", "g2", "g3", "k3", "m3", "sigma", "nu"];
@@ -87,7 +106,7 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 beta_g2_g3_k3_m3_sigma_nu_IC           =   HealthyControls.Results.IC;
-
+%beta_g2_g3_k3_m3_sigma_nu_IC           =   YoungControls.Results.IC;
 %% 10, beta, g2, g3, k3, m3, n3, sigma, nu Model
 config.ModelName        =   "beta_g2_g3_k3_m3_n3_sigma_nu";
 config.ParamName        =   ["beta", "g2", "g3", "k3", "m3", "n3", "sigma", "nu"];
@@ -97,8 +116,29 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 beta_g2_g3_k3_m3_n3_sigma_nu_IC           =   HealthyControls.Results.IC;
+%beta_g2_g3_k3_m3_n3_sigma_nu_IC           =   YoungControls.Results.IC;
+%% X, Stangl model, beta, alpha, sigma, nu Model (without considering additive bias b, reporting noise sigma_d and sigma_phi)
+config.ModelName        =   "stangl";
+config.ParamName        =   ["beta", "alpha", "sigma", "nu"];
+config.NumParams        =   length(config.ParamName);
 
+% Run the model
+VAM
+
+stangl_IC           =   HealthyControls.Results.IC;
+%stangl_IC           =   YoungControls.Results.IC;
+%% Y, Stangl model, beta, alpha, sigma, nu Model (without considering additive bias b, reporting noise sigma_d and sigma_phi)
+config.ModelName        =   "stangl2";
+config.ParamName        =   ["beta", "alpha", "g2", "g3", "sigma", "nu"];
+config.NumParams        =   length(config.ParamName);
+
+% Run the model
+VAM
+
+stangl2_IC           =   HealthyControls.Results.IC;
+%stangl2_IC           =   YoungControls.Results.IC;
 %%
+%config.ResultFolder = pwd+"/Output/ModelFigures/ModelComparison_HC";
 config.ResultFolder = pwd+"/Output/ModelFigures/ModelComparison_HC";
 %create storing folder for trajectory if not exist
 if ~exist(config.ResultFolder, 'dir')
@@ -106,7 +146,7 @@ if ~exist(config.ResultFolder, 'dir')
 end
 
 %%
-ModelNames = {'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10'};
+ModelNames = {'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11', 'M12'};
 
 %% Setting colors for using in plots
 ColorPattern; 
@@ -121,27 +161,36 @@ for idx_ = 1:4
     cond = CondList(idx_);
     [sigma_nu_AIC,sigma_nu_BIC, sigma_nu_NLL] = reformatIC(sigma_nu_IC, cond);
     [beta_sigma_nu_AIC,beta_sigma_nu_BIC, beta_sigma_nu_NLL] = reformatIC(beta_sigma_nu_IC, cond);
+    [g3_sigma_nu_AIC,g3_sigma_nu_BIC, g3_sigma_nu_NLL] = reformatIC(g3_sigma_nu_IC, cond);
     [g2_g3_sigma_nu_AIC,g2_g3_sigma_nu_BIC, g2_g3_sigma_nu_NLL] = reformatIC(g2_g3_sigma_nu_IC, cond);
     [beta_g2_sigma_nu_AIC, beta_g2_sigma_nu_BIC, beta_g2_sigma_nu_NLL] = reformatIC(beta_g2_sigma_nu_IC, cond);
     [beta_g3_sigma_nu_AIC,beta_g3_sigma_nu_BIC, beta_g3_sigma_nu_NLL] = reformatIC(beta_g3_sigma_nu_IC, cond);
+    [g3_m3_sigma_nu_AIC,g3_m3_sigma_nu_BIC, g3_m3_sigma_nu_NLL] = reformatIC(g3_m3_sigma_nu_IC, cond);
     [beta_g2_g3_sigma_nu_AIC, beta_g2_g3_sigma_nu_BIC,beta_g2_g3_sigma_nu_NLL] = reformatIC(beta_g2_g3_sigma_nu_IC, cond);
     [beta_g2_g3_k3_sigma_nu_AIC, beta_g2_g3_k3_sigma_nu_BIC,beta_g2_g3_k3_sigma_nu_NLL] = reformatIC(beta_g2_g3_k3_sigma_nu_IC, cond);
     [beta_g2_g3_m3_sigma_nu_AIC, beta_g2_g3_m3_sigma_nu_BIC,beta_g2_g3_m3_sigma_nu_NLL] = reformatIC(beta_g2_g3_m3_sigma_nu_IC, cond);
     [beta_g2_g3_k3_m3_sigma_nu_AIC, beta_g2_g3_k3_m3_sigma_nu_BIC,beta_g2_g3_k3_m3_sigma_nu_NLL] = reformatIC(beta_g2_g3_k3_m3_sigma_nu_IC, cond);
     [beta_g2_g3_k3_m3_n3_sigma_nu_AIC, beta_g2_g3_k3_m3_n3_sigma_nu_BIC,beta_g2_g3_k3_m3_n3_sigma_nu_NLL] = reformatIC(beta_g2_g3_k3_m3_n3_sigma_nu_IC, cond);
-        
+    
+    %[stangl_AIC,stangl_BIC, stangl_NLL] = reformatIC(stangl_IC, cond);    
+    %[stangl2_AIC,stangl2_BIC, stangl2_NLL] = reformatIC(stangl2_IC, cond);
+
     % Box Plot of AIC
     ICType = "AIC";
     All_AIC = [sigma_nu_AIC,... 
                beta_sigma_nu_AIC,...
+               g3_sigma_nu_AIC,...
                g2_g3_sigma_nu_AIC,...
                beta_g2_sigma_nu_AIC,...
                beta_g3_sigma_nu_AIC,...
+               g3_m3_sigma_nu_AIC,...
                beta_g2_g3_sigma_nu_AIC,...
                beta_g2_g3_k3_sigma_nu_AIC,...
                beta_g2_g3_m3_sigma_nu_AIC,...
                beta_g2_g3_k3_m3_sigma_nu_AIC,...
                beta_g2_g3_k3_m3_n3_sigma_nu_AIC];
+%                stangl_AIC,...
+%                stangl2_AIC];
 
     plotBoxPlot(All_AIC, ModelNames, ICType, config, cond);
     
@@ -149,28 +198,37 @@ for idx_ = 1:4
     ICType = "BIC";
     All_BIC = [sigma_nu_BIC,...
                beta_sigma_nu_BIC,...
+               g3_sigma_nu_BIC,...
                g2_g3_sigma_nu_BIC,...
                beta_g2_sigma_nu_BIC,...
                beta_g3_sigma_nu_BIC,...
+               g3_m3_sigma_nu_BIC,...
                beta_g2_g3_sigma_nu_BIC,...
                beta_g2_g3_k3_sigma_nu_BIC,...
                beta_g2_g3_m3_sigma_nu_BIC,...
                beta_g2_g3_k3_m3_sigma_nu_BIC,...
                beta_g2_g3_k3_m3_n3_sigma_nu_BIC];
+%                stangl_BIC,...
+%                stangl2_BIC];
+
     plotBoxPlot(All_BIC, ModelNames, ICType, config, cond);
     
     % Box Plot of NLL
     ICType = "NegLogLikelihood";
     All_NLL = [sigma_nu_NLL,...
                beta_sigma_nu_NLL,...
+               g3_sigma_nu_NLL,... 
                g2_g3_sigma_nu_NLL,... 
                beta_g2_sigma_nu_NLL,...
                beta_g3_sigma_nu_NLL,...
+               g3_m3_sigma_nu_NLL,...
                beta_g2_g3_sigma_nu_NLL,...
                beta_g2_g3_k3_sigma_nu_NLL,...
                beta_g2_g3_m3_sigma_nu_NLL,...
                beta_g2_g3_k3_m3_sigma_nu_NLL,...
                beta_g2_g3_k3_m3_n3_sigma_nu_NLL];
+%                stangl_NLL,...
+%                stangl2_NLL];
     plotBoxPlot(All_NLL, ModelNames, ICType, config, cond);
 
 end
@@ -243,10 +301,10 @@ function plotBoxPlot(data, ModelNames, ICType, config, cond)
 
     %% add scatter plot and the mean of the data
     num_points = size(data,1);
-    num_boxplots = size(data,2);
+
     for i=1:size(data,2)
         hold on
-        c_idx = mod(10-i+1,N)+1;
+        c_idx = mod(num_boxplots-i+1,N)+1;
 
         x = i*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
         scatter(x, data(:,i), scatter_markerSize, ...

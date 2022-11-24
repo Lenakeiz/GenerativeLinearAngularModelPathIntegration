@@ -17,7 +17,7 @@ config.NumParams        =   length(config.ParamName); % Set 100 here to avoid pr
 VAM
 
 %% Model run completed, preparing the data for plotting figures
-config.ResultFolder = pwd + "/Output/PaperFigs/Fig5A";
+config.ResultFolder = pwd + "/Output/ModelFigures/ROC_HealthyoldMCI";
 % Create storing folder for trajectory if not exist
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
@@ -31,6 +31,7 @@ HealthyControlsParameters = averageAcrossConditions(HealthyControls.Results.esti
 MCIUnkParameters          = averageAcrossConditions(MCIUnk.Results.estimatedParams);
 MCINegParameters          = averageAcrossConditions(MCINeg.Results.estimatedParams);
 MCIPosParameters          = averageAcrossConditions(MCIPos.Results.estimatedParams);
+
 MCIAllParameters          = [MCIUnkParameters; MCINegParameters; MCIPosParameters]; 
 
 %% Plotting roc curve HC vs pooled MCI and MCI negative vs MCI positive
@@ -49,7 +50,8 @@ plotInfo.visible = "on";
 disp("%%%%%%%%%%%%%%% ROC MCI pooled vs HC - model parameters estimation %%%%%%%%%%%%%%%")
 plotROCParametersCurve(HealthyControlsParameters, MCIAllParameters,'HC', 'MCI', config, plotInfo);
 
-plotInfo.Title = "MCI negative / MCI positive";
+%%
+plotInfo.Title = "MCI - / MCI +";
 
 disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - model parameters estimation %%%%%%%%%%%%%%%")
 plotROCParametersCurve(MCINegParameters, MCIPosParameters,'MCIneg', 'MCIpos', config, plotInfo);
@@ -73,31 +75,24 @@ set(0,'DefaultTextFontSize',plotInfo.axisSize)
 
 hold on;
 
-AUC{1} = plotsingleROCCurve(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(4,:), plotInfo);
-legendText{1,1} = "AUC(" + convertCharsToStrings({'\beta g_2 g_3 \sigma \nu'}) + ") = " + num2str(round(AUC{1}.Value(1),2),2);
-
-disp("AUC(" + convertCharsToStrings({'\beta g_2 g_3 \sigma \nu'}) + ") CI = [" ...
-    + num2str(round(AUC{1}.Value(2),2),2) +  ", " + num2str(round(AUC{1}.Value(3),2),2) + "]")
-% filter = ~(HealthyControlsParameters(:,3) == 0);
-% HealthyControlsParametersFilter = HealthyControlsParameters(filter,:);
-% 
-% filter = ~(MCIAllParameters(:,3) == 0);
-% MCIAllParametersFilter = MCIAllParameters(filter,:);
-
-% clear filter
+AUC = plotsingleROCCurve(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(4,:));
+legendText{1,1} = "AUC(" + convertCharsToStrings({'\beta g_2 g_3 \sigma \nu'}) + ") = " + num2str(round(AUC,2),2);
 
 for i = 1:length(parametersName)
-    AUC{i + 1} = plotsingleROCCurve(params1(:,i), params2(:,i), params1groupName, params2groupName, colors(i,:), plotInfo);
-    legendText{1,i + 1} = "AUC(" + convertCharsToStrings(parametersName{i}) + ") = " + num2str(round(AUC{i + 1}.Value(1),2),2);
-    disp("AUC(" + convertCharsToStrings(parametersName{i}) + ") CI = [" ...
-        + num2str(round(AUC{i + 1}.Value(2),2),2) +  ", " + num2str(round(AUC{i + 1}.Value(3),2),2) + "]")
+    AUC = plotsingleROCCurve(params1(:,i), params2(:,i), params1groupName, params2groupName, colors(i,:));
+    legendText{1,i+1} = "AUC(" + parametersName(i) + ") = "+num2str(round(AUC,2));
 end
 
-hold off;
+hline = refline([1 0]);
+hline.Color = 'k';
+hline.LineWidth = 2;
+hline.LineStyle = '--';
+
+hold off
 
 ll = legend('Location','southeast');
 ll.String = legendText;
-ll.FontSize = 12;
+ll.FontSize = 8;
 
 ylabel('True Positive Rate');
 xlabel('False Positive Rate')
@@ -112,6 +107,8 @@ set(gca, ...
     'TickLength'  , [.01 .01] , ...
     'XColor'      , [.1 .1 .1], ...
     'YColor'      , [.1 .1 .1], ...
+    'XLim'        , [0,1],...
+    'YLim'        , [0,1],...
     'LineWidth'   , .5        );
 
 axis square;
@@ -133,7 +130,9 @@ clear parametersName filesName i colors f ll legendText
 end
 
 %%
-function AUC = plotsingleROCCurve(param1, param2, param1Label, param2Label, paramColor, plotInfo)
+function AUC_mean = plotsingleROCCurve(param1, param2, param1Label, param2Label, paramColor)
+    % logistic regression with cross validation
+
     % Preparing the logistic regression
     allData = [param1; param2];
     allDatalogicalResponse = (1:height(param1) + height(param2))' > height(param1);
@@ -143,21 +142,61 @@ function AUC = plotsingleROCCurve(param1, param2, param1Label, param2Label, para
     label2(:)  = {param2Label};
     allLabels  = [label1;label2];
 
-    clear hcLabel mciLabel
-    
-    % Fitting the logistic regression
-    mdl = fitglm(allData,allDatalogicalResponse,'Distribution', 'binomial','Link','logit');
-    
-    allDataScores = mdl.Fitted.Probability;
-    [X,Y,~,AUC.Value] = perfcurve(allLabels, allDataScores, param2Label, NBoot=100);
+    M=200;
+    N = ceil(0.3*size(allData,1));
+    X_All = cell(1,M);
+    Y_All = cell(1,M);
+    AUC_All = zeros(1,M);
 
-    lineplot = plot(X(:,1),Y(:,1),...
-        "Color",paramColor,...
-        'LineWidth',2.0...
-        );
+    %cross validation for M times
+    for i=1:M
+        cv1 = cvpartition(size(param1,1),'HoldOut',0.3); %leave 30% datat out for the first group
+        cv2 = cvpartition(size(param2,1),'HoldOut',0.3); % leave 30% data out for the second group
+        train_idx = [cv1.training;cv2.training];
+        trainData = allData(train_idx,:);
+        trainLabel = allDatalogicalResponse(train_idx,:);
+        
+        test_idx = [cv1.test;cv2.test];
+        testData = allData(test_idx,:);
 
-    lineplot.Color = [lineplot.Color plotInfo.lineAlpha];
+        %testLabel = allDatalogicalResponse(cv.test,:);
 
+        % Fitting the logistic regression
+        mdl = fitglm(trainData,trainLabel,'Distribution', 'binomial','Link','logit');
+        
+        %predict on leave-out testing data
+        testScore = predict(mdl, testData);
+
+        testLabels = allLabels(test_idx,:);
+
+        [X,Y,~,AUC] = perfcurve(testLabels, testScore, param2Label);
+        
+        if length(X)<N
+            %pad 1 after the vector
+            %not sure why length of elements in X_All and Y_All are not consistent
+            %so far. May be due to ROC calculation somewhere inside the code
+            X =[X;ones(N-length(X),1)];
+            Y = [Y; ones(N-length(Y),1)];
+        else
+            X = X(1:N);
+            X(end) = 1.0;
+
+            Y = Y(1:N);
+            Y(end) = 1.0;
+        end
+        
+        X_All{:,i} = X(:,1);
+        Y_All{:,i} = Y(:,1);
+        AUC_All(i) = AUC(1);
+    end
+
+    X_mean = mean(cell2mat(X_All),2); %X_std = std(New_X_All,0,2);
+    Y_mean = mean(cell2mat(Y_All),2); Y_std = std(cell2mat(Y_All),0,2);
+    AUC_mean = mean(AUC_All,2);
+
+    plot(X_mean,Y_mean, "Color",paramColor,'LineWidth',2.0);
+    hold on
+    patch([X_mean; flipud(X_mean)], [Y_mean+Y_std; flipud(Y_mean-Y_std)], paramColor, 'EdgeColor','none', 'FaceAlpha',0.2, 'HandleVisibility','off')
 end
 
 %% get the model parameters, average across the conditions

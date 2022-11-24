@@ -22,18 +22,18 @@ if ~exist(config.ResultFolder, 'dir')
 end
 
 %% Getting Information from results:
-[YoungControlsPropDist, YoungControlsPropAng]     = getProportionalLinearAndAngularError(YoungControls);
-[HealthyControlsPropDist, HealthyControlsPropAng] = getProportionalLinearAndAngularError(HealthyControls);
-[MCIUnkPropDist, MCIUnkPropAng]                   = getProportionalLinearAndAngularError(MCIUnk);
-[MCINegPropDist, MCINegPropAng]                   = getProportionalLinearAndAngularError(MCINeg);
-[MCIPosPropDist, MCIPosPropAng]                   = getProportionalLinearAndAngularError(MCIPos);
+[YoungControlsPropDist, YoungControlsPropAng]     = getLinearAndAngularError(YoungControls);
+[HealthyControlsPropDist, HealthyControlsPropAng] = getLinearAndAngularError(HealthyControls);
+[MCIUnkPropDist, MCIUnkPropAng]                   = getLinearAndAngularError(MCIUnk);
+[MCINegPropDist, MCINegPropAng]                   = getLinearAndAngularError(MCINeg);
+[MCIPosPropDist, MCIPosPropAng]                   = getLinearAndAngularError(MCIPos);
 
 %%
-plotInfo.type = "ProportionalDistance";
+plotInfo.type = "Distance";
 [anova_tab_dist,multicomp_tab1_dist,multicomp_tab2_dist, multicomp_tab12_dist]     = TwowayAnovaAllGroupsData(YoungControlsPropDist, HealthyControlsPropDist, MCIPosPropDist, MCINegPropDist, MCIUnkPropDist, config, plotInfo);
 
 %%
-plotInfo.type = "ProportionalAngle";
+plotInfo.type = "Angle";
 [anova_tab_angle,multicomp_tab1_angle,multicomp_tab2_angle, multicomp_tab12_angle] = TwowayAnovaAllGroupsData(YoungControlsPropAng, HealthyControlsPropAng, MCIPosPropAng, MCINegPropAng, MCIUnkPropAng, config, plotInfo);
 
 %% Plotting
@@ -48,32 +48,32 @@ plotInfo.scatterFaceAlpha = 0.2;
 plotInfo.scatterEdgeAlpha = 0.8;
 plotInfo.scatterDataSize = 32;
 plotInfo.errorBarWidth = 2.0;
-plotInfo.type = "ProportionalDistance";
-plotInfo.YLabel = "Actual distance / correct distance";
+plotInfo.type = "Distance";
+plotInfo.YLabel = "Distance error";
 plotInfo.visible = "off";
 % These values have been set after checking the output of the two way anova
 % This adds only stars on top of the groups
-plotInfo.addStar = [nan nan nan nan 1];
+plotInfo.addStar = [nan nan nan nan nan];
 plotInfo.starXValues = [1 2 3 4 5];
-plotInfo.starYValues = [nan nan nan nan 1.5];
+plotInfo.starYValues = [nan nan nan nan nan];
 plotInfo.starTextSize = [35 35 35 35 35];
 % This adds sigstar bars using adjustablesigstar
-plotInfo.addSigmaStarbars = 1;
-plotInfo.sigmaStarBars = [4 5; 3 5; 2 5; 1 5];
+plotInfo.addSigmaStarbars = 0;
+plotInfo.sigmaStarBars = [];
 plotInfo.sigmaStarBarsPValues = [0.001; 0.001; 0.001; 0.001];
 plotInfo.sigmaStarLineWidth = 2.5;
 plotInfo.sigmaStarTextSize  = 20;
 plotInfo.sigmaBarSeparation = 0.075;
-plotInfo.yLim = [0 1.75];
+plotInfo.yLim = [-3 3];
 plotInfo.ticksStep = 0.5;
 
 plotBarScatter(YoungControlsPropDist, HealthyControlsPropDist, MCIPosPropDist, MCINegPropDist, MCIUnkPropDist, anova_tab_dist, multicomp_tab1_dist, config, plotInfo);
 
-plotInfo.yLim = [0 1.75];
+plotInfo.yLim = [-3 3];
 plotInfo.ticksStep = 0.5;
 plotMergedBarScatter(mean(YoungControlsPropDist,1,'omitnan'), mean(HealthyControlsPropDist,1,'omitnan'), mean(MCIPosPropDist,1,'omitnan'), mean(MCINegPropDist,1,'omitnan'), mean(MCIUnkPropDist,1,'omitnan'), anova_tab_dist, multicomp_tab1_dist, config, plotInfo);
 
-%
+%% 
 plotInfo.defaultTextSize = 20;
 plotInfo.defaultLineSize = 2;
 plotInfo.barFaceAlpha = 0.5;
@@ -82,28 +82,29 @@ plotInfo.scatterFaceAlpha = 0.2;
 plotInfo.scatterEdgeAlpha = 0.8;
 plotInfo.scatterDataSize = 32;
 plotInfo.errorBarWidth = 2.0;
-plotInfo.type = "ProportionalAngle";
-plotInfo.YLabel = "Actual angle / correct angle";
+plotInfo.type = "Angle";
+plotInfo.YLabel = "Angular error";
 plotInfo.visible = "off";
 % These values have been set after checking the output of the two way anova
 % This adds only stars on top of the groups
-plotInfo.addStar = [nan nan nan nan 1];
+plotInfo.addStar = [nan nan nan nan nan];
 plotInfo.starXValues = [1 2 3 4 5];
-plotInfo.starYValues = [nan nan nan nan 2.1];
+plotInfo.starYValues = [nan nan nan nan nan];
 plotInfo.starTextSize = [35 35 35 35 35];
 % This adds sigstar bars using adjustablesigstar
-plotInfo.addSigmaStarbars = 1;
+plotInfo.addSigmaStarbars = 0;
 plotInfo.sigmaStarBars = [4 5; 3 5; 2 5; 1 5];
 plotInfo.sigmaStarBarsPValues = [0.001; 0.001; 0.001; 0.001];
 plotInfo.sigmaStarLineWidth = 2.5;
 plotInfo.sigmaStarTextSize  = 20;
 plotInfo.sigmaBarSeparation = 0.06;
-plotInfo.yLim = [0 2.5];
-plotInfo.ticksStep = 0.5;
+plotInfo.yLim = [-80 50];
+plotInfo.ticksStep = 5;
 
 plotBarScatter(YoungControlsPropAng , HealthyControlsPropAng , MCIPosPropAng , MCINegPropAng , MCIUnkPropAng , anova_tab_angle, multicomp_tab1_angle, config, plotInfo);
 
-plotInfo.yLim = [0 2.5];
+plotInfo.yLim = [-80 50];
+plotInfo.ticksStep = 5;
 plotMergedBarScatter(mean(YoungControlsPropAng,1,'omitnan'), mean(HealthyControlsPropAng,1,'omitnan'), mean(MCIPosPropAng,1,'omitnan'), mean(MCINegPropAng,1,'omitnan'), mean(MCIUnkPropAng,1,'omitnan'), anova_tab_angle, multicomp_tab1_angle, config, plotInfo);
 
 %%
@@ -111,27 +112,27 @@ clear plotInfo
 
 %% get the normalized return distance and angles for all particpants
 % each value is a mean value for per participant per condition
-function [PropDist, PropAng] = getProportionalLinearAndAngularError(Group)
+function [Dist, Ang] = getLinearAndAngularError(Group)
 
-    PropDist = [];
-    PropAng  = [];
+    Dist = [];
+    Ang  = [];
 
     for TRIAL_FILTER = 1:3
         
-        CondPropDist  = Group.Results.PropDistErr{TRIAL_FILTER};
-        CondPropAng   = Group.Results.PropAngErr{TRIAL_FILTER};
-        subjectSize   = size(CondPropDist,2);
+        CondDist  = Group.Results.DistErr{TRIAL_FILTER};
+        CondAng   = Group.Results.AngleErr{TRIAL_FILTER};
+        subjectSize   = size(CondDist,2);
 
         CondPropDistMeanSubjs  = zeros(1,subjectSize);
         CondPropAngleMeanSubjs = zeros(1,subjectSize);
         
         for subj=1:subjectSize
-            CondPropDistMeanSubjs(1,subj)  = mean(cell2mat(CondPropDist{1,subj}),"omitnan");
-            CondPropAngleMeanSubjs(1,subj) = mean(cell2mat(CondPropAng{1,subj}),"omitnan");
+            CondPropDistMeanSubjs(1,subj)  = mean(cell2mat(CondDist{1,subj}),"omitnan");
+            CondPropAngleMeanSubjs(1,subj) = mean(cell2mat(CondAng{1,subj}),"omitnan");
         end
 
-        PropDist = [PropDist;CondPropDistMeanSubjs];
-        PropAng  = [PropAng;CondPropAngleMeanSubjs];
+        Dist = [Dist;CondPropDistMeanSubjs];
+        Ang  = [Ang;CondPropAngleMeanSubjs];
     
     end    
 end
@@ -234,7 +235,7 @@ function plotBarScatter(YoungData, HealthyOldData, MCIPosData, MCINegData, MCIUn
 
     hold on
     %add y=1 for reference
-    yline(1, 'LineStyle','-.', 'LineWidth', 1.5, 'Color', config.color_scheme_npg(1,:), 'Alpha', 0.8);
+    %yline(1, 'LineStyle','-.', 'LineWidth', 1.5, 'Color', config.color_scheme_npg(1,:), 'Alpha', 0.8);
     
     %Further post-processing the figure
     set(gca, ...
@@ -272,7 +273,7 @@ function plotBarScatter(YoungData, HealthyOldData, MCIPosData, MCINegData, MCIUn
 
     ylabel(plotInfo.YLabel);
     ylim(plotInfo.yLim);
-    yticks(0:plotInfo.ticksStep:plotInfo.yLim(2));
+    %yticks(0:plotInfo.ticksStep:plotInfo.yLim(2));
 
     hold off;
     
@@ -280,8 +281,8 @@ function plotBarScatter(YoungData, HealthyOldData, MCIPosData, MCINegData, MCIUn
     ax.LineWidth = plotInfo.defaultLineSize;
 
     % save figure
-    exportgraphics(f,config.ResultFolder+"/BarNormedReturn" + plotInfo.type + ".png",'Resolution',300);
-    exportgraphics(f,config.ResultFolder+"/BarNormedReturn" + plotInfo.type + ".pdf",'Resolution',300, 'ContentType','vector');
+    exportgraphics(f,config.ResultFolder+"/BarReturn" + plotInfo.type + ".png",'Resolution',300);
+    exportgraphics(f,config.ResultFolder+"/BarReturn" + plotInfo.type + ".pdf",'Resolution',300, 'ContentType','vector');
 
 end
 
@@ -351,7 +352,7 @@ function plotMergedBarScatter(YoungData, HealthyOldData, MCIPosData, MCINegData,
 
     hold on
     %add y=1 for reference
-    yline(1, 'LineStyle','-.', 'LineWidth', 1.5, 'Color', config.color_scheme_npg(1,:), 'Alpha', 0.8);
+    %yline(1, 'LineStyle','-.', 'LineWidth', 1.5, 'Color', config.color_scheme_npg(1,:), 'Alpha', 0.8);
     
     %Further post-processing the figure
     set(gca, ...
@@ -379,7 +380,7 @@ function plotMergedBarScatter(YoungData, HealthyOldData, MCIPosData, MCINegData,
         
     ylabel(plotInfo.YLabel);
     ylim(plotInfo.yLim);
-    yticks(0:plotInfo.ticksStep:plotInfo.yLim(2));
+    %yticks(0:plotInfo.ticksStep:plotInfo.yLim(2));
     
     ax = gca;
     ax.LineWidth = plotInfo.defaultLineSize;
@@ -387,8 +388,8 @@ function plotMergedBarScatter(YoungData, HealthyOldData, MCIPosData, MCINegData,
     hold off;
     
     % save figure
-    exportgraphics(f,config.ResultFolder+"/BarMergedNormedReturn" + plotInfo.type + ".png",'Resolution',300);
-    exportgraphics(f,config.ResultFolder+"/BarMergedNormedReturn" + plotInfo.type + ".pdf",'Resolution',300, 'ContentType','vector');
+    exportgraphics(f,config.ResultFolder+"/BarMergedReturn" + plotInfo.type + ".png",'Resolution',300);
+    exportgraphics(f,config.ResultFolder+"/BarMergedReturn" + plotInfo.type + ".pdf",'Resolution',300, 'ContentType','vector');
 
 end
 

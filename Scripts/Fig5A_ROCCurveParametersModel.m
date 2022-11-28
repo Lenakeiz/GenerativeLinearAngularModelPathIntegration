@@ -17,7 +17,7 @@ config.NumParams        =   length(config.ParamName); % Set 100 here to avoid pr
 VAM
 
 %% Model run completed, preparing the data for plotting figures
-config.ResultFolder = pwd + "/Output/ModelFigures/ROC_HealthyoldMCI";
+config.ResultFolder = pwd + "/Output//PaperFigs/Fig5A/ModelParameters";
 % Create storing folder for trajectory if not exist
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
@@ -36,6 +36,7 @@ MCIAllParameters          = [MCIUnkParameters; MCINegParameters; MCIPosParameter
 
 %% Plotting roc curve HC vs pooled MCI and MCI negative vs MCI positive
 % Plotting variables
+close all;
 plotInfo.defaultTextSize = 20;
 plotInfo.defaultLineSize = 1.4;
 plotInfo.titleFontSize = 16;
@@ -50,7 +51,6 @@ plotInfo.visible = "on";
 disp("%%%%%%%%%%%%%%% ROC MCI pooled vs HC - model parameters estimation %%%%%%%%%%%%%%%")
 plotROCParametersCurve(HealthyControlsParameters, MCIAllParameters,'HC', 'MCI', config, plotInfo);
 
-%%
 plotInfo.Title = "MCI - / MCI +";
 
 disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - model parameters estimation %%%%%%%%%%%%%%%")
@@ -76,11 +76,12 @@ set(0,'DefaultTextFontSize',plotInfo.axisSize)
 hold on;
 
 AUC = plotsingleROCCurve(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(4,:));
-legendText{1,1} = "AUC(" + convertCharsToStrings({'\beta g_2 g_3 \sigma \nu'}) + ") = " + num2str(round(AUC,2),2);
-
+legendText{1,1} = "AUC(" + convertCharsToStrings({'\beta g_2 g_3 \sigma \nu'}) + ") = " + num2str(round(AUC.mean,2),2);
+disp(["AUC_CI(" + parametersName(1) + ", " + parametersName(2) + ") = " num2str(AUC.CI)])
 for i = 1:length(parametersName)
     AUC = plotsingleROCCurve(params1(:,i), params2(:,i), params1groupName, params2groupName, colors(i,:));
-    legendText{1,i+1} = "AUC(" + parametersName(i) + ") = "+num2str(round(AUC,2));
+    legendText{1,i+1} = "AUC(" + parametersName(i) + ") = "+num2str(round(AUC.mean,2));
+    disp(["AUC_CI(" + parametersName(i) + ") = " num2str(AUC.CI)])
 end
 
 hline = refline([1 0]);
@@ -130,9 +131,9 @@ clear parametersName filesName i colors f ll legendText
 end
 
 %%
-function AUC_mean = plotsingleROCCurve(param1, param2, param1Label, param2Label, paramColor)
+function AUCOut = plotsingleROCCurve(param1, param2, param1Label, param2Label, paramColor)
     % logistic regression with cross validation
-
+    AUCOut=struct;
     % Preparing the logistic regression
     allData = [param1; param2];
     allDatalogicalResponse = (1:height(param1) + height(param2))' > height(param1);
@@ -142,21 +143,34 @@ function AUC_mean = plotsingleROCCurve(param1, param2, param1Label, param2Label,
     label2(:)  = {param2Label};
     allLabels  = [label1;label2];
 
-    M=200;
-    N = ceil(0.3*size(allData,1));
+    M=1000;
+    percentageLeaveOut = 0.3;
+    N = ceil(percentageLeaveOut*size(allData,1));
     X_All = cell(1,M);
     Y_All = cell(1,M);
-    AUC_All = zeros(1,M);
 
+    X_All_low = cell(1,M);
+    Y_All_low = cell(1,M);
+
+    X_All_high = cell(1,M);
+    Y_All_high = cell(1,M);
+
+    AUC_All = zeros(1,M);
+    AUC_CI = zeros(M,2);
+
+    warning('off',"all");
     %cross validation for M times
     for i=1:M
-        cv1 = cvpartition(size(param1,1),'HoldOut',0.3); %leave 30% datat out for the first group
-        cv2 = cvpartition(size(param2,1),'HoldOut',0.3); % leave 30% data out for the second group
+        cv1 = cvpartition(size(param1,1),'HoldOut',percentageLeaveOut); %leave 30% datat out for the first group
+        cv2 = cvpartition(size(param2,1),'HoldOut',percentageLeaveOut); % leave 30% data out for the second group
+        %partitionedData = cvpartition(length(allData),"HoldOut",percentageLeaveOut);
         train_idx = [cv1.training;cv2.training];
+        %train_idx = partitionedData.training;
         trainData = allData(train_idx,:);
         trainLabel = allDatalogicalResponse(train_idx,:);
         
         test_idx = [cv1.test;cv2.test];
+        %test_idx = partitionedData.test;
         testData = allData(test_idx,:);
 
         %testLabel = allDatalogicalResponse(cv.test,:);
@@ -169,31 +183,43 @@ function AUC_mean = plotsingleROCCurve(param1, param2, param1Label, param2Label,
 
         testLabels = allLabels(test_idx,:);
 
-        [X,Y,~,AUC] = perfcurve(testLabels, testScore, param2Label);
+        [X,Y,~,AUC] = perfcurve(testLabels, testScore, param2Label, NBoot=100);
         
+         if isnan(X(2:3))
+            AUC_All(i) = nan;
+            AUC_CI(i,:)  = nan(1,2);
+            continue
+        end
+
         if length(X)<N
             %pad 1 after the vector
             %not sure why length of elements in X_All and Y_All are not consistent
             %so far. May be due to ROC calculation somewhere inside the code
-            X =[X;ones(N-length(X),1)];
-            Y = [Y; ones(N-length(Y),1)];
+            X = [X;ones(N-size(X,1),size(X,2))];
+            Y = [Y;ones(N-size(Y,1),size(Y,2))];
         else
-            X = X(1:N);
-            X(end) = 1.0;
+            X = X(1:N,:);
+            X(end,:) = ones(1,size(X,2));
 
-            Y = Y(1:N);
-            Y(end) = 1.0;
+            Y = Y(1:N,:);
+            Y(end,:) = ones(1,size(Y,2));
         end
         
         X_All{:,i} = X(:,1);
         Y_All{:,i} = Y(:,1);
+        X_All_low = X(:,2);
+        Y_All_low = Y(:,2);
+        X_All_high = X(:,3);
+        Y_All_high = Y(:,3);
         AUC_All(i) = AUC(1);
+        AUC_CI(i,:)  = AUC(2:3);
     end
 
     X_mean = mean(cell2mat(X_All),2); %X_std = std(New_X_All,0,2);
-    Y_mean = mean(cell2mat(Y_All),2); Y_std = std(cell2mat(Y_All),0,2);
-    AUC_mean = mean(AUC_All,2);
-
+    Y_mean = mean(cell2mat(Y_All),2); Y_std = std(cell2mat(Y_All),0,2);%./sqrt(M);
+    AUCOut.mean = mean(AUC_All,2,"omitnan");
+    AUCOut.CI   = mean(AUC_CI,1,"omitnan");
+    warning('on',"all");
     plot(X_mean,Y_mean, "Color",paramColor,'LineWidth',2.0);
     hold on
     patch([X_mean; flipud(X_mean)], [Y_mean+Y_std; flipud(Y_mean-Y_std)], paramColor, 'EdgeColor','none', 'FaceAlpha',0.2, 'HandleVisibility','off')

@@ -12,7 +12,7 @@ VAM_PreprocessData
 config.useTrialFilter = true;
 config.ModelName        =   "beta_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
-config.NumParams        =   length(config.ParamName); %length(config.ParamName); % Set 100 here to avoid producing the model
+config.NumParams        =   100; %length(config.ParamName); % Set 100 here to avoid producing the model
 % Run the model
 VAM
 
@@ -51,29 +51,30 @@ close all;
 
 plotInfo.defaultTextSize = 20;
 plotInfo.defaultLineSize = 1.4;
-plotInfo.titleFontSize = 16;
-plotInfo.labelSize = 15;
+plotInfo.titleFontSize = 14;
+plotInfo.labelSize = 14;
 plotInfo.axisSize = 14;
 plotInfo.lineAlpha = 0.6;
 plotInfo.YLabel = "True positive rate";
 plotInfo.XLabel = "False positive rate";
-plotInfo.Title = "Healthy controls / pooled MCI";
+plotInfo.Title = "Healthy elder / MCI";
 plotInfo.visible = "on";
-parametersName = [{'Linear'}, {'Angular'}];
+parametersName = ["Linear", "Angular"];
 
-disp("%%%%%%%%%%%%%%% ROC Curve pooled MCI vs HC - behavioural data - proportional %%%%%%%%%%%%%%%")
+disp("%%%%%%%%%%%%%%% ROC Curve pooled MCI vs HC - behavioural data %%%%%%%%%%%%%%%")
+rng("default");
 generateROCCurve(allParamsHC, allParamsPooledMCI,'HC', 'MCI', parametersName, config, plotInfo);
 
 plotInfo.Title = "MCI negative / MCI positive";
-disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - behavioural data - proportional %%%%%%%%%%%%%%%")
-generateROCCurve(allParamsMCINeg, allParamsMCIPos,'MCIneg', 'MCIpos', parametersName, config, plotInfo);
+disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - behavioural data %%%%%%%%%%%%%%%");
+rng("default");
+generateROCCurve(allParamsMCINeg, allParamsMCIPos,'MCI-', 'MCI+', parametersName, config, plotInfo);
 
 %%
 function generateROCCurve(params1, params2, params1groupName, params2groupName, parametersName, config, plotInfo)
 
 colors = config.color_scheme_npg([8 3 7 9 10],:);
 % set figure info
-%f = figure('visible','off','Position', [100 100 1000 500]);
 f = figure('visible', plotInfo.visible, 'Position', [0 0 500 400]);
 %%% Font type and size setting %%%
 % Using Arial as default because all journals normally require the font to
@@ -85,23 +86,26 @@ set(0,'DefaultTextFontSize',plotInfo.axisSize)
 
 hold on;
 
-AUC{1} = plotsingleROCCurve(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(4,:), plotInfo);
-legendText{1,1} = "AUC(" + convertCharsToStrings(parametersName{1}) + ", " + convertCharsToStrings(parametersName{2}) + ") = " + num2str(round(AUC{1}.Value(1),2),2);
-disp("AUC(" + convertCharsToStrings(parametersName{1}) + ", " + convertCharsToStrings(parametersName{2}) + ") CI = [" ...
-    + num2str(round(AUC{1}.Value(2),2),2) +  ", " + num2str(round(AUC{1}.Value(3),2),2) + "]")
-
+AUC = plotsingleROCCurve(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(4,:));
+legendText{1,1} = "AUC(" + parametersName(1) + ", " + parametersName(2) + ") = "+num2str(round(AUC.mean,2));
+disp(["AUC_CI(" + parametersName(1) + ", " + parametersName(2) + ") = " num2str(AUC.CI)])
 for i = 1:length(parametersName)
-    AUC{i+1} = plotsingleROCCurve(params1(:,i), params2(:,i), params1groupName, params2groupName, colors(i,:), plotInfo);
-    legendText{1,i+1} = "AUC(" + convertCharsToStrings(parametersName{i}) + ") = " + num2str(round(AUC{i+1}.Value(1),2),2);
-    disp("AUC(" + convertCharsToStrings(parametersName{i}) + ") CI = [" ...
-        + num2str(round(AUC{i + 1}.Value(2),2),2) +  ", " + num2str(round(AUC{i + 1}.Value(3),2),2) + "]")
+    AUC = plotsingleROCCurve(params1(:,i), params2(:,i), params1groupName, params2groupName, colors(i,:));
+    legendText{1,i+1} = "AUC(" + parametersName(i) + ") = "+num2str(round(AUC.mean,2));
+    disp(["AUC_CI(" + parametersName(i) + ") = " num2str(AUC.CI)])
 end
+
+hline = refline([1 0]);
+hline.Color = 'k';
+hline.LineWidth = 2;
+hline.LineStyle = '--';
 
 hold off;
 
+legend('Location','southeast')
 ll = legend('Location','southeast');
 ll.String = legendText;
-ll.FontSize = 12;
+ll.FontSize = 8;
 
 ylabel('True Positive Rate');
 xlabel('False Positive Rate')
@@ -116,6 +120,8 @@ set(gca, ...
     'TickLength'  , [.01 .01] , ...
     'XColor'      , [.1 .1 .1], ...
     'YColor'      , [.1 .1 .1], ...
+    'XLim'        , [0,1],...
+    'YLim'        , [0,1],...
     'LineWidth'   , .5        );
 
 axis square;
@@ -137,7 +143,11 @@ clear parametersName filesName i colors f ll legendText
 end
 
 %%
-function AUC = plotsingleROCCurve(param1, param2, param1Label, param2Label, paramColor, plotInfo)
+function AUCOut = plotsingleROCCurve(param1, param2, param1Label, param2Label, paramColor)
+    % logistic regression with cross validation
+    
+    AUCOut=struct;
+
     % Preparing the logistic regression
     allData = [param1; param2];
     allDatalogicalResponse = (1:height(param1) + height(param2))' > height(param1);
@@ -147,22 +157,91 @@ function AUC = plotsingleROCCurve(param1, param2, param1Label, param2Label, para
     label2(:)  = {param2Label};
     allLabels  = [label1;label2];
 
-    clear hcLabel mciLabel
-    
-    % Fitting the logistic regression
-    mdl = fitglm(allData,allDatalogicalResponse,'Distribution', 'binomial','Link','logit');
-    
-    allDataScores = mdl.Fitted.Probability;
-    [X,Y,~,AUC.Value] = perfcurve(allLabels, allDataScores, param2Label, NBoot=1000);
+    M=1000;
+    propLeaveOut = 0.3;
+    N = ceil(propLeaveOut*size(allData,1));
+    X_All = cell(1,M);
+    Y_All = cell(1,M);
 
-    lineplot = plot(X(:,1),Y(:,1),...
-        "Color",paramColor,...
-        'LineWidth',2.0...
-        );
+    X_All_low = cell(1,M);
+    Y_All_low = cell(1,M);
 
-    lineplot.Color = [lineplot.Color plotInfo.lineAlpha];
+    X_All_high = cell(1,M);
+    Y_All_high = cell(1,M);
+
+    AUC_All = zeros(1,M);
+    AUC_CI = zeros(M,2);
+
+    warning('off',"all");
+    %cross validation for M times
+    for i=1:M
+        cv1 = cvpartition(size(param1,1),'HoldOut',propLeaveOut); %leave 30% datat out for the first group
+        cv2 = cvpartition(size(param2,1),'HoldOut',propLeaveOut); % leave 30% data out for the second group
+        train_idx = [cv1.training;cv2.training];
+        trainData = allData(train_idx,:);
+        trainLabel = allDatalogicalResponse(train_idx,:);
+        
+        test_idx = [cv1.test;cv2.test];
+        testData = allData(test_idx,:);
+
+        %testLabel = allDatalogicalResponse(cv.test,:);
+
+        % Fitting the logistic regression
+        mdl = fitglm(trainData,trainLabel,'Distribution', 'binomial','Link','logit');
+        
+        %predict on leave-out testing data
+        testScore = predict(mdl, testData);
+
+        testLabels = allLabels(test_idx,:);
+
+        [X,Y,~,AUC] = perfcurve(testLabels, testScore, param2Label, NBoot=100);
+
+        if isnan(X(2:3))
+            AUC_All(i) = nan;
+            AUC_CI(i,:)  = nan(1,2);
+            continue
+        end
+
+        if length(X)<N
+            %pad 1 after the vector
+            %not sure why length of elements in X_All and Y_All are not consistent
+            %so far. May be due to ROC calculation somewhere inside the code
+            X = [X;ones(N-size(X,1),size(X,2))];
+            Y = [Y;ones(N-size(Y,1),size(Y,2))];
+        else
+            X = X(1:N,:);
+            X(end,:) = ones(1,size(X,2));
+
+            Y = Y(1:N,:);
+            Y(end,:) = ones(1,size(Y,2));
+        end
+
+        X_All{:,i} = X(:,1);
+        Y_All{:,i} = Y(:,1);
+
+        X_All_low = X(:,2);
+        Y_All_low = Y(:,2);
+
+        X_All_high = X(:,3);
+        Y_All_high = Y(:,3);
+
+        AUC_All(i) = AUC(1);
+        AUC_CI(i,:)  = AUC(2:3);
+    end
+
+    X_mean = mean(cell2mat(X_All),2);
+    Y_mean = mean(cell2mat(Y_All),2); Y_d = std(cell2mat(Y_All),0,2);%./sqrt(M);
+
+    AUCOut.mean = mean(AUC_All,2,"omitnan");
+    AUCOut.CI   = mean(AUC_CI,1,"omitnan");
+    warning('on',"all");
+    hold on;
+    plot(X_mean,Y_mean, "Color",paramColor,'LineWidth',2.0);
+    patch([X_mean; flipud(X_mean)], [Y_mean+Y_d; flipud(Y_mean-Y_d)], paramColor, 'EdgeColor','none', 'FaceAlpha',0.2, 'HandleVisibility','off')
+    hold off;
 
 end
+
 
 %% get the model parameters, average across the conditions
 % remove nans if the row after mergin still contains nans

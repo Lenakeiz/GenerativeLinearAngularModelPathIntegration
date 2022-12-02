@@ -1,4 +1,4 @@
-function [negloglikelihood] = Estimate_beta_g2_g3_sigma_nu(beta, g2, g3, sigma, nu, Input, config)
+function [negloglikelihood] = Estimate_beta_g2_rgmean_g3_sigma_nu(beta, g2, g3, sigma, nu, Input, config)
 %   find the likelihood of the beta - g2 - g3 - sigma - nu Model
 %   Args:
 %       beta is the decay factor for the mental distance
@@ -71,8 +71,8 @@ for tr = 1:sampleSize
     end
     men_p1 = [men_length1,0];
     
-    theta2_prime = g2*theta2;
-    %theta2_prime = g2*theta2+mean_ecd_angle*(1-g2);
+    %theta2_prime = g2*theta2;
+    theta2_prime = g2*theta2+mean_ecd_angle*(1-g2);
 
     %mental point 2, (asuming a constant speed)
     men_length2 = l2*(1-exp(-beta*durationL2))/(beta*durationL2);
@@ -116,23 +116,5 @@ for tr = 1:sampleSize
     neg_ll = neg_ll_angle + neg_ll_dist;
 
     negloglikelihood = negloglikelihood + neg_ll;
-
-    
-%     %distance noise difference
-%     l3_prime    = h;
-%     dist_diff   = l3-l3_prime;
-% 
-%     %     %the negative loglikelihood of distance on non-OoB trials
-%     if flagOoB(tr)==0
-%         %this is a non-OoB trial
-%         neg_ll_angle = 1/2*log(2*pi) + log(nu_scaled) + (angluar_diff^2)/(2*nu_scaled^2); %Gaussian distribution
-%         neg_ll_dist = 1/2*log(2*pi) + log(sigma_scaled) + (dist_diff^2)/(2*sigma_scaled^2);
-%         %total negative loglikelihood
-%         neg_ll = neg_ll_angle + neg_ll_dist;
-%         negloglikelihood = negloglikelihood + neg_ll;
-%     end
-
-
-
 end
 end

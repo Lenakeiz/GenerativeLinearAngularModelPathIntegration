@@ -6,6 +6,7 @@ rng('default');
 disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
 %load('AllDataErrorsPrevent.mat');
 load('AllDataErrorsPreventFH.mat');
+load('AllDataErrorsPrevent.mat');
 
 %% setting the configuration
 config.Speed.alpha                                      = 0.9;    % Paramanter for running speed calculation
@@ -80,6 +81,88 @@ ScatterErrPlot(FamilyHistPos.Results.AngleErr, FamilyHistNeg.Results.AngleErr, F
 ThreewayAnova_CocoData(FamilyHistPos.Results.DistErr, FamilyHistNeg.Results.DistErr, config);
 ThreewayAnova_CocoData(FamilyHistPos.Results.AngleErr, FamilyHistNeg.Results.AngleErr, config);
 
+%% replicate coc's plots Fig1B PI Error v.s. CAISE DRS
+FHPos_DistErrMat = geterrorpercondition(FamilyHistPos.Results.DistErr);
+FHNeg_DistErrMat = geterrorpercondition(FamilyHistNeg.Results.DistErr);
+
+FHPos_AngErrMat = geterrorpercondition(FamilyHistPos.Results.AngleErr);
+FHNeg_AngErrMat = geterrorpercondition(FamilyHistNeg.Results.AngleErr);
+
+FHPos_LocErrMat = geterrorpercondition(FamilyHistPos.Results.LocationErr);
+FHNeg_LocErrMat = geterrorpercondition(FamilyHistNeg.Results.LocationErr);
+
+%get the CAIDE dementia risk score from prevenTab
+FHPosDRS = getDRS(FamilyHistPos.Info, preventTab);
+FHNegDRS = getDRS(FamilyHistNeg.Info, preventTab);
+
+%%
+preventTab.FH; %FH label
+preventTab.apoe4; %apoe4 label
+nonNanIdx = ~isnan(preventTab.apoe4);
+
+FHTag = preventTab.FH(nonNanIdx);
+Apoe4Tag = preventTab.apoe4(nonNanIdx);
+DRSTag = preventTab.DRS_noAP(nonNanIdx);  %CAIDE dementia risk score
+
+FHPos_ApoePos = DRSTag(FHTag & Apoe4Tag);   mean(FHPos_ApoePos, 'omitnan')
+
+FHPos_ApoeNeg = DRSTag(FHTag & ~Apoe4Tag);  mean(FHPos_ApoeNeg, 'omitnan')
+
+FHNeg_ApoePos = DRSTag(~FHTag & Apoe4Tag);  mean(FHNeg_ApoePos, 'omitnan')
+
+FHNeg_ApoeNeg = DRSTag(~FHTag & ~Apoe4Tag); mean(FHNeg_ApoeNeg, 'omitnan')
+
+%%
+LocErrMat = [FHPos_LocErrMat;FHNeg_LocErrMat];
+DRS = [FHPosDRS;FHNegDRS];
+y = LocErrMat(:,2)-LocErrMat(:,1);
+f = figure('visible','on','Position', [100 100 600 300]);
+scatter(DRS, y, 30, "black","filled")
+hold on;
+h = lsline;
+h.LineWidth=2;
+h.Color='r';
+xlabel("CAIDE Dementia Risk Score")
+ylabel("Dist Error (no optical flow-no change)")
+%[R,P] = corrcoef(LocErrMat(:,3), DRS, 'Rows','complete');
+[R,P] = corrcoef(y, DRS, 'Rows','complete');
+title("R="+num2str(R(1,2))+" P="+num2str(P(1,2)))
+exportgraphics(f,config.ResultFolder+"/noopticalflow_nochange.png",'Resolution',300);
+
+%% 
+AngErrMat = [FHPos_AngErrMat;FHNeg_AngErrMat];
+DRS = [FHPosDRS;FHNegDRS];
+y = AngErrMat(:,3)-AngErrMat(:,1);
+f = figure('visible','on','Position', [100 100 600 300]);
+scatter(DRS, y, 30, "black","filled")
+hold on;
+h = lsline;
+h.LineWidth=2;
+h.Color='r';
+xlabel("CAIDE Dementia Risk Score")
+ylabel("Angular Error (no distalcue-no chnange)")
+%[R,P] = corrcoef(LocErrMat(:,3), DRS, 'Rows','complete');
+[R,P] = corrcoef(y, DRS, 'Rows','complete');
+title("R="+num2str(R(1,2))+" P="+num2str(P(1,2)))
+exportgraphics(f,config.ResultFolder+"/ang_nodistalcue-nochnage.png",'Resolution',300);
+
+%%
+DistErrMat = [FHPos_DistErrMat;FHNeg_DistErrMat];
+DRS = [FHPosDRS;FHNegDRS];
+y = DistErrMat(:,1);%-DistErrMat(:,1);
+f = figure('visible','on','Position', [100 100 600 300]);
+scatter(DRS, y, 30, "black","filled")
+hold on;
+h = lsline;
+h.LineWidth=2;
+h.Color='r';
+xlabel("CAIDE Dementia Risk Score")
+ylabel("Dist Error (no chnage)")
+[R,P] = corrcoef(LocErrMat(:,1), DRS, 'Rows','complete');
+%[R,P] = corrcoef(y, DRS, 'Rows','complete');
+title("R="+num2str(R(1,2))+" P="+num2str(P(1,2)))
+ exportgraphics(f,config.ResultFolder+"/dist_nochnage.png",'Resolution',300);
+
 %%
 function Data = addBadExecution(Data)
     %add zero array of BadExecution
@@ -87,6 +170,34 @@ function Data = addBadExecution(Data)
     for i=1:numSubjs
         trialsize = height(Data.Reconstructed{1,i});
         Data.Reconstructed{1,i}.BadExecution = zeros(trialsize,1);
+    end
+end
+
+function DRSArray = getDRS(name, preventTab)
+    namelist = preventTab.subjectID;
+    DRS_noAP = preventTab.DRS_noAP;
+
+    DRSArray = zeros(length(name),1);
+    for i=1:length(name)
+        name_i = name{i};
+        idx = find(strcmp(namelist, name_i));
+        DRSArray(i) = DRS_noAP(idx);
+    end
+end
+
+function ErrMat = geterrorpercondition(Err)
+    %swap last two condition
+    Condition = [1,3,2];  
+    ErrMat = zeros(length(Err{1}),3);
+    for i=1:3
+        cond = Condition(i);
+        Err_cond = Err{cond};
+        for id=1:length(Err_cond)
+            err = Err_cond{id};
+            err = cell2mat(err);
+            meanerr = mean(err, 'omitnan');
+            ErrMat(id,i) = meanerr;
+        end
     end
 end
 
@@ -353,6 +464,7 @@ function ScatterErrPlot(FHPosErr, FHNegErr, FHPosFlagOoB, FHNegFlagOoB, gender, 
 
 end
 
+
 %%
 function ErrPlot(FHPosErr, FHNegErr, type, config)
     %% Pos 
@@ -500,6 +612,8 @@ function ErrPlot(FHPosErr, FHNegErr, type, config)
     legend({'FHPos','FHNeg'})
 
 end
+
+
 
 %% TwowayAnova and BarScatter Plot
 % [anova_tab,multicomp_tab1,~, ~] = TwowayAnova_CocoData(AllFamilyHistPosParams, AllFamilyHistNegParams, config);

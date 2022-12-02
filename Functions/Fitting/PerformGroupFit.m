@@ -166,7 +166,8 @@ for j = 1:subjectNum
             %wrap the real return angle to 360
             %AngleErr{j}{tr} = correctReAngle{j}{tr}-wrapTo360(realReturnAngles(tr));
             %wrap the angular error to [-180,180] 
-            AngleErr{j}{tr}   = wrapTo180(correctReAngle{j}{tr}-realReturnAngles(tr));
+            %AngleErr{j}{tr}   = wrapTo180(correctReAngle{j}{tr}-realReturnAngles(tr));
+            AngleErr{j}{tr}   = wrapTo180(realReturnAngles(tr)-correctReAngle{j}{tr});
             PropAngErr{j}{tr} = wrapTo360(realReturnAngles(tr))/correctReAngle{j}{tr};
         else
             %use only InB trials
@@ -194,7 +195,8 @@ for j = 1:subjectNum
                 %wrap the real return angle to [0,360]
                 %AngleErr{j}{tr} = correctReAngle{j}{tr}-wrapTo360(realReturnAngles(tr));
                 %wrap the angular error to [-180,180]
-                AngleErr{j}{tr}   = wrapTo180(correctReAngle{j}{tr}-realReturnAngles(tr));
+                %AngleErr{j}{tr}   = wrapTo180(correctReAngle{j}{tr}-realReturnAngles(tr));
+                AngleErr{j}{tr}   = wrapTo180(realReturnAngles(tr)-correctReAngle{j}{tr});
                 PropAngErr{j}{tr} = wrapTo360(realReturnAngles(tr))/correctReAngle{j}{tr};
 
                 x_3 = X{j}{tr}(4,:);   %trigger position
@@ -242,7 +244,7 @@ for j = 1:subjectNum
     Input.L2Dur              =   L2Dur{j};
     Input.StandingDur        =   StandingDur{j};
 
-    if length(flagpos{j}) < config.NumParams
+    if length(flagpos{j}) < config.NumParams-1
         %lack of trials, skip estimation
         disp("%%%%%%%%%%%%%%% Skipping participant " + num2str(j) + ...
             ", because only "+ length(flagpos{j}) + ...

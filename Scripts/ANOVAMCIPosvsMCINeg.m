@@ -8,12 +8,20 @@ VAM_PreprocessData;
 %% Preparing the data and Slecting the Model
 % config.ModelName        =   "beta_g2_g3_sigma_nu";
 % config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
-config.ModelName        =   "stangl";
-config.ParamName        =   ["beta", "alpha", "sigma", "nu"];
+
+% config.ModelName        =   "beta_g2_k2_g3_sigma_nu";
+% config.ParamName        =   ["beta", "g2", "k2", "g3", "sigma", "nu"];
+
+config.ModelName        =   "beta_k_g2_g3_sigma_nu";
+config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
+
+% config.ModelName        =   "stangl";
+% config.ParamName        =   ["beta", "alpha", "sigma", "nu"];
+
 config.NumParams        =   length(config.ParamName);
 % Run the model
 VAM;
-
+%%
 AllMCIPosParams     =   MCIPos.Results.estimatedParams;
 AllMCINegParams     =   MCINeg.Results.estimatedParams;
 
@@ -371,6 +379,9 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
         elseif ParamName(ParamIndx)=="beta"
             lowupYlim = [-0.1, 0.5];
             yticks = [-0.1, 0, 0.1, 0.3, 0.5];
+        elseif ParamName(ParamIndx)=="k"
+            lowupYlim = [0, 2];
+            yticks = [0,0.5,1,1.5,2.0];  
         elseif ParamName(ParamIndx)=="sigma"
             lowupYlim = [0, 1.5];    
             yticks = [0, 0.5, 1.0, 1.5];

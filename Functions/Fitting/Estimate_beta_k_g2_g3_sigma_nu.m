@@ -1,4 +1,4 @@
-function [negloglikelihood] = Estimate_beta_g2_g3_sigma_nu(beta, g2, g3, sigma, nu, Input, config)
+function [negloglikelihood] = Estimate_beta_k_g2_g3_sigma_nu(beta, k, g2, g3, sigma, nu, Input, config)
 %   find the likelihood of the beta - g2 - g3 - sigma - nu Model
 %   Args:
 %       beta is the decay factor for the mental distance
@@ -65,9 +65,9 @@ for tr = 1:sampleSize
     %mental point 1 (asuming a constant speed)
     %considering standing duration or not
     if config.includeStand==true
-        men_length1 = l1*(1-exp(-beta*durationL1))/(beta*durationL1)*exp(-beta*(durationL2+durationStand));
+        men_length1 = l1*k*(1-exp(-beta*durationL1))/(beta*durationL1)*exp(-beta*(durationL2+durationStand));
     else
-        men_length1 = l1*(1-exp(-beta*durationL1))/(beta*durationL1)*exp(-beta*durationL2);
+        men_length1 = l1*k*(1-exp(-beta*durationL1))/(beta*durationL1)*exp(-beta*durationL2);
     end
     men_p1 = [men_length1,0];
     
@@ -75,7 +75,7 @@ for tr = 1:sampleSize
     %theta2_prime = g2*theta2+mean_ecd_angle*(1-g2);
 
     %mental point 2, (asuming a constant speed)
-    men_length2 = l2*(1-exp(-beta*durationL2))/(beta*durationL2);
+    men_length2 = l2*k*(1-exp(-beta*durationL2))/(beta*durationL2);
     men_p2      = [men_length1+men_length2*cos(theta2_prime),men_length2*sin(theta2_prime)];
 
     %calculate length of mental vector 3

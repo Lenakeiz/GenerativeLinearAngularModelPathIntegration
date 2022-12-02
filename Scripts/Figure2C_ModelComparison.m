@@ -1,8 +1,8 @@
 %% Preparing the data
-VAM_PrepareBaseConfig
+%VAM_PrepareBaseConfig
 
 %% Preprocessing the data
-VAM_PreprocessData
+%VAM_PreprocessData
 
 %% 1, sigma nu Model --> egocentric noise only model
 config.ModelName        =   "sigma_nu";
@@ -32,6 +32,17 @@ VAM
 
 g3_sigma_nu_IC     =   HealthyControls.Results.IC;
 %g3_sigma_nu_IC     =   YoungControls.Results.IC;
+
+%% 2.xx, beta, k, sigma, nu Model --> only encoding errors in distance
+config.ModelName        =   "beta_k_sigma_nu";
+config.ParamName        =   ["beta", "k", "sigma", "nu"];
+config.NumParams        =   length(config.ParamName);
+% Run the model
+VAM
+
+beta_k_sigma_nu_IC        =   HealthyControls.Results.IC;
+%beta_sigma_nu_IC        =   YoungControls.Results.IC;
+
 %% 3, g2, g3, sigma, nu Model --> encoding errors and production errors in angle 
 config.ModelName        =   "g2_g3_sigma_nu";
 config.ParamName        =   ["g2", "g3", "sigma", "nu"];
@@ -77,6 +88,38 @@ VAM
 
 beta_g2_g3_sigma_nu_IC  =   HealthyControls.Results.IC;
 %beta_g2_g3_sigma_nu_IC  =   YoungControls.Results.IC;
+
+
+%% 6.xxx, beta, g2, g3, sigma, nu Model --> encoding errors in distance and angles and production error in angle
+config.ModelName        =   "beta_k_g2_g3_sigma_nu";
+config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
+config.NumParams        =   length(config.ParamName);
+% Run the model
+VAM
+
+beta_k_g2_g3_sigma_nu_IC  =   HealthyControls.Results.IC;
+%beta_g2_g3_sigma_nu_IC  =   YoungControls.Results.IC;
+
+%% 6.x, beta, g2, g3, sigma, nu Model --> encoding errors in distance and angles and production error in angle
+config.ModelName        =   "beta_g2_rgmean_g3_sigma_nu";
+config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
+config.NumParams        =   length(config.ParamName);
+% Run the model
+VAM
+
+beta_g2_rgmean_g3_sigma_nu_IC  =   HealthyControls.Results.IC;
+%beta_g2_g3_sigma_nu_IC  =   YoungControls.Results.IC;
+
+%% 6.xx, beta, g2, g3, sigma, nu Model --> encoding errors in distance and angles and production error in angle
+config.ModelName        =   "beta_g2_k2_g3_sigma_nu";
+config.ParamName        =   ["beta", "g2", "k2", "g3", "sigma", "nu"];
+config.NumParams        =   length(config.ParamName);
+% Run the model
+VAM
+
+beta_g2_k2_g3_sigma_nu_IC  =   HealthyControls.Results.IC;
+%beta_g2_g3_sigma_nu_IC  =   YoungControls.Results.IC;
+
 %% 7, beta, g2, g3, k3, sigma, nu Model --> add another parameter k3 to the beta, g2, g3, sigma, nu Model
 config.ModelName        =   "beta_g2_g3_k3_sigma_nu";
 config.ParamName        =   ["beta", "g2", "g3", "k3", "sigma", "nu"];
@@ -146,7 +189,7 @@ if ~exist(config.ResultFolder, 'dir')
 end
 
 %%
-ModelNames = {'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11', 'M12'};
+ModelNames = {'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11', 'M12', 'M13'};
 
 %% Setting colors for using in plots
 ColorPattern; 
@@ -163,14 +206,20 @@ for idx_ = 1:4
     [beta_sigma_nu_AIC,beta_sigma_nu_BIC, beta_sigma_nu_NLL] = reformatIC(beta_sigma_nu_IC, cond);
     [g3_sigma_nu_AIC,g3_sigma_nu_BIC, g3_sigma_nu_NLL] = reformatIC(g3_sigma_nu_IC, cond);
     [g2_g3_sigma_nu_AIC,g2_g3_sigma_nu_BIC, g2_g3_sigma_nu_NLL] = reformatIC(g2_g3_sigma_nu_IC, cond);
-    [beta_g2_sigma_nu_AIC, beta_g2_sigma_nu_BIC, beta_g2_sigma_nu_NLL] = reformatIC(beta_g2_sigma_nu_IC, cond);
+    [beta_g2_sigma_nu_AIC, beta_g2_sigma_nu_BIC, beta_g2_sigma_nu_NLL] = reformatIC(beta_g2_sigma_nu_IC, cond); 
     [beta_g3_sigma_nu_AIC,beta_g3_sigma_nu_BIC, beta_g3_sigma_nu_NLL] = reformatIC(beta_g3_sigma_nu_IC, cond);
     [g3_m3_sigma_nu_AIC,g3_m3_sigma_nu_BIC, g3_m3_sigma_nu_NLL] = reformatIC(g3_m3_sigma_nu_IC, cond);
     [beta_g2_g3_sigma_nu_AIC, beta_g2_g3_sigma_nu_BIC,beta_g2_g3_sigma_nu_NLL] = reformatIC(beta_g2_g3_sigma_nu_IC, cond);
+    [beta_g2_k2_g3_sigma_nu_AIC, beta_g2_k2_g3_sigma_nu_BIC, beta_g2_k2_g3_sigma_nu_NLL] = reformatIC(beta_g2_k2_g3_sigma_nu_IC, cond);
     [beta_g2_g3_k3_sigma_nu_AIC, beta_g2_g3_k3_sigma_nu_BIC,beta_g2_g3_k3_sigma_nu_NLL] = reformatIC(beta_g2_g3_k3_sigma_nu_IC, cond);
     [beta_g2_g3_m3_sigma_nu_AIC, beta_g2_g3_m3_sigma_nu_BIC,beta_g2_g3_m3_sigma_nu_NLL] = reformatIC(beta_g2_g3_m3_sigma_nu_IC, cond);
     [beta_g2_g3_k3_m3_sigma_nu_AIC, beta_g2_g3_k3_m3_sigma_nu_BIC,beta_g2_g3_k3_m3_sigma_nu_NLL] = reformatIC(beta_g2_g3_k3_m3_sigma_nu_IC, cond);
     [beta_g2_g3_k3_m3_n3_sigma_nu_AIC, beta_g2_g3_k3_m3_n3_sigma_nu_BIC,beta_g2_g3_k3_m3_n3_sigma_nu_NLL] = reformatIC(beta_g2_g3_k3_m3_n3_sigma_nu_IC, cond);
+    
+    [beta_g2_rgmean_g3_sigma_nu_AIC, beta_g2_rgmean_g3_sigma_nu_BIC,beta_g2_rgmean_g3_sigma_nu_NLL] = reformatIC(beta_g2_rgmean_g3_sigma_nu_IC, cond);
+    
+    [beta_k_g2_g3_sigma_nu_AIC, beta_k_g2_g3_sigma_nu_BIC,beta_k_g2_g3_sigma_nu_NLL] = reformatIC(beta_k_g2_g3_sigma_nu_IC, cond);
+    [beta_k_sigma_nu_AIC,beta_k_sigma_nu_BIC, beta_k_sigma_nu_NLL] = reformatIC(beta_k_sigma_nu_IC, cond);
     
     %[stangl_AIC,stangl_BIC, stangl_NLL] = reformatIC(stangl_IC, cond);    
     %[stangl2_AIC,stangl2_BIC, stangl2_NLL] = reformatIC(stangl2_IC, cond);
@@ -185,6 +234,7 @@ for idx_ = 1:4
                beta_g3_sigma_nu_AIC,...
                g3_m3_sigma_nu_AIC,...
                beta_g2_g3_sigma_nu_AIC,...
+               beta_g2_k2_g3_sigma_nu_AIC,...
                beta_g2_g3_k3_sigma_nu_AIC,...
                beta_g2_g3_m3_sigma_nu_AIC,...
                beta_g2_g3_k3_m3_sigma_nu_AIC,...
@@ -204,6 +254,7 @@ for idx_ = 1:4
                beta_g3_sigma_nu_BIC,...
                g3_m3_sigma_nu_BIC,...
                beta_g2_g3_sigma_nu_BIC,...
+               beta_g2_k2_g3_sigma_nu_BIC,...
                beta_g2_g3_k3_sigma_nu_BIC,...
                beta_g2_g3_m3_sigma_nu_BIC,...
                beta_g2_g3_k3_m3_sigma_nu_BIC,...
@@ -223,6 +274,7 @@ for idx_ = 1:4
                beta_g3_sigma_nu_NLL,...
                g3_m3_sigma_nu_NLL,...
                beta_g2_g3_sigma_nu_NLL,...
+               beta_g2_k2_g3_sigma_nu_NLL,...
                beta_g2_g3_k3_sigma_nu_NLL,...
                beta_g2_g3_m3_sigma_nu_NLL,...
                beta_g2_g3_k3_m3_sigma_nu_NLL,...

@@ -22,6 +22,135 @@ elseif Model_Name == "beta_sigma_nu"      % memory leaky decay + noise
     %defining likelihood function
     estFnc = @(FP) Estimate_beta_sigma_nu(FP(1), FP(2), FP(3), Input, config);
 
+elseif Model_Name == "beta_k_sigma_nu"      % memory leaky decay + noise
+    %set parameter lower bound and up bound
+    %     1, beta     2-k    3-sigma    4-nu
+    lb  = [-1.0,      0.5,     0.0,       0.0];
+    ub  = [1.0,       2,     3.0,       pi]; 
+
+    %defining likelihood function
+    estFnc = @(FP) Estimate_beta_k_sigma_nu(FP(1), FP(2), FP(3), FP(4), Input, config);
+
+elseif Model_Name == "g2_sigma_nu"      % memory leaky decay + noise
+    %set parameter lower bound and up bound
+    %     1-g2    2-sigma    3-nu
+    lb  = [0.0,      0.0,       0.0];
+    ub  = [3.0,      3.0,       pi]; 
+    estFnc = @(FP) Estimate_g2_sigma_nu(FP(1), FP(2), FP(3), Input, config);
+
+elseif Model_Name == "g3_sigma_nu"      %regressing to correct mean return angle
+    %set parameter lower bound and up bound
+    %      1-g3     2-sigma,     3-nu
+    lb  = [0,       0.0,         0.0];
+    ub  = [3,       3.0,         pi]; 
+
+    %defining likelihood function
+    estFnc = @(FP) Estimate_g3_sigma_nu(FP(1),FP(2),FP(3), Input, config);
+
+elseif Model_Name == "m3_sigma_nu"      %regressing to correct mean return angle
+    %set parameter lower bound and up bound
+    %      1-m3     2-sigma,     3-nu
+    lb  = [0,       0.0,         0.0];
+    ub  = [3,       3.0,         pi]; 
+
+    %defining likelihood function
+    estFnc = @(FP) Estimate_m3_sigma_nu(FP(1),FP(2),FP(3), Input, config);
+
+elseif Model_Name == "beta_k_g2_sigma_nu"      % memory leaky decay + noise
+    %set parameter lower bound and up bound
+    %     1, beta     2-k     3-g2    4-sigma    5-nu
+    lb  = [-1.0,      0.5,    0.0,      0.0,       0.0];
+    ub  = [1.0,       2.0,    3.0,      3.0,       pi]; 
+
+    %defining likelihood function
+    estFnc = @(FP) Estimate_beta_k_g2_sigma_nu(FP(1), FP(2), FP(3), FP(4), FP(5), Input, config);
+
+elseif Model_Name == "beta_k_g3_sigma_nu"      % memory leaky decay + noise
+    %set parameter lower bound and up bound
+    %     1, beta     2-k     3-g3    4-sigma    5-nu
+    lb  = [-1.0,      0.5,    0.0,      0.0,       0.0];
+    ub  = [1.0,       2.0,    3.0,      3.0,       pi]; 
+
+    %defining likelihood function
+    estFnc = @(FP) Estimate_beta_k_g3_sigma_nu(FP(1), FP(2), FP(3), FP(4), FP(5), Input, config);
+
+elseif Model_Name == "beta_k_m3_sigma_nu"      % memory leaky decay + noise
+    %set parameter lower bound and up bound
+    %     1, beta     2-k     3-m3    4-sigma    5-nu
+    lb  = [-1.0,      0.5,    0.0,      0.0,       0.0];
+    ub  = [1.0,       2.0,    3.0,      3.0,       pi]; 
+
+    %defining likelihood function
+    estFnc = @(FP) Estimate_beta_k_m3_sigma_nu(FP(1), FP(2), FP(3), FP(4), FP(5), Input, config);
+
+elseif Model_Name == "g2_g3_sigma_nu"      %regressing to correct mean return angle
+    %set parameter lower bound and up bound
+    %      1-g2     2-g3     3-sigma,     4-nu
+    lb  = [0,       0,       0.0,         0.0];
+    ub  = [3,       3,       3.0,         pi]; 
+
+    %defining likelihood function
+    estFnc = @(FP) Estimate_g2_g3_sigma_nu(FP(1),FP(2),FP(3),FP(4), Input, config);
+
+elseif Model_Name == "g2_m3_sigma_nu"      %regressing to correct mean return angle
+    %set parameter lower bound and up bound
+    %      1-g2     2-m3     3-sigma,     4-nu
+    lb  = [0,       0,       0.0,         0.0];
+    ub  = [3,       3,       3.0,         pi]; 
+
+    %defining likelihood function
+    estFnc = @(FP) Estimate_g2_m3_sigma_nu(FP(1),FP(2),FP(3),FP(4), Input, config);
+
+elseif Model_Name == "g3_m3_sigma_nu"      %regressing to correct mean return angle
+    %set parameter lower bound and up bound
+    %      1-g3     2-m3     3-sigma,     4-nu
+    lb  = [0,       0,       0.0,         0.0];
+    ub  = [3,       3,       3.0,         pi]; 
+
+    %defining likelihood function
+    estFnc = @(FP) Estimate_g3_m3_sigma_nu(FP(1),FP(2),FP(3),FP(4), Input, config);    
+
+elseif Model_Name == "beta_k_g2_g3_sigma_nu"      %regressing to correct mean return angle
+    %set parameter lower bound and up bound
+    %     1, beta       k         2-g2     3-g3     4-sigma      5-nu
+    lb  = [-1.0,        0.5,         0,       0,       0.0,         0.0];
+    ub  = [1.0,         2,         3,       3,       3.0,         pi];  
+    %defining likelihood function
+    estFnc = @(FP) Estimate_beta_k_g2_g3_sigma_nu(FP(1),FP(2),FP(3),FP(4),FP(5), FP(6),Input, config);  
+
+elseif Model_Name == "beta_k_g2_m3_sigma_nu"      %regressing to correct mean return angle
+    %set parameter lower bound and up bound
+    %     1, beta       k         2-g2     3-m3     4-sigma      5-nu
+    lb  = [-1.0,        0.5,      0,       0,       0.0,         0.0];
+    ub  = [1.0,         2,       3,        3,       3.0,         pi];  
+    %defining likelihood function
+    estFnc = @(FP) Estimate_beta_k_g2_m3_sigma_nu(FP(1),FP(2),FP(3),FP(4),FP(5), FP(6),Input, config); 
+
+elseif Model_Name == "beta_k_g3_m3_sigma_nu"      %regressing to correct mean return angle
+    %set parameter lower bound and up bound
+    %     1, beta       k         2-g3     3-m3     4-sigma      5-nu
+    lb  = [-1.0,        0.5,      0,       0,       0.0,         0.0];
+    ub  = [1.0,         2,        3,       3,       3.0,         pi];  
+    %defining likelihood function
+    estFnc = @(FP) Estimate_beta_k_g3_m3_sigma_nu(FP(1),FP(2),FP(3),FP(4),FP(5), FP(6),Input, config); 
+
+elseif Model_Name == "g2_g3_m3_sigma_nu"      %regressing to correct mean return angle
+    %set parameter lower bound and up bound
+    %     1,g2        2-g3     3-m3     4-sigma      5-nu
+    lb  = [0,         0,       0,       0.0,         0.0];
+    ub  = [3,         3,       3,       3.0,         pi];  
+    %defining likelihood function
+    estFnc = @(FP) Estimate_g2_g3_m3_sigma_nu(FP(1),FP(2),FP(3),FP(4),FP(5), Input, config); 
+
+elseif Model_Name == "beta_k_g2_k2_sigma_nu"      % memory leaky decay + noise
+    %set parameter lower bound and up bound
+    %     1, beta     2-k     3-g2      4-k2      4-sigma    5-nu
+    lb  = [-1.0,      0.5,    0.0,      0.0,      0.0,       0.0];
+    ub  = [1.0,       2.0,    3.0,      pi,       3.0,       pi]; 
+
+    %defining likelihood function
+    estFnc = @(FP) Estimate_beta_k_g2_k2_sigma_nu(FP(1), FP(2), FP(3), FP(4), FP(5), FP(6), Input, config);
+
 elseif Model_Name == "stangl"      % memory leaky decay +  velocity gain + noise
     %set parameter lower bound and up bound
     %     1, beta     2-alpha    3-sigma     4-nu
@@ -41,24 +170,6 @@ elseif Model_Name == "stangl2"      % memory leaky decay +  velocity gain + nois
     %defining likelihood function
     estFnc = @(FP) Estimate_Stangl2(FP(1), FP(2), FP(3), FP(4), FP(5), FP(6), Input, config);
 
-elseif Model_Name == "g3_sigma_nu"      %regressing to correct mean return angle
-    %set parameter lower bound and up bound
-    %      1-g3     2-sigma,     3-nu
-    lb  = [0,       0.0,         0.0];
-    ub  = [3,       3.0,         pi]; 
-
-    %defining likelihood function
-    estFnc = @(FP) Estimate_g3_sigma_nu(FP(1),FP(2),FP(3), Input, config);
-
-elseif Model_Name == "g2_g3_sigma_nu"      %regressing to correct mean return angle
-    %set parameter lower bound and up bound
-    %      1-g2     2-g3     3-sigma,     4-nu
-    lb  = [0,       0,       0.0,         0.0];
-    ub  = [3,       3,       3.0,         pi]; 
-
-    %defining likelihood function
-    estFnc = @(FP) Estimate_g2_g3_sigma_nu(FP(1),FP(2),FP(3),FP(4), Input, config);
-
 elseif Model_Name == "beta_g2_sigma_nu"      %regressing to correct mean return angle
     %set parameter lower bound and up bound
     %     1, beta     2-g2     3-sigma      4-nu
@@ -77,15 +188,6 @@ elseif Model_Name == "beta_g3_sigma_nu"      %regressing to correct mean return 
     %defining likelihood function
     estFnc = @(FP) Estimate_beta_g3_sigma_nu(FP(1),FP(2),FP(3),FP(4), Input, config);
 
-elseif Model_Name == "g3_m3_sigma_nu"      %regressing to correct mean return angle
-    %set parameter lower bound and up bound
-    %     1, g3     2-m3     3-sigma      4-nu
-    lb  = [0,       0,       0.0,         0.0];
-    ub  = [3,       3,       3.0,         pi]; 
-
-    %defining likelihood function
-    estFnc = @(FP) Estimate_g3_m3_sigma_nu(FP(1),FP(2),FP(3),FP(4), Input, config);
-
 elseif Model_Name == "beta_g2_g3_sigma_nu"      %regressing to correct mean return angle
     %set parameter lower bound and up bound
     %     1, beta        2-g2     3-g3     4-sigma      5-nu
@@ -93,6 +195,39 @@ elseif Model_Name == "beta_g2_g3_sigma_nu"      %regressing to correct mean retu
     ub  = [1.0,          3,       3,       3.0,         pi];  
     %defining likelihood function
     estFnc = @(FP) Estimate_beta_g2_g3_sigma_nu(FP(1),FP(2),FP(3),FP(4),FP(5), Input, config);  
+
+elseif Model_Name == "beta_k_g2_k2_g3_sigma_nu"      %regressing to correct mean return angle
+    %set parameter lower bound and up bound
+    %     1, beta       k         2-g2    k2    3-g3     4-sigma      5-nu
+    lb  = [-1.0,        0.5,       0,     0,     0,       0.0,         0.0];
+    ub  = [1.0,         2,         3,     pi,    3,       3.0,         pi];  
+    %defining likelihood function
+    estFnc = @(FP) Estimate_beta_k_g2_k2_g3_sigma_nu(FP(1),FP(2),FP(3),FP(4),FP(5), FP(6),FP(7), Input, config);  
+
+elseif Model_Name == "beta_k_g2_g3_k3_sigma_nu"      %regressing to correct mean return angle
+    %set parameter lower bound and up bound
+    %     1, beta       2-k         3-g2     4-g3     5-k3     6-sigma      7-nu
+    lb  = [-1.0,        0.5,         0,       0,      0,       0.0,         0.0];
+    ub  = [1.0,         2,           3,       3,      pi,      3.0,         pi];  
+    %defining likelihood function
+    estFnc = @(FP) Estimate_beta_k_g2_g3_k3_sigma_nu(FP(1),FP(2),FP(3),FP(4),FP(5), FP(6), FP(7),Input, config);  
+
+elseif Model_Name == "beta_g2_rgmean_g3_sigma_nu"      %regressing to correct mean return angle
+    %set parameter lower bound and up bound
+    %     1, beta        2-g2     3-g3     4-sigma      5-nu
+    lb  = [-1.0,         0,       0,       0.0,         0.0];
+    ub  = [1.0,          3,       3,       3.0,         pi];  
+    %defining likelihood function
+    estFnc = @(FP) Estimate_beta_g2_rgmean_g3_sigma_nu(FP(1),FP(2),FP(3),FP(4),FP(5), Input, config); 
+
+elseif Model_Name == "beta_g2_k2_g3_sigma_nu"      %regressing to correct mean return angle
+    %set parameter lower bound and up bound
+    %     1, beta        2-g2     3-k2    4-g3     5-sigma      6-nu
+    lb  = [-1.0,         0,       -0.01,      0,       0.0,         0.0];
+    ub  = [1.0,          3,       0.01,     3,       3.0,         pi];  
+    %defining likelihood function
+    estFnc = @(FP) Estimate_beta_g2_k2_g3_sigma_nu(FP(1),FP(2),FP(3),FP(4),FP(5), FP(6), Input, config); 
+
 elseif Model_Name == "beta_g2_g3_k3_sigma_nu"
     %set parameter lower bound and up bound
     %     1, beta        2-g2     3-g3    4-k3     5-sigma      6-nu
@@ -109,6 +244,25 @@ elseif Model_Name == "beta_g2_g3_m3_sigma_nu"
 
     %calculate the likelihood function
     estFnc = @(FP) Estimate_beta_g2_g3_m3_sigma_nu(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6), Input, config);
+
+elseif Model_Name == "beta_k_g2_g3_m3_sigma_nu"
+    %set parameter lower bound and up bound
+    %     1, beta     2-k      3-g2     4-g3    5-m3     6-sigma      7-nu
+    lb  = [-1.0,      0.5,       0,       0,      0,       0.0,         0.0];
+    ub  = [1.0,       2.0,       3,       3,      3,       3.0,         pi]; 
+
+    %calculate the likelihood function
+    estFnc = @(FP) Estimate_beta_k_g2_g3_m3_sigma_nu(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6), FP(7), Input, config);    
+
+elseif Model_Name == "beta_k_g2_g3_m3_n3_sigma_nu"
+    %set parameter lower bound and up bound
+    %     1, beta     2-k      3-g2     4-g3    5-m3     n3      6-sigma      7-nu
+    lb  = [-1.0,      0.5,       0,       0,      0,     0,        0.0,         0.0];
+    ub  = [1.0,       2.0,       3,       3,      3,     3,        3.0,         pi]; 
+
+    %calculate the likelihood function
+    estFnc = @(FP) Estimate_beta_k_g2_g3_m3_n3_sigma_nu(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6), FP(7),FP(8), Input, config); 
+
 elseif Model_Name == "beta_g2_g3_k3_m3_sigma_nu"
     %set parameter lower bound and up bound
     %     1, beta        2-g2     3-g3    4-k3,    5-m3     6-sigma      7-nu

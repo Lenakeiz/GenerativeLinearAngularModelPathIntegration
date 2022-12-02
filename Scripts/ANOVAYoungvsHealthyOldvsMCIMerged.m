@@ -8,10 +8,16 @@ VAM_PreprocessData;
 
 %% Preparing the data and Slecting the Model
 
-%config.ModelName        =   "beta_g2_g3_sigma_nu";
-%config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
-config.ModelName        =   "stangl";
-config.ParamName        =   ["beta", "alpha", "sigma", "nu"];
+% config.ModelName        =   "beta_g2_k2_g3_sigma_nu";
+% config.ParamName        =   ["beta", "g2", "k2", "g3", "sigma", "nu"];
+
+config.ModelName        =   "beta_k_g2_g3_sigma_nu";
+config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
+
+% config.ModelName        =   "beta_g2_g3_sigma_nu";
+% config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
+% config.ModelName        =   "stangl";
+% config.ParamName        =   ["beta", "alpha", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
 % Run the model
@@ -454,6 +460,8 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         %add yline
         if ParamName(ParamIndx)=="beta"
             yline(0,Color='r',LineStyle='--',LineWidth=2);
+        elseif ParamName(ParamIndx)=="k"
+            yline(1,Color='r',LineStyle='--',LineWidth=2);
         elseif ParamName(ParamIndx)=="g2"
             yline(1,Color='r',LineStyle='--',LineWidth=2);
         elseif ParamName(ParamIndx)=="g3"
@@ -470,6 +478,9 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         if ParamName(ParamIndx)=="g2" | ParamName(ParamIndx)=="g3" | ParamName(ParamIndx)=="nu" 
             lowupYlim = [0, 3];
             yticks = [0,1,2,3];
+        elseif ParamName(ParamIndx)=="k"
+            lowupYlim = [0, 2];
+            yticks = [0,0.5,1,1.5,2.0];            
         elseif ParamName(ParamIndx)=="beta"
             lowupYlim = [-0.1, 0.5];
             yticks = [-0.1, 0, 0.1, 0.3, 0.5];

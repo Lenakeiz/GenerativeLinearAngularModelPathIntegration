@@ -9,7 +9,6 @@ VAM_PreprocessData
 % for this graph we are not interested in running the model with splitted
 % conditions so we will set the relative config to false 
 % force it to not run
-rng("default");
 config.useTrialFilter = true;
 config.ModelName        =   "beta_k_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
@@ -18,7 +17,7 @@ config.NumParams        =   length(config.ParamName); % Set 100 here to avoid pr
 VAM
 
 %% Model run completed, preparing the data for plotting figures
-config.ResultFolder = pwd + "/Output//PaperFigs/Fig5A/ModelParameters";
+config.ResultFolder = pwd + "/Output//PaperFigs/Fig5A/ModelParameters/Grouped_beta_k_g2_g3_sigma_nu";
 % Create storing folder for trajectory if not exist
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
@@ -62,7 +61,7 @@ plotROCParametersCurve(MCINegParameters, MCIPosParameters,'MCIneg', 'MCIpos', co
 function plotROCParametersCurve(params1, params2, params1groupName, params2groupName, config, plotInfo)
 
 parametersName = [{'\beta'}, {'k_2'}, {'g_2'}, {'g_3'}, {'\sigma'}, {'\nu'}];
-colors = config.color_scheme_npg([8 2 3 4 5 9],:);
+colors = config.color_scheme_npg([8 2 3 10 5 9],:);
 
 % set figure info
 %f = figure('visible','off','Position', [100 100 1000 500]);
@@ -78,19 +77,33 @@ set(0,'DefaultTextFontSize',plotInfo.axisSize)
 hold on;
 
 %AUC = plotsingleROCCurve(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(4,:));
-AUC = plotsingleROCCurveSVM(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(4,:));
+AUC = plotsingleROCCurveSVM(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(8,:));
 
 legendText{1,1} = "AUC(" + convertCharsToStrings({'\beta k_2 g_2 g_3 \sigma \nu'}) + ") = " + num2str(round(AUC.mean,2),2);
 disp(["AUC(CI) all params = " num2str(AUC.CI)]);
 disp("AUC std all params: " + num2str(AUC.std));
 drawnow;
-for i = 1:length(parametersName)
-    AUC = plotsingleROCCurveSVM(params1(:,i), params2(:,i), params1groupName, params2groupName, colors(i,:));
-    legendText{1,i+1} = "AUC " + parametersName(i) + " = " + num2str(round(AUC.mean,2));
-    disp(["AUC(CI) " + parametersName(i) + " = " num2str(AUC.CI)]);
-    disp("AUC(std) " + parametersName(i) + " = " + num2str(AUC.std));
-    drawnow;
-end
+
+AUC = plotsingleROCCurveSVM(params1(:,[1 2 3]), params2(:,[1 2 3]), params1groupName, params2groupName, config.color_scheme_npg(4,:));
+
+legendText{1,2} = "AUC(" + convertCharsToStrings({'\beta k_2 g_2'}) + ") = " + num2str(round(AUC.mean,2),2);
+disp(["AUC(CI) all params = " num2str(AUC.CI)]);
+disp("AUC std all params: " + num2str(AUC.std));
+drawnow;
+
+AUC = plotsingleROCCurveSVM(params1(:,[4]), params2(:,[4]), params1groupName, params2groupName, config.color_scheme_npg(3,:));
+
+legendText{1,3} = "AUC(" + convertCharsToStrings({'g_3'}) + ") = " + num2str(round(AUC.mean,2),2);
+disp(["AUC(CI) all params = " num2str(AUC.CI)]);
+disp("AUC std all params: " + num2str(AUC.std));
+drawnow;
+
+AUC = plotsingleROCCurveSVM(params1(:,[5 6]), params2(:,[5 6]), params1groupName, params2groupName, config.color_scheme_npg(5,:));
+
+legendText{1,4} = "AUC(" + convertCharsToStrings({'\sigma \nu'}) + ") = " + num2str(round(AUC.mean,2),2);
+disp(["AUC(CI) all params = " num2str(AUC.CI)]);
+disp("AUC std all params: " + num2str(AUC.std));
+drawnow;
 
 hline = refline([1 0]);
 hline.Color = 'k';

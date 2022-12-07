@@ -3,15 +3,16 @@ VAM_PrepareBaseConfig
 
 %% Preprocessing the data
 VAM_PreprocessData
-
+ 
 %% Setting the model we are interested in
 % Eventually modify config paramteters we are interested in. For example
 % for this graph we are not interested in running the model with splitted
 % conditions so we will set the relative config to false 
 % force it to not run
+rng("default");
 config.useTrialFilter = true;
-config.ModelName        =   "beta_g2_g3_sigma_nu";
-config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
+config.ModelName        =   "beta_k_g2_g3_sigma_nu";
+config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName); % Set 100 here to avoid producing the model
 % Run the model
 VAM
@@ -51,7 +52,7 @@ plotInfo.visible = "on";
 disp("%%%%%%%%%%%%%%% ROC MCI pooled vs HC - model parameters estimation %%%%%%%%%%%%%%%")
 rng("shuffle");
 plotROCParametersCurve(HealthyControlsParameters, MCIAllParameters,'HC', 'MCI', config, plotInfo);
-
+%%
 plotInfo.Title = "MCI - / MCI +";
 disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - model parameters estimation %%%%%%%%%%%%%%%")
 rng("shuffle");
@@ -60,8 +61,8 @@ plotROCParametersCurve(MCINegParameters, MCIPosParameters,'MCIneg', 'MCIpos', co
 %%
 function plotROCParametersCurve(params1, params2, params1groupName, params2groupName, config, plotInfo)
 
-parametersName = [{'\beta'},  {'g_2'}, {'g_3'}, {'\sigma'}, {'\nu'}];
-colors = config.color_scheme_npg([8 3 7 9 10],:);
+parametersName = [{'\beta'}, {'k_2'}, {'g_2'}, {'g_3'}, {'\sigma'}, {'\nu'}];
+colors = config.color_scheme_npg([8 2 3 4 5 9],:);
 
 % set figure info
 %f = figure('visible','off','Position', [100 100 1000 500]);
@@ -79,13 +80,13 @@ hold on;
 %AUC = plotsingleROCCurve(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(4,:));
 AUC = plotsingleROCCurveSVM(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(4,:));
 
-legendText{1,1} = "AUC(" + convertCharsToStrings({'\beta g_2 g_3 \sigma \nu'}) + ") = " + num2str(round(AUC.mean,2),2);
+legendText{1,1} = "AUC(" + convertCharsToStrings({'\beta k_2 g_2 g_3 \sigma \nu'}) + ") = " + num2str(round(AUC.mean,2),2);
 disp(["AUC(CI) all params = " num2str(AUC.CI)]);
 disp("AUC std all params: " + num2str(AUC.std));
 drawnow;
 for i = 1:length(parametersName)
     AUC = plotsingleROCCurveSVM(params1(:,i), params2(:,i), params1groupName, params2groupName, colors(i,:));
-    legendText{1,i+1} = "AUC(" + parametersName(i) + ") = "+num2str(round(AUC.mean,2));
+    legendText{1,i+1} = "AUC " + parametersName(i) + " = " + num2str(round(AUC.mean,2));
     disp(["AUC(CI) " + parametersName(i) + " = " num2str(AUC.CI)]);
     disp("AUC(std) " + parametersName(i) + " = " + num2str(AUC.std));
     drawnow;

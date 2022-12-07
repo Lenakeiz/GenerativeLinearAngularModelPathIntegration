@@ -59,15 +59,15 @@ plotInfo.starYValues = [nan nan nan nan 1.5];
 plotInfo.starTextSize = [35 35 35 35 35];
 % This adds sigstar bars using adjustablesigstar
 plotInfo.addSigmaStarbars = 1;
-plotInfo.sigmaStarBars = [4 5; 3 5; 2 5; 1 5];
-plotInfo.sigmaStarBarsPValues = [0.001; 0.001; 0.001; 0.001];
+plotInfo.sigmaStarBars = [4 5; 3 5; 2 5; 1 5; 1 2];
+plotInfo.sigmaStarBarsPValues = [0.001; 0.001; 0.001; 0.001; 0.02];
 plotInfo.sigmaStarLineWidth = 2.5;
 plotInfo.sigmaStarTextSize  = 20;
 plotInfo.sigmaBarSeparation = 0.075;
 plotInfo.yLim = [0 1.75];
 plotInfo.ticksStep = 0.5;
 
-plotBarScatter(YoungControlsPropDist, HealthyControlsPropDist, MCIPosPropDist, MCINegPropDist, MCIUnkPropDist, anova_tab_dist, multicomp_tab1_dist, config, plotInfo);
+%plotBarScatter(YoungControlsPropDist, HealthyControlsPropDist, MCIPosPropDist, MCINegPropDist, MCIUnkPropDist, anova_tab_dist, multicomp_tab1_dist, config, plotInfo);
 
 plotInfo.yLim = [0 1.75];
 plotInfo.ticksStep = 0.5;
@@ -101,7 +101,7 @@ plotInfo.sigmaBarSeparation = 0.06;
 plotInfo.yLim = [0 2.5];
 plotInfo.ticksStep = 0.5;
 
-plotBarScatter(YoungControlsPropAng , HealthyControlsPropAng , MCIPosPropAng , MCINegPropAng , MCIUnkPropAng , anova_tab_angle, multicomp_tab1_angle, config, plotInfo);
+%plotBarScatter(YoungControlsPropAng , HealthyControlsPropAng , MCIPosPropAng , MCINegPropAng , MCIUnkPropAng , anova_tab_angle, multicomp_tab1_angle, config, plotInfo);
 
 plotInfo.yLim = [0 2.5];
 plotMergedBarScatter(mean(YoungControlsPropAng,1,'omitnan'), mean(HealthyControlsPropAng,1,'omitnan'), mean(MCIPosPropAng,1,'omitnan'), mean(MCINegPropAng,1,'omitnan'), mean(MCIUnkPropAng,1,'omitnan'), anova_tab_angle, multicomp_tab1_angle, config, plotInfo);
@@ -244,7 +244,7 @@ function plotBarScatter(YoungData, HealthyOldData, MCIPosData, MCINegData, MCIUn
         'XColor'      , [.1 .1 .1], ...
         'YColor'      , [.1 .1 .1], ...
         'XTick'       , (1:5),... 
-        'XTickLabel'  , ["Young", "Healthy Old", "MCI Unk", "MCI Neg", "MCI Pos"],...
+        'XTickLabel'  , ["Young", "Elderly", "MCI Unk", "MCI Neg", "MCI Pos"],...
         'LineWidth'   , .5        );
         %'Ytick'       , [0,0.5,1.0,1.5],...
         %'XLim'        , [0.5, 3.5],...
@@ -361,7 +361,7 @@ function plotMergedBarScatter(YoungData, HealthyOldData, MCIPosData, MCINegData,
         'XColor'      , [.1 .1 .1], ...
         'YColor'      , [.1 .1 .1], ...
         'XTick'       , (1:5),... 
-        'XTickLabel'  , ["Young", "Healthy Old", "MCI Unk", "MCI Neg", "MCI Pos"],...
+        'XTickLabel'  , ["Young", "Elderly", "MCI Unk", "MCI Neg", "MCI Pos"],...
         'LineWidth'   , .5        );
         %'Ytick'       , [0,0.5,1.0,1.5],...
         %'XLim'        , [0.5, 3.5],...
@@ -381,6 +381,8 @@ function plotMergedBarScatter(YoungData, HealthyOldData, MCIPosData, MCINegData,
     ylim(plotInfo.yLim);
     yticks(0:plotInfo.ticksStep:plotInfo.yLim(2));
     
+    xtickangle(35)
+
     ax = gca;
     ax.LineWidth = plotInfo.defaultLineSize;
 

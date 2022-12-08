@@ -77,7 +77,7 @@ set(0,'DefaultTextFontSize',plotInfo.axisSize)
 hold on;
 
 %AUC = plotsingleROCCurve(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(4,:));
-AUC = plotsingleROCCurveSVM(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(8,:));
+AUC = plotsingleROCCurveSVMCrossValid(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(8,:));
 
 legendText{1,1} = "AUC(" + convertCharsToStrings({'\beta k_2 g_2 g_3 \sigma \nu'}) + ") = " + num2str(round(AUC.mean,2),2);
 disp(["AUC(CI) all params = " num2str(AUC.CI)]);
@@ -262,6 +262,38 @@ function x= adjust_unique_points(Xroc)
             aux=aux+0.0001;
         end        
     end
+end
+
+%%
+function AUCOut = plotsingleROCCurveSVMCrossValid(param1, param2, param1Label, param2Label, paramColor)
+    
+    % logistic regression with cross validation
+    AUCOut=struct;
+    AUCOut.Mean = 0;
+    AUCOut.CI   = [0 0];
+    AUCOut.std  = 0;
+
+    % Preparing the logistic regression
+    allData = [param1; param2];
+    allDatalogicalResponse = (1:height(param1) + height(param2))' > height(param1);
+    label1     = cell(height(param1),1);
+    label1(:)  = {param1Label};
+    label2     = cell(height(param2),1);
+    label2(:)  = {param2Label};
+    allLabels  = [label1;label2];
+
+    for i =1:1000
+        mdl  = fitcsvm(allData,allLabels,"Standardize",true,"ClassNames",[{param1Label},{param2Label}], CrossVal="on", Holdout=0.3);
+        comp_mdl_post = fitPosterior(mdl.Trained{1},allData,allLabels);
+        %predict on leave-out testing data
+        [~,post_probabilities] = predict(comp_mdl_post,allData(mdl.Partition.test,:));
+        [X,Y,~,AUC] = perfcurve(allDatalogicalResponse(mdl.Partition.test,:), post_probabilities(:,2), true);
+        AUCOut.Mean = AUCOut.Mean + AUC/1000;
+    end
+
+    AUCOut.CI   = [0 0];
+    AUCOut.std  = 0;
+
 end
 
 %%

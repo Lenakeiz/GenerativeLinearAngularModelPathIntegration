@@ -300,7 +300,7 @@ problem = createOptimProblem('fmincon', ...
                              'lb',lb,'ub',ub, ...
                              'options',optim_options);
 
-gs = GlobalSearch('NumTrialPoints', 1000);
+gs = GlobalSearch('NumTrialPoints', 500);
 [FitAllParams,negloglikelihood] = run(gs,problem);
 
 disp("Fitted parameters: "+num2str(FitAllParams'));

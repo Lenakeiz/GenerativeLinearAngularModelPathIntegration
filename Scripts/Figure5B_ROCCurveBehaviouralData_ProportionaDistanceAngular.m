@@ -64,7 +64,7 @@ parametersName = ["Linear", "Angular"];
 disp("%%%%%%%%%%%%%%% ROC Curve pooled MCI vs HC - behavioural data %%%%%%%%%%%%%%%")
 rng("shuffle");
 generateROCCurve(allParamsHC, allParamsPooledMCI,'HC', 'MCI', parametersName, config, plotInfo);
-
+%%
 plotInfo.Title = "MCI negative / MCI positive";
 disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - behavioural data %%%%%%%%%%%%%%%");
 rng("shuffle");
@@ -194,7 +194,7 @@ function AUCOut = plotsingleROCCurveSVM(param1, param2, param1Label, param2Label
         testLabels = allLabels(test_idx,:);
 
         % Fitting the support vector machine
-        mdl  = fitcsvm(trainData,trainLabels,"Standardize",true,"ClassNames",[{param1Label},{param2Label}]);
+        mdl  = fitcsvm(trainData,trainLabels,"Standardize",true,"ClassNames",[{param1Label},{param2Label}], "KernelFunction","linear");
         comp_mdl = compact(mdl);
         comp_mdl_post = fitPosterior(comp_mdl,testData,testLabels);
 

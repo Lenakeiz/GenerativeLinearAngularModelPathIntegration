@@ -5,7 +5,7 @@ VAM_PrepareBaseConfig;
 
 %% Preprocessing the data
 VAM_PreprocessData;
-
+%rng("default")
 %% Preparing the data and Slecting the Model
 
 % config.ModelName        =   "beta_g2_k2_g3_sigma_nu";
@@ -42,7 +42,7 @@ AllMCIUnkParams     =   MCIUnk.Results.estimatedParams;
 
 %% merge MCI parameters together to get MCICombined
 AllMCIParams = MergeMCI(AllMCIPosParams, AllMCINegParams, AllMCIUnkParams);
-
+%AllMCIParams = AllMCINegParams;
 %% TwowayAnova
 [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_YoungHealthyOldMCICombined(AllYoungParams, AllHealthyOldParams, AllMCIParams, config);
 

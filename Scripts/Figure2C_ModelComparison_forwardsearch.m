@@ -1,9 +1,9 @@
 %% Preparing the data
-%VAM_PrepareBaseConfig
+VAM_PrepareBaseConfig
 
 %% Preprocessing the data
-%VAM_PreprocessData
-rng("default")
+VAM_PreprocessData
+%rng("default")
 %% 1, sigma nu Model --> egocentric noise only model
 config.ModelName        =   "sigma_nu";
 config.ParamName        =   ["sigma", "nu"];

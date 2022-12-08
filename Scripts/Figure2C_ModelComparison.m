@@ -88,7 +88,7 @@ VAM
 
 beta_g2_g3_sigma_nu_IC  =   HealthyControls.Results.IC;
 %beta_g2_g3_sigma_nu_IC  =   YoungControls.Results.IC;
-
+[beta_g2_g3_sigma_nu_AIC,beta_g2_g3_sigma_nu_BIC, beta_g2_g3_sigma_nu_NLL] = reformatIC(beta_g2_g3_sigma_nu_IC, "all");
 
 %% 6.xxx, beta, g2, g3, sigma, nu Model --> encoding errors in distance and angles and production error in angle
 config.ModelName        =   "beta_k_g2_g3_sigma_nu";

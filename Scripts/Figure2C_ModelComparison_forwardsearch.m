@@ -12,7 +12,6 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 sigma_nu_IC             =   HealthyControls.Results.IC;
-[sigma_nu_AIC,sigma_nu_BIC, sigma_nu_NLL] = reformatIC(sigma_nu_IC, cond);
 
 %% 2.1, beta, k, sigma, nu Model --> only encoding errors in distance
 config.ModelName        =   "beta_k_sigma_nu";
@@ -22,7 +21,6 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 beta_k_sigma_nu_IC        =   HealthyControls.Results.IC;
-[beta_k_sigma_nu_AIC,beta_k_sigma_nu_BIC,beta_k_sigma_nu_NLL] = reformatIC(beta_k_sigma_nu_IC, cond);
 
 %% 2.2, g2, sigma, nu Model --> only encoding errors in distance
 config.ModelName        =   "g2_sigma_nu";
@@ -32,7 +30,6 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 g2_sigma_nu_IC        =   HealthyControls.Results.IC;
-[g2_sigma_nu_AIC,g2_sigma_nu_BIC, g2_sigma_nu_NLL] = reformatIC(g2_sigma_nu_IC, cond);
 
 %% 2.3, g3, sigma, nu Model --> only encoding errors in distance
 config.ModelName        =   "g3_sigma_nu";
@@ -42,7 +39,6 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 g3_sigma_nu_IC        =   HealthyControls.Results.IC;
-[g3_sigma_nu_AIC,g3_sigma_nu_BIC, g3_sigma_nu_NLL] = reformatIC(g3_sigma_nu_IC, cond);
 
 %% 2.4, m3, sigma, nu Model --> only encoding errors in distance
 config.ModelName        =   "m3_sigma_nu";
@@ -52,7 +48,6 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 m3_sigma_nu_IC        =   HealthyControls.Results.IC;
-[m3_sigma_nu_AIC,m3_sigma_nu_BIC, m3_sigma_nu_NLL] = reformatIC(m3_sigma_nu_IC, cond);
 
 %% 3.1 beta,k,g2,sigma,nu model --> encoding errors in both distance and angle
 config.ModelName        =   "beta_k_g2_sigma_nu";
@@ -62,7 +57,6 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 beta_k_g2_sigma_nu_IC        =   HealthyControls.Results.IC;
-[beta_k_g2_sigma_nu_AIC,beta_k_g2_sigma_nu_BIC, beta_k_g2_sigma_nu_NLL] = reformatIC(beta_k_g2_sigma_nu_IC, cond);
 
 %% 3.2 beta,k,g3,sigma,nu model --> encoding errors in both distance and angle
 config.ModelName        =   "beta_k_g3_sigma_nu";
@@ -72,7 +66,6 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 beta_k_g3_sigma_nu_IC        =   HealthyControls.Results.IC;
-[beta_k_g3_sigma_nu_AIC,beta_k_g3_sigma_nu_BIC, beta_k_g3_sigma_nu_NLL] = reformatIC(beta_k_g3_sigma_nu_IC, cond);
 
 %% 3.3 beta,k,m3,sigma,nu model --> encoding errors in both distance and angle
 config.ModelName        =   "beta_k_m3_sigma_nu";
@@ -82,7 +75,6 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 beta_k_m3_sigma_nu_IC        =   HealthyControls.Results.IC;
-[beta_k_m3_sigma_nu_AIC,beta_k_m3_sigma_nu_BIC, beta_k_m3_sigma_nu_NLL] = reformatIC(beta_k_m3_sigma_nu_IC, cond);
 
 
 %% 3.4, g2, g3, sigma, nu Model --> encoding errors and production errors in angle 
@@ -93,7 +85,6 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 g2_g3_sigma_nu_IC       =   HealthyControls.Results.IC;
-[g2_g3_sigma_nu_AIC,g2_g3_sigma_nu_BIC, g2_g3_sigma_nu_NLL] = reformatIC(g2_g3_sigma_nu_IC, cond);
 
 %% 3.5, g2, m3, sigma, nu Model --> encoding errors and production errors in angle 
 config.ModelName        =   "g2_m3_sigma_nu";
@@ -103,7 +94,6 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 g2_m3_sigma_nu_IC       =   HealthyControls.Results.IC;
-[g2_m3_sigma_nu_AIC,g2_m3_sigma_nu_BIC, g2_m3_sigma_nu_NLL] = reformatIC(g2_m3_sigma_nu_IC, cond);
 
 %% 3.6, g3, m3, sigma, nu Model --> encoding errors and production errors in angle 
 config.ModelName        =   "g3_m3_sigma_nu";
@@ -113,7 +103,6 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 g3_m3_sigma_nu_IC       =   HealthyControls.Results.IC;
-[g3_m3_sigma_nu_AIC,g3_m3_sigma_nu_BIC, g3_m3_sigma_nu_NLL] = reformatIC(g3_m3_sigma_nu_IC, cond);
 
 %% 4.1 beta, k, g2, g3, sigma, nu Model --> encoding errors in distance and angles and production error in angle
 config.ModelName        =   "beta_k_g2_g3_sigma_nu";
@@ -123,7 +112,6 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 beta_k_g2_g3_sigma_nu_IC  =   HealthyControls.Results.IC;
-[beta_k_g2_g3_sigma_nu_AIC,beta_k_g2_g3_sigma_nu_BIC, beta_k_g2_g3_sigma_nu_NLL] = reformatIC(beta_k_g2_g3_sigma_nu_IC, cond);
 
 %% 4.2 beta, k, g2, m3, sigma, nu Model --> encoding errors in distance and angles and production error in angle
 config.ModelName        =   "beta_k_g2_m3_sigma_nu";
@@ -133,7 +121,6 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 beta_k_g2_m3_sigma_nu_IC  =   HealthyControls.Results.IC;
-[beta_k_g2_m3_sigma_nu_AIC,beta_k_g2_m3_sigma_nu_BIC, beta_k_g2_m3_sigma_nu_NLL] = reformatIC(beta_k_g2_m3_sigma_nu_IC, cond);
 
 %% 4.3 beta, k, g3, m3, sigma, nu Model --> encoding errors in distance and angles and production error in angle
 config.ModelName        =   "beta_k_g3_m3_sigma_nu";
@@ -143,7 +130,6 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 beta_k_g3_m3_sigma_nu_IC  =   HealthyControls.Results.IC;
-[beta_k_g3_m3_sigma_nu_AIC,beta_k_g3_m3_sigma_nu_BIC, beta_k_g3_m3_sigma_nu_NLL] = reformatIC(beta_k_g3_m3_sigma_nu_IC, cond);
 
 %% 4.4 g2, g3, m3, sigma, nu Model --> encoding errors in distance and angles and production error in angle
 config.ModelName        =   "g2_g3_m3_sigma_nu";
@@ -153,8 +139,6 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 g2_g3_m3_sigma_nu_IC  =   HealthyControls.Results.IC;
-[g2_g3_m3_sigma_nu_AIC,g2_g3_m3_sigma_nu_BIC, g2_g3_m3_sigma_nu_NLL] = reformatIC(g2_g3_m3_sigma_nu_IC, cond);
-
 
 %% 5.1 beta, k, g2, g3, m3, sigma, nu Model --> encoding errors in distance and angles and production error in angle
 config.ModelName        =   "beta_k_g2_g3_m3_sigma_nu";
@@ -164,8 +148,6 @@ config.NumParams        =   length(config.ParamName);
 VAM
 
 beta_k_g2_g3_m3_sigma_nu_IC  =   HealthyControls.Results.IC;
-[beta_k_g2_g3_m3_sigma_nu_AIC,beta_k_g2_g3_m3_sigma_nu_BIC, beta_k_g2_g3_m3_sigma_nu_NLL] = reformatIC(beta_k_g2_g3_m3_sigma_nu_IC, cond);
-
 
 
 %%
@@ -189,6 +171,23 @@ ColorPattern;
 CondList = ["no change", "no distal cue", "no optical flow", "all"];
 for idx_ = 1:4
     cond = CondList(idx_);
+
+    [sigma_nu_AIC,sigma_nu_BIC, sigma_nu_NLL] = reformatIC(sigma_nu_IC, cond);
+    [beta_k_sigma_nu_AIC,beta_k_sigma_nu_BIC,beta_k_sigma_nu_NLL] = reformatIC(beta_k_sigma_nu_IC, cond);
+    [g2_sigma_nu_AIC,g2_sigma_nu_BIC, g2_sigma_nu_NLL] = reformatIC(g2_sigma_nu_IC, cond);
+    [g3_sigma_nu_AIC,g3_sigma_nu_BIC, g3_sigma_nu_NLL] = reformatIC(g3_sigma_nu_IC, cond);
+    [m3_sigma_nu_AIC,m3_sigma_nu_BIC, m3_sigma_nu_NLL] = reformatIC(m3_sigma_nu_IC, cond);
+    [beta_k_g2_sigma_nu_AIC,beta_k_g2_sigma_nu_BIC, beta_k_g2_sigma_nu_NLL] = reformatIC(beta_k_g2_sigma_nu_IC, cond);
+    [beta_k_g3_sigma_nu_AIC,beta_k_g3_sigma_nu_BIC, beta_k_g3_sigma_nu_NLL] = reformatIC(beta_k_g3_sigma_nu_IC, cond);
+    [beta_k_m3_sigma_nu_AIC,beta_k_m3_sigma_nu_BIC, beta_k_m3_sigma_nu_NLL] = reformatIC(beta_k_m3_sigma_nu_IC, cond);
+    [g2_g3_sigma_nu_AIC,g2_g3_sigma_nu_BIC, g2_g3_sigma_nu_NLL] = reformatIC(g2_g3_sigma_nu_IC, cond);
+    [g2_m3_sigma_nu_AIC,g2_m3_sigma_nu_BIC, g2_m3_sigma_nu_NLL] = reformatIC(g2_m3_sigma_nu_IC, cond);
+    [g3_m3_sigma_nu_AIC,g3_m3_sigma_nu_BIC, g3_m3_sigma_nu_NLL] = reformatIC(g3_m3_sigma_nu_IC, cond);
+    [beta_k_g2_g3_sigma_nu_AIC,beta_k_g2_g3_sigma_nu_BIC, beta_k_g2_g3_sigma_nu_NLL] = reformatIC(beta_k_g2_g3_sigma_nu_IC, cond);
+    [beta_k_g2_m3_sigma_nu_AIC,beta_k_g2_m3_sigma_nu_BIC, beta_k_g2_m3_sigma_nu_NLL] = reformatIC(beta_k_g2_m3_sigma_nu_IC, cond);
+    [beta_k_g3_m3_sigma_nu_AIC,beta_k_g3_m3_sigma_nu_BIC, beta_k_g3_m3_sigma_nu_NLL] = reformatIC(beta_k_g3_m3_sigma_nu_IC, cond);
+    [g2_g3_m3_sigma_nu_AIC,g2_g3_m3_sigma_nu_BIC, g2_g3_m3_sigma_nu_NLL] = reformatIC(g2_g3_m3_sigma_nu_IC, cond);
+    [beta_k_g2_g3_m3_sigma_nu_AIC,beta_k_g2_g3_m3_sigma_nu_BIC, beta_k_g2_g3_m3_sigma_nu_NLL] = reformatIC(beta_k_g2_g3_m3_sigma_nu_IC, cond);
 
     % Box Plot of AIC
     ICType = "AIC";

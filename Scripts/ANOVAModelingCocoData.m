@@ -4,7 +4,7 @@ rng('default');
 
 %% Loading data
 disp('%%%%%%%%%%%%%%% DATA LOADING ... %%%%%%%%%%%%%%%');
-load('AllDataErrorsPrevent.mat');
+load('AllDataErrorsPreventFH.mat');
 
 %% setting the configuration
 config.Speed.alpha                                      = 0.9;    % Paramanter for running speed calculation
@@ -22,24 +22,16 @@ config.useTrialFilter                                   = true;
 
 %% Model fitting
 %Model related parameters
-% config.ModelName        = "beta_g3_sigma_nu";
-% config.ParamName        = ["beta", "g3", "sigma", "nu"];
 
-% config.ModelName        = "beta_g2_sigma_nu";
-% config.ParamName        = ["beta", "g2", "sigma", "nu"];
-
-% config.ModelName        = "beta_g2_g3_sigma_nu";
-% config.ParamName        = ["beta", "g2", "g3", "sigma", "nu"];
-
-% config.ModelName        = "beta_g2_g3_k3_sigma_nu";
-% config.ParamName        = ["beta", "g2", "g3", "k3", "sigma", "nu"];
+% config.ModelName        =   "beta_g2_g3_sigma_nu";
+% config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
 
 config.ModelName        =   "beta_k_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
 
 config.NumParams        = length(config.ParamName);
 
-resultfolder = pwd + "/Output/ModelFigures/FamilyHistPos_FamilyHistNeg_"+config.ModelName;
+resultfolder = pwd + "/Output/ModelFigures/Coco_"+config.ModelName;
 config.ResultFolder = resultfolder;
 %create storing folder for trajectory if not exist
 if ~exist(resultfolder, 'dir')
@@ -50,32 +42,281 @@ end
 FamilyHistPos   = TransformPaths(FamilyHistPos);%transform data
 FamilyHistPos   = CalculateTrackingPath(FamilyHistPos, config);
 ManuallyScoringFamilyHistPos;
-%%
+% fitting 
 FamilyHistPos.Results = getResultsAllConditions(FamilyHistPos, config);
 
 %% Model fitting for Neg data
 FamilyHistNeg   = TransformPaths(FamilyHistNeg);%transform data
 FamilyHistNeg   = CalculateTrackingPath(FamilyHistNeg, config);
 ManuallyScoringFamilyHistNeg;
-%%
+%fitting 
 FamilyHistNeg.Results = getResultsAllConditions(FamilyHistNeg, config);
 
-%%
+%% extracted the estimated parameters
 AllFamilyHistPosParams     =   FamilyHistPos.Results.estimatedParams;
 AllFamilyHistNegParams     =   FamilyHistNeg.Results.estimatedParams;
 
 %% Setting colors for using in plots
 ColorPattern; 
 
-%% TwowayAnova and BarScatter Plot
-[anova_tab,multicomp_tab1,~, ~] = TwowayAnova_CocoData(AllFamilyHistPosParams, AllFamilyHistNegParams, config);
-BoxPlotOfFittedParam(AllFamilyHistPosParams, AllFamilyHistNegParams, anova_tab, config);
-BoxPlotOfFittedParamMergeCondition(AllFamilyHistPosParams, AllFamilyHistNegParams, multicomp_tab1, config)
+% %% TwowayAnova and BarScatter Plot
+% [anova_tab,multicomp_tab1,~, ~] = TwowayAnova_CocoData(AllFamilyHistPosParams, AllFamilyHistNegParams, config);
+% % BoxPlotOfFittedParam(AllFamilyHistPosParams, AllFamilyHistNegParams, anova_tab, config);
+% % BoxPlotOfFittedParamMergeCondition(AllFamilyHistPosParams, AllFamilyHistNegParams, multicomp_tab1, config)
+% 
+% %% ThreewayAnova
+% config.Gender_Pos = FamilyHistPos.Gender;
+% config.Gender_Neg = FamilyHistNeg.Gender;
+% [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab3, multicomp_tab12, multicomp_tab13, multicomp_tab23, multicomp_tab123] = ThreewayAnova_CocoModel(AllFamilyHistPosParams, AllFamilyHistNegParams, config);
 
-%% ThreewayAnova
-config.Gender_Pos = FamilyHistPos.Gender;
-config.Gender_Neg = FamilyHistNeg.Gender;
-[anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab3, multicomp_tab12, multicomp_tab13, multicomp_tab23, multicomp_tab123] = ThreewayAnova_CocoModel(AllFamilyHistPosParams, AllFamilyHistNegParams, config);
+%% 4 groups FH+ Apoe+ v.s. FH+ Apoe- v.s. FH- Apoe+ v.s. FH- Apoe-
+
+%find the apoe tag for FH+ and FH-
+FHPos_Apoe = zeros(length(FamilyHistPos.Info),1);
+for i=1:length(FamilyHistPos.Info)
+    name = FamilyHistPos.Info{i};
+    idx = find(strcmp(preventTab.subjectID, name));
+    %find the apoe tag
+    apoe_label = preventTab.apoe4(idx);
+    FHPos_Apoe(i) = apoe_label;
+end
+
+FHNeg_Apoe = zeros(length(FamilyHistNeg.Info),1);
+for i=1:length(FamilyHistNeg.Info)
+    name = FamilyHistNeg.Info{i};
+    idx = find(strcmp(preventTab.subjectID, name));
+    %find the apoe tag
+    apoe_label = preventTab.apoe4(idx);
+    FHNeg_Apoe(i) = apoe_label;
+end
+
+%extract the subgroups 1,FH+ APoe+ 2,FH+ APoe-....
+Condition = [1,3,2];  %switch the no distal cue condition with the non optical flow condition
+for k=1:3
+    cond = Condition(k);
+    Params = AllFamilyHistPosParams{1,cond};
+    Gender = FamilyHistPos.Gender;
+
+    nonNanIdx = ~isnan(FHPos_Apoe);
+    nonNanParams = Params(nonNanIdx,:);
+    nonNanApoe = FHPos_Apoe(nonNanIdx);
+    nonNanGender = Gender(nonNanIdx);
+
+    FHPos_ApoePos_Param{1,k} = nonNanParams(logical(nonNanApoe),:);
+    FHPos_ApoeNeg_Param{1,k} = nonNanParams(~logical(nonNanApoe),:);
+    FHPos_ApoePos_Gender = nonNanGender(logical(nonNanApoe));
+    FHPos_ApoeNeg_Gender = nonNanGender(~logical(nonNanApoe));
+end
+
+%extract the subgroups 1,FH+ APoe+ 2,FH+ APoe-....
+for k=1:3
+    cond = Condition(k);
+    Params = AllFamilyHistNegParams{1,cond};
+    Gender = FamilyHistNeg.Gender;
+
+    nonNanIdx = ~isnan(FHNeg_Apoe);
+    nonNanParams = Params(nonNanIdx,:);
+    nonNanApoe = FHNeg_Apoe(nonNanIdx);
+    nonNanGender = Gender(nonNanIdx);
+
+    FHNeg_ApoePos_Param{1,k} = nonNanParams(logical(nonNanApoe),:);
+    FHNeg_ApoeNeg_Param{1,k} = nonNanParams(~logical(nonNanApoe),:);
+    FHNeg_ApoePos_Gender = nonNanGender(logical(nonNanApoe));
+    FHNeg_ApoeNeg_Gender = nonNanGender(~logical(nonNanApoe));
+end
+
+config.FHPos_ApoePos_Gender = FHPos_ApoePos_Gender;
+config.FHPos_ApoeNeg_Gender = FHPos_ApoeNeg_Gender;
+config.FHNeg_ApoePos_Gender = FHNeg_ApoePos_Gender;
+config.FHNeg_ApoeNeg_Gender = FHNeg_ApoeNeg_Gender;
+
+% three way anova on gender, codition, and 4 FH+APOE groups
+[anova_tab,...
+ multicomp_tab1,...
+ multicomp_tab2, ...
+ multicomp_tab3, ...
+ multicomp_tab12, ...
+ multicomp_tab13, ...
+ multicomp_tab23, ...
+ multicomp_tab123] = ThreewayAnova_Gender_Condition_FhApoe(FHPos_ApoePos_Param, ...
+                                                           FHPos_ApoeNeg_Param, ...
+                                                           FHNeg_ApoePos_Param, ...
+                                                           FHNeg_ApoeNeg_Param, ...
+                                                           config);
+%%
+ErrorBarPlotOfFittedParam(FHPos_ApoePos_Param, FHPos_ApoeNeg_Param, FHNeg_ApoePos_Param, FHNeg_ApoeNeg_Param, config);
+
+%% the difference in parmeters no distal cue condition - no change condition (baseline)
+PosPos_Param_Diff = FHPos_ApoePos_Param{1,3}-FHPos_ApoePos_Param{1,1}; %pairwise difference in PosPos 
+PosNeg_Param_Diff = FHPos_ApoeNeg_Param{1,3}-FHPos_ApoeNeg_Param{1,1}; %pairwise difference in PosNeg 
+NegPos_Param_Diff = FHNeg_ApoePos_Param{1,3}-FHNeg_ApoePos_Param{1,1}; %pairwise difference in NegPos 
+NegNeg_Param_Diff = FHNeg_ApoeNeg_Param{1,3}-FHNeg_ApoeNeg_Param{1,1}; %pairwise difference in NegNeg 
+
+TwowayAnovaonParameterDiff_Gender_FhApoe(PosPos_Param_Diff,...
+                                         PosNeg_Param_Diff,...
+                                         NegPos_Param_Diff,...
+                                         NegNeg_Param_Diff,...
+                                         config);
+%
+ErrorBarPlotOfParamDiff(PosPos_Param_Diff, PosNeg_Param_Diff, NegPos_Param_Diff, NegNeg_Param_Diff, config);
+
+%%
+function ErrorBarPlotOfParamDiff(PosPos_ParamsDiff,PosNeg_ParamsDiff, NegPos_ParamsDiff, NegNeg_ParamsDiff, config)
+    ParamName = config.ParamName;
+
+    PosPos_Gender = config.FHPos_ApoePos_Gender;
+    PosNeg_Gender = config.FHPos_ApoeNeg_Gender;
+    NegPos_Gender = config.FHNeg_ApoePos_Gender;
+    NegNeg_Gender = config.FHNeg_ApoeNeg_Gender;
+
+    for ParamIndx=1:length(ParamName)            
+
+        % set figure info
+        f = figure('visible','on','Position', [100 100 1000 500]);
+        %%% Font type and size setting %%%
+        % Using Arial as default because all journals normally require the font to
+        % be either Arial or Helvetica
+        set(0,'DefaultAxesFontName','Arial')
+        set(0,'DefaultTextFontName','Arial')
+        set(0,'DefaultAxesFontSize',12)
+        set(0,'DefaultTextFontSize',12)  
+        
+        subplot(1,2,1)
+        PosPos_Male = PosPos_ParamsDiff(PosPos_Gender==1,ParamIndx); PosPos_Male_mean = mean(PosPos_Male,1); PosPos_Male_sem = std(PosPos_Male,0,1)/sqrt(size(PosPos_Male,1));
+        PosNeg_Male = PosNeg_ParamsDiff(PosNeg_Gender==1,ParamIndx); PosNeg_Male_mean = mean(PosNeg_Male,1); PosNeg_Male_sem = std(PosNeg_Male,0,1)/sqrt(size(PosNeg_Male,1));
+        NegPos_Male = NegPos_ParamsDiff(NegPos_Gender==1,ParamIndx); NegPos_Male_mean = mean(NegPos_Male,1); NegPos_Male_sem = std(NegPos_Male,0,1)/sqrt(size(NegPos_Male,1));
+        NegNeg_Male = NegNeg_ParamsDiff(NegNeg_Gender==1,ParamIndx); NegNeg_Male_mean = mean(NegNeg_Male,1); NegNeg_Male_sem = std(NegNeg_Male,0,1)/sqrt(size(NegNeg_Male,1));
+        
+        MaleMean = [NegNeg_Male_mean;NegPos_Male_mean;PosNeg_Male_mean;PosPos_Male_mean];
+        MaleSem = [NegNeg_Male_sem;NegPos_Male_sem;PosNeg_Male_sem;PosPos_Male_sem];
+        b = bar(1:1:4, MaleMean);
+
+        hold on
+        % Plot the errorbars
+        errorbar(1:1:4,MaleMean,MaleSem,'k','linestyle','none');
+        title("Male "+ParamName(ParamIndx))
+
+        subplot(1,2,2)
+        PosPos_Female = PosPos_ParamsDiff(PosPos_Gender==2,ParamIndx);PosPos_Female_mean = mean(PosPos_Female,1); PosPos_Female_sem = std(PosPos_Female,0,1)/sqrt(size(PosPos_Female,1));
+        PosNeg_Female = PosNeg_ParamsDiff(PosNeg_Gender==2,ParamIndx);PosNeg_Female_mean = mean(PosNeg_Female,1); PosNeg_Female_sem = std(PosNeg_Female,0,1)/sqrt(size(PosNeg_Female,1));
+        NegPos_Female = NegPos_ParamsDiff(NegPos_Gender==2,ParamIndx);NegPos_Female_mean = mean(NegPos_Female,1); NegPos_Female_sem = std(NegPos_Female,0,1)/sqrt(size(NegPos_Female,1));
+        NegNeg_Female = NegNeg_ParamsDiff(NegNeg_Gender==2,ParamIndx);NegNeg_Female_mean = mean(NegNeg_Female,1); NegNeg_Female_sem = std(NegNeg_Female,0,1)/sqrt(size(NegNeg_Female,1));
+
+        FemaleMean = [NegNeg_Female_mean;NegPos_Female_mean;PosNeg_Female_mean;PosPos_Female_mean];
+        FemaleSem = [NegNeg_Female_sem;NegPos_Female_sem;PosNeg_Female_sem;PosPos_Female_sem];
+        b = bar(1:1:4,FemaleMean);
+
+        hold on
+        % Plot the errorbars
+        errorbar(1:1:4,FemaleMean,FemaleSem,'k','linestyle','none');
+        
+        title("Female "+ParamName(ParamIndx))
+        exportgraphics(f,config.ResultFolder+"/ParamDiffErrorBar_"+ParamName(ParamIndx)+".png",'Resolution',300);
+        exportgraphics(f,config.ResultFolder+"/ParamDiffErrorBar_"+ParamName(ParamIndx)+".pdf",'Resolution',300, 'ContentType','vector');
+
+    end
+
+
+end
+
+%% 
+function ErrorBarPlotOfFittedParam(PosPos_Params,PosNeg_Params, NegPos_Params, NegNeg_Params, config)
+    numConds = 3; %3 is the condition number
+    ParamName = config.ParamName;
+
+    PosPos_Gender = config.FHPos_ApoePos_Gender;
+    PosNeg_Gender = config.FHPos_ApoeNeg_Gender;
+    NegPos_Gender = config.FHNeg_ApoePos_Gender;
+    NegNeg_Gender = config.FHNeg_ApoeNeg_Gender;
+
+    for ParamIndx=1:length(ParamName)
+        PosPosParamAllConds = [];
+        PosNegParamAllConds = [];
+        NegPosParamAllConds = [];
+        NegNegParamAllConds = []; %dimension are different, so separate from YoungParams
+        
+        for TRIAL_FILTER=1:numConds
+            %% extract data
+            PosPosParam            =   PosPos_Params{TRIAL_FILTER}(:,ParamIndx);
+            PosPosParamAllConds    =   [PosPosParamAllConds,PosPosParam];
+
+            PosNegParam            =   PosNeg_Params{TRIAL_FILTER}(:,ParamIndx);
+            PosNegParamAllConds    =   [PosNegParamAllConds,PosNegParam];  
+
+            NegPosParam            =   NegPos_Params{TRIAL_FILTER}(:,ParamIndx);
+            NegPosParamAllConds    =   [NegPosParamAllConds,NegPosParam];
+
+            NegNegParam            =   NegNeg_Params{TRIAL_FILTER}(:,ParamIndx);
+            NegNegParamAllConds    =   [NegNegParamAllConds,NegNegParam];              
+        end
+        
+        %remove Nan rows (nan coz of 1, removing participants with short walking length; 2, not enough trials for parameter estimation)
+        PosPosParamAllConds        =   removeNanRows(PosPosParamAllConds);
+        PosNegParamAllConds        =   removeNanRows(PosNegParamAllConds);
+        NegPosParamAllConds        =   removeNanRows(NegPosParamAllConds);
+        NegNegParamAllConds        =   removeNanRows(NegNegParamAllConds);
+
+        % set figure info
+        f = figure('visible','on','Position', [100 100 1000 500]);
+        %%% Font type and size setting %%%
+        % Using Arial as default because all journals normally require the font to
+        % be either Arial or Helvetica
+        set(0,'DefaultAxesFontName','Arial')
+        set(0,'DefaultTextFontName','Arial')
+        set(0,'DefaultAxesFontSize',12)
+        set(0,'DefaultTextFontSize',12)  
+        
+        subplot(1,2,1)
+        PosPos_Male = PosPosParamAllConds(PosPos_Gender==1,:); PosPos_Male_mean = mean(PosPos_Male,1); PosPos_Male_sem = std(PosPos_Male,0,1)/sqrt(size(PosPos_Male,1));
+        PosNeg_Male = PosNegParamAllConds(PosNeg_Gender==1,:); PosNeg_Male_mean = mean(PosNeg_Male,1); PosNeg_Male_sem = std(PosNeg_Male,0,1)/sqrt(size(PosNeg_Male,1));
+        NegPos_Male = NegPosParamAllConds(NegPos_Gender==1,:); NegPos_Male_mean = mean(NegPos_Male,1); NegPos_Male_sem = std(NegPos_Male,0,1)/sqrt(size(NegPos_Male,1));
+        NegNeg_Male = NegNegParamAllConds(NegNeg_Gender==1,:); NegNeg_Male_mean = mean(NegNeg_Male,1); NegNeg_Male_sem = std(NegNeg_Male,0,1)/sqrt(size(NegNeg_Male,1));
+        
+        MaleMean = [NegNeg_Male_mean;NegPos_Male_mean;PosNeg_Male_mean;PosPos_Male_mean];
+        MaleSem = [NegNeg_Male_sem;NegPos_Male_sem;PosNeg_Male_sem;PosPos_Male_sem];
+        b = bar(MaleMean, 'grouped');
+
+        hold on
+        % Calculate the number of groups and number of bars in each group
+        [ngroups,nbars] = size(MaleMean);
+        % Get the x coordinate of the bars
+        x = nan(nbars, ngroups);
+        for i = 1:nbars
+            x(i,:) = b(i).XEndPoints;
+        end
+        % Plot the errorbars
+        errorbar(x',MaleMean,MaleSem,'k','linestyle','none');
+        title(ParamName(ParamIndx)+ " Male")
+
+        subplot(1,2,2)
+        PosPos_Female = PosPosParamAllConds(PosPos_Gender==2,:);PosPos_Female_mean = mean(PosPos_Female,1); PosPos_Female_sem = std(PosPos_Female,0,1)/sqrt(size(PosPos_Female,1));
+        PosNeg_Female = PosNegParamAllConds(PosNeg_Gender==2,:);PosNeg_Female_mean = mean(PosNeg_Female,1); PosNeg_Female_sem = std(PosNeg_Female,0,1)/sqrt(size(PosNeg_Female,1));
+        NegPos_Female = NegPosParamAllConds(NegPos_Gender==2,:);NegPos_Female_mean = mean(NegPos_Female,1); NegPos_Female_sem = std(NegPos_Female,0,1)/sqrt(size(NegPos_Female,1));
+        NegNeg_Female = NegNegParamAllConds(NegNeg_Gender==2,:);NegNeg_Female_mean = mean(NegNeg_Female,1); NegNeg_Female_sem = std(NegNeg_Female,0,1)/sqrt(size(NegNeg_Female,1));
+
+        FemaleMean = [NegNeg_Female_mean;NegPos_Female_mean;PosNeg_Female_mean;PosPos_Female_mean];
+        FemaleSem = [NegNeg_Female_sem;NegPos_Female_sem;PosNeg_Female_sem;PosPos_Female_sem];
+        b = bar(FemaleMean, 'grouped');
+
+        hold on
+        % Calculate the number of groups and number of bars in each group
+        [ngroups,nbars] = size(FemaleMean);
+        % Get the x coordinate of the bars
+        x = nan(nbars, ngroups);
+        for i = 1:nbars
+            x(i,:) = b(i).XEndPoints;
+        end
+        % Plot the errorbars
+        errorbar(x',FemaleMean,FemaleSem,'k','linestyle','none');
+        
+        title(ParamName(ParamIndx)+ " Female")
+        exportgraphics(f,config.ResultFolder+"/ErrorBar_"+ParamName(ParamIndx)+".png",'Resolution',300);
+        exportgraphics(f,config.ResultFolder+"/ErrorBar_"+ParamName(ParamIndx)+".pdf",'Resolution',300, 'ContentType','vector');
+
+    end
+
+
+end
 
 %%
 function BoxPlotOfFittedParam(AllPosParams, AllNegParams, anova_tab, config)

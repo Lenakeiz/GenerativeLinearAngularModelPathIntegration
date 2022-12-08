@@ -252,7 +252,7 @@ function H=makeSignificanceBar(x,y,p)
     %Increase offset between line and text if we will print "n.s."
     %instead of a star. 
     if ~isnan(p)
-        offset=0.005;
+        offset=0.01;
     else
         offset=0.02;
     end
@@ -261,7 +261,7 @@ function H=makeSignificanceBar(x,y,p)
     H(2)=text(mean(x(:)),starY,stars,...
         'HorizontalAlignment','Center',...
         'BackGroundColor','none',...
-        'Tag','sigstar_stars');
+        'Tag','sigstar_stars', 'FontSize', 24);
 
     Y=ylim;
     if Y(2)<starY

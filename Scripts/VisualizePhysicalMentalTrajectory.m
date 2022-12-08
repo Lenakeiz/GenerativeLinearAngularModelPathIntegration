@@ -9,8 +9,12 @@ VAM_PreprocessData;
 
 %% Preparing the data and Slecting the Model
 
-config.ModelName        =   "beta_g2_g3_sigma_nu";
-config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
+% config.ModelName        =   "beta_g2_g3_sigma_nu";
+% config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
+
+config.ModelName        =   "beta_k_g2_g3_sigma_nu";
+config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
+
 config.NumParams        =   length(config.ParamName);
 
 % Run the model
@@ -34,14 +38,15 @@ AllMCIUnkResults        =   MCIUnk.Results;
 ColorPattern; 
 
 %% visualize one trials
-[phy_p3,men_p3] = VisualizeMenPhyTraj(AllHealthyOldResults, 3, 1, 1, true, config); %true means plot the figure
+[phy_p3,men_p3] = VisualizeMenPhyTraj(AllHealthyOldResults, 13, 1, 3, true, config); %true means plot the figure
 
 %% visualize some trials
-id = 13;
+id = 28;
 trailNum=4;
 %randomly pick a trial in no change condition
 %trials = randsample(8,trailNum);
-trials = [2,3,5,7];
+%trials = [2,3,5,7];
+trials = [4,6,8,9];
 
 for tN=1:trailNum
     trial_id = trials(tN);
@@ -68,7 +73,7 @@ else
     error("choose correct name!")
 end
 
-%% do stats on return points
+% do stats on return points
 f = figure('visible','on','Position', [100 100 500 500]);
 %%% Font type and size setting %%%
 % Using Arial as default because all journals normally require the font to
@@ -87,7 +92,7 @@ hold on
 scatter(Mental_Pos(:,1), Mental_Pos(:,2), 'MarkerEdgeColor',MenColor, ...
     'MarkerFaceColor', MenColor, 'MarkerEdgeAlpha',0.2, 'MarkerFaceAlpha',0.4);
 
-legend('Actual return points', 'Mental return points');
+legend('Actual return points', 'Generated return points');
 
 set(gca, ...
 'Box'         , 'off'       , ...
@@ -165,8 +170,8 @@ set(gca, ...
 %xlabel('X (meters)');
 %ylabel('Y (meters)');
 
-exportgraphics(f,config.ResultFolder+"/"+name+".png",'Resolution',300);
-exportgraphics(f,config.ResultFolder+"/"+name+".pdf",'Resolution',300, 'ContentType','vector');
+exportgraphics(f,config.ResultFolder+"/"+name+"_distribution.png",'Resolution',300);
+exportgraphics(f,config.ResultFolder+"/"+name+"_distribution.pdf",'Resolution',300, 'ContentType','vector');
 
 %% bar plot of comparing forgetting amount on leg 1 versus leg 2
 noNan_L1Diff = L1Diff(~isnan(L1Diff));
@@ -188,15 +193,19 @@ scatter(noNan_L1Diff, noNan_L2Diff,100, 'MarkerEdgeColor','k', ...
     'MarkerFaceColor','k', 'MarkerEdgeAlpha',1.0, 'MarkerFaceAlpha',0.2)
 hold on
 %add a linear fit line
-ls = lsline;
-ls.LineWidth = 2; 
+dlm = fitlm(noNan_L1Diff,noNan_L2Diff,'Intercept',false);
+x=0:0.1:1;
+yfit = x*dlm.Coefficients{1,1};
+plot(x, yfit, 'r--', LineWidth=2)
+% ls = lsline;
+% ls.LineWidth = 2; 
 hold on
 %add a reference line y=x
 x = linspace(0,1.0,10); y = x; 
 plot(x,y,'k--', LineWidth=2);
 
-xlabel("Normalized difference for l_1");
-ylabel("Normalized difference for l_2")
+xlabel("Normalized error for l_1");
+ylabel("Normalized error for l_2")
 
 set(gca, ...
 'Box'         , 'off'       , ...
@@ -264,7 +273,7 @@ set(gca, ...
 'YColor'      , [.1 .1 .1]  , ...
 'XLim'        , [0.5, 2.5] ,...
 'XTick'       , [1,2]    ,...
-'XTickLabel'   , {'Physical \theta_2', 'Mental \theta_2^\prime'},...
+'XTickLabel'   , {'Actual turning \theta_2', 'Generated turning \theta_2^\prime'},...
 'LineWidth'   , .5          ,...
 'XAxisLocation', 'origin'   ,...
 'YAxisLocation', 'origin');
@@ -336,7 +345,6 @@ exportgraphics(f,config.ResultFolder+"/"+name+"_turn2.pdf",'Resolution',300, 'Co
 % exportgraphics(f,config.ResultFolder+"/"+name+"_turn2.pdf",'Resolution',300, 'ContentType','vector');
 
 %% regression to the mean
-
 f = figure('visible','on','Position', [100 100, 500, 400]);
 %%% Font type and size setting %%%
 % Using Arial as default because all journals normally require the font to
@@ -399,6 +407,154 @@ ylabel("Produced agnle (radians)")
 
 exportgraphics(f,config.ResultFolder+"/"+name+"_rgmean.png",'Resolution',300);
 exportgraphics(f,config.ResultFolder+"/"+name+"_rgmean.pdf",'Resolution',300, 'ContentType','vector');
+
+%% plot the distribution of all parameters 
+
+Parameters = AllHealthyOldResults.estimatedParams;
+ParamName = config.ParamName;
+for ParamIndx=1:length(ParamName)
+
+    ParamAllConds = []; 
+
+    for TRIAL_FILTER=1:3
+        % extract data
+        Param = Parameters{TRIAL_FILTER}(:,ParamIndx);
+        ParamAllConds = [ParamAllConds,Param];
+    end
+
+    %remove Nan rows (nan coz of 1, removing participants with short walking length; 2, not enough trials for parameter estimation)
+    ParamAllConds = removeNanRows(ParamAllConds);
+    ParamMean = mean(ParamAllConds, 2);
+    
+    f = figure('visible','on','Position', [100 100 500 500]);
+    %%% Font type and size setting %%%
+    % Using Arial as default because all journals normally require the font to
+    % be either Arial or Helvetica
+    set(0,'DefaultAxesFontName','Arial')
+    set(0,'DefaultTextFontName','Arial')
+    set(0,'DefaultAxesFontSize',12)
+    set(0,'DefaultTextFontSize',12)     
+    %%% Color definition %%%
+    color = config.color_scheme_npg(2,:);
+
+    %set params
+    whisker_value               =   1.5;
+    box_lineWidth               =   0.3;
+    box_widths_value            =   0.3;
+    box_color_transparency      =   0.5; %faceAlpha
+    median_lineWidth            =   2;
+    median_color                =   'k';
+    scatter_jitter_value        =   0.2;
+    scatter_markerSize          =   50;
+    scatter_marker_edgeColor    =   'k';
+    scatter_marker_edgeWidth    =   0.5;
+    scatter_color_transparency  =   0.7; %faceAlpha        
+
+    % boxplot for each column in MCIPOs
+    bp1 = boxplot(ParamMean, ...
+                'Whisker',whisker_value, ...
+                'symbol','', ... %symbol ='' making outlier invisible
+                'Color','k', ...
+                'Notch','on', ...
+                'widths',box_widths_value,...
+                'positions', 1);
+    set(bp1,'linewidth',box_lineWidth);
+
+    % Coloring each box
+    h = findobj(gca,'Tag','Box'); 
+    %get the MCI box
+    patch(get(h(1),'XData'),get(h(1),'YData'),color,'FaceAlpha',box_color_transparency);
+
+    % Adjusting median
+    h=findobj(gca,'tag','Median');
+    for i = 1:length(h)
+        h(i).LineWidth = median_lineWidth;
+        h(i).Color = median_color;
+    end
+
+    % add scatter plot and the mean of MCIPos
+    num_points = length(ParamMean);
+    hold on
+    x = ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
+    scatter(x, ParamMean, scatter_markerSize, ...
+            'filled', ...
+            'o', ... %marker shape
+            'MarkerEdgeColor',scatter_marker_edgeColor, ...
+            'MarkerFaceColor',color, ...
+            'MarkerFaceAlpha',scatter_color_transparency,...
+            'LineWidth',scatter_marker_edgeWidth); 
+
+    %add errorbar
+    mean_ = mean(ParamMean);
+    sem_= std(ParamMean)./sqrt(length(ParamMean));
+    errorbar(1,mean_,sem_,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 18);    
+    hold on
+    %add mean point
+    scatter(1, mean_, 3*scatter_markerSize, 'd',...
+            'filled','MarkerEdgeColor','k', ...
+            'MarkerFaceColor','w', ...
+            'LineWidth',scatter_marker_edgeWidth);
+
+    % Further post-processing the figure
+    %calculate the ylim
+    alldata = ParamMean;
+    maxdata = max(alldata,[],'all');
+    mindata = min(alldata, [], 'all');
+    
+    if ParamName(ParamIndx)=="g2" | ParamName(ParamIndx)=="g3" | ParamName(ParamIndx)=="nu" 
+        lowupYlim = [0, 2];
+        yticks = [0,1,2,3];
+    elseif ParamName(ParamIndx)=="beta"
+        lowupYlim = [-0.1, 0.3];
+        yticks = [-0.1, 0, 0.1, 0.2, 0.3];
+    elseif ParamName(ParamIndx)=="k"
+        lowupYlim = [0, 2];
+        yticks = [0,0.5,1,1.5,2.0];  
+    elseif ParamName(ParamIndx)=="sigma"
+        lowupYlim = [0, 1];    
+        yticks = [0, 0.5, 1.0];
+    end
+
+    set(gca, ...
+        'Box'         , 'off'     , ...
+        'TickDir'     , 'out'     , ...
+        'TickLength'  , [.01 .01] , ...
+        'XColor'      , [.0 .0 .0], ...
+        'YColor'      , [.0 .0 .0], ...
+        'XTick'       , (1),... 
+        'XLim'        , [0.5, 1.5],...
+        'YLim'        , lowupYlim,...   
+        'YTick'       , yticks,...
+        'XTickLabel'  , {ParamName(ParamIndx)},...
+        'LineWidth'   , 1.0        );
+    ylabel("Parameter value");
+
+    xL=xlim;
+    yL=ylim;
+    %add yline and one sample one side ttest
+    if ParamName(ParamIndx)=="beta"
+        [h,p,~,stat]=ttest(ParamMean,0,"Tail","right");
+        yline(0,Color='r',LineStyle='--',LineWidth=2);
+        text(1.05*xL(1),1.05*yL(2),"t("+num2str(stat.df)+")="+num2str(round(stat.tstat,2))+", p="+num2str(p), 'FontSize', 15)
+    elseif ParamName(ParamIndx)=="k"
+        [h,p,~,stat]=ttest(ParamMean,1,"Tail","right");
+        yline(1,Color='r',LineStyle='--',LineWidth=2); 
+        text(1.05*xL(1),1.05*yL(2),"t("+num2str(stat.df)+")="+num2str(round(stat.tstat,2))+", p="+num2str(p), 'FontSize', 15)
+    elseif ParamName(ParamIndx)=="g2"
+        [h,p,~,stat]=ttest(ParamMean,1);
+        yline(1,Color='r',LineStyle='--',LineWidth=2);
+        text(1.05*xL(1),1.05*yL(2),"t("+num2str(stat.df)+")="+num2str(round(stat.tstat,2))+", p="+num2str(p), 'FontSize', 15)
+    elseif ParamName(ParamIndx)=="g3"
+        [h,p,~,stat]=ttest(ParamMean,1,"Tail","left");
+        yline(1,Color='r',LineStyle='--',LineWidth=2);
+        text(1.05*xL(1),1.05*yL(2),"t("+num2str(stat.df)+")="+num2str(round(stat.tstat,2))+", p="+num2str(p), 'FontSize', 15)
+    end
+
+    exportgraphics(f,config.ResultFolder+"/Box_"+ParamName(ParamIndx)+".png",'Resolution',300);
+    exportgraphics(f,config.ResultFolder+"/Box_"+ParamName(ParamIndx)+".pdf",'Resolution',300, 'ContentType','vector');
+
+end
+
 %% 
 function [Physical_Pos, Mental_Pos, L1_Diff, L2_Diff, T2, T2_prime, Alpha, T3_prime] = extractAllFinalPoints(GroupResults, config)
     Physical_Pos = [];
@@ -451,7 +607,7 @@ function [phy_p3,men_p3_share,  l1_diff, l2_diff, theta2, theta2_prime, alpha, t
     %extract the parameters
     parameters = GroupResults.estimatedParams{Cond}(ID,:);
     cell_params = num2cell(parameters);
-    [beta, g2, g3, ~, ~] = deal(cell_params{:});
+    [beta, k, g2, g3, ~, ~] = deal(cell_params{:});
 
     if isnan(beta)
         error("NAN!")
@@ -500,12 +656,12 @@ function [phy_p3,men_p3_share,  l1_diff, l2_diff, theta2, theta2_prime, alpha, t
     durationL2      =       GroupResults.L2Dur{Cond}{ID}{TrialIdx};
 
     % calculate the mental trajectory
-    men_length1     =       l1*(1-exp(-beta*durationL1))/(beta*durationL1)*exp(-beta*durationL2);
+    men_length1     =       l1*k*(1-exp(-beta*durationL1))/(beta*durationL1)*exp(-beta*durationL2);
     men_p1          =       [men_length1,0];
     
     theta2_prime    =       g2*theta2;
 
-    men_length2     =       l2*(1-exp(-beta*durationL2))/(beta*durationL2);
+    men_length2     =       l2*k*(1-exp(-beta*durationL2))/(beta*durationL2);
     men_p2          =       [men_length1+men_length2*cos(theta2_prime),men_length2*sin(theta2_prime)];
 
     %calculate length of mental vector 3
@@ -561,7 +717,7 @@ function [phy_p3,men_p3_share,  l1_diff, l2_diff, theta2, theta2_prime, alpha, t
         p_y         =       physicalxy(:,2)+0.02;
 
         %plot mental trajectory based on the real location
-        plot([p_x(3), men_p3_share(1)]', [p_y(3), men_p3_share(2)+0.02]', '.-', 'Markersize', 30,  LineWidth=2, Color=[MenColor,0.8]);
+        %plot([p_x(3), men_p3_share(1)]', [p_y(3), men_p3_share(2)+0.02]', '.-', 'Markersize', 30,  LineWidth=2, Color=[MenColor,0.8]);
 
         hold on
         plot(p_x', p_y', '.-', 'Markersize', 30,  LineWidth=2, Color=[PhyColor,0.8]);

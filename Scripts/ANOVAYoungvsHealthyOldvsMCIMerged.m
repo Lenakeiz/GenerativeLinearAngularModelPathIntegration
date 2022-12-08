@@ -41,14 +41,15 @@ AllMCINegParams     =   MCINeg.Results.estimatedParams;
 AllMCIUnkParams     =   MCIUnk.Results.estimatedParams;
 
 %% merge MCI parameters together to get MCICombined
-AllMCIParams = MergeMCI(AllMCIPosParams, AllMCINegParams, AllMCIUnkParams);
+[AllMCIParams AllMCIParamsStatusIndex]= MergeMCI(AllMCIPosParams, AllMCINegParams, AllMCIUnkParams);
 %AllMCIParams = AllMCINegParams;
 %% TwowayAnova
 [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_YoungHealthyOldMCICombined(AllYoungParams, AllHealthyOldParams, AllMCIParams, config);
 
 %% BarScatter Plot between Young and HealthyOld for all Fitted Params
 BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams, anova_tab, config);
-BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCIParams, multicomp_tab1, config)
+%%
+BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCIParams, AllMCIParamsStatusIndex, multicomp_tab1, config)
 
 %%
 function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams, anova_tab, config)
@@ -275,7 +276,7 @@ function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
 end
 
 %% Box Plot Of Fitted Parameters by avearaging three paramters from three conditions into one mean value
-function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCIParams, multicomp_tab1, config)
+function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCIParams, AllMCIParamsStatusIndex,multicomp_tab1, config)
     
     numConds = 3; %3 is the condition number
     ParamName = config.ParamName;
@@ -284,7 +285,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         YoungParamAllConds = [];
         HealthyOldParamAllConds = []; %dimension are different, so separate from MCIParamAllConds
         MCIParamAllConds = [];
-
+        StatusIndex = AllMCIParamsStatusIndex;
         for TRIAL_FILTER=1:numConds
             %% extract data
             YoungParam          = AllYoungParams{TRIAL_FILTER}(:,ParamIndx);
@@ -300,7 +301,8 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         %remove Nan rows (nan coz of 1, removing participants with short walking length; 2, not enough trials for parameter estimation)
         YoungParamAllConds      = removeNanRows(YoungParamAllConds);
         HealthyOldParamAllConds = removeNanRows(HealthyOldParamAllConds);
-        MCIParamAllConds        = removeNanRows(MCIParamAllConds);
+        [MCIParamAllConds MCInanIdx] = removeNanRows(MCIParamAllConds);
+        StatusIndex = StatusIndex(~MCInanIdx,:);
 
         YoungParamMean      = mean(YoungParamAllConds, 2);
         HealthyOldParamMean = mean(HealthyOldParamAllConds, 2);
@@ -320,6 +322,8 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         colorForYoung = config.color_scheme_npg(3,:);        
         colorForHOld = config.color_scheme_npg(5,:);
         colorForMCI = config.color_scheme_npg(2,:);
+        colorForMCINeg = config.color_scheme_npg(4,:);
+        colorForMCIPos = config.color_scheme_npg(6,:);
 
         %set params
         whisker_value               =   1.5;
@@ -365,8 +369,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
                     'Notch','on', ...
                     'widths',box_widths_value,...
                     'positions', 3);
-        set(bp3,'linewidth',box_lineWidth);
-        
+        set(bp3,'linewidth',box_lineWidth);        
 
         %% Coloring each box
         %findobj first getting the box for MCI(from bp3) 
@@ -434,19 +437,41 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);    
 
-        %% add scatter plot and the mean of MCI
-        num_points = length(MCIParamMean);
+        %% add scatter plot MCI unk
+        num_points = length(MCIParamMean(StatusIndex == 0,:));
         hold on
         x = 3*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
-        scatter(x, MCIParamMean, scatter_markerSize, ...
+        scatter(x, MCIParamMean(StatusIndex == 0,:), scatter_markerSize, ...
                 'filled', ...
-                'o', ... %marker shape
+                'square', ... %marker shape
                 'MarkerEdgeColor',scatter_marker_edgeColor, ...
                 'MarkerFaceColor',colorForMCI, ...
                 'MarkerFaceAlpha',scatter_color_transparency,...
-                'LineWidth',scatter_marker_edgeWidth); 
+                'LineWidth',scatter_marker_edgeWidth);
+        %% add scatter plot MCI neg
+        num_points = length(MCIParamMean(StatusIndex == 1,:));
+        hold on
+        x = 3*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
+        scatter(x, MCIParamMean(StatusIndex == 1,:), scatter_markerSize, ...
+                'filled', ...
+                'v', ... %marker shape
+                'MarkerEdgeColor',scatter_marker_edgeColor, ...
+                'MarkerFaceColor',colorForMCINeg, ...
+                'MarkerFaceAlpha',scatter_color_transparency,...
+                'LineWidth',scatter_marker_edgeWidth);
+        %% add scatter plot MCI unk
+        num_points = length(MCIParamMean(StatusIndex == 2,:));
+        hold on
+        x = 3*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
+        scatter(x, MCIParamMean(StatusIndex == 2,:), scatter_markerSize, ...
+                'filled', ...
+                '^', ... %marker shape
+                'MarkerEdgeColor',scatter_marker_edgeColor, ...
+                'MarkerFaceColor',colorForMCIPos, ...
+                'MarkerFaceAlpha',scatter_color_transparency,...
+                'LineWidth',scatter_marker_edgeWidth);
 
-        %add errorbar
+        %add mean + errorbar
         mean_MCI = mean(MCIParamMean);
         sem_MCI = std(MCIParamMean)./sqrt(length(MCIParamMean));
         errorbar(3,mean_MCI,sem_MCI,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 18); 

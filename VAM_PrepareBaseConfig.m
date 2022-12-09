@@ -2,7 +2,7 @@
 %% Cleaning variables
 clearvars; clear all; close all; clc;
 rng('default'); %for code reproducibility
-
+%rng(123);
 %% Loading data
 disp('%%%%%%%%%%%%%%% Data loading ... %%%%%%%%%%%%%%%');
 load('Data/HowettBrain2019_Dataset.mat');

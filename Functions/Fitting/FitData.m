@@ -284,11 +284,13 @@ else
 end
 
 %initializing parameters
+rng(123)
 FitParams0 = (ub - lb)'.*rand(size(lb,2),1) + lb';
 disp("Initial parameters: "+num2str(FitParams0'));
 
 %setting optimization options
-optim_options = optimoptions(@fmincon, 'Algorithm','sqp', 'MaxFunctionEvaluations',1e3);
+%optim_options = optimoptions(@fmincon, 'Algorithm','sqp', 'MaxFunctionEvaluations',3e3);
+optim_options = optimoptions(@fmincon, 'MaxFunctionEvaluations',3e3);
 
 %finding the best local minima with globalsearch
 problem = createOptimProblem('fmincon', ...
@@ -297,7 +299,7 @@ problem = createOptimProblem('fmincon', ...
                              'lb',lb,'ub',ub, ...
                              'options',optim_options);
 
-gs = GlobalSearch('NumTrialPoints', 500);
+gs = GlobalSearch('NumTrialPoints', 1000);
 [FitAllParams,negloglikelihood] = run(gs,problem);
 
 disp("Fitted parameters: "+num2str(FitAllParams'));

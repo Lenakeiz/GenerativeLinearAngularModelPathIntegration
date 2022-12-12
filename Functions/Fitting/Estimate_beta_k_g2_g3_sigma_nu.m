@@ -135,5 +135,5 @@ for tr = 1:sampleSize
 
 
 end
-negloglikelihood
+
 end

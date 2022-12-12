@@ -17,7 +17,7 @@ config.NumParams        =   100; %length(config.ParamName); % Set 100 here to av
 VAM
 
 %% Model run completed, preparing the data for plotting figures
-config.ResultFolder = pwd + "/Output/PaperFigs/Fig5B/ProportionalError";
+config.ResultFolder = pwd + "/Output/ModelFigures/Fig5/ProportionalError";
 % Create storing folder for trajectory if not exist
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
@@ -64,7 +64,7 @@ parametersName = ["Linear", "Angular"];
 disp("%%%%%%%%%%%%%%% ROC Curve pooled MCI vs HC - behavioural data %%%%%%%%%%%%%%%")
 rng("shuffle");
 generateROCCurve(allParamsHC, allParamsPooledMCI,'HC', 'MCI', parametersName, config, plotInfo);
-%%
+
 plotInfo.Title = "MCI negative / MCI positive";
 disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - behavioural data %%%%%%%%%%%%%%%");
 rng("shuffle");
@@ -86,17 +86,14 @@ set(0,'DefaultTextFontSize',plotInfo.axisSize)
 
 hold on;
 
-%AUC = plotsingleROCCurve(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(4,:));
 AUC = plotsingleROCCurveSVM(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(4,:));
 legendText{1,1} = "AUC(" + parametersName(1) + ", " + parametersName(2) + ") = "+num2str(round(AUC.mean,2));
-disp(["AUC_CI(" + parametersName(1) + ", " + parametersName(2) + ") = " num2str(AUC.CI)]);
 disp("AUC std: " + num2str(AUC.std));
 drawnow;
 for i = 1:length(parametersName)
     %AUC = plotsingleROCCurve(params1(:,i), params2(:,i), params1groupName, params2groupName, colors(i,:));
     AUC = plotsingleROCCurveSVM(params1(:,i), params2(:,i), params1groupName, params2groupName, colors(i,:));
     legendText{1,i+1} = "AUC(" + parametersName(i) + ") = "+num2str(round(AUC.mean,2));
-    disp(["AUC_CI(" + parametersName(i) + ") = " num2str(AUC.CI)]);
     disp("AUC std: " + num2str(AUC.std));
     drawnow;
 end

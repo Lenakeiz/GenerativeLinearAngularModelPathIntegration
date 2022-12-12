@@ -284,7 +284,6 @@ else
 end
 
 %initializing parameters
-rng(123)
 FitParams0 = (ub - lb)'.*rand(size(lb,2),1) + lb';
 disp("Initial parameters: "+num2str(FitParams0'));
 

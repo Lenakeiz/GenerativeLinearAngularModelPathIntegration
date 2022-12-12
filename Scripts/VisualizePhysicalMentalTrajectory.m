@@ -8,7 +8,7 @@ VAM_PrepareBaseConfig;
 VAM_PreprocessData;
 
 %% Preparing the data and Slecting the Model
-
+rng("default")
 % config.ModelName        =   "beta_g2_g3_sigma_nu";
 % config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
 

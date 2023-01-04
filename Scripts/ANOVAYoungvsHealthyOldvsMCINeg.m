@@ -8,23 +8,17 @@ VAM_PreprocessData;
 
 %% Preparing the data and Slecting the Model
 
-% config.ModelName        =   "beta_g2_k2_g3_sigma_nu";
-% config.ParamName        =   ["beta", "g2", "k2", "g3", "sigma", "nu"];
-
+%choose a model from the model zoo
 config.ModelName        =   "beta_k_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
 
-% config.ModelName        =   "beta_g2_g3_sigma_nu";
-% config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
-% config.ModelName        =   "stangl";
-% config.ParamName        =   ["beta", "alpha", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
 % Run the model
 VAM;
 
 %% Model run completed, preparing the data for plotting figures
-config.ResultFolder     =   pwd + "/Output/ModelFigures/"+config.ModelName+"/Young_HealthyOld_MCICombined";
+config.ResultFolder     =   pwd + "/Output/ModelFigures/"+config.ModelName+"/Young_HealthyOld_MCINeg";
 %create storing folder for trajectory if not exist
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
@@ -36,20 +30,15 @@ ColorPattern;
 %% Getting Information from results:
 AllYoungParams      =   YoungControls.Results.estimatedParams;
 AllHealthyOldParams =   HealthyControls.Results.estimatedParams;
-AllMCIPosParams     =   MCIPos.Results.estimatedParams;
 AllMCINegParams     =   MCINeg.Results.estimatedParams;
-AllMCIUnkParams     =   MCIUnk.Results.estimatedParams;
 
-%% merge MCI parameters together to get MCICombined
-[AllMCIParams, AllMCIParamsStatusIndex]= MergeMCI(AllMCIPosParams, AllMCINegParams, AllMCIUnkParams);
-%AllMCIParams = AllMCINegParams;
 %% TwowayAnova
-[anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_YoungHealthyOldMCICombined(AllYoungParams, AllHealthyOldParams, AllMCIParams, config);
+[anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_YoungHealthyOldMCICombined(AllYoungParams, AllHealthyOldParams, AllMCINegParams, config);
 
 %% BarScatter Plot between Young and HealthyOld for all Fitted Params
 BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams, anova_tab, config);
 %%
-BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCIParams, AllMCIParamsStatusIndex, multicomp_tab1, config)
+BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCINegParams, multicomp_tab1, config)
 
 %%
 function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams, anova_tab, config)
@@ -276,7 +265,7 @@ function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
 end
 
 %% Box Plot Of Fitted Parameters by avearaging three paramters from three conditions into one mean value
-function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCIParams, AllMCIParamsStatusIndex,multicomp_tab1, config)
+function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCIParams,multicomp_tab1, config)
     
     numConds = 3; %3 is the condition number
     ParamName = config.ParamName;
@@ -285,7 +274,6 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         YoungParamAllConds = [];
         HealthyOldParamAllConds = []; %dimension are different, so separate from MCIParamAllConds
         MCIParamAllConds = [];
-        StatusIndex = AllMCIParamsStatusIndex;
         for TRIAL_FILTER=1:numConds
             %% extract data
             YoungParam          = AllYoungParams{TRIAL_FILTER}(:,ParamIndx);
@@ -302,7 +290,6 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         YoungParamAllConds      = removeNanRows(YoungParamAllConds);
         HealthyOldParamAllConds = removeNanRows(HealthyOldParamAllConds);
         [MCIParamAllConds MCInanIdx] = removeNanRows(MCIParamAllConds);
-        StatusIndex = StatusIndex(~MCInanIdx,:);
 
         YoungParamMean      = mean(YoungParamAllConds, 2);
         HealthyOldParamMean = mean(HealthyOldParamAllConds, 2);
@@ -437,37 +424,15 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);    
 
-        %% add scatter plot MCI unk
-        num_points = length(MCIParamMean(StatusIndex == 0,:));
-        hold on
-        x = 3*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
-        scatter(x, MCIParamMean(StatusIndex == 0,:), scatter_markerSize, ...
-                'filled', ...
-                'square', ... %marker shape
-                'MarkerEdgeColor',scatter_marker_edgeColor, ...
-                'MarkerFaceColor',colorForMCI, ...
-                'MarkerFaceAlpha',scatter_color_transparency,...
-                'LineWidth',scatter_marker_edgeWidth);
         %% add scatter plot MCI neg
-        num_points = length(MCIParamMean(StatusIndex == 1,:));
+        num_points = length(MCIParamMean(:,:));
         hold on
         x = 3*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
-        scatter(x, MCIParamMean(StatusIndex == 1,:), scatter_markerSize, ...
+        scatter(x, MCIParamMean(:,:), scatter_markerSize, ...
                 'filled', ...
                 'v', ... %marker shape
                 'MarkerEdgeColor',scatter_marker_edgeColor, ...
                 'MarkerFaceColor',colorForMCINeg, ...
-                'MarkerFaceAlpha',scatter_color_transparency,...
-                'LineWidth',scatter_marker_edgeWidth);
-        %% add scatter plot MCI unk
-        num_points = length(MCIParamMean(StatusIndex == 2,:));
-        hold on
-        x = 3*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
-        scatter(x, MCIParamMean(StatusIndex == 2,:), scatter_markerSize, ...
-                'filled', ...
-                '^', ... %marker shape
-                'MarkerEdgeColor',scatter_marker_edgeColor, ...
-                'MarkerFaceColor',colorForMCIPos, ...
                 'MarkerFaceAlpha',scatter_color_transparency,...
                 'LineWidth',scatter_marker_edgeWidth);
 
@@ -527,7 +492,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
             'XLim'        , [0.5, 3.5],...
             'YLim'        , lowupYlim,...
             'YTick'       , yticks,...
-            'XTickLabel'  , {'Young','Elderly','MCI'},...
+            'XTickLabel'  , {'Young','Elderly','MCI-'},...
             'LineWidth'   , 1.0        );
         %ylabel
         %Names = ["beta", "g2", "g3", "sigma", "nu"];

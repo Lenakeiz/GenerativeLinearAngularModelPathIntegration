@@ -41,6 +41,19 @@ ColorPattern;
 [phy_p3,men_p3] = VisualizeMenPhyTraj(AllHealthyOldResults, 13, 1, 3, true, config); %true means plot the figure
 
 %% visualize some trials
+id = 13;
+trailNum=4;
+%randomly pick a trial in no change condition
+%trials = randsample(8,trailNum);
+trials = [2,3,5,7];
+%trials = [4,6,8,9];
+
+for tN=1:trailNum
+    trial_id = trials(tN);
+    [phy_p3,men_p3] = VisualizeMenPhyTraj(AllHealthyOldResults, id, 1, trial_id, true, config); %true means plot the figure
+end
+
+%% visualize some trials
 id = 28;
 trailNum=4;
 %randomly pick a trial in no change condition

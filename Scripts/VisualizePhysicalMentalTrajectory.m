@@ -73,13 +73,13 @@ name = "HealthyOld";
 %name = "MCIMerged";
 
 if name == "Young"
-    [Physical_Pos, Mental_Pos, L1Diff, L2Diff, T2, T2_prime, Alpha, T3_prime] = extractAllFinalPoints(AllYoungResults, config);
+    [Physical_Pos, Mental_Pos, L1Diff, L2Diff, L1Ratio, L2Ratio, T2, T2_prime, Alpha, T3_prime] = extractAllFinalPoints(AllYoungResults, config);
 elseif name=="HealthyOld"
-    [Physical_Pos, Mental_Pos, L1Diff, L2Diff, T2, T2_prime, Alpha, T3_prime] = extractAllFinalPoints(AllHealthyOldResults, config);
+    [Physical_Pos, Mental_Pos, L1Diff, L2Diff,  L1Ratio, L2Ratio, T2, T2_prime, Alpha, T3_prime] = extractAllFinalPoints(AllHealthyOldResults, config);
 elseif name=="MCIMerged"
-    [Physical_Pos1, Mental_Pos1, L1Diff1, L2Diff1, T2_1, T2_prime1, Alpha1, T3_prime1] = extractAllFinalPoints(AllMCIPosResults, config);
-    [Physical_Pos2, Mental_Pos2, L1Diff2, L2Diff2, T2_2, T2_prime2, Alpha2, T3_prime2] = extractAllFinalPoints(AllMCINegResults, config);
-    [Physical_Pos3, Mental_Pos3, L1Diff3, L2Diff3, T2_3, T2_prime3, Alpha3, T3_prime3] = extractAllFinalPoints(AllMCIUnkResults, config);
+    [Physical_Pos1, Mental_Pos1, L1Diff1, L2Diff1, L1Ratio1, L2Ratio1, T2_1, T2_prime1, Alpha1, T3_prime1] = extractAllFinalPoints(AllMCIPosResults, config);
+    [Physical_Pos2, Mental_Pos2, L1Diff2, L2Diff2, L1Ratio2, L2Ratio2, T2_2, T2_prime2, Alpha2, T3_prime2] = extractAllFinalPoints(AllMCINegResults, config);
+    [Physical_Pos3, Mental_Pos3, L1Diff3, L2Diff3, L1Ratio3, L2Ratio3, T2_3, T2_prime3, Alpha3, T3_prime3] = extractAllFinalPoints(AllMCIUnkResults, config);
     Physical_Pos = [Physical_Pos1;Physical_Pos2;Physical_Pos3];
     Mental_Pos = [Mental_Pos1;Mental_Pos2;Mental_Pos3];
 else
@@ -186,7 +186,7 @@ set(gca, ...
 exportgraphics(f,config.ResultFolder+"/"+name+"_distribution.png",'Resolution',300);
 exportgraphics(f,config.ResultFolder+"/"+name+"_distribution.pdf",'Resolution',300, 'ContentType','vector');
 
-%% bar plot of comparing forgetting amount on leg 1 versus leg 2
+%% scatter plot of comparing forgetting amount on leg 1 versus leg 2
 noNan_L1Diff = L1Diff(~isnan(L1Diff));
 noNan_L2Diff = L2Diff(~isnan(L2Diff));
 
@@ -236,6 +236,78 @@ set(gca, ...
 
 exportgraphics(f,config.ResultFolder+"/"+name+"_legdiff.png",'Resolution',300);
 exportgraphics(f,config.ResultFolder+"/"+name+"_legdiff.pdf",'Resolution',300, 'ContentType','vector');
+
+%% bar plot of comparing forgetting amount on leg 1 versus leg 2
+noNan_L1Ratio = L1Ratio(~isnan(L1Ratio));
+noNan_L2Ratio = L2Ratio(~isnan(L2Ratio));
+
+f = figure('visible','on','Position', [100 100, 500, 400]);
+%%% Font type and size setting %%%
+% Using Arial as default because all journals normally require the font to
+% be either Arial or Helvetica
+set(0,'DefaultAxesFontName','Arial')
+set(0,'DefaultTextFontName','Arial')
+set(0,'DefaultAxesFontSize',12)
+set(0,'DefaultTextFontSize',12) 
+
+% Color1 = config.color_scheme_npg(1,:);
+% Color2 = config.color_scheme_npg(2,:);
+
+Color1 = [0.5,0.5,0.5];
+Color2 = [0.5,0.5,0.5];
+
+
+%bar scatter plot
+bar(1, mean(noNan_L1Ratio),'FaceColor', Color1, 'EdgeColor', 'k', 'BarWidth',0.4, 'FaceAlpha', 0.8);
+hold on
+bar(2, mean(noNan_L2Ratio),'FaceColor', Color2, 'EdgeColor', 'k', 'BarWidth',0.4, 'FaceAlpha', 0.8);
+
+%add horizontal connection lines
+for i=1:length(noNan_L1Ratio)
+    hold on
+    plot([1,2], [noNan_L1Ratio(i), noNan_L2Ratio(i)], 'Color',[0,0,0,0.2], LineWidth=1);
+end
+
+%scatter plot
+hold on
+scatter(ones(length(noNan_L1Ratio),1), noNan_L1Ratio,100, 'MarkerEdgeColor','k', ...
+    'MarkerFaceColor',Color1, 'MarkerEdgeAlpha',0.2, 'MarkerFaceAlpha',0.2)
+hold on
+scatter(2*ones(length(noNan_L2Ratio),1), noNan_L2Ratio,100, 'MarkerEdgeColor','k', ...
+    'MarkerFaceColor',Color2, 'MarkerEdgeAlpha',0.2, 'MarkerFaceAlpha',0.2)
+
+%link the mean value
+hold on
+plot([1,2], [mean(noNan_L1Ratio), mean(noNan_L2Ratio)], 'Color',[0,0,0,1.0], LineWidth=2);
+
+hold on
+%add a reference line y=1
+yl = yline(1);
+yl.Color = 'red';
+yl.LineWidth = 2;
+yl.LineStyle = '--';
+
+[h,p, stats] = ttest(noNan_L1Ratio, noNan_L2Ratio, "Tail", "left")
+
+set(gca, ...
+'Box'         , 'off'       , ...
+'TickDir'     , 'out'       , ...
+'TickLength'  , [.01 .01]   , ...
+'XColor'      , [.1 .1 .1]  , ...
+'YColor'      , [.1 .1 .1]  , ...
+'XLim'        , [0.5, 2.5] ,...
+'YLim'        , [0,1.6],...
+'XTick'       , [1,2]    ,...
+'YTick'       , [0,0.5,1.0,1.5] ,...
+'XTickLabel'   , {'Leg 1', 'Leg 2'},...
+'LineWidth'   , .5          ,...
+'XAxisLocation', 'origin'   ,...
+'YAxisLocation', 'origin');
+
+ylabel("Encoded distance / actual distance");
+
+exportgraphics(f,config.ResultFolder+"/"+name+"_legratio.png",'Resolution',300);
+exportgraphics(f,config.ResultFolder+"/"+name+"_legratio.pdf",'Resolution',300, 'ContentType','vector');
 
 %% second turn barplot
 noNan_T2 = T2(~isnan(T2));
@@ -292,6 +364,8 @@ set(gca, ...
 'YAxisLocation', 'origin');
 
 ylabel('Turning angle (radians)')
+
+[h,p, stats] = ttest(noNan_T2, noNan_T2_prime, "Tail", "right")
 
 exportgraphics(f,config.ResultFolder+"/"+name+"_turn2.png",'Resolution',300);
 exportgraphics(f,config.ResultFolder+"/"+name+"_turn2.pdf",'Resolution',300, 'ContentType','vector');
@@ -569,11 +643,13 @@ for ParamIndx=1:length(ParamName)
 end
 
 %% 
-function [Physical_Pos, Mental_Pos, L1_Diff, L2_Diff, T2, T2_prime, Alpha, T3_prime] = extractAllFinalPoints(GroupResults, config)
+function [Physical_Pos, Mental_Pos, L1_Diff, L2_Diff, L1_Ratio, L2_Ratio, T2, T2_prime, Alpha, T3_prime] = extractAllFinalPoints(GroupResults, config)
     Physical_Pos = [];
     Mental_Pos = [];
     L1_Diff = [];
     L2_Diff = [];
+    L1_Ratio = [];
+    L2_Ratio = [];
     T2 = [];
     T2_prime = [];
     Alpha = {};
@@ -582,6 +658,8 @@ function [Physical_Pos, Mental_Pos, L1_Diff, L2_Diff, T2, T2_prime, Alpha, T3_pr
     for ID =1:numID
         L1DiffID = [];
         L2DiffID = [];
+        L1RatioID = [];
+        L2RatioID = [];
         T2ID = [];
         T2_primeID = [];
         AlphaID = [];
@@ -590,12 +668,16 @@ function [Physical_Pos, Mental_Pos, L1_Diff, L2_Diff, T2, T2_prime, Alpha, T3_pr
             if ~isempty(GroupResults.DX{cond}{ID}) && ~isnan(GroupResults.estimatedParams{cond}(ID,1))
                 numTrails = length(GroupResults.DX{cond}{ID});
                 for trial=1:numTrails
-                    [phy_p3,men_p3,l1_diff, l2_diff, t2, t2_prime, alpha, t3_prime] = VisualizeMenPhyTraj(GroupResults, ID, cond, trial, false, config);
+                    [phy_p3,men_p3,l1_diff, l2_diff, l1_ratio, l2_ratio, t2, t2_prime, alpha, t3_prime] = VisualizeMenPhyTraj(GroupResults, ID, cond, trial, false, config);
 
                     Physical_Pos = [Physical_Pos; phy_p3];
                     Mental_Pos = [Mental_Pos; men_p3];
                     L1DiffID = [L1DiffID; l1_diff];
                     L2DiffID = [L2DiffID; l2_diff];
+
+                    L1RatioID = [L1RatioID; l1_ratio];
+                    L2RatioID = [L2RatioID; l2_ratio];
+
                     T2ID = [T2ID; t2];
                     T2_primeID = [T2_primeID; t2_prime];
                     AlphaID = [AlphaID; alpha];
@@ -606,6 +688,10 @@ function [Physical_Pos, Mental_Pos, L1_Diff, L2_Diff, T2, T2_prime, Alpha, T3_pr
 
         L1_Diff = [L1_Diff; mean(L1DiffID)];
         L2_Diff = [L2_Diff; mean(L2DiffID)];
+
+        L1_Ratio = [L1_Ratio; mean(L1RatioID)];
+        L2_Ratio = [L2_Ratio; mean(L2RatioID)];
+
         T2 = [T2; mean(T2ID)];
         T2_prime = [T2_prime; mean(T2_primeID)];
 
@@ -615,7 +701,7 @@ function [Physical_Pos, Mental_Pos, L1_Diff, L2_Diff, T2, T2_prime, Alpha, T3_pr
 end
 
 %% Visualize mental physical trajectory
-function [phy_p3,men_p3_share,  l1_diff, l2_diff, theta2, theta2_prime, alpha, theta3_prime]=VisualizeMenPhyTraj(GroupResults, ID, Cond, TrialIdx, doplot, config)
+function [phy_p3,men_p3_share,  l1_diff, l2_diff, l1_ratio, l2_ratio, theta2, theta2_prime, alpha, theta3_prime]=VisualizeMenPhyTraj(GroupResults, ID, Cond, TrialIdx, doplot, config)
 
     %extract the parameters
     parameters = GroupResults.estimatedParams{Cond}(ID,:);
@@ -702,6 +788,10 @@ function [phy_p3,men_p3_share,  l1_diff, l2_diff, theta2, theta2_prime, alpha, t
     %calculate normalized distance difference
     l1_diff = abs(men_length1-l1)/l1;
     l2_diff = abs(men_length2-l2)/l2;
+
+    %calculate distance ratio
+    l1_ratio = men_length1/l1;
+    l2_ratio = men_length2/l2;    
 
     if doplot
         % set figure info

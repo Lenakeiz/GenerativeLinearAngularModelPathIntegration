@@ -3,7 +3,7 @@ VAM_PrepareBaseConfig
 
 %% Preprocessing the data
 VAM_PreprocessData
- 
+
 %% Setting the model we are interested in
 % Eventually modify config paramteters we are interested in. For example
 % for this graph we are not interested in running the model with splitted
@@ -78,7 +78,7 @@ set(0,'DefaultTextFontSize',plotInfo.axisSize)
 
 hold on;
 
-AUC = plotROCCurveSVM(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(4,:));
+AUC = plotForwardSelectionROCCurveSVM(params1, params2, params1groupName, params2groupName, config.color_scheme_npg(4,:));
 
 legendText{1,1} = "AUC(" + convertCharsToStrings({'\beta k g_2 g_3 \sigma \nu'}) + ") = " + num2str(round(AUC.mean,2),2);
 disp("AUC std all params: " + num2str(AUC.std));
@@ -146,6 +146,10 @@ exportgraphics(f,config.ResultFolder+"/"+convertCharsToStrings(exportName)+".png
 exportgraphics(f,config.ResultFolder+"/"+convertCharsToStrings(exportName)+".pdf",'Resolution',300, 'ContentType','vector');
 
 clear parametersName filesName i colors f ll legendText
+end
+
+%%
+function AUCOut = plotForwardSelectionROCCurveSVM(param1, param2, param1Label, param2Label, paramColor)
 end
 
 %%

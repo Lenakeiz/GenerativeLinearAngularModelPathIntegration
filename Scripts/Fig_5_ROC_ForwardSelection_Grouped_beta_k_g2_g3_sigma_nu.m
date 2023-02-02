@@ -35,32 +35,45 @@ MCIPosParameters          = averageAcrossConditions(MCIPos.Results.estimatedPara
 
 MCIAllParameters          = [MCIUnkParameters; MCINegParameters; MCIPosParameters]; 
 
+% Loading previously saved SVM
+if(exist('Data/SVM_ForwardSelection.mat','file') == 2)
+    load Data/SVM_ForwardSelection.mat
+end
+
 %% Plotting roc curve HC vs pooled MCI and MCI negative vs MCI positive
+
+NSamples= 1000;
+disp("%%%%%%%%%%%%%%% SVM FORWARD SELECTION %%%%%%%%%%%%%%%")
+disp("%%%%%%%%%%%%%%% ROC MCI pooled vs HC - model parameters estimation %%%%%%%%%%%%%%%")
+rng("default");
+HCvsMCISVMModels_FS = getSVMBestModels(HealthyControlsParameters,MCIAllParameters,'HC', 'MCI', NSamples);
+disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - model parameters estimation %%%%%%%%%%%%%%%")
+rng("default");
+MCIPosvsMCINegSVMModels_FS = getSVMBestModels(MCINegParameters, MCIPosParameters,'MCIneg', 'MCIpos', NSamples);
+clear NSamples
+save Data/SVM_ForwardSelection.mat HCvsMCISVMModels_FS MCIPosvsMCINegSVMModels_FS
+%%
 % Plotting variables
 close all;
 plotInfo.defaultTextSize = 20;
-plotInfo.defaultLineSize = 1.4;
-plotInfo.titleFontSize = 16;
-plotInfo.labelSize = 15;
-plotInfo.axisSize = 14;
+plotInfo.defaultLineSize = 1.7;
+plotInfo.titleFontSize = 12;
+plotInfo.labelSize = 12;
+plotInfo.axisSize = 10;
 plotInfo.lineAlpha = 0.6;
 plotInfo.YLabel = "True positive rate";
 plotInfo.XLabel = "False positive rate";
 plotInfo.Title = "Healthy controls / pooled MCI";
 plotInfo.visible = "on";
-
-%%
-disp("%%%%%%%%%%%%%%% ROC MCI pooled vs HC - model parameters estimation %%%%%%%%%%%%%%%")
-rng("default");
-plotROCParametersCurve(HealthyControlsParameters, MCIAllParameters,'HC', 'MCI', config, plotInfo);
-%%
+plotInfo.figurePosition = [200 200 250 200];
+%
+plotInfo.Title = "HC / MCI";
+plotSVMResults(HealthyControlsParameters,MCIAllParameters,'HC', 'MCI',config, plotInfo, HCvsMCISVMModels_FS);
+%
 plotInfo.Title = "MCI - / MCI +";
-disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - model parameters estimation %%%%%%%%%%%%%%%")
-rng("default");
-MCIPosvsMCINegSVMModels = getSVMBestModels(MCINegParameters, MCIPosParameters,'MCIneg', 'MCIpos');
-plotSVMResults(MCINegParameters, MCIPosParameters,'MCIneg', 'MCIpos', config, plotInfo, MCIPosvsMCINegSVMModels);  
+plotSVMResults(MCINegParameters, MCIPosParameters,'MCIneg', 'MCIpos', config, plotInfo, MCIPosvsMCINegSVMModels_FS);  
 %%
-function FS_out = getSVMBestModels(param1, param2, param1Label, param2Label)
+function FS_out = getSVMBestModels(param1, param2, param1Label, param2Label, NSamples)
     
     % pre allocating output variable
     FS_out=struct;
@@ -113,23 +126,18 @@ function FS_out = getSVMBestModels(param1, param2, param1Label, param2Label)
         % that gives the best AUC
         for curr_comb_idx = 1:height(params_combination)
                 
-            M = 100;
+            M = NSamples;
             X_All = cell(1,M);
             Y_All = cell(1,M);
             AUC_All = zeros(1,M);
             
             curr_filtered_all_data = allData(:,params_combination(curr_comb_idx,:));
-            disp(['Fitting SVM on params ',...
-                sprintf('%d,',params_combination(curr_comb_idx,:)),...
-                ' size: ',...
-                sprintf('%d,', size(curr_filtered_all_data)),
-                ]);
 
             warning('off');
             for i_cross_valid = 1:M
 
                 % fitting 
-                mdl  = fitcsvm(curr_filtered_all_data,allLabels,ClassNames=[{param1Label},{param2Label}],Standardize=false, CrossVal="on", Holdout=holdout, KernelFunction="linear");
+                mdl  = fitcsvm(curr_filtered_all_data,allLabels,ClassNames=[{param1Label},{param2Label}],Standardize=true, CrossVal="on", Holdout=holdout, KernelFunction="linear");
                 trainingIDs = training(mdl.Partition);
                 Xtraining = curr_filtered_all_data(trainingIDs,:);
                 Ytraining = allLabels(trainingIDs);
@@ -141,6 +149,7 @@ function FS_out = getSVMBestModels(param1, param2, param1Label, param2Label)
                 compactModel = mdl.Trained{1};
 
                 comp_mdl_post = fitPosterior(compactModel,Xtraining,Ytraining);
+                %comp_mdl_post = fitPosterior(compactModel,curr_filtered_all_data,allLabels);
                 %predict on leave-out testing data
                 [predicted_labels,post_probabilities] = predict(comp_mdl_post,Xtest);
                 [X,Y,~,AUC] = perfcurve(Ytest, post_probabilities(:,2), {param2Label});
@@ -177,6 +186,14 @@ function FS_out = getSVMBestModels(param1, param2, param1Label, param2Label)
             candidate_model{1,1}.Y_mean = Y_mean;
             candidate_model{1,1}.Y_std = Y_std;
 
+            disp(['Fitted SVM on params ',...
+                sprintf('%d,',params_combination(curr_comb_idx,:)),...
+                ' size: ',...
+                sprintf('%d,', size(curr_filtered_all_data)),...
+                ' AUC = ',...
+                sprintf('%.3f,', candidate_model{1,1}.mean),...
+            ]);
+
             % Updating the structure containing four best models
             for i = 1:size(FS_out.models,1)
                 if(candidate_model{1,1}.mean > FS_out.models{i,1}.mean)
@@ -211,8 +228,7 @@ function plotSVMResults(params1, params2, params1groupName, params2groupName, co
     colors = config.color_scheme_npg([4 8 2 3 5 9],:);
     
     % set figure info
-    %f = figure('visible','off','Position', [100 100 1000 500]);
-    f = figure('visible', plotInfo.visible, 'Position', [0 0 500 400]);
+    f = figure('visible', plotInfo.visible, 'Position', plotInfo.figurePosition);
     %%% Font type and size setting %%%
     % Using Arial as default because all journals normally require the font to
     % be either Arial or Helvetica
@@ -239,7 +255,7 @@ function plotSVMResults(params1, params2, params1groupName, params2groupName, co
             end
         end
         clear i_text
-        l_text = l_text + ") = " + num2str(round(SVMModels.models{i,1}.mean,2),2);
+        l_text = l_text + ") = " + num2str(round(SVMModels.models{i,1}.mean,2),'%.2f');
         legendText{1,i} = l_text;
         disp("AUC std : " + num2str(SVMModels.models{i,1}.std));
         clear l_text
@@ -256,12 +272,12 @@ function plotSVMResults(params1, params2, params1groupName, params2groupName, co
     ll = legend('Location','southeast');
     ll.String = legendText;
     ll.FontSize = 8;
+    ll.Box = "off";
     
     ylabel('True Positive Rate');
     xlabel('False Positive Rate')
-    t = title(plotInfo.Title);
-    
-    t.FontSize = plotInfo.titleFontSize;
+    %t= title(plotInfo.Title);
+    %t.FontSize = plotInfo.titleFontSize;
     
     %Further post-processing the figure
     set(gca, ...

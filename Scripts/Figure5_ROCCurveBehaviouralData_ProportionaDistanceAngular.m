@@ -50,10 +50,10 @@ allParamsMCINeg    = [MCINegDistanceError MCINegAngErr];
 close all;
 
 plotInfo.defaultTextSize = 20;
-plotInfo.defaultLineSize = 1.4;
-plotInfo.titleFontSize = 14;
-plotInfo.labelSize = 14;
-plotInfo.axisSize = 14;
+plotInfo.defaultLineSize = 1.7;
+plotInfo.titleFontSize = 12;
+plotInfo.labelSize = 12;
+plotInfo.axisSize = 10;
 plotInfo.lineAlpha = 0.6;
 plotInfo.YLabel = "True positive rate";
 plotInfo.XLabel = "False positive rate";
@@ -64,7 +64,7 @@ parametersName = ["Linear", "Angular"];
 disp("%%%%%%%%%%%%%%% ROC Curve pooled MCI vs HC - behavioural data %%%%%%%%%%%%%%%")
 rng("shuffle");
 generateROCCurve(allParamsHC, allParamsPooledMCI,'HC', 'MCI', parametersName, config, plotInfo);
-
+%%
 plotInfo.Title = "MCI negative / MCI positive";
 disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - behavioural data %%%%%%%%%%%%%%%");
 rng("shuffle");
@@ -75,7 +75,7 @@ function generateROCCurve(params1, params2, params1groupName, params2groupName, 
 
 colors = config.color_scheme_npg([8 3 7 9 10],:);
 % set figure info
-f = figure('visible', plotInfo.visible, 'Position', [0 0 500 400]);
+f = figure('visible', plotInfo.visible, 'Position', [200 200 250 200]);
 %%% Font type and size setting %%%
 % Using Arial as default because all journals normally require the font to
 % be either Arial or Helvetica
@@ -109,12 +109,12 @@ legend('Location','southeast')
 ll = legend('Location','southeast');
 ll.String = legendText;
 ll.FontSize = 8;
+ll.Box = "off";
 
 ylabel('True Positive Rate');
 xlabel('False Positive Rate')
-t = title(plotInfo.Title);
-
-t.FontSize = plotInfo.titleFontSize;
+%t = title(plotInfo.Title);
+%t.FontSize = plotInfo.titleFontSize;
 
 %Further post-processing the figure
 set(gca, ...
@@ -158,7 +158,7 @@ function AUCOut = plotsingleROCCurveSVM(param1, param2, param1Label, param2Label
     label2(:)  = {param2Label};
     allLabels  = [label1;label2];
 
-    M=500;
+    M=1000;
     i = 1;
     percentageLeaveOut = 0.4;
     N = ceil(percentageLeaveOut*size(allData,1));
@@ -193,7 +193,7 @@ function AUCOut = plotsingleROCCurveSVM(param1, param2, param1Label, param2Label
         % Fitting the support vector machine
         mdl  = fitcsvm(trainData,trainLabels,"Standardize",true,"ClassNames",[{param1Label},{param2Label}], "KernelFunction","linear");
         comp_mdl = compact(mdl);
-        comp_mdl_post = fitPosterior(comp_mdl,testData,testLabels);
+        comp_mdl_post = fitPosterior(comp_mdl,trainData,trainLabels);
 
         %predict on leave-out testing data
         [~,post_probabilities] = predict(comp_mdl_post,testData);

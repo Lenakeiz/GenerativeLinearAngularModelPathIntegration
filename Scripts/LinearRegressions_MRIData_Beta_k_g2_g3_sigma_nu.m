@@ -58,17 +58,19 @@ clear filter
 close all;
 clc;
 
-plotInfo.defaultTextSize = 14;
-plotInfo.defaultLineSize = 2.0;
-plotInfo.LineSizeMdl = 3.0;
-plotInfo.titleFontSize = 20;
-plotInfo.labelSize = 24;
-plotInfo.axisSize = 25;
-plotInfo.dataSize = 80;
-plotInfo.legendFontSize = 18;
+plotInfo.defaultTextSize = 12;
+plotInfo.defaultLineSize = 1.4;
+plotInfo.axisLineSize = 1.2;
+plotInfo.LineSizeMdl = 1.5;
+plotInfo.titleFontSize = 13;
+plotInfo.labelSize = 12;
+plotInfo.axisSize = 10;
+plotInfo.dataSize = 30;
+plotInfo.legendFontSize = 10;
 plotInfo.visible = "on";
 plotInfo.ResultFolder = config.ResultFolder;
 plotInfo.color_scheme_group = config.color_scheme_group;
+plotInfo.figurePosition = [200 200 210 210];
 
 % Getting the indices for the ROI
 parameters_label = [{'\beta'}, {'k'}, {'g_2'}, {'g_3'}, {'\sigma'}, {'\nu'}];
@@ -180,7 +182,7 @@ function plotLinearRegression(fullTable,x,xLabelPlot,y,yLabelPlot,addLine,plotIn
     mdl = fitlm(xData,yData);
 
     % set figure info
-    f = figure('visible', plotInfo.visible, 'Position', [0 0 500 400]);
+    f = figure('visible', plotInfo.visible, 'Position',plotInfo.figurePosition);
     %%% Font type and size setting %%%
     set(0,'DefaultAxesFontName','Arial')
     set(0,'DefaultTextFontName','Arial')
@@ -211,16 +213,17 @@ function plotLinearRegression(fullTable,x,xLabelPlot,y,yLabelPlot,addLine,plotIn
     ylabel(yLabelPlot, Interpreter="tex");
 
     title("");
-    % pvalue is Bonferroni corrected already
-    if(pvalue < 0.001/5)
-        title("***")
-    elseif (pvalue < 0.01/5)
-        title("**")
-    elseif (pvalue < 0.05/5)
-        title("*")
-    end
-    legplotInfo = legend([axSc{1}, axSc{2}, axSc{3}, axSc{4}], {'HC' 'MCI unk' 'MCI-' 'MCI+'}, "Location", "northeast", "AutoUpdate", "off");
-    legplotInfo.FontSize = plotInfo.legendFontSize;
+%     % pvalue is Bonferroni corrected already
+%     if(pvalue < 0.001/5)
+%         title("***")
+%     elseif (pvalue < 0.01/5)
+%         title("**")
+%     elseif (pvalue < 0.05/5)
+%         title("*")
+%     end
+
+    %legplotInfo = legend([axSc{1}, axSc{2}, axSc{3}, axSc{4}], {'HC' 'MCI unk' 'MCI-' 'MCI+'}, "Location", "northeast", "AutoUpdate", "off");
+    %legplotInfo.FontSize = plotInfo.legendFontSize;
     
     ax = gca;
 
@@ -230,7 +233,7 @@ function plotLinearRegression(fullTable,x,xLabelPlot,y,yLabelPlot,addLine,plotIn
         plot(tempX,addLine*ones(length(tempX)),"r--", LineWidth=plotInfo.LineSizeMdl);
     end
 
-    ax.LineWidth = 3.0;
+    ax.LineWidth = plotInfo.axisLineSize;
     ax.XAxis.FontSize = plotInfo.axisSize;
     ax.YAxis.FontSize = plotInfo.axisSize;
     ax.XLabel.FontSize = plotInfo.labelSize;
@@ -239,6 +242,8 @@ function plotLinearRegression(fullTable,x,xLabelPlot,y,yLabelPlot,addLine,plotIn
     ax.XAxis.Exponent = -3;
 
     hold off;
+
+    legend(ax,"off");
 
     filename = convertCharsToStrings(yLabelPlot) + "vs" + convertCharsToStrings(xLabelPlot);
     

@@ -40,17 +40,18 @@ if(exist('Data/SVM_all.mat','file') == 2)
     load Data/SVM_all.mat
 end
 %% Generating the SVM models. Previous run will be saved into Data folder in SVM_all.mat
-NSamples = 1000;
+NSamples = 100;
+KernelFunction = "linear";
 disp("%%%%%%%%%%%%%%% ALL SVM MODELS %%%%%%%%%%%%%%%")
 disp("%%%%%%%%%%%%%%% ROC MCI pooled vs HC - model parameters estimation %%%%%%%%%%%%%%%")
 rng("default");
-HCvsMCISVMModels = getSVMBestModels(HealthyControlsParameters,MCIAllParameters,'HC', 'MCI', NSamples);
+HCvsMCISVMModels = getSVMBestModels(HealthyControlsParameters,MCIAllParameters,'HC', 'MCI', NSamples, KernelFunction);
 %plotSVMResults(HealthyControlsParameters,MCIAllParameters,'HC', 'MCI',config, plotInfo);
 %
 plotInfo.Title = "MCI - / MCI +";
 disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - model parameters estimation %%%%%%%%%%%%%%%")
 rng("default");
-MCIPosvsMCINegSVMModels = getSVMBestModels(MCINegParameters, MCIPosParameters,'MCIneg', 'MCIpos', NSamples);
+MCIPosvsMCINegSVMModels = getSVMBestModels(MCINegParameters, MCIPosParameters,'MCIneg', 'MCIpos', NSamples, KernelFunction);
 
 save Data/SVM_all.mat HCvsMCISVMModels MCIPosvsMCINegSVMModels
 %% Plotting the SVM models in instagram. Each one for the parameter of the best model.
@@ -95,7 +96,7 @@ plotInfo.Title = "MCIneg / MCIpos";
 plotInfo.barColor = config.color_scheme_npg(6,:);
 plotSVMResults(MCINegParameters, MCIPosParameters,'MCIneg', 'MCIpos', config, plotInfo, MCIPosvsMCINegSVMModels);
 %%
-function FS_out = getSVMBestModels(param1, param2, param1Label, param2Label, NSamples)
+function FS_out = getSVMBestModels(param1, param2, param1Label, param2Label, NSamples, kernelFunction)
     
     % Preparing data for the svm input
     allData = [param1; param2];
@@ -147,7 +148,7 @@ function FS_out = getSVMBestModels(param1, param2, param1Label, param2Label, NSa
             for i_cross_valid = 1:M
 
                 % fitting 
-                mdl  = fitcsvm(curr_filtered_all_data,allLabels,ClassNames=[{param1Label},{param2Label}],Standardize=true, CrossVal="on", Holdout=holdout, KernelFunction="linear");
+                mdl  = fitcsvm(curr_filtered_all_data,allLabels,ClassNames=[{param1Label},{param2Label}],Standardize=true, CrossVal="on", Holdout=holdout, KernelFunction=kernelFunction);
                 trainingIDs = training(mdl.Partition);
                 Xtraining = curr_filtered_all_data(trainingIDs,:);
                 Ytraining = allLabels(trainingIDs);

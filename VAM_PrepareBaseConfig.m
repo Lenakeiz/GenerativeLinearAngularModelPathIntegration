@@ -19,10 +19,10 @@ LoadNeuroPsychData;
 
 %% setting the configuration
 config.Speed.alpha                                      = 0.9;    % Paramanter for running speed calculation
-config.Speed.timeOffsetAfterFlagReach                   = 1.5;    % Time to track after flag reached in seconds 
-config.Speed.smoothWindow                               = 10;     % tracking rate should be 10Hz so 4 secs window is 40 datapoints
+config.Speed.timeOffsetAfterFlagReach                   = 0.5;    % Time to track after flag reached in seconds 
+config.Speed.smoothWindow                               = 20;     % tracking rate should be 10Hz so 4 secs window is 40 datapoints
 config.Speed.velocityCutoff                             = 0.2;    % velocity cutoff to select only the walking part of the reconstructed velocity
-config.Speed.timeOffsetForDetectedTemporalWindow        = 0.4;    % time in seconds that will push earlier/ the detected rising edge
+config.Speed.timeOffsetForDetectedTemporalWindow        = 0.2;    % time in seconds that will push earlier/ the detected rising edge
 config.UseGlobalSearch                                  = true;
 config.TrackedInboundAngularDeltaT                      = 1;
 config.includeStand                                     = false;

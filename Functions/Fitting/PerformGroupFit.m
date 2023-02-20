@@ -128,6 +128,8 @@ for j = 1:subjectNum
         
         X{j}{tr}         =      [flagpos{j}{tr}(:,[1,3]);finalpos{j}{tr}([1,3])];
         segments{j}{tr}  =      X{j}{tr}(2:end,:) - X{j}{tr}(1:end-1,:);
+        % DX contains the lenght of each segment of the outbound path plus the
+        % inbound path
         DX{j}{tr}        =      sqrt(sum(segments{j}{tr}.^2,2));        
      
         outer_rad        =      [0; anglebetween(segments{j}{tr}(1:end-1,:), segments{j}{tr}(2:end,:))];

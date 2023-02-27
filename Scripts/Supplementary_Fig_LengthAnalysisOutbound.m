@@ -42,14 +42,18 @@ plotInfo.titleFontSize = 12;
 plotInfo.labelSize = 12;
 plotInfo.axisSize = 10;
 plotInfo.MarkerSize = 70;
-plotInfo.MarkerAlpha = 0.3;
+plotInfo.MarkerAlpha = 0.5;
 plotInfo.PatchAlpha = 0.7;
-plotInfo.yLim = [4 8];
+plotInfo.yLim = [4 8.5];
 plotInfo.xLim = [0.5 5.5];
 plotInfo.medianColor = [0.4 0.4 0.4];
 plotInfo.medianWidth = 1.3;
 plotInfo.meanMarkerSize = 90;
-plotInfo.FigurePosition = [200 200 600 300];
+plotInfo.sigmaStarLineWidth = 2.5;
+plotInfo.sigmaStarTextSize  = 20;
+plotInfo.sigmaBarSeparation = 0.04;
+plotInfo.FigurePosition = [200 200 280 250];
+
 
 % Generate example data
 max_element = max([numel(YoungOutbound),...
@@ -63,12 +67,24 @@ MCIUnkOutbound(end+1 : max_element) = nan;
 MCINegOutbound(end+1 : max_element) = nan;
 MCIPosOutbound(end+1 : max_element) = nan;
 
-OutboundDurationData = [YoungOutbound HealthyControlsOutbound MCIUnkOutbound MCINegOutbound MCIPosOutbound];
+OutboundData = [YoungOutbound HealthyControlsOutbound MCIUnkOutbound MCINegOutbound MCIPosOutbound];
 
-DataMeans = mean(OutboundDurationData,1,"omitnan");
-DataSems = std(OutboundDurationData,1,"omitnan")./sqrt(sum(~isnan(OutboundDurationData),1));
+DataMeans = mean(OutboundData,1,"omitnan");
+DataSems = std(OutboundData,1,"omitnan")./sqrt(sum(~isnan(OutboundData),1));
 
 xDatameans = 1:length(DataMeans);
+
+%
+OutboundDataAnova = [YoungOutbound; HealthyControlsOutbound; MCIUnkOutbound; MCINegOutbound; MCIPosOutbound];
+OutboundDataAnovaGroups = [repmat({'Young'}, size(YoungOutbound, 1), 1); ...
+          repmat({'Healthy Older'}, size(HealthyControlsOutbound, 1), 1); ...
+          repmat({'MCI Unknown'}, size(MCIUnkOutbound, 1), 1); ...
+          repmat({'MCI Negative'}, size(MCINegOutbound, 1), 1); ...
+          repmat({'MCI Positive'}, size(MCIPosOutbound, 1), 1)];
+
+[p, tbl, stats] = anova1(OutboundDataAnova, OutboundDataAnovaGroups, 'off');
+[results, means, ~, ~] = multcompare(stats, 'alpha', 0.05,'Display','off');
+
 
 currFig = figure("Position",plotInfo.FigurePosition);
 
@@ -78,7 +94,7 @@ set(0,'DefaultTextFontName','Arial');
 hold on;
 
 % Create box plot
-boxplots = boxplot(OutboundDurationData,"Notch","on","symbol","","Colors",config.color_scheme_group, "Widths",0.6);
+boxplots = boxplot(OutboundData,"Notch","on","symbol","","Colors",config.color_scheme_group, "Widths",0.6);
 boxes = findobj(gca,'Tag','Box');
 boxes = flip(boxes);
 medians = findobj(gca,'Tag','Median');
@@ -107,8 +123,8 @@ sc_means.MarkerFaceAlpha = 1;
 sc_means.MarkerFaceColor = "white";
 sc_means.MarkerEdgeColor = "none";
 
-for j = 1:width(OutboundDurationData)
-    sh = scatter(j*ones(height(OutboundDurationData),1), OutboundDurationData(:,j));
+for j = 1:width(OutboundData)
+    sh = scatter(j*ones(height(OutboundData),1), OutboundData(:,j));
     sh.SizeData = plotInfo.MarkerSize;
     sh.MarkerEdgeColor = "none";
     sh.MarkerFaceColor = config.color_scheme_group(j,:);
@@ -116,12 +132,18 @@ for j = 1:width(OutboundDurationData)
 end
 clear j;
 
+sigstaroptions.textSize      = plotInfo.sigmaStarTextSize;
+sigstaroptions.lineWidth     = plotInfo.sigmaStarLineWidth;
+sigstaroptions.barSeparation = plotInfo.sigmaBarSeparation;
+
+adjustablesigstar([1 2],0.001,0,sigstaroptions);
+
 hold off;
 
 ylim(plotInfo.yLim);
 xlim(plotInfo.xLim);
 
-ylabel("Outbound path length (m)");
+ylabel("Length (m)");
 
 set(gca, ...
     'Box'         , 'off'     , ...
@@ -140,19 +162,8 @@ ax.YLabel.FontSize = plotInfo.labelSize;
 ax.XAxis.FontSize = plotInfo.axisSize;
 ax.YAxis.FontSize = plotInfo.axisSize;
 
-%
-OutboundDurationDataAnova = [YoungOutbound; HealthyControlsOutbound; MCIUnkOutbound; MCINegOutbound; MCIPosOutbound];
-OutboundDurationDataAnovaGroups = [repmat({'Young'}, size(YoungOutbound, 1), 1); ...
-          repmat({'Healthy Older'}, size(HealthyControlsOutbound, 1), 1); ...
-          repmat({'MCI Unknown'}, size(MCIUnkOutbound, 1), 1); ...
-          repmat({'MCI Negative'}, size(MCINegOutbound, 1), 1); ...
-          repmat({'MCI Positive'}, size(MCIPosOutbound, 1), 1)];
-
-[p, tbl, stats] = anova1(OutboundDurationDataAnova, OutboundDurationDataAnovaGroups, 'off');
-[results, means, ~, ~] = multcompare(stats, 'alpha', 0.05,'Display','off');
-
-exportgraphics(currFig,config.ResultFolder+"/SupplementaryLength.png",'Resolution',300);
-exportgraphics(currFig,config.ResultFolder+"/SupplementaryLength.pdf",'Resolution',300, 'ContentType','vector');
+exportgraphics(currFig,config.ResultFolder+"/OutboundPathLength.png",'Resolution',300);
+exportgraphics(currFig,config.ResultFolder+"/OutboundPathLength.pdf",'Resolution',300, 'ContentType','vector');
 
 
 %%

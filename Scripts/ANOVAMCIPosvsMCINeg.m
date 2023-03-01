@@ -26,7 +26,7 @@ AllMCIPosParams     =   MCIPos.Results.estimatedParams;
 AllMCINegParams     =   MCINeg.Results.estimatedParams;
 
 %% Generate result folder and Setting colors for using in plots
-config.ResultFolder     =   pwd + "/Output/ModelFigures/"+config.ModelName+"/MCIPosvsMCINeg";
+config.ResultFolder     =   pwd + "/Output/ModelFigures/"+config.ModelName+"/Actualangle_MCIPosvsMCINeg";
 %create storing folder for trajectory if not exist
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);

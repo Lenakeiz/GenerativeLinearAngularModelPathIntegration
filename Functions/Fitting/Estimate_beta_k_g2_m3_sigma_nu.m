@@ -24,6 +24,7 @@ negloglikelihood    =   0;
 %% find the correct mean return angle/distance based on all trials 
 Alphas = zeros(sampleSize,1);
 Betas = zeros(sampleSize,1);
+ActualBetas = zeros(sampleSize,1);
 for tr = 1:sampleSize
     %extract the physical data info
     l1      = DX{tr}(1);
@@ -41,9 +42,11 @@ for tr = 1:sampleSize
 
     beta    = norm(phy_p2);
     Betas(tr) = beta;
+    ActualBetas(tr) = DX{tr}(3); 
 end
 mean_angle = mean(Alphas);
-mean_distance = mean(Betas);
+%mean_distance = mean(Betas);
+mean_distance = mean(ActualBetas);
 
 for tr = 1:sampleSize
     %% extract the physical data info

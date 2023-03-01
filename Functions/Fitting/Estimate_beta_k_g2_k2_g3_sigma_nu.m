@@ -23,6 +23,7 @@ negloglikelihood    =   0;
 
 %% find the correct mean return angle based on all trials 
 Alphas = zeros(sampleSize,1);
+ActualAlphas = zeros(sampleSize,1);
 Betas = zeros(sampleSize,1);
 for tr = 1:sampleSize
     %extract the physical data info
@@ -39,9 +40,12 @@ for tr = 1:sampleSize
     alpha   = deg2rad(alpha);%transfer from degree to radians
     alpha   = mod(alpha, 2*pi);  %wrap to (0,2pi)  
     Alphas(tr) = alpha;
+
+    %calculate the actuall return angle
+    ActualAlphas(tr) = THETAX{tr}(3);    
 end
-mean_angle = mean(Alphas);
-mean_ecd_angle = mean(Betas); %mean encoded angle
+%mean_angle = mean(Alphas);
+mean_angle = mean(ActualAlphas);
 
 for tr = 1:sampleSize
     %% extract the physical data info

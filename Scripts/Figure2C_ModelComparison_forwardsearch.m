@@ -151,7 +151,7 @@ beta_k_g2_g3_m3_sigma_nu_IC  =   HealthyControls.Results.IC;
 
 
 %%
-config.ResultFolder = pwd+"/Output/ModelFigures/ModelSelectionForwardsearch_HC";
+config.ResultFolder = pwd+"/Output/ModelFigures/ModelSelectionForwardsearch_HC_regression2actualmean";
 %create storing folder for trajectory if not exist
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);

@@ -191,44 +191,44 @@ for idx_ = 1:4
 
     % Box Plot of AIC
     ICType = "AIC";
-    All_AIC = [sigma_nu_AIC,...              %1
-               beta_k_sigma_nu_AIC,...       %2.1
-               g2_sigma_nu_AIC,...           %2.2
-               g3_sigma_nu_AIC,...           %2.3
-               m3_sigma_nu_AIC,...           %2.4
-               beta_k_g2_sigma_nu_AIC,...    %3.1
-               beta_k_g3_sigma_nu_AIC,...    %3.2
-               beta_k_m3_sigma_nu_AIC,...    %3.3
-               g2_g3_sigma_nu_AIC,...        %3.4
-               g2_m3_sigma_nu_AIC,...        %3.5
-               g3_m3_sigma_nu_AIC,...        %3.6
-               beta_k_g2_g3_sigma_nu_AIC,... %4.1
-               beta_k_g2_m3_sigma_nu_AIC,... %4.2
-               beta_k_g3_m3_sigma_nu_AIC,... %4.3
-               g2_g3_m3_sigma_nu_AIC,...     %4.4
-               beta_k_g2_g3_m3_sigma_nu_AIC];%5.1
+    All_AIC = [sigma_nu_AIC,...              %2
+               beta_k_sigma_nu_AIC,...       %3.1
+               g2_sigma_nu_AIC,...           %3.2
+               g3_sigma_nu_AIC,...           %3.3
+               m3_sigma_nu_AIC,...           %3.4
+               beta_k_g2_sigma_nu_AIC,...    %4.1
+               beta_k_g3_sigma_nu_AIC,...    %4.2
+               beta_k_m3_sigma_nu_AIC,...    %4.3
+               g2_g3_sigma_nu_AIC,...        %4.4
+               g2_m3_sigma_nu_AIC,...        %4.5
+               g3_m3_sigma_nu_AIC,...        %4.6
+               beta_k_g2_g3_sigma_nu_AIC,... %5.1
+               beta_k_g2_m3_sigma_nu_AIC,... %5.2
+               beta_k_g3_m3_sigma_nu_AIC,... %5.3
+               g2_g3_m3_sigma_nu_AIC,...     %5.4
+               beta_k_g2_g3_m3_sigma_nu_AIC];%6.1
 
     plotBoxPlot(All_AIC, ModelNames, ICType, config, cond);
     plotErrorPlot(All_AIC, ModelNames, ICType, config, cond);
     
     % Box Plot of BIC
     ICType = "BIC";
-    All_BIC = [sigma_nu_BIC,...              %1
-               beta_k_sigma_nu_BIC,...       %2.1
-               g2_sigma_nu_BIC,...           %2.2
-               g3_sigma_nu_BIC,...           %2.3
-               m3_sigma_nu_BIC,...           %2.4
-               beta_k_g2_sigma_nu_BIC,...    %3.1
-               beta_k_g3_sigma_nu_BIC,...    %3.2
-               beta_k_m3_sigma_nu_BIC,...    %3.3
-               g2_g3_sigma_nu_BIC,...        %3.4
-               g2_m3_sigma_nu_BIC,...        %3.5
-               g3_m3_sigma_nu_BIC,...        %3.6
-               beta_k_g2_g3_sigma_nu_BIC,... %4.1
-               beta_k_g2_m3_sigma_nu_BIC,... %4.2
-               beta_k_g3_m3_sigma_nu_BIC,... %4.3
-               g2_g3_m3_sigma_nu_BIC,...     %4.4
-               beta_k_g2_g3_m3_sigma_nu_BIC];%5.1
+    All_BIC = [sigma_nu_BIC,...              %2
+               beta_k_sigma_nu_BIC,...       %3.1
+               g2_sigma_nu_BIC,...           %3.2
+               g3_sigma_nu_BIC,...           %3.3
+               m3_sigma_nu_BIC,...           %3.4
+               beta_k_g2_sigma_nu_BIC,...    %4.1
+               beta_k_g3_sigma_nu_BIC,...    %4.2
+               beta_k_m3_sigma_nu_BIC,...    %4.3
+               g2_g3_sigma_nu_BIC,...        %4.4
+               g2_m3_sigma_nu_BIC,...        %4.5
+               g3_m3_sigma_nu_BIC,...        %4.6
+               beta_k_g2_g3_sigma_nu_BIC,... %5.1
+               beta_k_g2_m3_sigma_nu_BIC,... %5.2
+               beta_k_g3_m3_sigma_nu_BIC,... %5.3
+               g2_g3_m3_sigma_nu_BIC,...     %5.4
+               beta_k_g2_g3_m3_sigma_nu_BIC];%6.1
 
     plotBoxPlot(All_BIC, ModelNames, ICType, config, cond);
     plotErrorPlot(All_BIC, ModelNames, ICType, config, cond);

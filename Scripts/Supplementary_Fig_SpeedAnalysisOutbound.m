@@ -32,14 +32,14 @@ plotInfo.defaultLineSize = 1.7;
 plotInfo.titleFontSize = 12;
 plotInfo.labelSize = 12;
 plotInfo.axisSize = 10;
-plotInfo.MarkerSize = 70;
+plotInfo.MarkerSize = 20;
 plotInfo.MarkerAlpha = 0.5;
 plotInfo.PatchAlpha = 0.7;
 plotInfo.yLim = [0.2 0.8];
 plotInfo.xLim = [0.5 5.5];
 plotInfo.medianColor = [0.4 0.4 0.4];
 plotInfo.medianWidth = 1.3;
-plotInfo.meanMarkerSize = 90;
+plotInfo.meanMarkerSize = 30;
 plotInfo.sigmaStarLineWidth = 2.5;
 plotInfo.sigmaStarTextSize  = 20;
 plotInfo.sigmaBarSeparation = 0.04;
@@ -107,6 +107,15 @@ for j = 1:length(medians)
 end
 clear j;
 
+for j = 1:width(OutboundData)
+    sh = scatter(j*ones(height(OutboundData),1), OutboundData(:,j));
+    sh.SizeData = plotInfo.MarkerSize;
+    sh.MarkerEdgeColor = "none";
+    sh.MarkerFaceColor = config.color_scheme_group(j,:);
+    sh.MarkerFaceAlpha = plotInfo.MarkerAlpha;
+end
+clear j;
+
 ax_errorBar = errorbar(xDatameans,DataMeans,DataSems);
 ax_errorBar.Color = [0 0 0];
 ax_errorBar.LineWidth = 3;
@@ -119,20 +128,11 @@ sc_means.MarkerFaceAlpha = 1;
 sc_means.MarkerFaceColor = "white";
 sc_means.MarkerEdgeColor = "none";
 
-for j = 1:width(OutboundData)
-    sh = scatter(j*ones(height(OutboundData),1), OutboundData(:,j));
-    sh.SizeData = plotInfo.MarkerSize;
-    sh.MarkerEdgeColor = "none";
-    sh.MarkerFaceColor = config.color_scheme_group(j,:);
-    sh.MarkerFaceAlpha = plotInfo.MarkerAlpha;
-end
-clear j;
-
 sigstaroptions.textSize      = plotInfo.sigmaStarTextSize;
 sigstaroptions.lineWidth     = plotInfo.sigmaStarLineWidth;
 sigstaroptions.barSeparation = plotInfo.sigmaBarSeparation;
 
-adjustablesigstar([1 2],0.01,0,sigstaroptions);
+adjustablesigstar([1 2],0.05,0,sigstaroptions);
 
 hold off;
 

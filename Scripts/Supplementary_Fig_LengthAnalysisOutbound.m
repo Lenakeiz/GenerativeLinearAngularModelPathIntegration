@@ -41,14 +41,14 @@ plotInfo.defaultLineSize = 1.7;
 plotInfo.titleFontSize = 12;
 plotInfo.labelSize = 12;
 plotInfo.axisSize = 10;
-plotInfo.MarkerSize = 70;
-plotInfo.MarkerAlpha = 0.5;
+plotInfo.MarkerSize = 20;
+plotInfo.MarkerAlpha = 0.35;
 plotInfo.PatchAlpha = 0.7;
 plotInfo.yLim = [4 8.5];
 plotInfo.xLim = [0.5 5.5];
 plotInfo.medianColor = [0.4 0.4 0.4];
 plotInfo.medianWidth = 1.3;
-plotInfo.meanMarkerSize = 90;
+plotInfo.meanMarkerSize = 30;
 plotInfo.sigmaStarLineWidth = 2.5;
 plotInfo.sigmaStarTextSize  = 20;
 plotInfo.sigmaBarSeparation = 0.04;
@@ -93,36 +93,27 @@ set(0,'DefaultTextFontName','Arial');
 
 hold on;
 
-% Create box plot
+% Creating box plots
 boxplots = boxplot(OutboundData,"Notch","on","symbol","","Colors",config.color_scheme_group, "Widths",0.6);
 boxes = findobj(gca,'Tag','Box');
 boxes = flip(boxes);
 medians = findobj(gca,'Tag','Median');
 medians = flip(medians);
 
+% Adding a patch to the box plots
 for j = 1:length(boxes)
     pp = patch(get(boxes(j),'XData'), get(boxes(j), 'YData'), config.color_scheme_group(j,:), 'FaceAlpha', plotInfo.PatchAlpha);
     pp.LineStyle = "none";
 end
 clear j;
 
+% Changing color of the median 
 for j = 1:length(medians)
     plot(medians(j).XData,medians(j).YData,Color=plotInfo.medianColor, LineStyle="-", LineWidth=plotInfo.medianWidth);
 end
 clear j;
 
-ax_errorBar = errorbar(xDatameans,DataMeans,DataSems);
-ax_errorBar.Color = [0 0 0];
-ax_errorBar.LineWidth = 3;
-ax_errorBar.LineStyle = "none";
-
-sc_means = scatter(xDatameans,DataMeans);
-sc_means.Marker = "diamond";
-sc_means.SizeData = plotInfo.meanMarkerSize;
-sc_means.MarkerFaceAlpha = 1;
-sc_means.MarkerFaceColor = "white";
-sc_means.MarkerEdgeColor = "none";
-
+% Adding the dots for each participant
 for j = 1:width(OutboundData)
     sh = scatter(j*ones(height(OutboundData),1), OutboundData(:,j));
     sh.SizeData = plotInfo.MarkerSize;
@@ -131,6 +122,20 @@ for j = 1:width(OutboundData)
     sh.MarkerFaceAlpha = plotInfo.MarkerAlpha;
 end
 clear j;
+
+% Adding error bars
+ax_errorBar = errorbar(xDatameans,DataMeans,DataSems);
+ax_errorBar.Color = [0 0 0];
+ax_errorBar.LineWidth = 3;
+ax_errorBar.LineStyle = "none";
+
+% Adding black diamond
+sc_means = scatter(xDatameans,DataMeans);
+sc_means.Marker = "diamond";
+sc_means.SizeData = plotInfo.meanMarkerSize;
+sc_means.MarkerFaceAlpha = 1;
+sc_means.MarkerFaceColor = "white";
+sc_means.MarkerEdgeColor = "none";
 
 sigstaroptions.textSize      = plotInfo.sigmaStarTextSize;
 sigstaroptions.lineWidth     = plotInfo.sigmaStarLineWidth;

@@ -1,10 +1,10 @@
 %% Preparing the data
 VAM_PrepareBaseConfig
 
-%% Preprocessing the data
+% Preprocessing the data
 VAM_PreprocessData
 
-%% Setting the model we are interested in
+% Setting the model we are interested in
 % Eventually modify config paramteters we are interested in. For example
 % for this graph we are not interested in running the model with splitted
 % conditions so we will set the relative config to false 

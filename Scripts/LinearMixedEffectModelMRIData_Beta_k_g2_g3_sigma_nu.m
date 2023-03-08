@@ -48,7 +48,7 @@ clear filter
 
 %% Performing mixedeffectmodel
 clc;
-rhs = "Sex + Age + norm_ErC + norm_hippocampus + norm_isthmuscingulate_volume_Dest + norm_inferiorparietal_volume_Dest + norm_superiorparietal_volume_Dest + (1 | MCI)";
+rhs = "Sex + Age + norm_ErC + norm_hippocampus + norm_isthmuscingulate_volume_Dest + norm_inferiorparietal_volume_Dest + norm_precuneus_volume_Dest + (1 | MCI)";
 
 disp("%%%%%%%%%%%%%%% PERFORMING LINEAR MIXED EFFECT MODELS %%%%%%%%%%%%%%%");
 
@@ -149,7 +149,8 @@ function [lme,stats] = performLinearMixedEffectModel(MRIModelParamsDataTable,lef
     MRIModelParamsDataTable.norm_posteriorCingulate           = zscore(MRIModelParamsDataTable.norm_posteriorCingulate);
     MRIModelParamsDataTable.norm_inferiorparietal_volume_Dest = zscore(MRIModelParamsDataTable.norm_inferiorparietal_volume_Dest);
     MRIModelParamsDataTable.norm_isthmuscingulate_volume_Dest = zscore(MRIModelParamsDataTable.norm_isthmuscingulate_volume_Dest);
-    MRIModelParamsDataTable.norm_superiorparietal_volume_Dest = zscore(MRIModelParamsDataTable.norm_superiorparietal_volume_Dest);
+    MRIModelParamsDataTable.norm_precuneus_volume_Dest        = zscore(MRIModelParamsDataTable.norm_precuneus_volume_Dest);
+    MRIModelParamsDataTable.norm_superiorparietal_volume_DK   = zscore(MRIModelParamsDataTable.norm_superiorparietal_volume_DK);
     MRIModelParamsDataTable.norm_inferiorparietal_volume_DK   = zscore(MRIModelParamsDataTable.norm_inferiorparietal_volume_DK);
     MRIModelParamsDataTable.norm_isthmuscingulate_volume_DK   = zscore(MRIModelParamsDataTable.norm_isthmuscingulate_volume_DK);
     MRIModelParamsDataTable.norm_superiorparietal_volume_DK   = zscore(MRIModelParamsDataTable.norm_superiorparietal_volume_DK);

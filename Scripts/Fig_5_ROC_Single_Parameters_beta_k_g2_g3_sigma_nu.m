@@ -37,7 +37,7 @@ MCIAllParameters          = [MCIUnkParameters; MCINegParameters; MCIPosParameter
 
 % Loading previously saved SVM
 if(exist('Data/SVM_ForwardSelection.mat','file') == 2)
-    load Data/SVM_ForwardSelection.mat
+    load Data/SVM_SingleParameters.mat
 end
 
 %% Plotting roc curve HC vs pooled MCI and MCI negative vs MCI positive
@@ -69,11 +69,11 @@ plotInfo.Title = "Healthy controls / pooled MCI";
 plotInfo.visible = "on";
 plotInfo.figurePosition = [200 200 250 200];
 %
-disp("%%%%%%%%%%%%%%% ROC HC vs MCI - M6 model %%%%%%%%%%%%%%%");
+disp("%%%%%%%%%%%%%%% ROC HC vs MCI model %%%%%%%%%%%%%%%");
 plotInfo.Title = "HC / MCI";
 plotSVMResults(HealthyControlsParameters,MCIAllParameters,'HC', 'MCI', config, plotInfo, HCvsMCISVMModels_SingleParameters);
 %
-disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - M6 model %%%%%%%%%%%%%%%");
+disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative %%%%%%%%%%%%%%%");
 plotInfo.Title = "MCI - / MCI +";
 plotSVMResults(MCINegParameters, MCIPosParameters,'MCIneg', 'MCIpos', config, plotInfo, MCIPosvsMCINegSVMModels_SingleParameters);  
 %%

@@ -1,10 +1,10 @@
 %% Preparing the data
 VAM_PrepareBaseConfig
 
-%% Preprocessing the data
+% Preprocessing the data
 VAM_PreprocessData
  
-%% Setting the model we are interested in
+% Setting the model we are interested in
 % Eventually modify config paramteters we are interested in. For example
 % for this graph we are not interested in running the model with splitted
 % conditions so we will set the relative config to false 
@@ -18,7 +18,7 @@ config.NumParams        =   100; % Set 100 here to avoid producing the model
 VAM
 
 %% Model run completed, preparing the data for plotting figures
-config.ResultFolder = pwd + "/Output/Supplementary/TimeAnalysis";
+config.ResultFolder = pwd + "/Output/Supplementary/YawAnalysis";
 % Create storing folder for trajectory if not exist
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
@@ -27,15 +27,23 @@ end
 %% Genarating color scheme
 ColorPattern;
 
-%% Getting speed information
-% Averaging across segments L1 and L2 of the outbound path
-YoungOutboundDuration = extractTimeData(YoungControls);
-HealthyControlsOutboundDuration = extractTimeData(HealthyControls);
-MCINegOutboundDuration = extractTimeData(MCINeg);
-MCIPosOutboundDuration = extractTimeData(MCIPos);
-MCIUnkOutboundDuration = extractTimeData(MCIUnk);
-%
-% close all
+%% Plotting the calculation of the yaw points for some participant
+% Remember Unity is y-up world coordinate
+drawHeadingPoints(YoungControls.Path{1,1}{1,1}(:,[5 7 6]),YoungControls.Path{1,1}{1,1}(:,1),YoungControls.FlagTrigTimes{1,1}{1,2},YoungControls.FlagTrigTimes{1,1}{1,3});
+drawHeadingPoints(HealthyControls.Path{1,1}{1,1}(:,[5 7 6]),HealthyControls.Path{1,1}{1,1}(:,1),HealthyControls.FlagTrigTimes{1,1}{1,2},HealthyControls.FlagTrigTimes{1,1}{1,3});
+drawHeadingPoints(MCIUnk.Path{1,1}{1,1}(:,[5 7 6]),MCIUnk.Path{1,1}{1,1}(:,1),MCIUnk.FlagTrigTimes{1,1}{1,2},MCIUnk.FlagTrigTimes{1,1}{1,3});
+drawHeadingPoints(MCINeg.Path{1,1}{1,1}(:,[5 7 6]),MCINeg.Path{1,1}{1,1}(:,1),MCINeg.FlagTrigTimes{1,1}{1,2},MCINeg.FlagTrigTimes{1,1}{1,3});
+drawHeadingPoints(MCIPos.Path{1,1}{1,1}(:,[5 7 6]),MCIPos.Path{1,1}{1,1}(:,1),MCIPos.FlagTrigTimes{1,1}{1,2},MCIPos.FlagTrigTimes{1,1}{1,3});
+
+%% Extracting the Pitch angle
+% Calculating the pitch angle of the head during the outbound path between
+% cone 2 and cone 3
+YoungData = extractPitchData(YoungControls);
+HealthyControlsData = extractPitchData(HealthyControls);
+MCINegData = extractPitchData(MCINeg);
+MCIPosData = extractPitchData(MCIPos);
+MCIUnkData = extractPitchData(MCIUnk);
+%% Young/Healthy Controls/MCI separately
 close all;
 
 plotInfo.defaultLineSize = 1.7;
@@ -43,9 +51,9 @@ plotInfo.titleFontSize = 12;
 plotInfo.labelSize = 12;
 plotInfo.axisSize = 10;
 plotInfo.MarkerSize = 20;
-plotInfo.MarkerAlpha = 0.5;
+plotInfo.MarkerAlpha = 0.35;
 plotInfo.PatchAlpha = 0.7;
-plotInfo.yLim = [8 20];
+plotInfo.yLim = [-30 20];
 plotInfo.xLim = [0.5 5.5];
 plotInfo.medianColor = [0.4 0.4 0.4];
 plotInfo.medianWidth = 1.3;
@@ -55,37 +63,36 @@ plotInfo.sigmaStarTextSize  = 20;
 plotInfo.sigmaBarSeparation = 0.04;
 plotInfo.FigurePosition = [200 200 280 250];
 
-% Generate example data
-max_element = max([numel(YoungOutboundDuration),...
-    numel(HealthyControlsOutboundDuration),...
-    numel(MCINegOutboundDuration),...
-    numel(MCIPosOutboundDuration),...
-    numel(MCIUnkOutboundDuration)]);
-YoungOutboundDuration(end+1 : max_element) = nan;
-HealthyControlsOutboundDuration(end+1 : max_element) = nan;
-MCIUnkOutboundDuration(end+1 : max_element) = nan;
-MCINegOutboundDuration(end+1 : max_element) = nan;
-MCIPosOutboundDuration(end+1 : max_element) = nan;
+% Filling with nans smaller columns
+max_element = max([numel(YoungData),...
+    numel(HealthyControlsData),...
+    numel(MCINegData),...
+    numel(MCIPosData),...
+    numel(MCIUnkData)]);
+YoungData(end+1 : max_element) = nan;
+HealthyControlsData(end+1 : max_element) = nan;
+MCIUnkData(end+1 : max_element) = nan;
+MCINegData(end+1 : max_element) = nan;
+MCIPosData(end+1 : max_element) = nan;
 
-%
-OutboundData = [YoungOutboundDuration HealthyControlsOutboundDuration MCIUnkOutboundDuration MCINegOutboundDuration MCIPosOutboundDuration];
+OutboundData = [YoungData HealthyControlsData MCIUnkData MCINegData MCIPosData];
 
 DataMeans = mean(OutboundData,1,"omitnan");
 DataSems = std(OutboundData,1,"omitnan")./sqrt(sum(~isnan(OutboundData),1));
 
 xDatameans = 1:length(DataMeans);
 
-% Calculating anova
-OutboundDataAnova = [YoungOutboundDuration; HealthyControlsOutboundDuration; MCIUnkOutboundDuration; MCINegOutboundDuration; MCIPosOutboundDuration];
-
-OutboundDataAnovaGroups = [repmat({'Young'}, size(YoungOutboundDuration, 1), 1); ...
-          repmat({'Healthy Older'}, size(HealthyControlsOutboundDuration, 1), 1); ...
-          repmat({'MCI Unknown'}, size(MCIUnkOutboundDuration, 1), 1); ...
-          repmat({'MCI Negative'}, size(MCINegOutboundDuration, 1), 1); ...
-          repmat({'MCI Positive'}, size(MCIPosOutboundDuration, 1), 1)];
+%
+OutboundDataAnova = [YoungData; HealthyControlsData; MCIUnkData; MCINegData; MCIPosData];
+OutboundDataAnovaGroups = [repmat({'Young'}, size(YoungData, 1), 1); ...
+          repmat({'Healthy Older'}, size(HealthyControlsData, 1), 1); ...
+          repmat({'MCI Unknown'}, size(MCIUnkData, 1), 1); ...
+          repmat({'MCI Negative'}, size(MCINegData, 1), 1); ...
+          repmat({'MCI Positive'}, size(MCIPosData, 1), 1)];
 
 [p, tbl, stats] = anova1(OutboundDataAnova, OutboundDataAnovaGroups, 'off');
 [results, means, ~, ~] = multcompare(stats, 'alpha', 0.05,'Display','off');
+
 
 currFig = figure("Position",plotInfo.FigurePosition);
 
@@ -94,24 +101,27 @@ set(0,'DefaultTextFontName','Arial');
 
 hold on;
 
-% Create box plot
+% Creating box plots
 boxplots = boxplot(OutboundData,"Notch","on","symbol","","Colors",config.color_scheme_group, "Widths",0.6);
 boxes = findobj(gca,'Tag','Box');
 boxes = flip(boxes);
 medians = findobj(gca,'Tag','Median');
 medians = flip(medians);
 
+% Adding a patch to the box plots
 for j = 1:length(boxes)
     pp = patch(get(boxes(j),'XData'), get(boxes(j), 'YData'), config.color_scheme_group(j,:), 'FaceAlpha', plotInfo.PatchAlpha);
     pp.LineStyle = "none";
 end
 clear j;
 
+% Changing color of the median 
 for j = 1:length(medians)
     plot(medians(j).XData,medians(j).YData,Color=plotInfo.medianColor, LineStyle="-", LineWidth=plotInfo.medianWidth);
 end
 clear j;
 
+% Adding the dots for each participant
 for j = 1:width(OutboundData)
     sh = scatter(j*ones(height(OutboundData),1), OutboundData(:,j));
     sh.SizeData = plotInfo.MarkerSize;
@@ -121,11 +131,13 @@ for j = 1:width(OutboundData)
 end
 clear j;
 
+% Adding error bars
 ax_errorBar = errorbar(xDatameans,DataMeans,DataSems);
 ax_errorBar.Color = [0 0 0];
 ax_errorBar.LineWidth = 3;
 ax_errorBar.LineStyle = "none";
 
+% Adding black diamond
 sc_means = scatter(xDatameans,DataMeans);
 sc_means.Marker = "diamond";
 sc_means.SizeData = plotInfo.meanMarkerSize;
@@ -137,14 +149,14 @@ sigstaroptions.textSize      = plotInfo.sigmaStarTextSize;
 sigstaroptions.lineWidth     = plotInfo.sigmaStarLineWidth;
 sigstaroptions.barSeparation = plotInfo.sigmaBarSeparation;
 
-adjustablesigstar([1 2],0.001,0,sigstaroptions);
+adjustablesigstar([1 4],0.01,0,sigstaroptions);
 
 hold off;
 
 ylim(plotInfo.yLim);
 xlim(plotInfo.xLim);
 
-ylabel("Duration (s)");
+ylabel("Pitch angle (degree)");
 
 set(gca, ...
     'Box'         , 'off'     , ...
@@ -163,11 +175,10 @@ ax.YLabel.FontSize = plotInfo.labelSize;
 ax.XAxis.FontSize = plotInfo.axisSize;
 ax.YAxis.FontSize = plotInfo.axisSize;
 
-exportgraphics(currFig,config.ResultFolder+"/OutboundPathDurationSeparateMCI.png",'Resolution',300);
-exportgraphics(currFig,config.ResultFolder+"/OutboundPathDurationSeparateMCI.pdf",'Resolution',300, 'ContentType','vector');
+exportgraphics(currFig,config.ResultFolder+"/OutboundTurnPitchAngle.png",'Resolution',300);
+exportgraphics(currFig,config.ResultFolder+"/OutboundTurnPitchAngle.pdf",'Resolution',300, 'ContentType','vector');
 
-%%
-% close all
+% Young/Healthy Controls/MCI pooled
 close all;
 
 plotInfo.defaultLineSize = 1.7;
@@ -175,9 +186,9 @@ plotInfo.titleFontSize = 12;
 plotInfo.labelSize = 12;
 plotInfo.axisSize = 10;
 plotInfo.MarkerSize = 20;
-plotInfo.MarkerAlpha = 0.5;
+plotInfo.MarkerAlpha = 0.35;
 plotInfo.PatchAlpha = 0.7;
-plotInfo.yLim = [8 20];
+plotInfo.yLim = [-30 20];
 plotInfo.xLim = [0.5 3.5];
 plotInfo.medianColor = [0.4 0.4 0.4];
 plotInfo.medianWidth = 1.3;
@@ -187,33 +198,32 @@ plotInfo.sigmaStarTextSize  = 20;
 plotInfo.sigmaBarSeparation = 0.04;
 plotInfo.FigurePosition = [200 200 280 250];
 
-MCIAllData = [MCIUnkOutboundDuration; MCINegOutboundDuration; MCIPosOutboundDuration];
+MCIAllData = [MCIUnkData; MCINegData; MCIPosData];
 
-% Generate example data
-max_element = max([numel(YoungOutboundDuration),...
-    numel(HealthyControlsOutboundDuration),...
+% Filling with nans smaller columns
+max_element = max([numel(YoungData),...
+    numel(HealthyControlsData),...
     numel(MCIAllData)]);
-YoungOutboundDuration(end+1 : max_element) = nan;
-HealthyControlsOutboundDuration(end+1 : max_element) = nan;
+YoungData(end+1 : max_element) = nan;
+HealthyControlsData(end+1 : max_element) = nan;
 MCIAllData(end+1 : max_element) = nan;
 
-%
-OutboundData = [YoungOutboundDuration HealthyControlsOutboundDuration MCIAllData];
+OutboundData = [YoungData HealthyControlsData MCIAllData];
 
 DataMeans = mean(OutboundData,1,"omitnan");
 DataSems = std(OutboundData,1,"omitnan")./sqrt(sum(~isnan(OutboundData),1));
 
 xDatameans = 1:length(DataMeans);
 
-% Calculating anova
-OutboundDataAnova = [YoungOutboundDuration; HealthyControlsOutboundDuration; MCIAllData];
-
-OutboundDataAnovaGroups = [repmat({'Young'}, size(YoungOutboundDuration, 1), 1); ...
-          repmat({'Healthy Older'}, size(HealthyControlsOutboundDuration, 1), 1); ...
+%
+OutboundDataAnova = [YoungData; HealthyControlsData; MCIAllData];
+OutboundDataAnovaGroups = [repmat({'Young'}, size(YoungData, 1), 1); ...
+          repmat({'Elderly'}, size(HealthyControlsData, 1), 1); ...
           repmat({'MCI'}, size(MCIAllData, 1), 1)];
 
 [p, tbl, stats] = anova1(OutboundDataAnova, OutboundDataAnovaGroups, 'off');
 [results, means, ~, ~] = multcompare(stats, 'alpha', 0.05,'Display','off');
+
 
 currFig = figure("Position",plotInfo.FigurePosition);
 
@@ -222,24 +232,27 @@ set(0,'DefaultTextFontName','Arial');
 
 hold on;
 
-% Create box plot
+% Creating box plots
 boxplots = boxplot(OutboundData,"Notch","on","symbol","","Colors",config.color_scheme_group, "Widths",0.6);
 boxes = findobj(gca,'Tag','Box');
 boxes = flip(boxes);
 medians = findobj(gca,'Tag','Median');
 medians = flip(medians);
 
+% Adding a patch to the box plots
 for j = 1:length(boxes)
     pp = patch(get(boxes(j),'XData'), get(boxes(j), 'YData'), config.color_scheme_group(j,:), 'FaceAlpha', plotInfo.PatchAlpha);
     pp.LineStyle = "none";
 end
 clear j;
 
+% Changing color of the median 
 for j = 1:length(medians)
     plot(medians(j).XData,medians(j).YData,Color=plotInfo.medianColor, LineStyle="-", LineWidth=plotInfo.medianWidth);
 end
 clear j;
 
+% Adding the dots for each participant
 for j = 1:width(OutboundData)
     sh = scatter(j*ones(height(OutboundData),1), OutboundData(:,j));
     sh.SizeData = plotInfo.MarkerSize;
@@ -249,11 +262,13 @@ for j = 1:width(OutboundData)
 end
 clear j;
 
+% Adding error bars
 ax_errorBar = errorbar(xDatameans,DataMeans,DataSems);
 ax_errorBar.Color = [0 0 0];
 ax_errorBar.LineWidth = 3;
 ax_errorBar.LineStyle = "none";
 
+% Adding black diamond
 sc_means = scatter(xDatameans,DataMeans);
 sc_means.Marker = "diamond";
 sc_means.SizeData = plotInfo.meanMarkerSize;
@@ -265,15 +280,14 @@ sigstaroptions.textSize      = plotInfo.sigmaStarTextSize;
 sigstaroptions.lineWidth     = plotInfo.sigmaStarLineWidth;
 sigstaroptions.barSeparation = plotInfo.sigmaBarSeparation;
 
-adjustablesigstar([1 2],0.001,0,sigstaroptions);
-adjustablesigstar([2 3],0.01,0,sigstaroptions);
+adjustablesigstar([1 3],0.001,0,sigstaroptions);
 
 hold off;
 
 ylim(plotInfo.yLim);
 xlim(plotInfo.xLim);
 
-ylabel("Duration (s)");
+ylabel("Pitch angle (degree)");
 
 set(gca, ...
     'Box'         , 'off'     , ...
@@ -281,6 +295,7 @@ set(gca, ...
     'TickLength'  , [.01 .01] , ...
     'XColor'      , [.1 .1 .1], ...
     'YColor'      , [.1 .1 .1]);
+
 
 ax = gca;
 ax.XAxis.TickLabels = {'Young', 'Elderly', 'MCI'};
@@ -291,24 +306,77 @@ ax.YLabel.FontSize = plotInfo.labelSize;
 ax.XAxis.FontSize = plotInfo.axisSize;
 ax.YAxis.FontSize = plotInfo.axisSize;
 
-exportgraphics(currFig,config.ResultFolder+"/OutboundPathDurationPooledMCI.png",'Resolution',300);
-exportgraphics(currFig,config.ResultFolder+"/OutboundPathDurationPooledMCI.pdf",'Resolution',300, 'ContentType','vector');
+exportgraphics(currFig,config.ResultFolder+"/OutboundTurnPitchAngleMCIPooled.png",'Resolution',300);
+exportgraphics(currFig,config.ResultFolder+"/OutboundTurnPitchAngleMCIPooled.pdf",'Resolution',300, 'ContentType','vector');
 
 
 %%
-function dataout = extractTimeData(groupData)
+function dataout = extractPitchData(groupData)
 
-    dataout = [];
+    dataout = nan(length(groupData.Path),1);
     
-    for i_participant = 1:length(groupData.Results.L1Dur)
-        if(~isempty(groupData.Results.L1Dur{i_participant}))
-            l1_duration = cell2mat(groupData.Results.L1Dur{i_participant});
-            l2_duration = cell2mat(groupData.Results.L2Dur{i_participant});
-            dataout = [dataout; mean(l1_duration+l2_duration,'omitnan')];
+    for i_participant = 1:length(groupData.Path)
+        if(~isempty(groupData.Path{i_participant}))
+            for i_trial = 1:length(groupData.Path{i_participant})
+                path = groupData.Path{i_participant}{i_trial};
+                % Including only tracking data between reaching cone 2 and
+                % cone 3
+                filter_idxs = path(:,1) > groupData.FlagTrigTimes{i_participant}{i_trial,2} & path(:,1) < groupData.FlagTrigTimes{i_participant}{i_trial,3};
+                % Inverting the order to take into account Unity is y-up
+                % coordinate system
+                path = path(filter_idxs,[5 7 6]);
+                curr_pitch_angle = atan2(path(:,3), sqrt(path(:,1).^2 + path(:,2).^2)) * 180 / pi;
+            end   
+            dataout(i_participant,1) = mean(curr_pitch_angle);
         end
     end
+
 end
 
+%%
+function drawHeadingPoints(points, timestamps, startTime, endTime)
+
+filter_idxs = timestamps > startTime & timestamps < endTime;
+points = points(filter_idxs,:);
+nPoints = height(points);
+cmap    = colormap(cool);
+idxs = round(linspace(1,size(cmap,1),nPoints)');
+tmap    = cmap(idxs,:); 
+clear cmap idxs
+
+figure('Position', [200, 200, 1600, 800]);
+subplot(1,2,1);
+axis([-1, 1, -1, 1, -1, 1]);
+view(45, 30);
+xlabel("x");
+ylabel("y");
+zlabel("z");
+hold on
+
+subplot(1,2,2);
+axis([0, nPoints, -180, 180]);
+xlabel('Time');
+ylabel('Pitch Angle (degrees)');
+hold on
+
+    % Loop through each point and plot it using drawnow
+    for i = 1:nPoints
+        hold on
+        subplot(1,2,1);
+        % Plot the current point
+        plot3(points(i,1), points(i,2), points(i,3), '.', 'MarkerSize', 10, 'Color',tmap(i,:));
+        % Update the plot and pause for a short amount of time
+        hold on
+        subplot(1,2,2);
+        pitch_angle = atan2(points(i,3), sqrt(points(i,1)^2 + points(i,2)^2)) * 180 / pi;
+        plot(i, pitch_angle, '.', 'MarkerSize', 10, 'Color',tmap(i,:));
+        drawnow;
+        pause(0.01);
+    end
+
+hold off
+
+end
 %% Extracting speed information for each of the walked segment
 %
 function dataout = averageAcrossConditions(data)

@@ -27,7 +27,8 @@ end
 %% Genarating color scheme
 ColorPattern;
 
-%% Getting speed information
+%% Analysis and plotting
+% MCI separately
 plotInfo.defaultLineSize = 1.7;
 plotInfo.titleFontSize = 12;
 plotInfo.labelSize = 12;
@@ -35,14 +36,14 @@ plotInfo.axisSize = 10;
 plotInfo.MarkerSize = 20;
 plotInfo.MarkerAlpha = 0.5;
 plotInfo.PatchAlpha = 0.7;
-plotInfo.yLim = [0.2 0.8];
+plotInfo.yLim = [0.2 1.0];
 plotInfo.xLim = [0.5 5.5];
 plotInfo.medianColor = [0.4 0.4 0.4];
 plotInfo.medianWidth = 1.3;
 plotInfo.meanMarkerSize = 30;
 plotInfo.sigmaStarLineWidth = 2.5;
 plotInfo.sigmaStarTextSize  = 20;
-plotInfo.sigmaBarSeparation = 0.04;
+plotInfo.sigmaBarSeparation = 0.06;
 plotInfo.FigurePosition = [200 200 280 250];
 
 % Averaging across segments L1 and L2 of the outbound path
@@ -133,6 +134,9 @@ sigstaroptions.lineWidth     = plotInfo.sigmaStarLineWidth;
 sigstaroptions.barSeparation = plotInfo.sigmaBarSeparation;
 
 adjustablesigstar([1 2],0.05,0,sigstaroptions);
+adjustablesigstar([1 3],0.001,0,sigstaroptions);
+adjustablesigstar([1 4],0.01,0,sigstaroptions);
+adjustablesigstar([1 5],0.05,0,sigstaroptions);
 
 hold off;
 
@@ -158,8 +162,143 @@ ax.YLabel.FontSize = plotInfo.labelSize;
 ax.XAxis.FontSize = plotInfo.axisSize;
 ax.YAxis.FontSize = plotInfo.axisSize;
 
-exportgraphics(currFig,config.ResultFolder+"/OutboundPathSpeed.png",'Resolution',300);
-exportgraphics(currFig,config.ResultFolder+"/OutboundPathSpeed.pdf",'Resolution',300, 'ContentType','vector');
+exportgraphics(currFig,config.ResultFolder+"/OutboundPathSpeedSeparateMCI.png",'Resolution',300);
+exportgraphics(currFig,config.ResultFolder+"/OutboundPathSpeedSeparateMCI.pdf",'Resolution',300, 'ContentType','vector');
+
+%
+% Analysis and plotting
+% MCI pooled
+plotInfo.defaultLineSize = 1.7;
+plotInfo.titleFontSize = 12;
+plotInfo.labelSize = 12;
+plotInfo.axisSize = 10;
+plotInfo.MarkerSize = 20;
+plotInfo.MarkerAlpha = 0.5;
+plotInfo.PatchAlpha = 0.7;
+plotInfo.yLim = [0.2 0.8];
+plotInfo.xLim = [0.5 3.5];
+plotInfo.medianColor = [0.4 0.4 0.4];
+plotInfo.medianWidth = 1.3;
+plotInfo.meanMarkerSize = 30;
+plotInfo.sigmaStarLineWidth = 2.5;
+plotInfo.sigmaStarTextSize  = 20;
+plotInfo.sigmaBarSeparation = 0.07;
+plotInfo.FigurePosition = [200 200 280 250];
+
+% Averaging across segments L1 and L2 of the outbound path
+YoungSpeed = extractSpeedData(YoungControls);
+HealthyControlsSpeed = extractSpeedData(HealthyControls);
+MCINegSpeed = extractSpeedData(MCINeg);
+MCIPosSpeed = extractSpeedData(MCIPos);
+MCIUnkSpeed = extractSpeedData(MCIUnk);
+
+MCIAllData = [MCIUnkSpeed; MCINegSpeed; MCIPosSpeed];
+
+% Generate example data
+max_element = max([numel(YoungSpeed), numel(HealthyControlsSpeed), numel(MCIAllData)]);
+YoungSpeed(end+1 : max_element) = nan;
+HealthyControlsSpeed(end+1 : max_element) = nan;
+MCIAllData(end+1 : max_element) = nan;
+
+OutboundData = [YoungSpeed HealthyControlsSpeed MCIAllData];
+
+DataMeans = mean(OutboundData,1,"omitnan");
+DataSems = std(OutboundData,1,"omitnan")./sqrt(sum(~isnan(OutboundData),1));
+
+xDatameans = 1:length(DataMeans);
+
+%
+OutboundDataAnova = [YoungSpeed; HealthyControlsSpeed; MCIAllData];
+
+OutboundDataAnovaGroups = [repmat({'Young'}, size(YoungSpeed, 1), 1); ...
+          repmat({'Elderly'}, size(HealthyControlsSpeed, 1), 1); ...
+          repmat({'MCI All'}, size(MCIAllData, 1), 1)];
+
+[p, tbl, stats] = anova1(OutboundDataAnova, OutboundDataAnovaGroups, 'off');
+[results, means, ~, ~] = multcompare(stats, 'alpha', 0.05,'Display','off');
+
+% close all
+close all;
+
+currFig = figure("Position",plotInfo.FigurePosition);
+
+set(0,'DefaultAxesFontName','Arial');
+set(0,'DefaultTextFontName','Arial');
+
+hold on;
+
+% Create box plot
+boxplots = boxplot(OutboundData,"Notch","on","symbol","","Colors",config.color_scheme_group, "Widths",0.6);
+boxes = findobj(gca,'Tag','Box');
+boxes = flip(boxes);
+medians = findobj(gca,'Tag','Median');
+medians = flip(medians);
+
+for j = 1:length(boxes)
+    pp = patch(get(boxes(j),'XData'), get(boxes(j), 'YData'), config.color_scheme_group(j,:), 'FaceAlpha', plotInfo.PatchAlpha);
+    pp.LineStyle = "none";
+end
+clear j;
+
+for j = 1:length(medians)
+    plot(medians(j).XData,medians(j).YData,Color=plotInfo.medianColor, LineStyle="-", LineWidth=plotInfo.medianWidth);
+end
+clear j;
+
+for j = 1:width(OutboundData)
+    sh = scatter(j*ones(height(OutboundData),1), OutboundData(:,j));
+    sh.SizeData = plotInfo.MarkerSize;
+    sh.MarkerEdgeColor = "none";
+    sh.MarkerFaceColor = config.color_scheme_group(j,:);
+    sh.MarkerFaceAlpha = plotInfo.MarkerAlpha;
+end
+clear j;
+
+ax_errorBar = errorbar(xDatameans,DataMeans,DataSems);
+ax_errorBar.Color = [0 0 0];
+ax_errorBar.LineWidth = 3;
+ax_errorBar.LineStyle = "none";
+
+sc_means = scatter(xDatameans,DataMeans);
+sc_means.Marker = "diamond";
+sc_means.SizeData = plotInfo.meanMarkerSize;
+sc_means.MarkerFaceAlpha = 1;
+sc_means.MarkerFaceColor = "white";
+sc_means.MarkerEdgeColor = "none";
+
+sigstaroptions.textSize      = plotInfo.sigmaStarTextSize;
+sigstaroptions.lineWidth     = plotInfo.sigmaStarLineWidth;
+sigstaroptions.barSeparation = plotInfo.sigmaBarSeparation;
+
+hold off;
+
+ylim(plotInfo.yLim);
+xlim(plotInfo.xLim);
+
+ylabel("Speed (m/s)");
+
+set(gca, ...
+    'Box'         , 'off'     , ...
+    'TickDir'     , 'out'     , ...
+    'TickLength'  , [.01 .01] , ...
+    'XColor'      , [.1 .1 .1], ...
+    'YColor'      , [.1 .1 .1]);
+
+ax = gca;
+ax.XAxis.TickLabels = {'Young', 'Elderly', 'MCI'};
+
+ax.LineWidth = plotInfo.defaultLineSize;
+ax.XLabel.FontSize = plotInfo.labelSize;
+ax.YLabel.FontSize = plotInfo.labelSize;
+ax.XAxis.FontSize = plotInfo.axisSize;
+ax.YAxis.FontSize = plotInfo.axisSize;
+
+% After checking at the results variable
+adjustablesigstar([1 2],0.01,0,sigstaroptions);
+adjustablesigstar([1 3],0.001,0,sigstaroptions);
+
+exportgraphics(currFig,config.ResultFolder+"/OutboundPathSpeedPooledMCI.png",'Resolution',300);
+exportgraphics(currFig,config.ResultFolder+"/OutboundPathSpeedPooledMCI.pdf",'Resolution',300, 'ContentType','vector');
 
 
 %%

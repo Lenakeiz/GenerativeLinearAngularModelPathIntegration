@@ -28,7 +28,8 @@ end
 ColorPattern;
 
 %% Plotting the calculation of the yaw points for some participant
-% Remember Unity is y-up world coordinate
+% Unity is y-up world coordinate
+
 drawHeadingPoints(YoungControls.Path{1,1}{1,1}(:,[5 7 6]),YoungControls.Path{1,1}{1,1}(:,1),YoungControls.FlagTrigTimes{1,1}{1,2},YoungControls.FlagTrigTimes{1,1}{1,3});
 drawHeadingPoints(HealthyControls.Path{1,1}{1,1}(:,[5 7 6]),HealthyControls.Path{1,1}{1,1}(:,1),HealthyControls.FlagTrigTimes{1,1}{1,2},HealthyControls.FlagTrigTimes{1,1}{1,3});
 drawHeadingPoints(MCIUnk.Path{1,1}{1,1}(:,[5 7 6]),MCIUnk.Path{1,1}{1,1}(:,1),MCIUnk.FlagTrigTimes{1,1}{1,2},MCIUnk.FlagTrigTimes{1,1}{1,3});
@@ -43,7 +44,8 @@ HealthyControlsData = extractPitchData(HealthyControls);
 MCINegData = extractPitchData(MCINeg);
 MCIPosData = extractPitchData(MCIPos);
 MCIUnkData = extractPitchData(MCIUnk);
-%% Young/Healthy Controls/MCI separately
+
+% Young/Healthy Controls/MCI separately
 close all;
 
 plotInfo.defaultLineSize = 1.7;
@@ -149,8 +151,6 @@ sigstaroptions.textSize      = plotInfo.sigmaStarTextSize;
 sigstaroptions.lineWidth     = plotInfo.sigmaStarLineWidth;
 sigstaroptions.barSeparation = plotInfo.sigmaBarSeparation;
 
-adjustablesigstar([1 4],0.01,0,sigstaroptions);
-
 hold off;
 
 ylim(plotInfo.yLim);
@@ -178,7 +178,7 @@ ax.YAxis.FontSize = plotInfo.axisSize;
 exportgraphics(currFig,config.ResultFolder+"/OutboundTurnPitchAngle.png",'Resolution',300);
 exportgraphics(currFig,config.ResultFolder+"/OutboundTurnPitchAngle.pdf",'Resolution',300, 'ContentType','vector');
 
-% Young/Healthy Controls/MCI pooled
+%% Young/Healthy Controls/MCI pooled
 close all;
 
 plotInfo.defaultLineSize = 1.7;

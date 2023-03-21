@@ -134,9 +134,6 @@ sigstaroptions.lineWidth     = plotInfo.sigmaStarLineWidth;
 sigstaroptions.barSeparation = plotInfo.sigmaBarSeparation;
 
 adjustablesigstar([1 2],0.05,0,sigstaroptions);
-adjustablesigstar([1 3],0.001,0,sigstaroptions);
-adjustablesigstar([1 4],0.01,0,sigstaroptions);
-adjustablesigstar([1 5],0.05,0,sigstaroptions);
 
 hold off;
 
@@ -165,7 +162,7 @@ ax.YAxis.FontSize = plotInfo.axisSize;
 exportgraphics(currFig,config.ResultFolder+"/OutboundPathSpeedSeparateMCI.png",'Resolution',300);
 exportgraphics(currFig,config.ResultFolder+"/OutboundPathSpeedSeparateMCI.pdf",'Resolution',300, 'ContentType','vector');
 
-%
+%%
 % Analysis and plotting
 % MCI pooled
 plotInfo.defaultLineSize = 1.7;

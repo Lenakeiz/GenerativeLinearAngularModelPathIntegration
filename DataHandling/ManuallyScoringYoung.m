@@ -1,52 +1,21 @@
-%Run Calculate TrackingPath first
+%% Manually scoring the participants trajectory
+% In order to the model to fit the data the participant had to demonstrate
+% a clear intention of completing the triangle.
+% This did not happen all of the time and therefore we had to exclude some
+% data. Also we noticed by looking at the tracking data that participants
+% turned over the long angle instead of the short one, but calculation
+% based on the solely position could not capture this rotation. In order to
+% account for real angular production error we corrected the calculated
+% angle based on the fact the participant took the long or the short angle
+% to complete their estimation.
 
+% Realtime Tracking paths are visualized using
+% "VisualizeRealtimeTrackingData" function.
 
-% the goal of this script is to manually identify ' bad trials'
-% in participants from the healthy old group. The judgement is subjective
-% and is based on observing the participant's trajectory - and judging
-% whether it looks like they know what they are doing. 
-
-% if trial is judged as a bad trial, then mark it as follows:
-% BadExecution(trial number, 1) = 1;
-% otherwise BadExecution(trial number, 1) = 0 as it was originally
-% initialised to 0. 
-% note that BadExecution(trial number, 1) has 1 in the second variable, and
-% that is always the case because that represents there is only one column
-% participant number associated with given BadExecution are assigned at the
-% end of each section, when we save the information in the structure
-% corresponding to each participant separately 
-
-% note:  
-% MCINeg.Reconstructed{1,participant number}.RealReturnAngle(trial number) =
-% MCINeg.Reconstructed{1,participant number}.RealReturnAngle(trial number) + 360;
-
-% use this line of code, when you identify that the 'Real Inferred Angle'
-% stated in the table in the visualisation has a 'weird' angle 
-% (usually a weirdly large negative angle) - this will be the case when 
-% we erroneously deducted (-360 degrees) 
-% we need to add the 360 degrees back. 
-% Note that originally we deducted 360 degrees supposedely in trials, where
-% participants turned in the wrong ('clockwise') direction at cone 3 just
-% prior to embarking on the return journey. If that really happened - i.e.
-% if at cone 3 just before outbound path they truly turned to the clockwise
-% direction, then 360 degrees SHOULD be deducted. This would result in the
-% first 'body rotation' value being negative, reflecting the clockwise
-% direction of turning (when anticlockwise was expected). Since the 'body
-% rotation' would be negative, the 'inferred angle' should be positive, 
-% these two angles would have opposing signs, and
-% altogether the 'real inferred angle' would have 360 deducted
-
-% However, if we visually see that the 'real inferred angle' did have the
-% 360 degrees deducted, and we see that the 'body rotation' angle is
-% negative - * but not because they initially turned clockwise prior to
-% returning, but because they later in the trajectory turned around
-% clockwise, which altogether caused the negative value * - then we should
-% add the 360 degrees back, as it was a mistake to deduce it to begin with 
-
-% This error happens when the 'body rotation' and 'inferred angle' were of
-% different signs, and hence (-360) degrees were deducted, but if we
-% manually look at the trajectory, it should not have been deducted, so we
-% add it back 
+% Bad trials are marked as follows: 
+% Participant did not show a clear intention of moving from cone 3 (we took
+% 0.5m as a threshold).
+% Participant retraced previous cone to find the position of cone 1.
 
 %% Participant 1
 trialsize = height(YoungControls.Reconstructed{1,1});

@@ -1,4 +1,22 @@
-%Run Calculate TrackingPath first
+%% Manually scoring the participants trajectory
+% In order to the model to fit the data the participant had to demonstrate
+% a clear intention of completing the triangle.
+% This did not happen all of the time and therefore we had to exclude some
+% data. Also we noticed by looking at the tracking data that participants
+% turned over the long angle instead of the short one, but calculation
+% based on the solely position could not capture this rotation. In order to
+% account for real angular production error we corrected the calculated
+% angle based on the fact the participant took the long or the short angle
+% to complete their estimation.
+
+% Realtime Tracking paths are visualized using
+% "VisualizeRealtimeTrackingData" function. Must be run after
+% CalculateTrackingPath function.
+
+% Bad trials are marked as follows: 
+% Participant did not show a clear intention of moving from cone 3 (we took
+% 0.5m as a threshold).
+% Participant retraced previous cone to find the position of cone 1.
 
 %% Participant 1
 trialsize = height(MCIUnk.Reconstructed{1,1});

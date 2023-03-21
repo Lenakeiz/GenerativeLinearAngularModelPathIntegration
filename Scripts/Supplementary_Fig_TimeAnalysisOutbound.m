@@ -138,6 +138,7 @@ sigstaroptions.lineWidth     = plotInfo.sigmaStarLineWidth;
 sigstaroptions.barSeparation = plotInfo.sigmaBarSeparation;
 
 adjustablesigstar([1 2],0.001,0,sigstaroptions);
+adjustablesigstar([2 3],0.05,0,sigstaroptions);
 
 hold off;
 

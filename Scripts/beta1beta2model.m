@@ -124,7 +124,7 @@ function BoxPlotOfBeta1Beta2(AllParams, config, name)
     yl.LineStyle = '--';
     
     %[h,p, stats] = ttest(Beta1, Beta2, "Tail", "left")
-    signrank(Beta1, Beta2, "Tail", "left")
+    signrank(Beta1, Beta2, "Tail", "left");
     set(gca, ...
         'Box'         , 'off'     , ...
         'TickDir'     , 'out'     , ...
@@ -136,7 +136,26 @@ function BoxPlotOfBeta1Beta2(AllParams, config, name)
         'XLim'        , [0.5, 2.5],...
         'YLim'        , [0,1.8],... 
         'LineWidth'   , 1.0        );
-    title(name)
+
+    %add sigstar 
+    pvalue = signrank(Beta1, Beta2, "Tail", "left");
+    AllP = [pvalue];
+    Xval = [[1,2]];
+    %select those P value smaller than 0.05 (only add line when p<0.05)
+    PsigInd = AllP<0.05;
+    if sum(AllP<0.05)>0
+        Xval_select = Xval(PsigInd,:);
+        AllP_select = AllP(PsigInd);
+        XXX = {};
+        for i=1:sum(AllP<0.05)
+            XXX{i} = Xval_select(i,:);
+        end
+        H=sigstar(XXX,AllP_select);
+    end
+
+    yline(1,Color='r',LineStyle='--',LineWidth=2);
+    %text(1.05*xL(1),1.05*yL(2),"t("+num2str(stat.df)+")="+num2str(round(stat.tstat,2))+", p="+num2str(p), 'FontSize', 15)
+
     %% save figure
     exportgraphics(f,config.ResultFolder+"/ZMergeCondsBox_beta1beta2.png",'Resolution',300);
     exportgraphics(f,config.ResultFolder+"/ZMergeCondsBox_beta1beta2.pdf",'Resolution',300, 'ContentType','vector');

@@ -40,6 +40,7 @@ ColorPattern;
 
 %% BarScatter Plot between Young and HealthyOld for all Fitted Params
 BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, config);
+%%
 BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, multicomp_tab1, config)
 
 %%
@@ -248,7 +249,8 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
 
         MCIPosParamMean = mean(MCIPosParamAllConds, 2);
         MCINegParamMean = mean(MCINegParamAllConds, 2);
-    
+
+        %[h,p,~,stat]=ttest(MCIPosParamMean,1,"Tail","right")
         %% set figure info
         f = figure('visible','off','Position', [100 100 500 500]);
         %%% Font type and size setting %%%

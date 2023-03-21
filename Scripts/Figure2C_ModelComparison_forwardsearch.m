@@ -160,7 +160,7 @@ VAM
 beta1_beta2_g2_g3_sigma_nu_IC  =   HealthyControls.Results.IC;
 
 %%
-config.ResultFolder = pwd+"/Output/ModelFigures/ModelSelectionForwardsearch_HC_regression2actualmean_beta1beta2";
+config.ResultFolder = pwd+"/Output/ModelFigures/ModelSelectionForwardsearch_HC_regression2actualmean";
 %create storing folder for trajectory if not exist
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
@@ -171,7 +171,7 @@ ModelNames = {'M2', ...
               'M3.1', 'M3.2', 'M3.3', 'M3.4',...
               'M4.1', 'M4.2','M4.3','M4.4','M4.5','M4.6',...
               'M5.1', 'M5.2','M5.3','M5.4',...
-              'M6', 'M7'};
+              'M6'};
 
 %% Setting colors for using in plots
 ColorPattern; 
@@ -197,8 +197,6 @@ for idx_ = 1:4
     [beta_k_g3_m3_sigma_nu_AIC,beta_k_g3_m3_sigma_nu_BIC, beta_k_g3_m3_sigma_nu_NLL] = reformatIC(beta_k_g3_m3_sigma_nu_IC, cond);
     [g2_g3_m3_sigma_nu_AIC,g2_g3_m3_sigma_nu_BIC, g2_g3_m3_sigma_nu_NLL] = reformatIC(g2_g3_m3_sigma_nu_IC, cond);
     [beta_k_g2_g3_m3_sigma_nu_AIC,beta_k_g2_g3_m3_sigma_nu_BIC, beta_k_g2_g3_m3_sigma_nu_NLL] = reformatIC(beta_k_g2_g3_m3_sigma_nu_IC, cond);
-    [beta1_beta2_g2_g3_sigma_nu_AIC,beta1_beta2_g2_g3_sigma_nu_BIC, beta1_beta2_g2_g3_sigma_nu_NLL] = reformatIC(beta1_beta2_g2_g3_sigma_nu_IC, cond);
-    
     % Box Plot of AIC
     ICType = "AIC";
     All_AIC = [sigma_nu_AIC,...              %2
@@ -216,8 +214,7 @@ for idx_ = 1:4
                beta_k_g2_m3_sigma_nu_AIC,... %5.2
                beta_k_g3_m3_sigma_nu_AIC,... %5.3
                g2_g3_m3_sigma_nu_AIC,...     %5.4
-               beta_k_g2_g3_m3_sigma_nu_AIC,...%6.1
-               beta1_beta2_g2_g3_sigma_nu_AIC];
+               beta_k_g2_g3_m3_sigma_nu_AIC]; %6.1
 
     plotBoxPlot(All_AIC, ModelNames, ICType, config, cond);
     plotErrorPlot(All_AIC, ModelNames, ICType, config, cond);
@@ -239,8 +236,7 @@ for idx_ = 1:4
                beta_k_g2_m3_sigma_nu_BIC,... %5.2
                beta_k_g3_m3_sigma_nu_BIC,... %5.3
                g2_g3_m3_sigma_nu_BIC,...     %5.4
-               beta_k_g2_g3_m3_sigma_nu_BIC,...
-               beta1_beta2_g2_g3_sigma_nu_BIC];%6.1
+               beta_k_g2_g3_m3_sigma_nu_BIC];%6.1
 
     plotBoxPlot(All_BIC, ModelNames, ICType, config, cond);
     plotErrorPlot(All_BIC, ModelNames, ICType, config, cond);
@@ -262,8 +258,7 @@ for idx_ = 1:4
                beta_k_g2_m3_sigma_nu_NLL,... %4.2
                beta_k_g3_m3_sigma_nu_NLL,... %4.3
                g2_g3_m3_sigma_nu_NLL,...     %4.4
-               beta_k_g2_g3_m3_sigma_nu_NLL,...
-               beta1_beta2_g2_g3_sigma_nu_NLL];%5.1
+               beta_k_g2_g3_m3_sigma_nu_NLL];%5.1
 
     plotBoxPlot(All_NLL, ModelNames, ICType, config, cond);
     plotErrorPlot(All_NLL, ModelNames, ICType, config, cond);

@@ -51,7 +51,8 @@ end
 %mean_angle = mean(Alphas);
 mean_angle = mean(ActualAlphas);
 %mean_distance = mean(Betas);
-mean_distance = mean(ActualBetas);
+%mean_distance = mean(ActualBetas);
+mean_distance = mean(ActualBetas(flagOoB==0)); %using data from only the non-oob trials...
 
 for tr = 1:sampleSize
     %% extract the physical data info

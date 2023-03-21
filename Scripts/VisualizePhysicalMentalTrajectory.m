@@ -42,10 +42,10 @@ ColorPattern;
 
 %% visualize some trials
 id = 13;
-trailNum=4;
+trailNum=7;
 %randomly pick a trial in no change condition
 %trials = randsample(8,trailNum);
-trials = [2,3,5,7];
+trials = [1,2,3,4,5,6,7];
 %trials = [4,6,8,9];
 
 for tN=1:trailNum
@@ -55,11 +55,12 @@ end
 
 %% visualize some trials
 id = 28;
-trailNum=4;
+trailNum=7;
 %randomly pick a trial in no change condition
 %trials = randsample(8,trailNum);
 %trials = [2,3,5,7];
-trials = [4,6,8,9];
+%trials = [4,6,8,9];
+trials = [1,2,3,4,5,6,7];
 
 for tN=1:trailNum
     trial_id = trials(tN);
@@ -287,7 +288,7 @@ yl.Color = 'red';
 yl.LineWidth = 2;
 yl.LineStyle = '--';
 
-[h,p, stats] = ttest(noNan_L1Ratio, noNan_L2Ratio, "Tail", "left")
+[h,p, ci, stats] = ttest(noNan_L1Ratio, noNan_L2Ratio, "Tail", "left")
 
 set(gca, ...
 'Box'         , 'off'       , ...

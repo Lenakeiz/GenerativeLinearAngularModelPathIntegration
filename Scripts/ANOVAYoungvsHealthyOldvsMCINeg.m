@@ -18,7 +18,7 @@ config.NumParams        =   length(config.ParamName);
 VAM;
 
 %% Model run completed, preparing the data for plotting figures
-config.ResultFolder     =   pwd + "/Output/ModelFigures/"+config.ModelName+"/Young_HealthyOld_MCINeg";
+config.ResultFolder     =   pwd + "/Output/ModelFigures/"+config.ModelName+"/Actualangle_Young_HealthyOld_MCINeg";
 %create storing folder for trajectory if not exist
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);

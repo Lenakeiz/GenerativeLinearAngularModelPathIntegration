@@ -13,9 +13,6 @@ function [negloglikelihood] = Estimate_beta1_beta2_g2_g3_sigma_nu(beta1, beta2, 
 %% information necessary for running parameter estimation
 DX              =   Input.DX;
 THETAX          =   Input.THETADX;
-L1Dur           =   Input.L1Dur;
-L2Dur           =   Input.L2Dur;
-StandingDur     =   Input.StandingDur;
 flagOoB         =   Input.flagOoB;
 
 sampleSize          =   size(DX,2);
@@ -44,7 +41,6 @@ for tr = 1:sampleSize
     %calculate the actuall return angle
     ActualAlphas(tr) = THETAX{tr}(3);
 end
-%mean_angle = mean(Alphas);
 mean_angle = mean(ActualAlphas);
 
 for tr = 1:sampleSize
@@ -54,8 +50,6 @@ for tr = 1:sampleSize
     l3          =       DX{tr}(3);
     theta2      =       THETAX{tr}(2); 
     theta3      =       THETAX{tr}(3); 
-    durationL1  =       L1Dur{tr}; 
-    durationL2  =       L2Dur{tr};
     
     %% whether to use weber's law to scaling the noise strength
     if config.useweber == true
@@ -116,23 +110,6 @@ for tr = 1:sampleSize
     neg_ll = neg_ll_angle + neg_ll_dist;
 
     negloglikelihood = negloglikelihood + neg_ll;
-
-    
-%     %distance noise difference
-%     l3_prime    = h;
-%     dist_diff   = l3-l3_prime;
-% 
-%     %     %the negative loglikelihood of distance on non-OoB trials
-%     if flagOoB(tr)==0
-%         %this is a non-OoB trial
-%         neg_ll_angle = 1/2*log(2*pi) + log(nu_scaled) + (angluar_diff^2)/(2*nu_scaled^2); %Gaussian distribution
-%         neg_ll_dist = 1/2*log(2*pi) + log(sigma_scaled) + (dist_diff^2)/(2*sigma_scaled^2);
-%         %total negative loglikelihood
-%         neg_ll = neg_ll_angle + neg_ll_dist;
-%         negloglikelihood = negloglikelihood + neg_ll;
-%     end
-
-
 
 end
 end

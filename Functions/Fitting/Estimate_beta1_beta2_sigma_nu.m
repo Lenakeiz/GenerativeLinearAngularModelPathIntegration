@@ -1,10 +1,10 @@
-function [negloglikelihood] = Estimate_beta_k_g3_m3_sigma_nu(beta, k, g3, m3, sigma, nu, Input, config)
-%   find the likelihood of the beta - k- g2 - g3 - sigma - nu Model
+function [negloglikelihood] = Estimate_beta1_beta2_sigma_nu(beta1, beta2, sigma, nu, Input, config)
+%   find the likelihood of the beta1 -beta2 - g2 - g3 - sigma - nu Model
 %   Args:
-%       beta is the decay factor for the mental distance
-%       k
+%       beta1 is the decay factor for the mental distance on leg1
+%       beta2 is the decay factor for the mental distance on leg2
+%       g2 is the rotation gain for the second turn (measuring encoding error)
 %       g3 is the rotation gain for the return (measuring production error)
-%       m3 is the regression to mean effect in return distance
 %       sigma is the standard deviation for the Gaussian distribution of the return distance
 %       nu is the standard deviation for the Gaussian distribution of the return angle
 %       Input contains all the data information for estimating, see PerformGroupFit for how it was generated
@@ -13,24 +13,21 @@ function [negloglikelihood] = Estimate_beta_k_g3_m3_sigma_nu(beta, k, g3, m3, si
 %% information necessary for running parameter estimation
 DX              =   Input.DX;
 THETAX          =   Input.THETADX;
-L1Dur           =   Input.L1Dur;
-L2Dur           =   Input.L2Dur;
-StandingDur     =   Input.StandingDur;
 flagOoB         =   Input.flagOoB;
 
 sampleSize          =   size(DX,2);
 negloglikelihood    =   0;
 
-%% find the correct mean return angle/distance based on all trials 
+%% find the correct mean return angle based on all trials 
 Alphas = zeros(sampleSize,1);
 ActualAlphas = zeros(sampleSize,1);
 Betas = zeros(sampleSize,1);
-ActualBetas = zeros(sampleSize,1);
 for tr = 1:sampleSize
     %extract the physical data info
     l1      = DX{tr}(1);
     l2      = DX{tr}(2);
     theta2  = THETAX{tr}(2);
+    Betas(tr) = theta2;
 
     %calculate the correct return angle
     phy_p1  = [l1,0];
@@ -40,20 +37,11 @@ for tr = 1:sampleSize
     alpha   = deg2rad(alpha);%transfer from degree to radians
     alpha   = mod(alpha, 2*pi);  %wrap to (0,2pi)  
     Alphas(tr) = alpha;
-
+    
     %calculate the actuall return angle
     ActualAlphas(tr) = THETAX{tr}(3);
-
-    beta    = norm(phy_p2);
-    Betas(tr) = beta;
-
-    ActualBetas(tr) = DX{tr}(3); 
 end
-%mean_angle = mean(Alphas);
 mean_angle = mean(ActualAlphas);
-%mean_distance = mean(Betas);
-%mean_distance = mean(ActualBetas);
-mean_distance = mean(ActualBetas(flagOoB==0)); %using data from only the non-oob trials...
 
 for tr = 1:sampleSize
     %% extract the physical data info
@@ -62,9 +50,6 @@ for tr = 1:sampleSize
     l3          =       DX{tr}(3);
     theta2      =       THETAX{tr}(2); 
     theta3      =       THETAX{tr}(3); 
-    durationL1  =       L1Dur{tr}; 
-    durationL2  =       L2Dur{tr};
-    durationStand =     StandingDur{tr};
     
     %% whether to use weber's law to scaling the noise strength
     if config.useweber == true
@@ -77,17 +62,14 @@ for tr = 1:sampleSize
 
     %mental point 1 (asuming a constant speed)
     %considering standing duration or not
-    if config.includeStand==true
-        men_length1 = l1*k*(1-exp(-beta*durationL1))/(beta*durationL1)*exp(-beta*(durationL2+durationStand));
-    else
-        men_length1 = l1*k*(1-exp(-beta*durationL1))/(beta*durationL1)*exp(-beta*durationL2);
-    end
+    men_length1 = l1*beta1;
     men_p1 = [men_length1,0];
     
     theta2_prime = theta2;
+    %theta2_prime = g2*theta2+mean_ecd_angle*(1-g2);
 
     %mental point 2, (asuming a constant speed)
-    men_length2 = l2*k*(1-exp(-beta*durationL2))/(beta*durationL2);
+    men_length2 = l2*beta2;
     men_p2      = [men_length1+men_length2*cos(theta2_prime),men_length2*sin(theta2_prime)];
 
     %calculate length of mental vector 3
@@ -99,20 +81,18 @@ for tr = 1:sampleSize
     alpha       = deg2rad(alpha);   %transfer from degree to radians
     
     %mental turning angle
-    sign_alpha = sign(alpha);
-    theta3_prime = g3*abs(alpha)+mean_angle*(1-g3); %regress to mean correct return angle
-    theta3_prime = sign_alpha*theta3_prime;
+    theta3_prime = alpha;
     
     %angular noise difference
     angluar_diff = theta3-theta3_prime;
-    %the negative loglikelihood of angle
+
     neg_ll_angle = 1/2*log(2*pi) + log(nu_scaled) + (angluar_diff^2)/(2*nu_scaled^2); %Gaussian distribution
 
     %distance noise difference
-    l3_prime    = m3*h+mean_distance*(1-m3);    %regress to mean correct return distance
+    l3_prime    = h;
     dist_diff   = l3-l3_prime;
 
-    %the negative loglikelihood of distance on non-OoB trials
+    %     %the negative loglikelihood of distance on non-OoB trials
     if flagOoB(tr)==0
         %this is a non-OoB trial
         neg_ll_dist = 1/2*log(2*pi) + log(sigma_scaled) + (dist_diff^2)/(2*sigma_scaled^2);
@@ -125,7 +105,6 @@ for tr = 1:sampleSize
     neg_ll = neg_ll_angle + neg_ll_dist;
 
     negloglikelihood = negloglikelihood + neg_ll;
-
 
 end
 end

@@ -307,7 +307,8 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         YoungParamMean      = mean(YoungParamAllConds, 2);
         HealthyOldParamMean = mean(HealthyOldParamAllConds, 2);
         MCIParamMean        = mean(MCIParamAllConds, 2);
-    
+        
+        %[h,p,~,stat]=ttest(MCIParamMean,1,"Tail","right")
         %% set figure info
         f = figure('visible','off','Position', [100 100 500 500]);
         %%% Font type and size setting %%%

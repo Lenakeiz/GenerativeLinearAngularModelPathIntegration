@@ -1,39 +1,33 @@
-%% Preparing the data
-VAM_PrepareBaseConfig
+% Preparing the data
+VAM_PrepareBaseConfig;
 
 % Preprocessing the data
-VAM_PreprocessData
+VAM_PreprocessData;
 
-% Setting the model we are interested in
-% Eventually modify config paramteters we are interested in. For example
-% for this graph we are not interested in running the model with splitted
-% conditions so we will set the relative config to false 
-% force it to not run
-rng("default")
-config.useTrialFilter = true;
 config.ModelName        =   "beta_k_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
-config.NumParams        =   length(config.ParamName); %length(config.ParamName); % Set 100 here to avoid producing the model
-% Run the model
-VAM
+config.NumParams        =   length(config.ParamName);
 
-%% Model run completed, preparing the data for plotting figures
-config.ResultFolder = pwd + "/Output/MRIvsModelParamsLinearRegressions/Beta_k_g2_g3_sigma_nu";
-% Create storing folder for trajectory if not exist
+% Model fitting
+VAM;
+
+% Preparing output
+config.ResultFolder = pwd + "/Output/Fig_6";
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
 end
 
-ColorPattern;
+% Generating color scheme for our paper
+ColorPattern; 
 
-%% Getting Information from results:
+% Collecting information from output
 YoungControlsParameters   = averageAcrossConditions(YoungControls.Results.estimatedParams);
 HealthyControlsParameters = averageAcrossConditions(HealthyControls.Results.estimatedParams);
 MCIUnkParameters          = averageAcrossConditions(MCIUnk.Results.estimatedParams);
 MCINegParameters          = averageAcrossConditions(MCINeg.Results.estimatedParams);
 MCIPosParameters          = averageAcrossConditions(MCIPos.Results.estimatedParams);
 
-%% Preparing linear mixed effect table
+% Preparing linear mixed effect table
 HealthyControls_lmetable = createLMETable(HealthyControls.MRI,HealthyControlsParameters);
 MCIUnk_lmetable          = createLMETable(MCIUnk.MRI,MCIUnkParameters);
 MCINeg_lmetable          = createLMETable(MCINeg.MRI,MCINegParameters);
@@ -43,7 +37,8 @@ MRIModelParamsDataTable  = [HealthyControls_lmetable; MCIUnk_lmetable; MCINeg_lm
 
 %Removing nans (either from Nan parameters model or missing mri data)
 filter = isnan(MRIModelParamsDataTable.beta) | isnan(MRIModelParamsDataTable.MCI);
-% Counting removed samples
+% Counting removed samples. This takes into account also the exclusion from
+% the preprocessing step
 disp("Total Removed samples = " + sum(filter));
 MRIModelParamsDataTable = MRIModelParamsDataTable(~filter,:);
 
@@ -213,17 +208,6 @@ function plotLinearRegression(fullTable,x,xLabelPlot,y,yLabelPlot,addLine,plotIn
     ylabel(yLabelPlot, Interpreter="tex");
 
     title("");
-%     % pvalue is Bonferroni corrected already
-%     if(pvalue < 0.001/5)
-%         title("***")
-%     elseif (pvalue < 0.01/5)
-%         title("**")
-%     elseif (pvalue < 0.05/5)
-%         title("*")
-%     end
-
-    %legplotInfo = legend([axSc{1}, axSc{2}, axSc{3}, axSc{4}], {'HC' 'MCI unk' 'MCI-' 'MCI+'}, "Location", "northeast", "AutoUpdate", "off");
-    %legplotInfo.FontSize = plotInfo.legendFontSize;
     
     ax = gca;
 
@@ -247,10 +231,6 @@ function plotLinearRegression(fullTable,x,xLabelPlot,y,yLabelPlot,addLine,plotIn
 
     filename = convertCharsToStrings(yLabelPlot) + "vs" + convertCharsToStrings(xLabelPlot);
     
-%     if exist(plotInfo.ResultFolder+"/"+filename+".png","file") == 2
-%         delete(plotInfo.ResultFolder+"/"+filename+".png");
-%     end
-
     exportgraphics(f,plotInfo.ResultFolder+"/"+filename+".png",'Resolution',300);
     exportgraphics(f,plotInfo.ResultFolder+"/"+filename+".pdf",'Resolution',300, 'ContentType','vector');
 

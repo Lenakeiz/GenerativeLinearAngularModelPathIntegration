@@ -1,4 +1,5 @@
 %% Prepare a simple config file for the model to run
+% Andrea Castegnaro, UCL, 2022 uceeaca@ucl.ac.uk
 %% Cleaning variables
 clearvars; clear all; close all; clc;
 rng('default'); %for code reproducibility

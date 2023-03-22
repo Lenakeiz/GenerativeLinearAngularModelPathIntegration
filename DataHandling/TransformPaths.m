@@ -1,5 +1,6 @@
 function [outData] = TransformPaths(Data)
 %% TransformPaths
+% Andrea Castegnaro, UCL, 2022 uceeaca@ucl.ac.uk
 % Transform all the paths so they are all facing the positive x-axis and
 % starting from (0,0). Mirrors all the right turns in the outbound
 % so that all paths are left turns.

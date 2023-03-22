@@ -1,9 +1,5 @@
-%% Main entry point for the Vector Addiction Modelling (VAM) project
-% This script loads the data the from the Howett 2019., Brain paper. It
-% prepare the variables and runs the modelling described in the current
-% paper. Each figure will have a separate script that can be run after this
-% script has been correctly executed. For additional dependecies please
-% refer to the README file. 
+%% Vector Addiction Modelling (VAM) Model
+% Andrea Castegnaro, UCL, 2022 uceeaca@ucl.ac.uk
 % This script requires a config variable set before running. An example of
 % the config variable can be created with VAM_PrepareBaseConfig
 

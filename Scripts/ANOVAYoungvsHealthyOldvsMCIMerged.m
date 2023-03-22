@@ -6,49 +6,36 @@ VAM_PrepareBaseConfig;
 % Preprocessing the data
 VAM_PreprocessData;
 
-% Preparing the data and Slecting the Model
-
-% config.ModelName        =   "beta_g2_k2_g3_sigma_nu";
-% config.ParamName        =   ["beta", "g2", "k2", "g3", "sigma", "nu"];
-
 config.ModelName        =   "beta_k_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
-
-% config.ModelName        =   "beta_g2_g3_sigma_nu";
-% config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
-% config.ModelName        =   "stangl";
-% config.ParamName        =   ["beta", "alpha", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-% Run the model
+% Model fitting
 VAM;
 
-%% Model run completed, preparing the data for plotting figures
+% Preparing output
 config.ResultFolder     =   pwd + "/Output/ModelFigures/"+config.ModelName+"/Actualangle_Young_HealthyOld_MCICombined";
-%create storing folder for trajectory if not exist
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
 end
 
-%% Generating color scheme
+% Generating color scheme for our paper
 ColorPattern; 
 
-%% Getting Information from results:
+% Collecting information from output
 AllYoungParams      =   YoungControls.Results.estimatedParams;
 AllHealthyOldParams =   HealthyControls.Results.estimatedParams;
 AllMCIPosParams     =   MCIPos.Results.estimatedParams;
 AllMCINegParams     =   MCINeg.Results.estimatedParams;
 AllMCIUnkParams     =   MCIUnk.Results.estimatedParams;
 
-%% merge MCI parameters together to get MCICombined
 [AllMCIParams, AllMCIParamsStatusIndex]= MergeMCI(AllMCIPosParams, AllMCINegParams, AllMCIUnkParams);
-%AllMCIParams = AllMCINegParams;
-%% TwowayAnova
+
+% TwowayAnova Analysis
 [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_YoungHealthyOldMCICombined(AllYoungParams, AllHealthyOldParams, AllMCIParams, config);
 
-%% BarScatter Plot between Young and HealthyOld for all Fitted Params
+% Plot results
 BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams, anova_tab, config);
-%%
 BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCIParams, AllMCIParamsStatusIndex, multicomp_tab1, config)
 
 %%

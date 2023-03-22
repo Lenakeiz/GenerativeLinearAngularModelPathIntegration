@@ -1,5 +1,18 @@
 function [outGroup] = CalculateTrackingPath(Group, config)
 %% CalculateTrackingPath
+% Andrea Castegnaro, UCL, 2022 uceeaca@ucl.ac.uk
+% Calculate trial information based on tracking data.
+% Despite having a separate output in our dataset (i.e. cones locations,
+% cones triggered position, cones spawning times, triggered position, out
+% of bound location on incorrect trials) we wanted to analyse the tracking
+% data saved for each trial. We reconstructed from the tracking data the
+% following quantities. Speed along segments l1 and l2, body angular
+% rotation at cone 3, reconstructed walked lengths of l1 and l2, time spent
+% on l1 and l2, time spent standing at cone 2.
+% We used the body angular rotation at cone 3 to detect trials that needed
+% a visual check, to see if participants completed the triangle using the
+% short or long rotation, to account for the correct angular execution
+% error.
 % ===================================================================================
 
 pSize = size(Group.Path,2);

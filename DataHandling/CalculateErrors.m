@@ -8,21 +8,21 @@ function [ Errors,  OoBInfo] = CalculateErrors(FlagPos, TrigPos, OutOfBoundPos, 
 % local variable for quick visualization. 
 debug_plotting = 0;
 
-%% Getting cone positions
+% Getting cone positions
 flagPosMat = cell2mat(FlagPos);
 firstConePositions = flagPosMat(1 : 3 : end, [1,3]);
 secondConePositions = flagPosMat(2 : 3 : end, [1,3]);
 thirdConePositions = flagPosMat(3 : 3 : end, [1,3]);
 
-%% Getting triggered position excluding y values
+% Getting triggered position excluding y values
 triggerPositions = cell2mat(TrigPos);
 triggerPositions = triggerPositions(:,[1,3]);
 
-%% Getting triggered position excluding y values
+% Getting OoB position excluding y values
 outofboundpos = cell2mat(OutOfBoundPos);
 outofboundpos = outofboundpos(:,[1,3]);
 
-%% Calculating absolute error distance as sqrt((x2-x1)^2 + (z2-z1)^2)
+% Calculating absolute error distance
 AbsErrorDistance = sqrt(sum((triggerPositions - firstConePositions).^2,2));
 AbsWalkedSegment = sqrt(sum((triggerPositions - thirdConePositions).^2,2));
 OoBLength = zeros(size(triggerPositions,1),1);

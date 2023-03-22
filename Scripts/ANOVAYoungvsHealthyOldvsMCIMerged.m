@@ -1,12 +1,12 @@
 %% two-way Anova (group*condition) on Young Controls, Elderly Controls and MCI
 
-%% Preparing the data
+% Preparing the data
 VAM_PrepareBaseConfig;
 
-%% Preprocessing the data
+% Preprocessing the data
 VAM_PreprocessData;
 
-%% Preparing the data and Slecting the Model
+% Preparing the data and Slecting the Model
 
 % config.ModelName        =   "beta_g2_k2_g3_sigma_nu";
 % config.ParamName        =   ["beta", "g2", "k2", "g3", "sigma", "nu"];

@@ -5,17 +5,17 @@ VAM_PrepareBaseConfig
 VAM_PreprocessData
 
 %% Setting the model we are interested in
-% Eventually modify config paramteters we are interested in. For example
-% for this graph we are not interested in running the model so we will
-% force it to not run
 config.ModelName        =   "beta_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
-config.NumParams = 100; % Set this here to prevent the modelling to run
+% Adding NumParams different from the number of parameters model will
+% prevent the model to fit, resulting with only behavioural data as ouput
+config.NumParams = 100;
+
 % Run the model
 VAM
 
 %% Model completed, preparing the data for plotting figures
-config.ResultFolder = pwd + "/Output/PaperFigs/Fig1B";
+config.ResultFolder = pwd + "/Output/PaperFigs/Fig1";
 %create storing folder for trajectory if not exist
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);

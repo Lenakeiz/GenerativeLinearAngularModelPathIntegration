@@ -20,8 +20,7 @@ function Group = AddNeuroPsychData(Group, neuroPsychData)
     ids = cellstr(neuroPsychData.ID);
     NeuroPsych = table();
 
-    % Add here the columns you are interested to get from the
-    % neuropsych data, if wanted to check for more
+    % Extracting 
     neuroPsychIndices = [15 16 20];
 
     for i = 1:length(Group.Info)

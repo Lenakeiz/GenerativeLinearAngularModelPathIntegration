@@ -1,7 +1,7 @@
-%% Vector Addiction Modelling (VAM) Model
+%% Generative Linear-Angular Model of Path Integration (GLAMPI)
 % Andrea Castegnaro, UCL, 2022 uceeaca@ucl.ac.uk
-% This script requires a config variable set before running. An example of
-% the config variable can be created with VAM_PrepareBaseConfig
+% This script is a wrapper for the model fitter written by Zilong Ji
+% It requires that GLAMPI_
 
 if (exist('config','var') == 0)
     ME = MException("MyComponent:noSuchVariable","Config variable not found, please run VAM_PrepareBaseConfig to generate a base one");

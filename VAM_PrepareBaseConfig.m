@@ -1,8 +1,14 @@
-%% Prepare a simple config file for the model to run
+%% Generative Linear-Angular Model of Path Integration (GLAMPI) Base Configurator
 % Andrea Castegnaro, UCL, 2022 uceeaca@ucl.ac.uk
+% This script loads the Howett et al., 2019 behavioural and MRI data. The
+% dataset contains also the healthy young participants (no MRI data for
+% them). It also set global properties that are used for the preprocecssing
+% stage and for fitting the model. Information for the config parameters
+% can be found within the script.
+
 %% Cleaning variables
 clearvars; clear all; close all; clc;
-rng('default'); %for code reproducibility
+rng('default');
 
 %% Loading data
 disp('%%%%%%%%%%%%%%% Data loading ... %%%%%%%%%%%%%%%');
@@ -13,8 +19,8 @@ disp('%%%%%%%%%%%%%%% Adding MRI data ... %%%%%%%%%%%%%%%');
 LoadMRIData;
 
 %% Loading NeuroPsychological data
-disp('%%%%%%%%%%%%%%% Adding NeuroPsychological data ... %%%%%%%%%%%%%%%');
-LoadNeuroPsychData;
+%disp('%%%%%%%%%%%%%%% Adding NeuroPsychological data ... %%%%%%%%%%%%%%%');
+%LoadNeuroPsychData;
 
 %% setting the configuration
 config.Speed.alpha                                      = 0.9;    % Paramanter for running speed calculation

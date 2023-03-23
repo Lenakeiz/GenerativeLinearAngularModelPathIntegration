@@ -1,59 +1,58 @@
-%% two-way Anova (group*condition) on MCI+ and MCI-
-%% Preparing the data
+%% Script to create output for Fig. 4 - parameter comparisons between MCI positive and MCI negative
+% Zilong Ji, UCL, 2022 zilong.ji@ucl.ac.uk
+% Fits the model on all of the groups and run a two-way Anova
+% (group*condition) on MCI positive and MCI negative
+% Output: for each parameter fitted by the model output one boxplot with
+% the three groups and performance splitted by environmental condition and
+% a boxplot with three groups performance averaged across environmental
+% conditions
+
+% Preparing the data
 VAM_PrepareBaseConfig;
 
-%% Preprocessing the data
+% Preprocessing the data
 VAM_PreprocessData;
 
-%% Preparing the data and Slecting the Model
-% config.ModelName        =   "beta_g2_g3_sigma_nu";
-% config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
-
-% config.ModelName        =   "beta_g2_k2_g3_sigma_nu";
-% config.ParamName        =   ["beta", "g2", "k2", "g3", "sigma", "nu"];
-
+% Model fitting
 config.ModelName        =   "beta_k_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
 
-% config.ModelName        =   "stangl";
-% config.ParamName        =   ["beta", "alpha", "sigma", "nu"];
-
 config.NumParams        =   length(config.ParamName);
-% Run the model
-VAM;
-%%
-AllMCIPosParams     =   MCIPos.Results.estimatedParams;
-AllMCINegParams     =   MCINeg.Results.estimatedParams;
 
-%% Generate result folder and Setting colors for using in plots
-config.ResultFolder     =   pwd + "/Output/ModelFigures/"+config.ModelName+"/Actualangle_MCIPosvsMCINeg";
-%create storing folder for trajectory if not exist
+VAM;
+
+% Preparing the output
+config.ResultFolder     =   pwd + "/Output/Fig4/"+config.ModelName+"/MCIPosvsMCINeg";
+
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
 end
 
-%% Generating color scheme
+% Generating color scheme for our paper
 ColorPattern; 
 
-%% TwowayAnova
+% Collecting information from output
+AllMCIPosParams     =   MCIPos.Results.estimatedParams;
+AllMCINegParams     =   MCINeg.Results.estimatedParams;
+
+% TwowayAnova Analysis
 [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_MCIPosMCINeg(AllMCIPosParams, AllMCINegParams, config);
 
-%% BarScatter Plot between Young and HealthyOld for all Fitted Params
+% Plot results
 BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, config);
-%%
 BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, multicomp_tab1, config)
 
 %%
 function BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, config)
     
-    numConds = 3; %3 is the condition number
+    numConds = 3; % environmental conditions
     ParamName = config.ParamName;
     for ParamIndx=1:length(ParamName)
 
-        MCIPosParamAllConds = []; %dimension are different, so separate from MCIParamAllConds
+        MCIPosParamAllConds = []; 
         MCINegParamAllConds = [];
         for TRIAL_FILTER=1:numConds
-            %% extract data
+            %% extract data for each condition
             MCIPosParam = AllMCIPosParams{TRIAL_FILTER}(:,ParamIndx);
             MCIPosParamAllConds = [MCIPosParamAllConds,MCIPosParam];
 
@@ -61,43 +60,41 @@ function BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, confi
             MCINegParamAllConds = [MCINegParamAllConds,MCINegParam];
         end
 
-        %remove Nan rows (nan coz of 1, removing participants with short walking length; 2, not enough trials for parameter estimation)
+        % remove Nan rows (because of 1) removing participants with short walking length; 2) not enough trials for parameter estimation)
         nonNAN_MCIPosParamAllConds = removeNanRows(MCIPosParamAllConds);
         nonNAN_MCINegParamAllConds = removeNanRows(MCINegParamAllConds);
     
-        %% set figure info
         f = figure('visible','off','Position', [100 100 1000 500]);
-        %%% Font type and size setting %%%
-        % Using Arial as default because all journals normally require the font to
-        % be either Arial or Helvetica
+
         set(0,'DefaultAxesFontName','Arial')
         set(0,'DefaultTextFontName','Arial')
         set(0,'DefaultAxesFontSize',12)
         set(0,'DefaultTextFontSize',12)     
 
-        %%% Color definition %%%
         colorForMCIPos = config.color_scheme_npg(6,:);
         colorForMCINeg = config.color_scheme_npg(3,:);
 
-        %set params
+        % parameters set for controlling visual output
         whisker_value               =   1.5;
         box_lineWidth               =   0.3;
         box_widths_value            =   0.2;
-        box_color_transparency      =   0.5;        %faceAlpha
-        center_x                    =   [1,2,3];    %center of box (three conditions)
-        shift_value                 =   0.2;        %box shift from center
+        box_color_transparency      =   0.5;
+        center_x                    =   [1,2,3];    
+        %center of box (three conditions)
+        shift_value                 =   0.2;        
+        %box shift from center
         median_lineWidth            =   2;
         median_color                =   'k';
         scatter_jitter_value        =   0.1;
         scatter_markerSize          =   30;
         scatter_marker_edgeColor    =   'k';
         scatter_marker_edgeWidth    =   0.5;
-        scatter_color_transparency  =   0.7;        %faceAlpha        
+        scatter_color_transparency  =   0.7;     
 
-        %% boxplot for each column in MCIPos
+        %% Boxplot for each column in MCI positive
         bp1 = boxplot(MCIPosParamAllConds, ...
                     'Whisker',whisker_value, ...
-                    'symbol','', ... %symbol ='' making outlier invisible
+                    'symbol','', ...
                     'Color','k', ...
                     'Notch','on', ...
                     'widths',box_widths_value,...
@@ -105,19 +102,18 @@ function BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, confi
         set(bp1,'linewidth',box_lineWidth);
 
         hold on
-        %boxplot for each column in MCIMerge
+        
+        %% Boxplot for each column in MCI negative
         bp2 = boxplot(MCINegParamAllConds, ...
                     'Whisker',whisker_value, ...
-                    'symbol','', ... %symbol ='' making outlier invisible
+                    'symbol','', ...
                     'Color','k', ...
                     'Notch','on', ...
                     'widths',box_widths_value,...
                     'positions', center_x+shift_value);
         set(bp2,'linewidth',box_lineWidth);
 
-        %% Coloring each box
-        %findobj first getting the three boxes for MCINeg (from bp2) from right to left
-        %then getting the three boxes for MCIPos (frm bp1) from right to left
+        %% Boxplot visual changes
         h = findobj(gca,'Tag','Box'); 
         for i = 1:length(h)
             if i<4  %get the MCINeg box
@@ -127,14 +123,14 @@ function BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, confi
             end
         end
 
-        %% Adjusting median
+        %% Median visual changes
         h=findobj(gca,'tag','Median');
         for i = 1:length(h)
             h(i).LineWidth = median_lineWidth;
             h(i).Color = median_color;
         end
 
-        %% add scatter plot and the mean of MCIPos
+        %% Scatter plot for data and mean (MCI positive)
         num_points = size(MCIPosParamAllConds,1);
         for i=1:size(MCIPosParamAllConds,2)
             hold on
@@ -157,7 +153,7 @@ function BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, confi
                     'LineWidth',scatter_marker_edgeWidth);
         end
 
-        %% add scatter plot and the mean of MCINeg
+        %% Scatter plot for data and mean (MCI negative)
         num_points = size(MCINegParamAllConds,1);
         for i=1:size(MCINegParamAllConds,2)
             hold on
@@ -180,14 +176,12 @@ function BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, confi
                     'LineWidth',scatter_marker_edgeWidth);
         end
 
-        %% Further post-processing the figure
-
-        %calculate te ylim
+        %% Figure post-processing
+        % calculate the Y limits
         alldata = [MCIPosParamAllConds;MCINegParamAllConds];
         maxdata = max(alldata,[],'all');
         mindata = min(alldata, [], 'all');
         lowupYlim = [mindata-.1*(maxdata-mindata)-eps, maxdata+.1*(maxdata-mindata)+eps]; 
-        %eps to make sure when mindata=maxdata, there won't be an error
 
         set(gca, ...
             'Box'         , 'off'     , ...
@@ -204,20 +198,17 @@ function BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, confi
         allpatches = findall(gca,'type','Patch');
         legend(allpatches(1:3:end), {'MCIPos' 'MCINeg'}, 'Location','northeast', 'NumColumns',2);
 
-        %extract pvalue for group, conditino and interaction to show on the figure 
+        %extract pvalue for group, conditino and interaction
         anova_result = anova_tab{ParamIndx};
         group_pvalue = anova_result{2,7};
         condition_pvalue = anova_result{3,7};
         interaction_pvalue = anova_result{4,7};
-%         str = {['Group Pvalue = ',sprintf('%.2g',group_pvalue)],...
-%                ['Condition Pvalue = ',sprintf('%.2g',condition_pvalue)],...
-%                ['Interaction Pvalue = ',sprintf('%.2g',interaction_pvalue)]};
-%         annotation('textbox',[0.2 0.6 0.3 0.3],'String',str,'FitBoxToText','on');
+
         title(strcat(['Group P = ',sprintf('%.2g',group_pvalue)],...
               ['    Condition P = ',sprintf('%.2g',condition_pvalue)],...
               ['    Interaction P = ',sprintf('%.2g',interaction_pvalue)]))
 
-        %% save figure
+        %% export figure
         exportgraphics(f,config.ResultFolder+"/Box_"+ParamName(ParamIndx)+".png",'Resolution',300);
         exportgraphics(f,config.ResultFolder+"/Box_"+ParamName(ParamIndx)+".pdf",'Resolution',300, 'ContentType','vector');
 
@@ -227,7 +218,7 @@ end
 %%
 function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, multicomp_tab1, config)
     
-    numConds = 3; %3 is the condition number
+    numConds = 3; % environmental conditions
     ParamName = config.ParamName;
     for ParamIndx=1:length(ParamName)
 
@@ -243,41 +234,37 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
             MCINegParamAllConds = [MCINegParamAllConds,MCINegParam];
         end
 
-        %remove Nan rows (nan coz of 1, removing participants with short walking length; 2, not enough trials for parameter estimation)
+        % remove Nan rows (because of 1) removing participants with short walking length; 2) not enough trials for parameter estimation)
         MCIPosParamAllConds = removeNanRows(MCIPosParamAllConds);
         MCINegParamAllConds = removeNanRows(MCINegParamAllConds);
 
         MCIPosParamMean = mean(MCIPosParamAllConds, 2);
         MCINegParamMean = mean(MCINegParamAllConds, 2);
 
-        %[h,p,~,stat]=ttest(MCIPosParamMean,1,"Tail","right")
-        %% set figure info
         f = figure('visible','off','Position', [100 100 500 500]);
-        %%% Font type and size setting %%%
-        % Using Arial as default because all journals normally require the font to
-        % be either Arial or Helvetica
+
         set(0,'DefaultAxesFontName','Arial')
         set(0,'DefaultTextFontName','Arial')
         set(0,'DefaultAxesFontSize',12)
         set(0,'DefaultTextFontSize',12)     
-        %%% Color definition %%%
+
         colorForMCIPos = config.color_scheme_npg(6,:);
         colorForMCINeg = config.color_scheme_npg(3,:);
 
-        %set params
+        % parameters set for controlling visual output
         whisker_value               =   1.5;
         box_lineWidth               =   0.3;
         box_widths_value            =   0.4;
-        box_color_transparency      =   0.5; %faceAlpha
+        box_color_transparency      =   0.5; 
         median_lineWidth            =   2;
         median_color                =   'k';
         scatter_jitter_value        =   0.2;
         scatter_markerSize          =   50;
         scatter_marker_edgeColor    =   'k';
         scatter_marker_edgeWidth    =   0.5;
-        scatter_color_transparency  =   0.7; %faceAlpha        
+        scatter_color_transparency  =   0.7;         
 
-        %% boxplot for each column in MCIPOs
+        %% Boxplot for each column in MCI positive
         bp1 = boxplot(MCIPosParamMean, ...
                     'Whisker',whisker_value, ...
                     'symbol','', ... %symbol ='' making outlier invisible
@@ -288,7 +275,7 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
         set(bp1,'linewidth',box_lineWidth);
 
         hold on
-        %boxplot for each column in MCINeg
+        %% Boxplot for each column in MCI negative
         bp2 = boxplot(MCINegParamMean, ...
                     'Whisker',whisker_value, ...
                     'symbol','', ... %symbol ='' making outlier invisible
@@ -298,29 +285,27 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
                     'positions', 2);
         set(bp2,'linewidth',box_lineWidth);
 
-        %% Coloring each box
-        %findobj first getting the box for MCINeg (from bp2) 
-        %then getting the box for MCIPos(frm bp1)
+        %% Boxplot visual changes
         h = findobj(gca,'Tag','Box'); 
-        %get the MCI box
+        %get the MCI negative
         patch(get(h(1),'XData'),get(h(1),'YData'),colorForMCINeg,'FaceAlpha',box_color_transparency);
-        %get the HelthyOld box
+        %get the MCI positive
         patch(get(h(2),'XData'),get(h(2),'YData'),colorForMCIPos,'FaceAlpha',box_color_transparency);
 
-        %% Adjusting median
+        %% Median visual change
         h=findobj(gca,'tag','Median');
         for i = 1:length(h)
             h(i).LineWidth = median_lineWidth;
             h(i).Color = median_color;
         end
 
-        %% add scatter plot and the mean of MCIPos
+        %% Scatter plot for data and mean MCI positive
         num_points = length(MCIPosParamMean);
         hold on
-        x = ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
+        x = ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5);
         scatter(x, MCIPosParamMean, scatter_markerSize, ...
                 'filled', ...
-                'o', ... %marker shape
+                'o', ... 
                 'MarkerEdgeColor',scatter_marker_edgeColor, ...
                 'MarkerFaceColor',colorForMCIPos, ...
                 'MarkerFaceAlpha',scatter_color_transparency,...
@@ -337,13 +322,13 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);
 
-        %% add scatter plot and the mean of MCI
+        %% Scatter plot for data and mean MCI negative
         num_points = size(MCINegParamMean,1);
         hold on
-        x = 2*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
+        x = 2*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5);
         scatter(x, MCINegParamMean, scatter_markerSize, ...
                 'filled', ...
-                'o', ... %marker shape
+                'o', ... 
                 'MarkerEdgeColor',scatter_marker_edgeColor, ...
                 'MarkerFaceColor',colorForMCINeg, ...
                 'MarkerFaceAlpha',scatter_color_transparency,...
@@ -360,7 +345,7 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);        
 
-        %add yline
+        % add horizontal line for parameter reference
         if ParamName(ParamIndx)=="beta"
             yline(0,Color='r',LineStyle='--',LineWidth=2);
         elseif ParamName(ParamIndx)=="k"
@@ -371,8 +356,8 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
             yline(1,Color='r',LineStyle='--',LineWidth=2);
         end
 
-        %% Further post-processing the figure
-        %calculate the ylim
+        %% Figure post-processing
+        % calculate the Y limits
         alldata = [MCIPosParamMean;MCINegParamMean];
         maxdata = max(alldata,[],'all');
         mindata = min(alldata, [], 'all');
@@ -391,9 +376,6 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
             yticks = [0, 0.5, 1.0, 1.5];
         end
 
-        %lowupYlim = [mindata-.1*(maxdata-mindata)-eps, maxdata+.1*(maxdata-mindata)+eps]; 
-        %eps to make sure when mindata=maxdata, there won't be an error
-
         set(gca, ...
             'Box'         , 'off'     , ...
             'TickDir'     , 'out'     , ...
@@ -408,19 +390,19 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
             'LineWidth'   , 1.0        );
         ylabel(ParamName(ParamIndx));
 
-        %extract pvalue for multicomparison of Group effect for showing on the figure
+        % Extract pvalues from multiple comparison of group effect. Adding
+        % it to the figure
         multicomp_result = multicomp_tab1{ParamIndx};
         Pvalue = multicomp_result(1,6); % MCIPos vs. MCINeg see Two-way anova for details
-%         str = {['P = ',sprintf('%.2g',Pvalue)]};
-%         annotation('textbox',[0.2 0.6 0.3 0.3],'String',str,'FitBoxToText','on');
+
         title(['P value = ',sprintf('%.2g',Pvalue)])
 
-        %% add sigstar 
+        %% Add significance bars
         if Pvalue<0.05
-            H=sigstar({[1,2]},[Pvalue]);
+            H=adjustablesigstar({[1,2]},[Pvalue]);
         end
 
-        %% save figure
+        %% export figure
         exportgraphics(f,config.ResultFolder+"/ZMergeCondsBox_"+ParamName(ParamIndx)+".png",'Resolution',300);
         exportgraphics(f,config.ResultFolder+"/ZMergeCondsBox_"+ParamName(ParamIndx)+".pdf",'Resolution',300, 'ContentType','vector');
 

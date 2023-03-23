@@ -1,4 +1,4 @@
-%% Script to create output for Fig. 3 
+%% Script to create output for Fig. 4 - parameter comparisons between Young, healthy Elderly, MCI combined
 % Zilong Ji, UCL, 2022 zilong.ji@ucl.ac.uk
 % Fits the model on all of the groups and run a two-way Anova
 % (group*condition) on Young Controls, Elderly Controls and MCI
@@ -21,7 +21,7 @@ config.NumParams        =   length(config.ParamName);
 VAM;
 
 % Preparing output
-config.ResultFolder     =   pwd + "/Output/Fig3/"+config.ModelName+"/Young_HealthyOld_MCICombined";
+config.ResultFolder     =   pwd + "/Output/Fig4/"+config.ModelName+"/Young_HealthyOld_MCICombined";
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
 end
@@ -222,8 +222,7 @@ function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
         end
 
         %% Figure post-processing
-
-        % calculate the y limits
+        % calculate the Y limits
         alldata = [YoungParamAllConds;HealthyOldParamAllConds;MCIParamAllConds];
         maxdata = max(alldata,[],'all');
         mindata = min(alldata, [], 'all');
@@ -293,8 +292,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         YoungParamMean      = mean(YoungParamAllConds, 2);
         HealthyOldParamMean = mean(HealthyOldParamAllConds, 2);
         MCIParamMean        = mean(MCIParamAllConds, 2);
-        
-        %% set figure info
+
         f = figure('visible','off','Position', [100 100 500 500]);
 
         set(0,'DefaultAxesFontName','Arial')
@@ -462,7 +460,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);     
         
-        % add yline
+        % add horizontal line for parameter reference
         if ParamName(ParamIndx)=="beta"
             yline(0,Color='r',LineStyle='--',LineWidth=2);
         elseif ParamName(ParamIndx)=="k"
@@ -509,7 +507,8 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
 
         ylabel(ParamName(ParamIndx));
 
-        %extract pvalue for multicomparison of Group effect for showing on the figure
+        % Extract pvalues from multiple comparison of group effect. Adding
+        % it to the figure
         multicomp_result = multicomp_tab1{ParamIndx};
         % 1       2             3
         % MCI     HealthyOld    Young
@@ -521,7 +520,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
               ['    P23 = ',sprintf('%.2g',PvalueHealthyOldvsMCI)],...
               ['    P13 = ',sprintf('%.2g',PvalueYoungvsMCI)]))
         
-        %% Adding sigstars 
+        %% Add significance bars 
         AllP = [PvalueYoungvsHealthyOld,PvalueHealthyOldvsMCI,PvalueYoungvsMCI];
         Xval = [[1,2];[2,3];[1,3]];
         %select those P value smaller than 0.05 (only add line when p<0.05)

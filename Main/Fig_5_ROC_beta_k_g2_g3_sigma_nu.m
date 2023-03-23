@@ -1,4 +1,12 @@
-%% Preparing the data
+%% Script to create output for Fig. 4 - receiver operating characteristic curve for each GLAMPI parameter 
+% Andrea Castegnaro, UCL, 2022 andrea.castegnaro@ucl.ac.uk
+% Using support vector machine (SVM) to classify two groups based on their
+% fitted parameters using an holdout strategy (60% training set 40% testing
+% set). Receiver operating characteristic curves are calculated on
+% posterior probabilities of the model applied to the testing set. Cross
+% validation has been applied using 1000 repetitions.
+
+% Preparing the data
 VAM_PrepareBaseConfig
 
 % Preprocessing the data
@@ -9,20 +17,20 @@ rng("default");
 config.useTrialFilter = true;
 config.ModelName        =   "beta_k_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
-config.NumParams        =   length(config.ParamName); % Set 100 here to avoid producing the model
-% Run the model
+config.NumParams        =   length(config.ParamName);
+
 VAM
 
-%% Model run completed, preparing the data for plotting figures
-config.ResultFolder = pwd + "/Output/ModelFigures/Fig5/ModelParameters/ForwardSelection/Grouped_beta_k_g2_g3_sigma_nu";
-% Create storing folder for trajectory if not exist
+% Preparing output
+config.ResultFolder = pwd + "/Output/Fig5/ModelParameters/beta_k_g2_g3_sigma_nu";
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
 end
 
-%% Genarating color scheme
+% Generating color scheme for our paper
 ColorPattern;
-%% Getting Information from results:
+
+% Collecting information from output
 YoungControlsParameters   = averageAcrossConditions(YoungControls.Results.estimatedParams);
 HealthyControlsParameters = averageAcrossConditions(HealthyControls.Results.estimatedParams);
 MCIUnkParameters          = averageAcrossConditions(MCIUnk.Results.estimatedParams);
@@ -32,16 +40,16 @@ MCIPosParameters          = averageAcrossConditions(MCIPos.Results.estimatedPara
 MCIAllParameters          = [MCIUnkParameters; MCINegParameters; MCIPosParameters]; 
 
 % Loading previously saved SVM
-if(exist('Data/SVM_ForwardSelection.mat','file') == 2)
-    load Data/SVM_SingleParameters.mat
+if(exist('Data/ROC_SVM_ModelParameters_results.mat','file') == 2)
+    load Data/ROC_SVM_ModelParameters_results.mat
 end
 
-%% Plotting roc curve HC vs pooled MCI and MCI negative vs MCI positive
-
+% Samples used for cross validation
 NSamples= 1000;
+% Kernel for the SVM
 KernelFunction = "linear";
 Holdout = 0.4;
-disp("%%%%%%%%%%%%%%% SVM FORWARD SELECTION %%%%%%%%%%%%%%%")
+disp("%%%%%%%%%%%%%%% Fitting SVM on parameters %%%%%%%%%%%%%%%");
 disp("%%%%%%%%%%%%%%% ROC MCI pooled vs HC - model parameters estimation %%%%%%%%%%%%%%%")
 rng("default");
 HCvsMCISVMModels_SingleParameters = getSVMModels(HealthyControlsParameters,MCIAllParameters,'HC', 'MCI', config,  NSamples, KernelFunction, Holdout);
@@ -49,10 +57,13 @@ disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - model parameters estima
 rng("default");
 MCIPosvsMCINegSVMModels_SingleParameters = getSVMModels(MCINegParameters, MCIPosParameters,'MCIneg', 'MCIpos', config, NSamples, KernelFunction, Holdout);
 clear NSamples
-save Data/SVM_SingleParameters.mat HCvsMCISVMModels_SingleParameters MCIPosvsMCINegSVMModels_SingleParameters
-%%
-% Plotting variables
+save Data/ROC_SVM_ROC_SVM_ModelParameters_resultsresults.mat HCvsMCISVMModels_SingleParameters MCIPosvsMCINegSVMModels_SingleParameters
+disp("%%%%%%%%%%%%%%% SVM fitting done %%%%%%%%%%%%%%%");
+
+% Plot results
 close all;
+
+% Parameters set for controlling visual output
 plotInfo.defaultTextSize = 20;
 plotInfo.defaultLineSize = 1.7;
 plotInfo.titleFontSize = 12;
@@ -62,16 +73,17 @@ plotInfo.lineAlpha = 0.6;
 plotInfo.YLabel = "True positive rate";
 plotInfo.XLabel = "False positive rate";
 plotInfo.Title = "Healthy controls / pooled MCI";
-plotInfo.visible = "on";
+plotInfo.visible = "off";
 plotInfo.figurePosition = [200 200 250 200];
-%
-disp("%%%%%%%%%%%%%%% ROC HC vs MCI model %%%%%%%%%%%%%%%");
+
+disp("%%%%%%%%%%%%%%% Plotting ROC HC vs MCI model %%%%%%%%%%%%%%%");
 plotInfo.Title = "HC / MCI";
 plotSVMResults(HealthyControlsParameters,MCIAllParameters,'HC', 'MCI', config, plotInfo, HCvsMCISVMModels_SingleParameters);
-%
-disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative %%%%%%%%%%%%%%%");
+
+disp("%%%%%%%%%%%%%%% Plotting ROC MCI positive vs MCI negative %%%%%%%%%%%%%%%");
 plotInfo.Title = "MCI - / MCI +";
 plotSVMResults(MCINegParameters, MCIPosParameters,'MCIneg', 'MCIpos', config, plotInfo, MCIPosvsMCINegSVMModels_SingleParameters);  
+
 %%
 function SVM_out = getSVMModels(param1, param2, param1Label, param2Label, config, NSamples, kernelFunction, Holdout)
     
@@ -83,28 +95,24 @@ function SVM_out = getSVMModels(param1, param2, param1Label, param2Label, config
     label2     = cell(height(param2),1);
     label2(:)  = {param2Label};
     allLabels  = [label1;label2];
-    
-    clear param1 param2
-
-    % set the holdout on training/testing for cross validation
     holdout = Holdout;
 
+    clear param1 param2
+
     n_params = size(allData,2);
-    % pre allocating output variable
+    % Pre allocating output variable with empty values
     SVM_out=struct;
-    % taking track of the 4 best parameters
     SVM_out.models = cell(config.NumParams ,1);
     for i = 1:config.NumParams 
         SVM_out.models{i,1}.mean = 0;
         SVM_out.models{i,1}.std = 0;
-        % tracking the best model out of the forward search
         SVM_out.models{i,1}.index = nan;
         SVM_out.models{i,1}.X_mean = nan;
         SVM_out.models{i,1}.Y_mean = nan;
         SVM_out.models{i,1}.Y_std = nan;
     end
 
-    % We look through combination of parameters starting from one
+    % Looping through each of the parameters
     for i_params = 1:n_params
 
         M = NSamples;
@@ -115,6 +123,8 @@ function SVM_out = getSVMModels(param1, param2, param1Label, param2Label, config
         curr_filtered_all_data = allData(:,i_params);
 
         warning('off');
+
+        % Cross-validation
         for i_cross_valid = 1:M
 
             mdl  = fitcsvm(curr_filtered_all_data,allLabels,ClassNames=[{param1Label},{param2Label}], Standardize=true, CrossVal="on", Holdout=holdout, KernelFunction=kernelFunction);
@@ -129,15 +139,14 @@ function SVM_out = getSVMModels(param1, param2, param1Label, param2Label, config
             compactModel = mdl.Trained{1};
 
             comp_mdl_post = fitPosterior(compactModel,Xtraining,Ytraining);
-            %comp_mdl_post = fitPosterior(compactModel,curr_filtered_all_data,allLabels);
-            %predict on leave-out testing data
             [predicted_labels,post_probabilities] = predict(comp_mdl_post,Xtest);
+
             [X,Y,~,AUC] = perfcurve(Ytest, post_probabilities(:,2), {param2Label});
             AUC_All(i_cross_valid) = AUC(1);
             N = length(Ytest);
 
             if size(X,1)<N
-                % pad 1
+                % pad 1 to make all of the repetition of the same length
                 X = [X;ones(N-size(X,1),size(X,2))];
                 Y = [Y;ones(N-size(Y,1),size(Y,2))];
             else
@@ -182,11 +191,8 @@ function plotSVMResults(params1, params2, params1groupName, params2groupName, co
     parametersName = [{'\beta'}, {'k'}, {'g_2'}, {'g_3'}, {'\sigma'}, {'\nu'}];
     colors = config.color_scheme_npg([4 8 2 3 5 9],:);
     
-    % set figure info
     f = figure('visible', plotInfo.visible, 'Position', plotInfo.figurePosition);
-    %%% Font type and size setting %%%
-    % Using Arial as default because all journals normally require the font to
-    % be either Arial or Helvetica
+
     set(0,'DefaultAxesFontName','Arial')
     set(0,'DefaultTextFontName','Arial')
     set(0,'DefaultAxesFontSize',plotInfo.axisSize)
@@ -225,10 +231,8 @@ function plotSVMResults(params1, params2, params1groupName, params2groupName, co
     
     ylabel('True Positive Rate');
     xlabel('False Positive Rate')
-    %t= title(plotInfo.Title);
-    %t.FontSize = plotInfo.titleFontSize;
     
-    %Further post-processing the figure
+    %% Figure post-processing
     set(gca, ...
         'Box'         , 'off'     , ...
         'TickDir'     , 'out'     , ...
@@ -257,10 +261,10 @@ function plotSVMResults(params1, params2, params1groupName, params2groupName, co
     clear parametersName filesName i colors f ll legendText found_parameters_name
 end
 
-%% get the model parameters, average across the conditions
-% remove nans if the row after mergin still contains nans
+%% 
 function dataout = averageAcrossConditions(data)
-
+    % average across the conditions, assuming a specific structure to this
+    % data
     dataout = [];
     pSize = length(data{1});
     paramsSize = width(data{1});
@@ -273,6 +277,7 @@ function dataout = averageAcrossConditions(data)
         dataout = [dataout;tempP];
     end
 
+    % remove nans if the row after merging data
     dataout = removeNanRows(dataout);
 
 end

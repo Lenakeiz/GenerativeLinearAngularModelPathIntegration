@@ -3,7 +3,7 @@ Generative Linear-Angular Model of Path Integration (GLAMPI)
 
 ## Description 
 This repository contains the full dataset and the scripts for generating the analysis and the figures from _"Dissociating linear and angular path integration in ageing and Alzheimer’s disease"_[^1]  
-The dataset for healthy
+The anonymised dataset for healthy elderly and MCI patients is the one from the _"Differentiation of mild cognitive impairment using an entorhinal cortex-based test of virtual reality navigation"_[^2]
 
 ## Package dependency
 Developed using Matlab R2022a.
@@ -17,3 +17,5 @@ We also used a customised version of [Rob Campbell (2023) sigstar](https://githu
 
 ---
 [^1]: Andrea Castegnaro *, Zilong Ji *, Katarzyna Rudzka, Dennis Chan, Neil Burgess _( * ) Equal contributions_
+
+[^2]: David Howett *, Andrea Castegnaro *, Katarzyna Krzywicka, Johanna Hagman, Deepti Marchment, Richard Henson, Miguel Rio, John A King, Neil Burgess, Dennis Chan _( * ) Equal contributions_

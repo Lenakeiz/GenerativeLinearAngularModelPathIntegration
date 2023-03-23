@@ -1,6 +1,8 @@
 Generative Linear-Angular Model of Path Integration (GLAMPI)  
 ======
 
+[Figure 1]: https://https://github.com/Lenakeiz/VectorAdditionModel/blob/main/Images/Fig1a.png "Triangle Completion Task"
+
 ## Description 
 This repository contains the full dataset and the scripts for generating the analysis and the figures from _"Dissociating linear and angular path integration in ageing and Alzheimer’s disease"_[^1]  
 The anonymised dataset for healthy elderly and MCI patients is the one from the _"Differentiation of mild cognitive impairment using an entorhinal cortex-based test of virtual reality navigation"_[^2]

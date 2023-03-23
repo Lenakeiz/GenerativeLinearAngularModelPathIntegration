@@ -402,8 +402,8 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
         end
 
         %% export figure
-        exportgraphics(f,config.ResultFolder+"/ZMergeCondsBox_"+ParamName(ParamIndx)+".png",'Resolution',300);
-        exportgraphics(f,config.ResultFolder+"/ZMergeCondsBox_"+ParamName(ParamIndx)+".pdf",'Resolution',300, 'ContentType','vector');
+        exportgraphics(f,config.ResultFolder+"/MergeCondsBox_"+ParamName(ParamIndx)+".png",'Resolution',300);
+        exportgraphics(f,config.ResultFolder+"/MergeCondsBox_"+ParamName(ParamIndx)+".pdf",'Resolution',300, 'ContentType','vector');
 
     end
 end

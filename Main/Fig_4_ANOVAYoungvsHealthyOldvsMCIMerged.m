@@ -175,7 +175,7 @@ function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
                     'LineWidth',scatter_marker_edgeWidth);
         end
 
-        %% Scatter plot for data and mean (Healthy Old)
+        %% Scatter plot for data and mean (Healthy Elderly)
         num_points = size(HealthyOldParamAllConds,1);
         for i=1:size(HealthyOldParamAllConds,2)
             hold on

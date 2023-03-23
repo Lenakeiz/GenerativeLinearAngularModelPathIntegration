@@ -1,54 +1,55 @@
-%% two-way Anova (group*condition) on Young Controls, Elderly Controls and MCI
+%% Script to create output for Fig. S8 - parameter comparisons between Young, healthy Elderly, MCI negative
+% Zilong Ji, UCL, 2022 zilong.ji@ucl.ac.uk
+% Fits the model on all of the groups and run a two-way Anova
+% (group*condition) on Young Controls, Elderly Controls and MCI negative
+% Output: for each parameter fitted by the model output one boxplot with
+% the three groups and performance splitted by environmental condition and
+% a boxplot with three groups performance averaged across environmental
+% conditions
 
-%% Preparing the data
+% Preparing the data
 VAM_PrepareBaseConfig;
 
-%% Preprocessing the data
+% Preprocessing the data
 VAM_PreprocessData;
 
-%% Preparing the data and Slecting the Model
-
-%choose a model from the model zoo
+% Model fitting
 config.ModelName        =   "beta_k_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
-
 config.NumParams        =   length(config.ParamName);
 
-% Run the model
 VAM;
 
-%% Model run completed, preparing the data for plotting figures
-config.ResultFolder     =   pwd + "/Output/ModelFigures/"+config.ModelName+"/Actualangle_Young_HealthyOld_MCINeg";
-%create storing folder for trajectory if not exist
+% Preparing output
+config.ResultFolder     =   pwd + "/Output/FigS8/"+config.ModelName+"/Young_HealthyOld_MCINeg";
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
 end
 
-%% Generating color scheme
+% Generating color scheme for our paper
 ColorPattern; 
 
-%% Getting Information from results:
+% Collecting information from output
 AllYoungParams      =   YoungControls.Results.estimatedParams;
 AllHealthyOldParams =   HealthyControls.Results.estimatedParams;
 AllMCINegParams     =   MCINeg.Results.estimatedParams;
 
-%% TwowayAnova
+% TwowayAnova Analysis
 [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_YoungHealthyOldMCICombined(AllYoungParams, AllHealthyOldParams, AllMCINegParams, config);
 
-%% BarScatter Plot between Young and HealthyOld for all Fitted Params
-BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams, anova_tab, config);
-%%
+% Plot results
+BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCINegParams, anova_tab, config);
 BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCINegParams, multicomp_tab1, config)
 
 %%
 function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams, anova_tab, config)
     
-    numConds = 3; %3 is the condition number
+    numConds = 3; % environmental conditions
     ParamName = config.ParamName;
     for ParamIndx=1:length(ParamName)
 
         YoungParamAllConds = [];
-        HealthyOldParamAllConds = []; %dimension are different, so separate from YoungParams
+        HealthyOldParamAllConds = []; 
         MCIParamAllConds = [];
         
         for TRIAL_FILTER=1:numConds
@@ -63,42 +64,40 @@ function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
             MCIParamAllConds    = [MCIParamAllConds,MCIParam];            
         end
         
-        % remove Nan rows (nan because of 1, removing participants with short walking length; 2, not enough trials for parameter estimation)
+        % remove Nan rows (because of 1) removing participants with short walking length; 2) not enough trials for parameter estimation)
         YoungParamAllConds      = removeNanRows(YoungParamAllConds);
         HealthyOldParamAllConds = removeNanRows(HealthyOldParamAllConds);
         MCIParamAllConds        = removeNanRows(MCIParamAllConds);
-    
-        %% set figure info
+
         f = figure('visible','off','Position', [100 100 1000 500]);
-        %%% Font type and size setting %%%
-        % Using Arial as default because all journals normally require the font to
-        % be either Arial or Helvetica
+
         set(0,'DefaultAxesFontName','Arial')
         set(0,'DefaultTextFontName','Arial')
         set(0,'DefaultAxesFontSize',12)
         set(0,'DefaultTextFontSize',12)     
-        %%% Color definition %%%
+
         colorForYoung = config.color_scheme_npg(3,:);
         colorForHOld = config.color_scheme_npg(5,:);
         colorForMCI = config.color_scheme_npg(2,:);
         
-        %set params
+        % parameters set for controlling visual output
         whisker_value = 1.5;
         box_lineWidth = 0.3;
         box_widths_value = 0.2;
-        box_color_transparency = 0.5; %faceAlpha
+        box_color_transparency = 0.5;
         %center of box (three conditions)
         center_x = [1,2,3];
-        shift_value = 0.25; %box shift from center
+        shift_value = 0.25; 
+        %box shift from center
         median_lineWidth = 2;
         median_color = 'k';
         scatter_jitter_value = 0.1;
         scatter_markerSize=30;
         scatter_marker_edgeColor = 'k';
         scatter_marker_edgeWidth = 0.5;
-        scatter_color_transparency = 0.7; %faceAlpha        
+        scatter_color_transparency = 0.7;         
 
-        %% boxplot for each column in Young
+        %% Boxplot for each column in Young
         bp1 = boxplot(YoungParamAllConds, ...
                     'Whisker',whisker_value, ...
                     'symbol','', ... %symbol ='' making outlier invisible
@@ -109,7 +108,7 @@ function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
         set(bp1,'linewidth',box_lineWidth);
 
         hold on
-        %% boxplot for each column in HealthOld
+        %% Boxplot for each column in Health Elderly
         bp2 = boxplot(HealthyOldParamAllConds, ...
                     'Whisker',whisker_value, ...
                     'symbol','', ... %symbol ='' making outlier invisible
@@ -120,7 +119,7 @@ function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
         set(bp2,'linewidth',box_lineWidth);
 
         hold on
-        %% boxplot for each column in MCIMerge
+        %% Boxplot for each column in MCI Negative
         bp3 = boxplot(MCIParamAllConds, ...
                     'Whisker',whisker_value, ...
                     'symbol','', ... %symbol ='' making outlier invisible
@@ -130,9 +129,7 @@ function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
                     'positions', center_x+shift_value);
         set(bp3,'linewidth',box_lineWidth);
 
-        %% Coloring each box
-        %findobj first getting the three boxes from right to left
-        %first MCI (bp3), then HealthyOld (from bp2), finally Young (from bp1)
+       %% Boxplot visual changes
         h = findobj(gca,'Tag','Box'); 
         for i = 1:length(h)
             if i<4  %get the MCI box
@@ -144,14 +141,14 @@ function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
             end
         end
 
-        %% Adjusting median
+        %% Median visual changes
         h=findobj(gca,'tag','Median');
         for i = 1:length(h)
             h(i).LineWidth = median_lineWidth;
             h(i).Color = median_color;
         end
 
-        %% add scatter plot and the mean of Young
+        %% Scatter plot for data and mean (Young)
         num_points = size(YoungParamAllConds,1);
         for i=1:size(YoungParamAllConds,2)
             hold on
@@ -174,7 +171,7 @@ function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
                     'LineWidth',scatter_marker_edgeWidth);
         end
 
-        %% add scatter plot and the mean of HealthyOld
+        %% Scatter plot for data and mean (Healthy Elderly)
         num_points = size(HealthyOldParamAllConds,1);
         for i=1:size(HealthyOldParamAllConds,2)
             hold on
@@ -197,7 +194,7 @@ function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
                     'LineWidth',scatter_marker_edgeWidth);
         end
 
-        %% add scatter plot and the mean of MCI
+        %% Scatter plot for data and mean (MCI negative)
         num_points = size(MCIParamAllConds,1);
         for i=1:size(MCIParamAllConds,2)
             hold on
@@ -220,14 +217,12 @@ function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
                     'LineWidth',scatter_marker_edgeWidth);
         end
 
-        %% Further post-processing the figure
-
-        %calculate te ylim
+        %% Figure post-processing
+        % calculate the Y limits
         alldata = [YoungParamAllConds;HealthyOldParamAllConds;MCIParamAllConds];
         maxdata = max(alldata,[],'all');
         mindata = min(alldata, [], 'all');
         lowupYlim = [mindata-.1*(maxdata-mindata)-eps, maxdata+.1*(maxdata-mindata)+eps]; 
-        %eps to make sure when mindata=maxdata, there won't be an error
 
         set(gca, ...
             'Box'         , 'off'     , ...
@@ -242,17 +237,14 @@ function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
             'LineWidth'   , 1.0        );
         ylabel(ParamName(ParamIndx));
         allpatches = findall(gca,'type','Patch');
-        legend(allpatches(1:3:end), {'Young', 'HealthyOld', 'MCIMerged'}, 'Location','northeast', 'NumColumns',3);
+        legend(allpatches(1:3:end), {'Young', 'HealthyOld', 'MCINeg'}, 'Location','northeast', 'NumColumns',3);
 
-        %extract pvalue for group, conditino and interaction to show on the figure 
+        %extract pvalue for group, environmental condition and interaction
         anova_result = anova_tab{ParamIndx};
         group_pvalue = anova_result{2,7};
         condition_pvalue = anova_result{3,7};
         interaction_pvalue = anova_result{4,7};
-%         str = {['Group Pvalue = ',sprintf('%.2g',group_pvalue)],...
-%                ['Condition Pvalue = ',sprintf('%.2g',condition_pvalue)],...
-%                ['Interaction Pvalue = ',sprintf('%.2g',interaction_pvalue)]};
-%         annotation('textbox',[0.2 0.6 0.3 0.3],'String',str,'FitBoxToText','on');
+
         title(strcat(['Group P = ',sprintf('%.2g',group_pvalue)],...
               ['    Condition P = ',sprintf('%.2g',condition_pvalue)],...
               ['    Interaction P = ',sprintf('%.2g',interaction_pvalue)]))
@@ -267,12 +259,12 @@ end
 %% Box Plot Of Fitted Parameters by avearaging three paramters from three conditions into one mean value
 function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCIParams,multicomp_tab1, config)
     
-    numConds = 3; %3 is the condition number
+    numConds = 3; % environmental conditions
     ParamName = config.ParamName;
     for ParamIndx=1:length(ParamName)
 
         YoungParamAllConds = [];
-        HealthyOldParamAllConds = []; %dimension are different, so separate from MCIParamAllConds
+        HealthyOldParamAllConds = []; 
         MCIParamAllConds = [];
         for TRIAL_FILTER=1:numConds
             %% extract data
@@ -286,7 +278,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
             MCIParamAllConds    = [MCIParamAllConds,MCIParam];         
         end
 
-        %remove Nan rows (nan coz of 1, removing participants with short walking length; 2, not enough trials for parameter estimation)
+        % remove Nan rows (because of 1) removing participants with short walking length; 2) not enough trials for parameter estimation)
         YoungParamAllConds      = removeNanRows(YoungParamAllConds);
         HealthyOldParamAllConds = removeNanRows(HealthyOldParamAllConds);
         [MCIParamAllConds MCInanIdx] = removeNanRows(MCIParamAllConds);
@@ -295,24 +287,20 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         HealthyOldParamMean = mean(HealthyOldParamAllConds, 2);
         MCIParamMean        = mean(MCIParamAllConds, 2);
     
-        %% set figure info
         f = figure('visible','off','Position', [100 100 500 500]);
-        %%% Font type and size setting %%%
-        % Using Arial as default because all journals normally require the font to
-        % be either Arial or Helvetica
+
         set(0,'DefaultAxesFontName','Arial')
         set(0,'DefaultTextFontName','Arial')
         set(0,'DefaultAxesFontSize',12)
         set(0,'DefaultTextFontSize',12)     
 
-        %%% Color definition %%%
         colorForYoung = config.color_scheme_npg(3,:);        
         colorForHOld = config.color_scheme_npg(5,:);
         colorForMCI = config.color_scheme_npg(2,:);
         colorForMCINeg = config.color_scheme_npg(4,:);
         colorForMCIPos = config.color_scheme_npg(6,:);
 
-        %set params
+        % parameters set for controlling visual output
         whisker_value               =   1.5;
         box_lineWidth               =   0.3;
         box_widths_value            =   0.4;
@@ -326,7 +314,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         scatter_color_transparency  =   0.7; %faceAlpha        
 
         hold on
-        %% boxplot for each column in Young
+        %% Boxplot for each column in Young
         bp1 = boxplot(YoungParamMean, ...
                     'Whisker',whisker_value, ...
                     'symbol','', ... %symbol ='' making outlier invisible
@@ -337,7 +325,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         set(bp1,'linewidth',box_lineWidth);
 
         hold on
-        %% boxplot for each column in HealthOld
+        %% Boxplot for each column in Healthy Elderly
         bp2 = boxplot(HealthyOldParamMean, ...
                     'Whisker',whisker_value, ...
                     'symbol','', ... %symbol ='' making outlier invisible
@@ -348,7 +336,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         set(bp2,'linewidth',box_lineWidth);
 
         hold on
-        %% boxplot for each column in MCIMerge
+        %% Boxplot for each column in MCI negative
         bp3 = boxplot(MCIParamMean, ...
                     'Whisker',whisker_value, ...
                     'symbol','', ... %symbol ='' making outlier invisible
@@ -358,10 +346,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
                     'positions', 3);
         set(bp3,'linewidth',box_lineWidth);        
 
-        %% Coloring each box
-        %findobj first getting the box for MCI(from bp3) 
-        % then for HealthyOld (from bp2) 
-        %then getting the box for Young (frm bp1)
+        %% Boxplot visual changes
         h = findobj(gca,'Tag','Box'); 
         %get the Young box
         patch(get(h(1),'XData'),get(h(1),'YData'),colorForMCI,'FaceAlpha',box_color_transparency);        
@@ -370,20 +355,20 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         %get the MCI box
         patch(get(h(3),'XData'),get(h(3),'YData'),colorForYoung,'FaceAlpha',box_color_transparency);
 
-        %% Adjusting median
+        %% Median visual change
         h=findobj(gca,'tag','Median');
         for i = 1:length(h)
             h(i).LineWidth = median_lineWidth;
             h(i).Color = median_color;
         end
 
-        %% add scatter plot and the mean of Young
+        %% Scatter plot for data and mean (Young)
         num_points = size(YoungParamMean,1);
         hold on
         x = 1*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
         scatter(x, YoungParamMean, scatter_markerSize, ...
                 'filled', ...
-                'o', ... %marker shape
+                'o', ... 
                 'MarkerEdgeColor',scatter_marker_edgeColor, ...
                 'MarkerFaceColor',colorForYoung, ...
                 'MarkerFaceAlpha',scatter_color_transparency,...
@@ -401,13 +386,13 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);    
 
-        %% add scatter plot and the mean of HealthyOld
+        %% Scatter plot for data and mean (Healthy Elderly)
         num_points = length(HealthyOldParamMean);
         hold on
         x = 2*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
         scatter(x, HealthyOldParamMean, scatter_markerSize, ...
                 'filled', ...
-                'o', ... %marker shape
+                'o', ...
                 'MarkerEdgeColor',scatter_marker_edgeColor, ...
                 'MarkerFaceColor',colorForHOld, ...
                 'MarkerFaceAlpha',scatter_color_transparency,...
@@ -424,13 +409,13 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);    
 
-        %% add scatter plot MCI neg
+        %% Scatter plot for data and mean (MCI negative)
         num_points = length(MCIParamMean(:,:));
         hold on
         x = 3*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
         scatter(x, MCIParamMean(:,:), scatter_markerSize, ...
                 'filled', ...
-                'v', ... %marker shape
+                'v', ...
                 'MarkerEdgeColor',scatter_marker_edgeColor, ...
                 'MarkerFaceColor',colorForMCINeg, ...
                 'MarkerFaceAlpha',scatter_color_transparency,...
@@ -447,7 +432,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);     
         
-        %add yline
+        % add horizontal line for parameter reference
         if ParamName(ParamIndx)=="beta"
             yline(0,Color='r',LineStyle='--',LineWidth=2);
         elseif ParamName(ParamIndx)=="k"
@@ -458,9 +443,8 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
             yline(1,Color='r',LineStyle='--',LineWidth=2);
         end
 
-        %% Further post-processing the figure
-
-        %calculate the ylim
+        %% Figure post-processing
+        % calculate the Y limits
         alldata = [YoungParamMean;HealthyOldParamMean;MCIParamMean];
         maxdata = max(alldata,[],'all');
         mindata = min(alldata, [], 'all');
@@ -479,9 +463,6 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
             yticks = [0, 0.5, 1.0, 1.5];
         end
 
-%         lowupYlim = [mindata-.1*(maxdata-mindata)-eps, maxdata+.1*(maxdata-mindata)+eps]; 
-%         %eps to make sure when mindata=maxdata, there won't be an error
-
         set(gca, ...
             'Box'         , 'off'     , ...
             'TickDir'     , 'out'     , ...
@@ -494,26 +475,23 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
             'YTick'       , yticks,...
             'XTickLabel'  , {'Young','Elderly','MCI-'},...
             'LineWidth'   , 1.0        );
-        %ylabel
-        %Names = ["beta", "g2", "g3", "sigma", "nu"];
+
         ylabel(ParamName(ParamIndx));
 
-        %extract pvalue for multicomparison of Group effect for showing on the figure
+        % Extract pvalues from multiple comparison of group effect. Adding
+        % it to the figure
         multicomp_result = multicomp_tab1{ParamIndx};
         % 1       2             3
         % MCI     HealthyOld    Young
         PvalueYoungvsHealthyOld = multicomp_result(3,6); % Young vs. HealthyOld see Two-way anova for details
         PvalueHealthyOldvsMCI = multicomp_result(1,6); % HealthyOld v.s. MCI vs.  see Two-way anova for details
         PvalueYoungvsMCI = multicomp_result(2,6); % Young vs. MCI see Two-way anova for details 
-%         str = {['P12 = ',sprintf('%.2g',PvalueYoungvsHealthyOld)],...
-%                ['P23 = ',sprintf('%.2g',PvalueHealthyOldvsMCI)],...
-%                ['P13 = ',sprintf('%.2g',PvalueYoungvsMCI)]};
-%         annotation('textbox',[0.2 0.6 0.3 0.3],'String',str,'FitBoxToText','on');
+
         title(strcat(['P12 = ',sprintf('%.2g',PvalueYoungvsHealthyOld)],...
               ['    P23 = ',sprintf('%.2g',PvalueHealthyOldvsMCI)],...
               ['    P13 = ',sprintf('%.2g',PvalueYoungvsMCI)]))
         
-        %% add sigstar 
+        %% Add significance bars
         AllP = [PvalueYoungvsHealthyOld,PvalueHealthyOldvsMCI,PvalueYoungvsMCI];
         Xval = [[1,2];[2,3];[1,3]];
         %select those P value smaller than 0.05 (only add line when p<0.05)
@@ -528,12 +506,12 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
             for i=1:sum(AllP<0.05)
                 XXX{i} = Xval_select(i,:);
             end
-            H=sigstar(XXX,AllP_select);
+            H=adjustablesigstar(XXX,AllP_select);
         end
 
-        %% save figure
-        exportgraphics(f,config.ResultFolder+"/ZMergeCondsBox_"+ParamName(ParamIndx)+".png",'Resolution',300);
-        exportgraphics(f,config.ResultFolder+"/ZMergeCondsBox_"+ParamName(ParamIndx)+".pdf",'Resolution',300, 'ContentType','vector');
+        %% export figure
+        exportgraphics(f,config.ResultFolder+"/MergeCondsBox_"+ParamName(ParamIndx)+".png",'Resolution',300);
+        exportgraphics(f,config.ResultFolder+"/MergeCondsBox_"+ParamName(ParamIndx)+".pdf",'Resolution',300, 'ContentType','vector');
 
     end
 end

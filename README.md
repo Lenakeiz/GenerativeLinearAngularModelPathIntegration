@@ -10,9 +10,6 @@ The anonymised dataset for healthy elderly and MCI patients is the one from the 
 ## Installation
 Simply clone the repository anywhere in your machine. Make sure to add the folders and subfolders to the Matlab path.
 
-## Use
-Scripts to reproduce the plots and analysis in the paper can be found into the **Main** folder. Each of the scripts has produce an entire or a single plot from any given figure of the paper. Some scripts will take longer than others to run.
-
 ## Package dependency
 Developed using Matlab R2022a.
 
@@ -22,6 +19,10 @@ Requires the following MATLAB toolboxes:
 - [Mapping toolbox](https://uk.mathworks.com/products/mapping.html)
 
 We also used a customised version of [Rob Campbell (2023) sigstar](https://github.com/raacampbell/sigstar) which is included already in the project files.
+
+## Use
+Scripts to reproduce the plots and analysis in the paper can be found into the **Main** folder. Each of the scripts produce an entire or a single plot from any given figure of the paper. Each script is named accordingly to the figure ouput. Usually plots will not be displayed in Matlab but output will be saved inside **Output** folder. Some scripts will take longer than others to run (like the one that runs all different types of model).
+
 
 ---
 [^1]: Andrea Castegnaro *, Zilong Ji *, Katarzyna Rudzka, Dennis Chan, Neil Burgess _( * ) Equal contributions_

@@ -1,9 +1,9 @@
 function [AIC, BIC, NLL] = reformatIC(IC, cond)
-%Reformatting IC from cell to array for later figure plotting
-%Args:
-%   IC
-%Returns:
-%   AIC, BIC and Negative Loglikelihood
+%% Reformat IC
+% Reformatting information criterion from cell to array for later figure
+% plotting
+% IC: (see Fig_2_ModelSelection)
+% AIC, BIC, NLL: Akaike, Bayesian and negative likelihood 
     
     if cond=="no change"
         index = 1;
@@ -11,8 +11,6 @@ function [AIC, BIC, NLL] = reformatIC(IC, cond)
         index = 2;
     elseif cond=="no optical flow"
         index = 3;
-    else
-        %do nothing
     end
 
     numSubj = length(IC{1});
@@ -27,13 +25,8 @@ function [AIC, BIC, NLL] = reformatIC(IC, cond)
         end
     end
 
-%     %remove nan rows from array
-%     AIC = removeNanRows(AIC);
-%     BIC = removeNanRows(BIC);
-%     NLL = removeNanRows(NLL);
-    
     if cond=="all"
-        %average over conditions to get the IC mean
+        % average over conditions to get the IC mean
         AIC = mean(AIC,2);
         BIC = mean(BIC,2);
         NLL = mean(NLL,2);

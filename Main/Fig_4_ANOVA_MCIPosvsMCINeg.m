@@ -207,7 +207,7 @@ function BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, confi
               ['    Condition P = ',sprintf('%.2g',condition_pvalue)],...
               ['    Interaction P = ',sprintf('%.2g',interaction_pvalue)]))
 
-        %% export figure
+        %% Export figure
         exportgraphics(f,config.ResultFolder+"/Box_"+ParamName(ParamIndx)+".png",'Resolution',300);
         exportgraphics(f,config.ResultFolder+"/Box_"+ParamName(ParamIndx)+".pdf",'Resolution',300, 'ContentType','vector');
 

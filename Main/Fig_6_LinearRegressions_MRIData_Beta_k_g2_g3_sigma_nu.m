@@ -30,7 +30,7 @@ end
 % Generating color scheme for our paper
 ColorPattern; 
 
-%% Collecting information from output
+% Collecting information from output
 YoungControlsParameters   = averageAcrossConditions(YoungControls.Results.estimatedParams);
 HealthyControlsParameters = averageAcrossConditions(HealthyControls.Results.estimatedParams);
 MCIUnkParameters          = averageAcrossConditions(MCIUnk.Results.estimatedParams);
@@ -46,10 +46,9 @@ MCIPos_lmetable          = createLMETable(MCIPos.MRI,MCIPosParameters);
 MRIModelParamsDataTable  = [HealthyControls_lmetable; MCIUnk_lmetable; MCINeg_lmetable; MCIPos_lmetable];
 
 %Removing nans (either from Nan parameters model or missing mri data)
+% Please note this will also account for the exclusion from the
+% preprocessing step
 filter = isnan(MRIModelParamsDataTable.beta) | isnan(MRIModelParamsDataTable.MCI);
-
-% Counting removed samples. This will also account for the exclusion from
-% the preprocessing step
 disp("Total Removed samples = " + sum(filter));
 MRIModelParamsDataTable = MRIModelParamsDataTable(~filter,:);
 

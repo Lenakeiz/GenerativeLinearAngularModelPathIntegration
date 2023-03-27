@@ -1,14 +1,26 @@
-%% Preparing the data
+%% Script that fit different types of the generative linear angular model considering differnt types of error - output is in Fig. 2, Fig S2, Fig S4
+% Zilong Ji, UCL, 2022 zilong.ji@ucl.ac.uk
+% We calculated different generative angular-linear models with different
+% types of source errors to find the candidate for our model (please see
+% online methods for details. We chose healthy elderly group to fit our
+% models. For each model we calculate the Akaike information criterion
+% (AIC) and the Bayesian criterion information (BIC) to select the final
+% model taking into account the model complexity.
+
+% Preparing the data
 VAM_PrepareBaseConfig
 
-%% Preprocessing the data
+% Preprocessing the data
 VAM_PreprocessData
-%rng("default")
+
+% Instructing the model to run only on healthy elderly
+config.ModelSelection = true;
+
 %% 1, sigma nu Model --> egocentric noise only model
 config.ModelName        =   "sigma_nu";
 config.ParamName        =   ["sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
-% Run the model
+
 VAM
 
 sigma_nu_IC             =   HealthyControls.Results.IC;
@@ -17,7 +29,7 @@ sigma_nu_IC             =   HealthyControls.Results.IC;
 config.ModelName        =   "beta_k_sigma_nu";
 config.ParamName        =   ["beta", "k", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
-% Run the model
+
 VAM
 
 beta_k_sigma_nu_IC        =   HealthyControls.Results.IC;
@@ -26,7 +38,7 @@ beta_k_sigma_nu_IC        =   HealthyControls.Results.IC;
 config.ModelName        =   "g2_sigma_nu";
 config.ParamName        =   ["g2", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
-% Run the model
+
 VAM
 
 g2_sigma_nu_IC        =   HealthyControls.Results.IC;
@@ -35,7 +47,7 @@ g2_sigma_nu_IC        =   HealthyControls.Results.IC;
 config.ModelName        =   "g3_sigma_nu";
 config.ParamName        =   ["g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
-% Run the model
+
 VAM
 
 g3_sigma_nu_IC        =   HealthyControls.Results.IC;
@@ -44,7 +56,7 @@ g3_sigma_nu_IC        =   HealthyControls.Results.IC;
 config.ModelName        =   "m3_sigma_nu";
 config.ParamName        =   ["m3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
-% Run the model
+
 VAM
 
 m3_sigma_nu_IC        =   HealthyControls.Results.IC;
@@ -53,7 +65,7 @@ m3_sigma_nu_IC        =   HealthyControls.Results.IC;
 config.ModelName        =   "beta_k_g2_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
-% Run the model
+
 VAM
 
 beta_k_g2_sigma_nu_IC        =   HealthyControls.Results.IC;
@@ -62,7 +74,7 @@ beta_k_g2_sigma_nu_IC        =   HealthyControls.Results.IC;
 config.ModelName        =   "beta_k_g3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
-% Run the model
+
 VAM
 
 beta_k_g3_sigma_nu_IC        =   HealthyControls.Results.IC;
@@ -71,7 +83,7 @@ beta_k_g3_sigma_nu_IC        =   HealthyControls.Results.IC;
 config.ModelName        =   "beta_k_m3_sigma_nu";
 config.ParamName        =   ["beta", "k", "m3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
-% Run the model
+
 VAM
 
 beta_k_m3_sigma_nu_IC        =   HealthyControls.Results.IC;
@@ -81,7 +93,7 @@ beta_k_m3_sigma_nu_IC        =   HealthyControls.Results.IC;
 config.ModelName        =   "g2_g3_sigma_nu";
 config.ParamName        =   ["g2", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
-% Run the model
+
 VAM
 
 g2_g3_sigma_nu_IC       =   HealthyControls.Results.IC;
@@ -90,7 +102,7 @@ g2_g3_sigma_nu_IC       =   HealthyControls.Results.IC;
 config.ModelName        =   "g2_m3_sigma_nu";
 config.ParamName        =   ["g2", "m3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
-% Run the model
+
 VAM
 
 g2_m3_sigma_nu_IC       =   HealthyControls.Results.IC;
@@ -99,7 +111,7 @@ g2_m3_sigma_nu_IC       =   HealthyControls.Results.IC;
 config.ModelName        =   "g3_m3_sigma_nu";
 config.ParamName        =   ["g3", "m3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
-% Run the model
+
 VAM
 
 g3_m3_sigma_nu_IC       =   HealthyControls.Results.IC;
@@ -108,7 +120,7 @@ g3_m3_sigma_nu_IC       =   HealthyControls.Results.IC;
 config.ModelName        =   "beta_k_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
-% Run the model
+
 VAM
 
 beta_k_g2_g3_sigma_nu_IC  =   HealthyControls.Results.IC;
@@ -117,7 +129,7 @@ beta_k_g2_g3_sigma_nu_IC  =   HealthyControls.Results.IC;
 config.ModelName        =   "beta_k_g2_m3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "m3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
-% Run the model
+
 VAM
 
 beta_k_g2_m3_sigma_nu_IC  =   HealthyControls.Results.IC;
@@ -126,7 +138,7 @@ beta_k_g2_m3_sigma_nu_IC  =   HealthyControls.Results.IC;
 config.ModelName        =   "beta_k_g3_m3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g3", "m3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
-% Run the model
+
 VAM
 
 beta_k_g3_m3_sigma_nu_IC  =   HealthyControls.Results.IC;
@@ -135,7 +147,7 @@ beta_k_g3_m3_sigma_nu_IC  =   HealthyControls.Results.IC;
 config.ModelName        =   "g2_g3_m3_sigma_nu";
 config.ParamName        =   ["g2", "g3", "m3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
-% Run the model
+
 VAM
 
 g2_g3_m3_sigma_nu_IC  =   HealthyControls.Results.IC;
@@ -144,40 +156,43 @@ g2_g3_m3_sigma_nu_IC  =   HealthyControls.Results.IC;
 config.ModelName        =   "beta_k_g2_g3_m3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "g3", "m3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
-% Run the model
+
 VAM
 
 beta_k_g2_g3_m3_sigma_nu_IC  =   HealthyControls.Results.IC;
 
 
-%% beta1 beta2
+%% beta1 beta2 Model --> vector addition model with separate gains for the outbound path segments, follows Harootonian et al., 2020 paper
 config.ModelName        =   "beta1_beta2_g2_g3_sigma_nu";
 config.ParamName        =   ["beta1", "beta2", "g2", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
-% Run the model
+
 VAM
 
 beta1_beta2_g2_g3_sigma_nu_IC  =   HealthyControls.Results.IC;
 
-%%
-config.ResultFolder = pwd+"/Output/ModelFigures/ModelSelectionForwardsearch_HC_regression2actualmean";
-%create storing folder for trajectory if not exist
+% Preparing output folder
+config.ResultFolder = pwd+"/Output/ModelSelection/GenerativeLinearAngularModel";
+
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
 end
 
-%%
+% Generating color scheme for our paper
+ColorPattern; 
+
+% Generating schematic names for our model -> MX.Y where X is total number
+% of fitted parameters and Y is variant within a given X
 ModelNames = {'M2', ...
               'M3.1', 'M3.2', 'M3.3', 'M3.4',...
               'M4.1', 'M4.2','M4.3','M4.4','M4.5','M4.6',...
               'M5.1', 'M5.2','M5.3','M5.4',...
               'M6'};
 
-%% Setting colors for using in plots
-ColorPattern; 
-
 %% reformating the IC structure
 CondList = ["no change", "no distal cue", "no optical flow", "all"];
+
+% When cond = "all" it will average the values between the conditions
 for idx_ = 1:4
     cond = CondList(idx_);
 
@@ -197,7 +212,8 @@ for idx_ = 1:4
     [beta_k_g3_m3_sigma_nu_AIC,beta_k_g3_m3_sigma_nu_BIC, beta_k_g3_m3_sigma_nu_NLL] = reformatIC(beta_k_g3_m3_sigma_nu_IC, cond);
     [g2_g3_m3_sigma_nu_AIC,g2_g3_m3_sigma_nu_BIC, g2_g3_m3_sigma_nu_NLL] = reformatIC(g2_g3_m3_sigma_nu_IC, cond);
     [beta_k_g2_g3_m3_sigma_nu_AIC,beta_k_g2_g3_m3_sigma_nu_BIC, beta_k_g2_g3_m3_sigma_nu_NLL] = reformatIC(beta_k_g2_g3_m3_sigma_nu_IC, cond);
-    % Box Plot of AIC
+    
+    % Box Plot for AICs
     ICType = "AIC";
     All_AIC = [sigma_nu_AIC,...              %2
                beta_k_sigma_nu_AIC,...       %3.1
@@ -219,7 +235,7 @@ for idx_ = 1:4
     plotBoxPlot(All_AIC, ModelNames, ICType, config, cond);
     plotErrorPlot(All_AIC, ModelNames, ICType, config, cond);
     
-    % Box Plot of BIC
+    % Box Plot for BIC
     ICType = "BIC";
     All_BIC = [sigma_nu_BIC,...              %2
                beta_k_sigma_nu_BIC,...       %3.1
@@ -241,7 +257,7 @@ for idx_ = 1:4
     plotBoxPlot(All_BIC, ModelNames, ICType, config, cond);
     plotErrorPlot(All_BIC, ModelNames, ICType, config, cond);
     
-    % Box Plot of NLL
+    % Box Plot for NLL
     ICType = "NegLogLikelihood";
     All_NLL = [sigma_nu_NLL,...              %1
                beta_k_sigma_nu_NLL,...       %2.1
@@ -264,27 +280,33 @@ for idx_ = 1:4
     plotErrorPlot(All_NLL, ModelNames, ICType, config, cond);
 
 end
-%% function for Box plot
+
+% Final cleanup to leave workspace as the end of the Preprocessing stage.
+% Remove if you want to take a look at the output data.
+clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
+% Cleaning dummy variable to allow other scripts to run on all groups
+if (isfield(config, 'ModelSelection') == 1)
+    config = rmfield(config,"ModelSelection");
+end
+
 function plotBoxPlot(data, ModelNames, ICType, config, cond)
+
     f = figure('visible','off','Position', [100 100 600 400]);
     
-    %%%set paramsters
+    % Parameters set for controlling visual output
     num_boxplots = size(data,2);
     box_lineWidth = 0.5;
     whisker_value = 1.5;
     box_widths_value = 0.6;
-    box_color_transparency = 0.5; %faceAlpha
+    box_color_transparency = 0.5; 
     median_lineWidth = 2;
     median_color = 'k';
     scatter_jitter_value = 0.1;
     scatter_markerSize=10;
     scatter_marker_edgeColor = 'k';
     scatter_marker_edgeWidth = 0.5;
-    scatter_color_transparency = 0.7; %faceAlpha
+    scatter_color_transparency = 0.7; 
 
-    %%% Font type and size setting %%%
-    % Using Arial as default because all journals normally require the font to
-    % be either Arial or Helvetica
     set(0,'DefaultAxesFontName','Arial')
     set(0,'DefaultTextFontName','Arial')
     set(0,'DefaultAxesFontSize',12)
@@ -292,11 +314,8 @@ function plotBoxPlot(data, ModelNames, ICType, config, cond)
     
     N = size(config.color_scheme_npg,1)-2;
     color_scheme = config.color_scheme_npg(1:N,:);
-    %idxs = randsample(N-2,num_boxplots, true);
-    %box_colors = config.color_scheme_npg(1:num_boxplots,:);
     
-    %% main boxplot one box for each column in data
-    bp = boxplot(data, 'whisker',whisker_value,'symbol','', ... %symbol ='' making outlier invisible
+    bp = boxplot(data, 'whisker',whisker_value,'symbol','', ... 
                 'color','k', ...
                 'Notch','on',...
                 'widths',box_widths_value,...
@@ -314,24 +333,23 @@ function plotBoxPlot(data, ModelNames, ICType, config, cond)
         error("Choose correct IC type!");
     end
     
-    %% Coloring each box
+    %% Boxplot visual changes
     h = findobj(gca,'Tag','Box');
     for i = length(h):-1:1
-        %note that first getting the most right box, so do "length(h)-i+1"
         c_idx = mod(i,N)+1;
         patch(get(h(i),'XData'),get(h(i),'YData'),color_scheme(c_idx,:),'FaceAlpha',box_color_transparency);
     end
     % Sending patch to back of the figure so that median can be drawn on top of it
     set(gca,'children',flipud(get(gca,'children'))) 
 
-    %% Adjusting median
+    %% Median visual changes
     h=findobj(gca,'tag','Median');
     for i = 1:length(h)
         h(i).LineWidth = median_lineWidth;
         h(i).Color = median_color;
     end
 
-    %% add scatter plot and the mean of the data
+    %% Scatter plot for data and mean
     num_points = size(data,1);
 
     for i=1:size(data,2)
@@ -351,12 +369,7 @@ function plotBoxPlot(data, ModelNames, ICType, config, cond)
                 'LineWidth',scatter_marker_edgeWidth);
     end
 
-    %% Further post-processing the figure
-%     if ICType=='AIC' | ICType=='BIC'
-%         ylimup = 75;
-%     else
-%         ylimup = 35;
-%     end    
+    %% Figure post-processing  
     set(gca, ...
         'Box'         , 'off'     , ...
         'TickDir'     , 'out'     , ...
@@ -366,21 +379,16 @@ function plotBoxPlot(data, ModelNames, ICType, config, cond)
         'XTick'       , 1:1:100,... 
         'XLim'        , [0.5,length(ModelNames)+0.5],...
         'LineWidth'   , .5        );
-    %'YLim'        , [0,ylimup],...
-    %title(cond)
     
-    %% save figure
+    %% Export figure
     exportgraphics(f,config.ResultFolder+"/"+cond+"_"+ICType+".png",'Resolution',300);
     exportgraphics(f,config.ResultFolder+"/"+cond+"_"+ICType+".pdf",'Resolution',300,'ContentType','vector');
 end
 
-%% function for Box plot
 function plotErrorPlot(data, ModelNames, ICType, config, cond)
+    
     f = figure('visible','off','Position', [100 100 1200 300]);
 
-    %%% Font type and size setting %%%
-    % Using Arial as default because all journals normally require the font to
-    % be either Arial or Helvetica
     set(0,'DefaultAxesFontName','Arial')
     set(0,'DefaultTextFontName','Arial')
     set(0,'DefaultAxesFontSize',12)
@@ -411,25 +419,6 @@ function plotErrorPlot(data, ModelNames, ICType, config, cond)
         error("Choose correct IC type!");
     end
 
-%     if ICType=="AIC" | ICType=="BIC"
-%         ylimup = 60;
-%     else
-%         ylimup = 30;
-%     end   
-
-%     set(gca, ...
-%         'Box'         , 'off'     , ...
-%         'TickDir'     , 'out'     , ...
-%         'TickLength'  , [.01 .01] , ...
-%         'XColor'      , [.1 .1 .1], ...
-%         'YColor'      , [.1 .1 .1], ...
-%         'XTick'       , 1:1:num_boxplots,... 
-%         'XTickLabel'  , ModelNames,...
-%         'XLim'        , [0.5,num_boxplots+0.5],...
-%         'YLim'        , [0, ylimup],...
-%         'LineWidth'   , .5        );
-%     title(cond)
- 
     set(gca, ...
         'Box'         , 'off'     , ...
         'TickDir'     , 'out'     , ...
@@ -440,62 +429,8 @@ function plotErrorPlot(data, ModelNames, ICType, config, cond)
         'XTickLabel'  , ModelNames,...
         'XLim'        , [0.5,num_boxplots+0.5],...
         'LineWidth'   , .5        );
-    %title(cond)
 
-    %% save figure
-    exportgraphics(f,config.ResultFolder+"/zErrorBar_"+cond+"_"+ICType+".png",'Resolution',300);
-    exportgraphics(f,config.ResultFolder+"/zErrorBar_"+cond+"_"+ICType+".pdf",'Resolution',300,'ContentType','vector');
-end
-
-%%
-function AICcomparisonbetweenmodel(All_AIC, idx1, idx2, config)
-
-    % plot figures
-    f = figure('visible','on','Position', [100 100 200 200]);
-    %%% Font type and size setting %%%
-    % Using Arial as default because all journals normally require the font to
-    % be either Arial or Helvetica
-    set(0,'DefaultAxesFontName','Arial')
-    set(0,'DefaultTextFontName','Arial')
-    set(0,'DefaultAxesFontSize',12)
-    set(0,'DefaultTextFontSize',12)    
-    
-    AICM1 = All_AIC(:,idx1);
-    AICM2 = All_AIC(:,idx2);
-    scatter(AICM1, AICM2, 30, 'red', 'filled')
-    hold on 
-    rline = refline(1,0);
-    rline.Color = 'k';
-    rline.LineStyle = "--";
-    rline.LineWidth = 1;  
-
-    xlabel("AIC M"+num2str(idx1));
-    ylabel("AIC M"+num2str(idx2));
-    [p, h, stats] = signrank(AICM1, AICM2, "tail","right");
-    %print p value and statistics for paper use
-    p
-    stats
-    
-    if p<0.001
-        title("p<0.001")
-    else
-        title("p="+num2str(p, '%0.2f'))
-    end
-    
-    
-    set(gca, ...
-        'Box'         , 'off'     , ...
-        'TickDir'     , 'out'     , ...
-        'TickLength'  , [.01 .01] , ...
-        'XColor'      , [.0 .0 .0], ...
-        'YColor'      , [.0 .0 .0], ...
-        'XLim'        , [0,80],...
-        'XTick'       , [0,80],...
-        'YLim'        , [0,80],...
-        'YTick'       , [0,80],...   
-        'LineWidth'   , 1        );
-    
-    exportgraphics(f,config.ResultFolder+"/AICCompare_"+num2str(idx1)+"_"+num2str(idx2)+".png",'Resolution',300);
-    exportgraphics(f,config.ResultFolder+"/AICCompare_"+num2str(idx1)+"_"+num2str(idx2)+".pdf",'Resolution',300,'ContentType','vector');
-
+    %% Export figures
+    exportgraphics(f,config.ResultFolder+"/ErrorBar_"+cond+"_"+ICType+".png",'Resolution',300);
+    exportgraphics(f,config.ResultFolder+"/ErrorBar_"+cond+"_"+ICType+".pdf",'Resolution',300,'ContentType','vector');
 end

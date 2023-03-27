@@ -5,6 +5,8 @@
 % variables. Each linear model includes age and sex as additional
 % predictors. We applied Bonferroni correction to the results of the anova
 % that tested if the slope of the ROI predictor was different from zero.
+% MRI data needs to be loaded for running this script (see details in
+% PrepareBaseConfig.
 
 % Preparing the data
 VAM_PrepareBaseConfig;
@@ -20,7 +22,7 @@ config.NumParams        =   length(config.ParamName);
 VAM;
 
 % Preparing output
-config.ResultFolder = pwd + "/Output/Fig_6";
+config.ResultFolder = pwd + "/Output/Fig6";
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
 end
@@ -28,7 +30,7 @@ end
 % Generating color scheme for our paper
 ColorPattern; 
 
-% Collecting information from output
+%% Collecting information from output
 YoungControlsParameters   = averageAcrossConditions(YoungControls.Results.estimatedParams);
 HealthyControlsParameters = averageAcrossConditions(HealthyControls.Results.estimatedParams);
 MCIUnkParameters          = averageAcrossConditions(MCIUnk.Results.estimatedParams);
@@ -58,10 +60,10 @@ disp("Removed negative = " + (height(MCINegParameters) - sum(MRIModelParamsDataT
 
 clear filter
 
-%% Plotting linear regressions for ROIs
 close all;
 clc;
 
+% Parameters set for controlling visual output
 plotInfo.defaultTextSize = 12;
 plotInfo.defaultLineSize = 1.4;
 plotInfo.axisLineSize = 1.2;
@@ -71,14 +73,14 @@ plotInfo.labelSize = 12;
 plotInfo.axisSize = 10;
 plotInfo.dataSize = 30;
 plotInfo.legendFontSize = 10;
-plotInfo.visible = "on";
+plotInfo.visible = "off";
 plotInfo.ResultFolder = config.ResultFolder;
 plotInfo.color_scheme_group = config.color_scheme_group;
 plotInfo.figurePosition = [200 200 210 210];
 
-% Getting the indices for the ROI
 parameters_label = [{'\beta'}, {'k'}, {'g_2'}, {'g_3'}, {'\sigma'}, {'\nu'}];
 
+% Labels selected ROI regions, see paper methods for details 
 mri_indeces = ["norm_ErC"...
     "norm_hippocampus" "norm_precuneus_volume_Dest"...
     "norm_inferiorparietal_volume_Dest" "norm_isthmuscingulate_volume_Dest"];
@@ -86,10 +88,13 @@ mri_indeces_label = ["Entorhinal Cortex"...
     "Hippocampus" "Precuneus"...
     "Inferior parietal" "Isthmus cingulate"];
 
+% Controlling if we should add a reference line when plotting the GLAMPI
+% parameter
 addLine = [0, 1, 1, 1, 0, 0];
 
 for param_i = 1:length(config.ParamName)    
     for mri_i = 1:length(mri_indeces)
+
         disp("Fitting " + parameters_label{param_i} + " vs " + mri_indeces_label(mri_i));
 
         pvalue = fitLinearRegression(...
@@ -113,9 +118,10 @@ for param_i = 1:length(config.ParamName)
         );
     end
 end
-clear param_i mri_i
 
-clear statuscode sex age
+% Final cleanup to leave workspace as the end of the Preprocessing stage.
+% Remove if you want to take a look at the output data.
+clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
 
 %% get the model parameters, average across the conditions
 % remove nans if the row after mergin still contains nans
@@ -143,6 +149,7 @@ end
 
 %%
 function pvalue = fitLinearRegression(fullTable,x,xLabelPlot,y,yLabelPlot,addLine,plotInfo)
+% Calculated the pvalues from the linear model provided
 
 fullTable.Sex = nominal(fullTable.Sex);
 fullTable.CSF = nominal(fullTable.CSF);
@@ -156,10 +163,15 @@ fullTable.norm_isthmuscingulate_volume_Dest = zscore(fullTable.norm_isthmuscingu
 fullTable.norm_precuneus_volume_Dest        = zscore(fullTable.norm_precuneus_volume_Dest);
 
 model_spec = y + " ~ Age + Sex + " + x;
-mdl_full = fitlm(fullTable,model_spec) % To get the pvalue correcting for age and sex
+% Let the function display the output
+mdl_full = fitlm(fullTable,model_spec)
+% Performing anova on coefficients for the slope
 anova_mdl_full = anova(mdl_full);
+
+% Output the result for the ROI of interest
 pvalue = anova_mdl_full.pValue(anova_mdl_full.Properties.RowNames == x);
 
+% Displaying values that are significant over the Bonferroni correction
 if(pvalue < 0.05/5)
     disp("%%%%%%%%%%%%%%%%%%%%%%%");
     disp("%%%%%%%%%%%%%%%%%%%%%%% Survived correction " + xLabelPlot + " " + yLabelPlot + "%%%%%%%%%%%%%%%%%%%%%%%");
@@ -168,9 +180,10 @@ end
 
 end
 
-%% Plotting a linear regression using a linear model
+%% 
 function plotLinearRegression(fullTable,x,xLabelPlot,y,yLabelPlot,addLine,plotInfo,pvalue)
-
+% Plot single linear regression between ROI Volume parameter and GLAMPI
+% parameter
     labels = ["HC", "Unknown", "Negative", "Positive"];
     fullTable.Sex = nominal(fullTable.Sex);
     xData = table2array(fullTable(:,find(strcmp(fullTable.Properties.VariableNames, x))));
@@ -215,7 +228,7 @@ function plotLinearRegression(fullTable,x,xLabelPlot,y,yLabelPlot,addLine,plotIn
     ax = gca;
 
     if addLine > 0
-        % Plotting y = 1
+        % adding reference line
         tempX = [ax.XLim(1):0.0001:ax.XLim(2)];
         plot(tempX,addLine*ones(length(tempX)),"r--", LineWidth=plotInfo.LineSizeMdl);
     end

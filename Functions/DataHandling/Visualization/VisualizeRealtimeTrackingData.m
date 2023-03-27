@@ -1,33 +1,48 @@
 function VisualizeRealtimeTrackingData(Group, pId, trialId, playbackSpeed, varargin)
+%% VisualizeRealtimeTrackingData
+% Andrea Castegnaro, UCL, 2022 uceeaca@ucl.ac.uk
+% Function used to manuyally visualize the reconstructed data from a
+% participant.
+% Group: group from which we are going to visualize the trial
+% pId: identify participant within the group
+% trialId: identify trial within participant
+% playbackSpeed: set the speed for the video
+% varargin: 'cutconethree' - extract data from cone 3 only, 'videoplot' -
+% draw the plot as video or not, 'cutsecbeforecone1' - number of seconds to
+% track before reaching cone 1, 'displaytrialinfo' - plot a legend with 
+% This function has been used to create Figure 1b.
+% ===================================================================================
 
+% Anonymous function to calculate angle between two vectors.
 anglebetween = @(v,w) atan2d(w(:,2).*v(:,1) - v(:,2).*w(:,1), v(:,1).*w(:,1) + v(:,2).*w(:,2));
 
+% Color pattern for our paper
 ColorPattern;
-savefolder = pwd + "/Output/";
-resultfolder = savefolder + "PaperFigs/Fig1C";
-config.ResultFolder = resultfolder;
-%create storing folder for trajectory if not exist
+
+% Preparing output
+config.ResultFolder = pwd + "/Output/Fig1b";
+
 if ~exist(resultfolder, 'dir')
    mkdir(resultfolder);
 end
 
+% Creating figure
 figureOpen = figure('visible','off','Position', [100 100 850 500]);
 set(0,'DefaultAxesFontName','Arial')
 set(0,'DefaultTextFontName','Arial')
 set(0,'DefaultAxesFontSize',16)
 set(0,'DefaultTextFontSize',16)  
 
-
 % Reconstructing a visualization of participants walk and head drection after reaching the third
 % cone
 config.cutFromConeThree = false;
-% make an animation or not
+% Animate animation or not
 config.videoplot = true;
-% seconds to start tracking before reaching cone 1 (-100 means get all
+% Seconds to start tracking before reaching cone 1 (-100 means get all
 % information in tracking path from the current trial. Current trial starts
 % when the participants ended the previous one.
 config.cutseconds = -100; 
-% diplay a legend with all the trial info. Necessary for the manual
+% Diplay a legend with all the trial info. Necessary for the manual
 % checking of the data
 config.displayTrialInfo = false; 
 
@@ -54,7 +69,7 @@ Extracted_pos = Group.Path{1,pId}{trialId,1};
 Extracted_pos = array2table(Extracted_pos,"VariableNames",{'Time' 'Pos_X' 'Pos_Y' 'Pos_Z' 'Forward_X' 'Forward_Y' 'Forward_Z'});
 
 if(~isfield(Group,'Reconstructed'))
-    disp('Please run CalculateTrckingPath first');
+    disp('Please run CalculateTrackingPath function on the group before this one');
     return;
 end
 
@@ -77,10 +92,12 @@ else
     outStr = 'no';
 end
 
+% Information produced in CalculateTrackingPath
 calculatedAngle = Group.Reconstructed{1,pId}.InboundBodyRotation(trialId);
 real_return_angle = Group.Reconstructed{1,pId}.RealReturnAngle(trialId);
 f_return_angle = Group.Reconstructed{1,pId}.InferredReturnAngle(trialId);
 
+% Adding information if this is an out of bound trial
 OoB = [nan 0 nan];
 ReconstrutedOoB = [nan 0 nan];
 if (outofbound == 1)
@@ -90,7 +107,7 @@ if (outofbound == 1)
     end    
 end
 
-% Extracting after reaching cone 3
+% Extracting tracking information after cone three has been reached
 if(config.cutFromConeThree)
     Extracted_pos = Extracted_pos(Extracted_pos.Time > Group.FlagTrigTimes{1,pId}{trialId,3} - 2,:);
 end
@@ -104,7 +121,7 @@ ax = gca;
 ax.FontSize = 20;
 ax.FontName = 'Arial';
 
-% Dinamically calculate bounds
+% Dinamically calculate bounds for the plot
 maxX = max([Cone_pos(:,1); Trig_pos(1,1); OoB(1,1)]);
 maxY = max([Cone_pos(:,3); Trig_pos(1,3); OoB(1,3)]);
 minX = min([Cone_pos(:,1); Trig_pos(1,1); OoB(1,1)]);
@@ -116,8 +133,7 @@ offSetFromMax = 0.5;
 xlabel('x (m)')
 ylabel('y (m)')
 
-%title(['Path visualizer'],FontSize=25);
-
+% Creating a legend with information calculated in CalculateTrackingPath
 boxwidth = [0.15 0.2];
 leftCorner = [0.65 0.4];
 dim = [leftCorner boxwidth];
@@ -139,15 +155,21 @@ if(config.displayTrialInfo)
 end
 
 tracking_size = height(Extracted_pos);
-% Plot the position of the third cone
+
+% Plot the position of the cones
 pCone1 = plot(Cone_pos(1,1),Cone_pos(1,3),'Marker','d','LineStyle','none','MarkerFaceColor',config.color_scheme_npg(2,:),'MarkerEdgeColor','black','MarkerSize',18); 
 pCone2 = plot(Cone_pos(2,1),Cone_pos(2,3),'Marker','d','LineStyle','none','MarkerFaceColor',[0.5 0.5 0.5],'MarkerEdgeColor','black','MarkerSize',18); 
 pCone3 = plot(Cone_pos(3,1),Cone_pos(3,3),'Marker','d','LineStyle','none','MarkerFaceColor',config.color_scheme_npg(1,:),'MarkerEdgeColor','black','MarkerSize',18);
+% Mark out of bound position when available
 pOoB = plot(OoB(1,1),OoB(1,3),'Marker','*',Color=config.color_scheme_npg(4,:),MarkerSize=18, LineWidth=3);
+% Mark the reconstructed out of bound position (this position is set to a
+% distance for which it will not weight on the mean)
 pRecconstructedOoB = plot(ReconstrutedOoB(1,1),ReconstrutedOoB(1,3),'Marker','*',Color=config.color_scheme_npg(7,:),MarkerSize=18,LineWidth=3);
+% Plot the triggered position
 pTrigPos = plot(Trig_pos(1,1),Trig_pos(1,3),'Marker','x','LineStyle','none','MarkerFaceColor',config.color_scheme_npg(2,:),'MarkerEdgeColor','black','MarkerSize',18,LineWidth=3);
 
 if(config.videoplot)
+    % Draw frame by frame
     for k = 2 : tracking_size        
         tempPos = Extracted_pos(k-1:k,[2 4]);
         
@@ -176,7 +198,7 @@ if(config.videoplot)
 else
     tempDir = [Extracted_pos.Forward_X(2) Extracted_pos.Forward_Z(2)];
     tempDir = tempDir/norm(tempDir);
-    % Making it smaller for visualization
+    % Making participant orientation smaller just for visualization
     tempDir = tempDir.*0.5;
 
     qv = quiver(Extracted_pos.Pos_X(2),Extracted_pos.Pos_Z(2),tempDir(1), tempDir(2), 'off');
@@ -186,7 +208,6 @@ else
 
     tempDir = [Extracted_pos.Forward_X(tracking_size) Extracted_pos.Forward_Z(tracking_size)];
     tempDir = tempDir/norm(tempDir);
-    % Making it smaller for visualization
     tempDir = tempDir.*0.5;
 
     qv = quiver(Extracted_pos.Pos_X(tracking_size),Extracted_pos.Pos_Z(tracking_size),tempDir(1), tempDir(2), 'off');
@@ -208,7 +229,6 @@ leg.FontSize = 15;
 axis square
 
 xlim([absMin-offSetFromMax absMax+offSetFromMax]);
-%xticks(absMin-offSetFromMax:1.0:absMax+offSetFromMax);
 ylim([absMin-offSetFromMax absMax+offSetFromMax]);
 yticks(xticks);
 
@@ -216,7 +236,8 @@ ax = gca;
 ax.LineWidth = 2.0;
 
 hold off
-% save figure
+
+% Export figure
 exportgraphics(figureOpen,config.ResultFolder+"/ExampleTrackingPath.png",'Resolution',300);
 exportgraphics(figureOpen,config.ResultFolder+"/ExampleTrackingPath.pdf",'Resolution',300, 'ContentType','vector');
 disp("Save complete!");

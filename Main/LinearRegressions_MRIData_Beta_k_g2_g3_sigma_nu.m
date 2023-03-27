@@ -1,14 +1,22 @@
+%% Script to create plots from Fig. 6 - Linear regressions models with regions of interest volumes
+% Andrea Castegnaro, UCL, 2022 uceeaca@ucl.ac.uk
+% Calculate simple linear regressions where the GLAMPI parameters are
+% dependent variables and volumes of interest are the independent
+% variables. Each linear model includes age and sex as additional
+% predictors. We applied Bonferroni correction to the results of the anova
+% that tested if the slope of the ROI predictor was different from zero.
+
 % Preparing the data
 VAM_PrepareBaseConfig;
 
 % Preprocessing the data
 VAM_PreprocessData;
 
+% Model fitting
 config.ModelName        =   "beta_k_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-% Model fitting
 VAM;
 
 % Preparing output
@@ -37,7 +45,8 @@ MRIModelParamsDataTable  = [HealthyControls_lmetable; MCIUnk_lmetable; MCINeg_lm
 
 %Removing nans (either from Nan parameters model or missing mri data)
 filter = isnan(MRIModelParamsDataTable.beta) | isnan(MRIModelParamsDataTable.MCI);
-% Counting removed samples. This takes into account also the exclusion from
+
+% Counting removed samples. This will also account for the exclusion from
 % the preprocessing step
 disp("Total Removed samples = " + sum(filter));
 MRIModelParamsDataTable = MRIModelParamsDataTable(~filter,:);
@@ -141,15 +150,9 @@ fullTable.MCI = nominal(fullTable.MCI);
 
 fullTable.Age                               = zscore(fullTable.Age);  
 fullTable.norm_ErC                          = zscore(fullTable.norm_ErC);
-fullTable.norm_AntLat                       = zscore(fullTable.norm_AntLat);
-fullTable.norm_PosMed                       = zscore(fullTable.norm_PosMed);
-fullTable.norm_TE35                         = zscore(fullTable.norm_TE35);
 fullTable.norm_hippocampus                  = zscore(fullTable.norm_hippocampus);
-fullTable.norm_subiculum                    = zscore(fullTable.norm_subiculum);
-fullTable.norm_posteriorCingulate           = zscore(fullTable.norm_posteriorCingulate);
 fullTable.norm_inferiorparietal_volume_Dest = zscore(fullTable.norm_inferiorparietal_volume_Dest);
 fullTable.norm_isthmuscingulate_volume_Dest = zscore(fullTable.norm_isthmuscingulate_volume_Dest);
-fullTable.norm_superiorparietal_volume_Dest = zscore(fullTable.norm_superiorparietal_volume_Dest);
 fullTable.norm_precuneus_volume_Dest        = zscore(fullTable.norm_precuneus_volume_Dest);
 
 model_spec = y + " ~ Age + Sex + " + x;

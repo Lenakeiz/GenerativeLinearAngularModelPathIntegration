@@ -1,4 +1,4 @@
-%% Script to create output for Fig. 4 - receiver operating characteristic curve for proportional errors 
+%% Script to create output for Fig. 5 - receiver operating characteristic curve for proportional errors 
 % Andrea Castegnaro, UCL, 2022 andrea.castegnaro@ucl.ac.uk
 % Using support vector machine (SVM) to classify two groups based on their
 % fitted parameters using an holdout strategy (60% training set 40% testing

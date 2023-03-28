@@ -1,7 +1,13 @@
-%% Two-way anova on all Groups
-% five groups:          Young / HealthyOld / MCIPos / MCINeg / MCIUnk
-% three conditions:     no changed / no distal cue / no optical flow
 function [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_MCIPosMCINeg(AllMCIPos, AllMCINeg, config)
+%% TwowayAnova_MCIPosMCINeg
+% Zilong Ji, UCL, 2022 zilong.ji@ucl.ac.uk
+% Calculate two way anova between groups of participants
+% five groups:         MCIpos / MCIneg
+% three conditions:    no change / no distal cue /  no optical flow
+% Expects a set of parameters for each group as an input
+% Returns anova results and results from multiple comparison tables for
+% main effect and interactions.
+% ===================================================================================
 
     %load configurations necessary for the script
     resultfolder = config.ResultFolder;

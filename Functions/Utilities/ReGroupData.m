@@ -1,7 +1,10 @@
 function [Y, GroupNames, ConditionNames]=ReGroupData(Data,groupname)
-%Group all the data from five groups and three conditions into a long
-%numeric vector for further two-way anova analysis 
-%and also output the factor names 
+%% ReGroupData
+% Andrea Castegnaro, UCL, uceeaca@ucl.ac.uk
+% Group all the group data from three environmental conditions into a long
+% numeric vector for further two-way anova analysis and also output the
+% factor names
+% ===================================================================================
 
 Y = [Data(1,:), Data(2,:), Data(3,:)];
 

@@ -1,7 +1,6 @@
 %% Loading NeuroPsych data for all of the older participants filtering for only normalized data
-% This script is called from VAM_PrepareBaseConfig.
-% 
-%
+% Script called from VAM_PrepareBaseConfig.
+
 %% Loading MRI data
 opts = detectImportOptions("./Data/HowettBrain2019_NeuroPsych.csv");
 neuroPsychData = readtable("./Data/HowettBrain2019_NeuroPsych.csv", opts);

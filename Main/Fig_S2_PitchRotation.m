@@ -1,35 +1,36 @@
-%% Preparing the data
+%% Script to create output for Supp Fig. 2 - analysis of pitch rotation during turn between outbound segments
+% Andrea Castegnaro, UCL, 2022 andrea.castegnaro@ucl.ac.uk
+% Calculate pitch rotation during the rotation at the outbound segment. A
+% different pitch rotation might indicate a difference in angular velocity
+% encoding (please see Choi et al., 2023) for details
+
+% Preparing the data
 VAM_PrepareBaseConfig
 
 % Preprocessing the data
 VAM_PreprocessData
- 
-% Setting the model we are interested in
-% Eventually modify config paramteters we are interested in. For example
-% for this graph we are not interested in running the model with splitted
-% conditions so we will set the relative config to false 
-% force it to not run
+
+% Model fitting
 rng("default");
+% No need to filter between different environmental condition
 config.useTrialFilter = false;
 config.ModelName        =   "beta_k_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
-config.NumParams        =   100; % Set 100 here to avoid producing the model
-% Run the model
+config.NumParams        =   100; % skip model fitting
+
 VAM
 
-%% Model run completed, preparing the data for plotting figures
-config.ResultFolder = pwd + "/Output/Supplementary/YawAnalysis";
-% Create storing folder for trajectory if not exist
+% Preparing output
+config.ResultFolder = pwd + "/Output/S2/YawAnalysis";
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
 end
 
-%% Genarating color scheme
+% Generating color scheme for our paper
 ColorPattern;
 
 %% Plotting the calculation of the yaw points for some participant
 % Unity is y-up world coordinate
-
 drawHeadingPoints(YoungControls.Path{1,1}{1,1}(:,[5 7 6]),YoungControls.Path{1,1}{1,1}(:,1),YoungControls.FlagTrigTimes{1,1}{1,2},YoungControls.FlagTrigTimes{1,1}{1,3});
 drawHeadingPoints(HealthyControls.Path{1,1}{1,1}(:,[5 7 6]),HealthyControls.Path{1,1}{1,1}(:,1),HealthyControls.FlagTrigTimes{1,1}{1,2},HealthyControls.FlagTrigTimes{1,1}{1,3});
 drawHeadingPoints(MCIUnk.Path{1,1}{1,1}(:,[5 7 6]),MCIUnk.Path{1,1}{1,1}(:,1),MCIUnk.FlagTrigTimes{1,1}{1,2},MCIUnk.FlagTrigTimes{1,1}{1,3});
@@ -48,6 +49,7 @@ MCIUnkData = extractPitchData(MCIUnk);
 % Young/Healthy Controls/MCI separately
 close all;
 
+% Parameters set for controlling visual output
 plotInfo.defaultLineSize = 1.7;
 plotInfo.titleFontSize = 12;
 plotInfo.labelSize = 12;
@@ -96,7 +98,7 @@ OutboundDataAnovaGroups = [repmat({'Young'}, size(YoungData, 1), 1); ...
 [results, means, ~, ~] = multcompare(stats, 'alpha', 0.05,'Display','off');
 
 
-currFig = figure("Position",plotInfo.FigurePosition);
+currFig = figure("Position",plotInfo.FigurePosition,Visible="off");
 
 set(0,'DefaultAxesFontName','Arial');
 set(0,'DefaultTextFontName','Arial');
@@ -178,139 +180,11 @@ ax.YAxis.FontSize = plotInfo.axisSize;
 exportgraphics(currFig,config.ResultFolder+"/OutboundTurnPitchAngle.png",'Resolution',300);
 exportgraphics(currFig,config.ResultFolder+"/OutboundTurnPitchAngle.pdf",'Resolution',300, 'ContentType','vector');
 
-%% Young/Healthy Controls/MCI pooled
-close all;
+% Final cleanup to leave workspace as the end of the Preprocessing stage.
+% Remove if you want to take a look at the output data.
+clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
 
-plotInfo.defaultLineSize = 1.7;
-plotInfo.titleFontSize = 12;
-plotInfo.labelSize = 12;
-plotInfo.axisSize = 10;
-plotInfo.MarkerSize = 20;
-plotInfo.MarkerAlpha = 0.35;
-plotInfo.PatchAlpha = 0.7;
-plotInfo.yLim = [-30 20];
-plotInfo.xLim = [0.5 3.5];
-plotInfo.medianColor = [0.4 0.4 0.4];
-plotInfo.medianWidth = 1.3;
-plotInfo.meanMarkerSize = 30;
-plotInfo.sigmaStarLineWidth = 2.5;
-plotInfo.sigmaStarTextSize  = 20;
-plotInfo.sigmaBarSeparation = 0.04;
-plotInfo.FigurePosition = [200 200 280 250];
-
-MCIAllData = [MCIUnkData; MCINegData; MCIPosData];
-
-% Filling with nans smaller columns
-max_element = max([numel(YoungData),...
-    numel(HealthyControlsData),...
-    numel(MCIAllData)]);
-YoungData(end+1 : max_element) = nan;
-HealthyControlsData(end+1 : max_element) = nan;
-MCIAllData(end+1 : max_element) = nan;
-
-OutboundData = [YoungData HealthyControlsData MCIAllData];
-
-DataMeans = mean(OutboundData,1,"omitnan");
-DataSems = std(OutboundData,1,"omitnan")./sqrt(sum(~isnan(OutboundData),1));
-
-xDatameans = 1:length(DataMeans);
-
-%
-OutboundDataAnova = [YoungData; HealthyControlsData; MCIAllData];
-OutboundDataAnovaGroups = [repmat({'Young'}, size(YoungData, 1), 1); ...
-          repmat({'Elderly'}, size(HealthyControlsData, 1), 1); ...
-          repmat({'MCI'}, size(MCIAllData, 1), 1)];
-
-[p, tbl, stats] = anova1(OutboundDataAnova, OutboundDataAnovaGroups, 'off');
-[results, means, ~, ~] = multcompare(stats, 'alpha', 0.05,'Display','off');
-
-
-currFig = figure("Position",plotInfo.FigurePosition);
-
-set(0,'DefaultAxesFontName','Arial');
-set(0,'DefaultTextFontName','Arial');
-
-hold on;
-
-% Creating box plots
-boxplots = boxplot(OutboundData,"Notch","on","symbol","","Colors",config.color_scheme_group, "Widths",0.6);
-boxes = findobj(gca,'Tag','Box');
-boxes = flip(boxes);
-medians = findobj(gca,'Tag','Median');
-medians = flip(medians);
-
-% Adding a patch to the box plots
-for j = 1:length(boxes)
-    pp = patch(get(boxes(j),'XData'), get(boxes(j), 'YData'), config.color_scheme_group(j,:), 'FaceAlpha', plotInfo.PatchAlpha);
-    pp.LineStyle = "none";
-end
-clear j;
-
-% Changing color of the median 
-for j = 1:length(medians)
-    plot(medians(j).XData,medians(j).YData,Color=plotInfo.medianColor, LineStyle="-", LineWidth=plotInfo.medianWidth);
-end
-clear j;
-
-% Adding the dots for each participant
-for j = 1:width(OutboundData)
-    sh = scatter(j*ones(height(OutboundData),1), OutboundData(:,j));
-    sh.SizeData = plotInfo.MarkerSize;
-    sh.MarkerEdgeColor = "none";
-    sh.MarkerFaceColor = config.color_scheme_group(j,:);
-    sh.MarkerFaceAlpha = plotInfo.MarkerAlpha;
-end
-clear j;
-
-% Adding error bars
-ax_errorBar = errorbar(xDatameans,DataMeans,DataSems);
-ax_errorBar.Color = [0 0 0];
-ax_errorBar.LineWidth = 3;
-ax_errorBar.LineStyle = "none";
-
-% Adding black diamond
-sc_means = scatter(xDatameans,DataMeans);
-sc_means.Marker = "diamond";
-sc_means.SizeData = plotInfo.meanMarkerSize;
-sc_means.MarkerFaceAlpha = 1;
-sc_means.MarkerFaceColor = "white";
-sc_means.MarkerEdgeColor = "none";
-
-sigstaroptions.textSize      = plotInfo.sigmaStarTextSize;
-sigstaroptions.lineWidth     = plotInfo.sigmaStarLineWidth;
-sigstaroptions.barSeparation = plotInfo.sigmaBarSeparation;
-
-adjustablesigstar([1 3],0.001,0,sigstaroptions);
-
-hold off;
-
-ylim(plotInfo.yLim);
-xlim(plotInfo.xLim);
-
-ylabel("Pitch angle (degree)");
-
-set(gca, ...
-    'Box'         , 'off'     , ...
-    'TickDir'     , 'out'     , ...
-    'TickLength'  , [.01 .01] , ...
-    'XColor'      , [.1 .1 .1], ...
-    'YColor'      , [.1 .1 .1]);
-
-
-ax = gca;
-ax.XAxis.TickLabels = {'Young', 'Elderly', 'MCI'};
-
-ax.LineWidth = plotInfo.defaultLineSize;
-ax.XLabel.FontSize = plotInfo.labelSize;
-ax.YLabel.FontSize = plotInfo.labelSize;
-ax.XAxis.FontSize = plotInfo.axisSize;
-ax.YAxis.FontSize = plotInfo.axisSize;
-
-exportgraphics(currFig,config.ResultFolder+"/OutboundTurnPitchAngleMCIPooled.png",'Resolution',300);
-exportgraphics(currFig,config.ResultFolder+"/OutboundTurnPitchAngleMCIPooled.pdf",'Resolution',300, 'ContentType','vector');
-
-
-%%
+%% ------------------------------------------------------------------
 function dataout = extractPitchData(groupData)
 
     dataout = nan(length(groupData.Path),1);
@@ -333,7 +207,7 @@ function dataout = extractPitchData(groupData)
 
 end
 
-%%
+%% ------------------------------------------------------------------
 function drawHeadingPoints(points, timestamps, startTime, endTime)
 
 filter_idxs = timestamps > startTime & timestamps < endTime;
@@ -375,24 +249,5 @@ hold on
     end
 
 hold off
-
-end
-%% Extracting speed information for each of the walked segment
-%
-function dataout = averageAcrossConditions(data)
-
-    dataout = [];
-    pSize = length(data{1});
-    paramsSize = width(data{1});
-
-    for i = 1:pSize
-        tempP = [];
-        for j = 1:paramsSize
-            tempP = [tempP mean([data{1}(i,j) data{2}(i,j) data{3}(i,j)],"omitnan")];
-        end
-        dataout = [dataout;tempP];
-    end
-
-    dataout = removeNanRows(dataout);
 
 end

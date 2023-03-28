@@ -41,6 +41,10 @@ AllMCINegParams     =   MCINeg.Results.estimatedParams;
 BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, config);
 BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, multicomp_tab1, config)
 
+% Final cleanup to leave workspace as the end of the Preprocessing stage.
+% Remove if you want to take a look at the output data.
+clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
+
 %%
 function BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, config)
     
@@ -310,12 +314,12 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
                 'MarkerFaceAlpha',scatter_color_transparency,...
                 'LineWidth',scatter_marker_edgeWidth); 
 
-        %add errorbar
+        % add errorbar
         mean_MCIPos = mean(MCIPosParamMean);
         sem_MCIPos= std(MCIPosParamMean)./sqrt(length(MCIPosParamMean));
         errorbar(1,mean_MCIPos,sem_MCIPos,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 18);    
         hold on
-        %add mean point
+        % add mean point
         scatter(1, mean_MCIPos, 3*scatter_markerSize, 'd',...
                 'filled','MarkerEdgeColor','k', ...
                 'MarkerFaceColor','w', ...

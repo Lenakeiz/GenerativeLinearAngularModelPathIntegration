@@ -106,8 +106,9 @@ plotInfo.ticksStep = 0.5;
 plotInfo.yLim = [0 2.5];
 plotMergedBarScatter(mean(YoungControlsPropAng,1,'omitnan'), mean(HealthyControlsPropAng,1,'omitnan'), mean(MCIPosPropAng,1,'omitnan'), mean(MCINegPropAng,1,'omitnan'), mean(MCIUnkPropAng,1,'omitnan'), anova_tab_angle, multicomp_tab1_angle, config, plotInfo);
 
-%%
-clear plotInfo
+% Final cleanup to leave workspace as the end of the Preprocessing stage.
+% Remove if you want to take a look at the output data.
+clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
 
 %% get the normalized return distance and angles for all particpants
 % each value is a mean value for per participant per condition

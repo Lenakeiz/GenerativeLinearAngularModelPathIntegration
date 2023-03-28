@@ -78,6 +78,10 @@ generateROCCurve(allParamsMCINeg, allParamsMCIPos,'MCI-', 'MCI+', parametersName
 
 disp("%%%%%%%%%%%%%%% SVM fitting completed %%%%%%%%%%%%%%%");
 
+% Final cleanup to leave workspace as the end of the Preprocessing stage.
+% Remove if you want to take a look at the output data.
+clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
+
 %%
 function generateROCCurve(params1, params2, params1groupName, params2groupName, parametersName, config, plotInfo)
 

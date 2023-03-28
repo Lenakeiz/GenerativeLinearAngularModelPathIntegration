@@ -41,6 +41,10 @@ AllMCINegParams     =   MCINeg.Results.estimatedParams;
 BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCINegParams, anova_tab, config);
 BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCINegParams, multicomp_tab1, config)
 
+% Final cleanup to leave workspace as the end of the Preprocessing stage.
+% Remove if you want to take a look at the output data.
+clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
+
 %%
 function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams, anova_tab, config)
     

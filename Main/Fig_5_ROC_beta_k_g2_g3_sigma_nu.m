@@ -84,6 +84,10 @@ disp("%%%%%%%%%%%%%%% Plotting ROC MCI positive vs MCI negative %%%%%%%%%%%%%%%"
 plotInfo.Title = "MCI - / MCI +";
 plotSVMResults(MCINegParameters, MCIPosParameters,'MCIneg', 'MCIpos', config, plotInfo, MCIPosvsMCINegSVMModels_SingleParameters);  
 
+% Final cleanup to leave workspace as the end of the Preprocessing stage.
+% Remove if you want to take a look at the output data.
+clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
+
 %%
 function SVM_out = getSVMModels(param1, param2, param1Label, param2Label, config, NSamples, kernelFunction, Holdout)
     

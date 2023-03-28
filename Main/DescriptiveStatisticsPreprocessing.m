@@ -19,13 +19,16 @@ config.NumParams        =   length(config.ParamName); % Set 100 here to avoid pr
 % Run the model
 VAM
 
-%% Clearing the workspace
+%% Descriptive data
 OutputPreprocessingDescriptive(YoungControls,"Young controls");
 OutputPreprocessingDescriptive(HealthyControls,"Healthy Controls");
 OutputPreprocessingDescriptive(MCIUnk,"MCI Unk");
 OutputPreprocessingDescriptive(MCINeg,"MCI Neg");
 OutputPreprocessingDescriptive(MCIPos,"MCI pos");
-clearvars -except config YoungControls HealthyControls MCIUnk MCINeg MCIPos
+
+% Final cleanup to leave workspace as the end of the Preprocessing stage.
+% Remove if you want to take a look at the output data.
+clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
 
 %% Takes a sigle group and calcutate the descriptive statistics out of it
 function OutputPreprocessingDescriptive(group, groupName)

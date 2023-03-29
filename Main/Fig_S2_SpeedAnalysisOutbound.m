@@ -79,9 +79,16 @@ OutboundDataAnovaGroups = [repmat({'Young'}, size(YoungSpeed, 1), 1); ...
           repmat({'MCI Negative'}, size(MCINegSpeed, 1), 1); ...
           repmat({'MCI Positive'}, size(MCIPosSpeed, 1), 1)];
 
+% Anova
 [p, tbl, stats] = anova1(OutboundDataAnova, OutboundDataAnovaGroups, 'off');
-[results, means, ~, ~] = multcompare(stats, 'alpha', 0.05,'Display','off');
+disp("Anova on Speed- 1 Young 2 Elderly 3 Mci unk 4 Mci neg 5 Mci pos");
+tbl
+% Multiple comparisons
+[results, means, ~, ~] = multcompare(stats, "Alpha", 0.01, "CType","bonferroni", 'Display','off');
 
+% Reporting multiple comparisons results
+disp("Anova multiple comparisons results - 1 Young 2 Elderly 3 Mci unk 4 Mci neg 5 Mci pos");
+results
 % close all
 close all;
 

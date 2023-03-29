@@ -94,10 +94,16 @@ OutboundDataAnovaGroups = [repmat({'Young'}, size(YoungData, 1), 1); ...
           repmat({'MCI Negative'}, size(MCINegData, 1), 1); ...
           repmat({'MCI Positive'}, size(MCIPosData, 1), 1)];
 
+% Anova
 [p, tbl, stats] = anova1(OutboundDataAnova, OutboundDataAnovaGroups, 'off');
-[results, means, ~, ~] = multcompare(stats, 'alpha', 0.05,'Display','off');
+disp("Anova on Pitch - 1 Young 2 Elderly 3 Mci unk 4 Mci neg 5 Mci pos");
+tbl
+% Multiple comparisons
+[results, means, ~, ~] = multcompare(stats, "Alpha", 0.01, "CType","bonferroni", 'Display','off');
+disp("Anova multiple comparisons results - 1 Young 2 Elderly 3 Mci unk 4 Mci neg 5 Mci pos");
+results
 
-
+%
 currFig = figure("Position",plotInfo.FigurePosition,Visible="off");
 
 set(0,'DefaultAxesFontName','Arial');

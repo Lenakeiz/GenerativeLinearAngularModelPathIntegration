@@ -1,5 +1,5 @@
 function [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_YoungHealthyOldMCICombined(AllYoung, AllHealthyOld, AllMCI, config)
-%% TwowayAnovaOnRealData
+%% TwowayAnova_YoungHealthyOldMCICombined
 % Zilong Ji, UCL, 2022 zilong.ji@ucl.ac.uk
 % Calculate two way anova between groups of participants
 % five groups:         Young / HealthyOld / MCIall

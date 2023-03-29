@@ -1,4 +1,4 @@
-function [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnovaOnRealData(YoungData, HealthyOldData, MCIPosData, MCINegData, MCIUnkData, config)
+function [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnovaAllGroups(YoungData, HealthyOldData, MCIPosData, MCINegData, MCIUnkData, config)
 %% TwowayAnovaOnRealData
 % Andrea Castegnaro, UCL, 2022 uceeaca@ucl.ac.uk
 % Calculate two way anova between groups of participants
@@ -25,10 +25,9 @@ end
 [MCINegY, MCINegGroupNames, MCINegConditionNames]=ReGroupData(MCINegData,'MCIPNeg');
 [MCIUnkY, MCIUnkGroupNames, MCIUnkConditionNames]=ReGroupData(MCIUnkData,'MCIPUnk');
 
-AllY = [MCIPosY,MCINegY,MCIUnkY,YoungY,HealthyOldY];
-AllGroupNames = [MCIPosGroupNames,MCINegGroupNames,MCIUnkGroupNames,YoungGroupNames,HealthyOldGroupNames];
-AllConditionNames = [MCIPosConditionNames,MCINegConditionNames,MCIUnkConditionNames,YoungConditionNames,HealthyOldConditionNames];
-
+    AllY              = [YoungY,             HealthyOldY,             MCIUnkY,             MCINegY,             MCIPosY];
+    AllGroupNames     = [YoungGroupNames,    HealthyOldGroupNames,    MCIUnkGroupNames,    MCINegGroupNames,    MCIPosGroupNames];
+    AllConditionNames = [YoungConditionNames,HealthyOldConditionNames,MCIUnkConditionNames,MCINegConditionNames,MCIPosConditionNames];
 % Do two-way anova with unbalanced design
 [p,anova_tab, stats]= anovan(AllY,{AllGroupNames,AllConditionNames},'model','interaction','varnames',{'Groups','Conditions'},'display','on');
 

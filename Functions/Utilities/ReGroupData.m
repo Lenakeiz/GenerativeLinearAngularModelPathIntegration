@@ -6,16 +6,26 @@ function [Y, GroupNames, ConditionNames]=ReGroupData(Data,groupname)
 % factor names
 % ===================================================================================
 
-Y = [Data(1,:), Data(2,:), Data(3,:)];
+% Removing nans
+isnan_idx = ~isnan(Data(1,:));
+nochange = Data(1,isnan_idx);
+isnan_idx = ~isnan(Data(2,:));
+nodistalcues = Data(1,isnan_idx);
+isnan_idx = ~isnan(Data(3,:));
+noopticflow = Data(1,isnan_idx);
 
-numSubjs = size(Data,2);
+Y = [nochange, nodistalcues, noopticflow];
 
-GroupNames = [string(repmat({groupname},1,numSubjs)),...
-              string(repmat({groupname},1,numSubjs)),...
-              string(repmat({groupname},1,numSubjs))];
+numSubjsNoChange     = size(nochange,2);
+numSubjsNoDistalCues = size(nodistalcues,2);
+numSubjsNoOpticFlow  = size(noopticflow,2);
 
-ConditionNames = [string(repmat({'NoChange'},1,numSubjs)),...
-                  string(repmat({'NoDistalCue'},1,numSubjs)),...
-                  string(repmat({'NoOpticFlow'},1,numSubjs))];  
+GroupNames = [string(repmat({groupname},1,numSubjsNoChange)),...
+              string(repmat({groupname},1,numSubjsNoDistalCues)),...
+              string(repmat({groupname},1,numSubjsNoOpticFlow))];
+
+ConditionNames = [string(repmat({'NoChange'},1 ,numSubjsNoChange)),...
+                  string(repmat({'NoDistalCue'},1,numSubjsNoDistalCues)),...
+                  string(repmat({'NoOpticFlow'},1,numSubjsNoOpticFlow))];  
 
 end

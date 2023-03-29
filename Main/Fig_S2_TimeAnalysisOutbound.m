@@ -36,7 +36,7 @@ MCINegOutboundDuration = extractTimeData(MCINeg);
 MCIPosOutboundDuration = extractTimeData(MCIPos);
 MCIUnkOutboundDuration = extractTimeData(MCIUnk);
 
-%% Analysis and plotting
+% Analysis and plotting
 close all;
 
 % Parameters set for controlling visual output
@@ -85,8 +85,16 @@ OutboundDataAnovaGroups = [repmat({'Young'}, size(YoungOutboundDuration, 1), 1);
           repmat({'MCI Negative'}, size(MCINegOutboundDuration, 1), 1); ...
           repmat({'MCI Positive'}, size(MCIPosOutboundDuration, 1), 1)];
 
+% Anova
 [p, tbl, stats] = anova1(OutboundDataAnova, OutboundDataAnovaGroups, 'off');
-[results, means, ~, ~] = multcompare(stats, 'alpha', 0.05,'Display','off');
+disp("Anova on Time - 1 Young 2 Elderly 3 Mci unk 4 Mci neg 5 Mci pos");
+tbl
+% Multiple comparisons
+[results, means, ~, ~] = multcompare(stats, "Alpha", 0.01, "CType","bonferroni", 'Display','off');
+
+% Reporting multiple comparisons results
+disp("Anova multiple comparisons results - 1 Young 2 Elderly 3 Mci unk 4 Mci neg 5 Mci pos");
+results
 
 currFig = figure("Position",plotInfo.FigurePosition,"Visible","off");
 

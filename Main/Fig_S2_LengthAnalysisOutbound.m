@@ -25,10 +25,10 @@ if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
 end
 
-%% Generating color scheme for our paper
+% Generating color scheme for our paper
 ColorPattern;
 
-% Collecting information from output
+%% Collecting information from output
 YoungOutbound = extractLengthData(YoungControls);
 HealthyControlsOutbound = extractLengthData(HealthyControls);
 MCINegOutbound = extractLengthData(MCINeg);
@@ -84,9 +84,16 @@ OutboundDataAnovaGroups = [repmat({'Young'}, size(YoungOutbound, 1), 1); ...
           repmat({'MCI Negative'}, size(MCINegOutbound, 1), 1); ...
           repmat({'MCI Positive'}, size(MCIPosOutbound, 1), 1)];
 
-% Multiple comparisons
+% Anova
 [p, tbl, stats] = anova1(OutboundDataAnova, OutboundDataAnovaGroups, 'off');
-[results, means, ~, ~] = multcompare(stats, 'alpha', 0.05,'Display','off');
+disp("Anova on Length- 1 Young 2 Elderly 3 Mci unk 4 Mci neg 5 Mci pos");
+tbl
+% Multiple comparisons
+[results, means, ~, ~] = multcompare(stats, "Alpha", 0.01, "CType","bonferroni", 'Display','off');
+
+% Reporting multiple comparisons results
+disp("Anova multiple comparisons results - 1 Young 2 Elderly 3 Mci unk 4 Mci neg 5 Mci pos");
+results
 
 currFig = figure("Position",plotInfo.FigurePosition,"Visible","off");
 
@@ -143,6 +150,7 @@ sigstaroptions.textSize      = plotInfo.sigmaStarTextSize;
 sigstaroptions.lineWidth     = plotInfo.sigmaStarLineWidth;
 sigstaroptions.barSeparation = plotInfo.sigmaBarSeparation;
 
+% Manually set from looking at results table (please see above)
 adjustablesigstar([1 2],0.001,0,sigstaroptions);
 
 hold off;

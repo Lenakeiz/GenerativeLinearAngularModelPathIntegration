@@ -1,18 +1,19 @@
 function Results = PerformGroupFit(GroupData, config)
-%%Fit parameters for a single group
-% GroupData is the extracted data containing the tracked positions of
-% the participants as well as the their responses
-% nsamples is the number of random samples to be taken when modelling the
-% final position
+%% PerformGroupFit
+% Andrea Castegnaro, UCL, uceeaca@ucl.ac.uk
+% Zilong Ji, UCL, zilong.ji@ucl.ac.uk
+% Fit parameters for a single group. Calculates behavioural results. 
+% GroupData is the data obtained at the end of the pre-processing stage.
+% ===================================================================================
 
-TRIAL_FILTER = config.TrialFilter;          %load configurations necessary for the script
-subjectNum = size(GroupData.FlagPos,2);     % Calculating sample size
+TRIAL_FILTER = config.TrialFilter;          % check wheter run the script by keeping environmental conditions separate or not
+subjectNum = size(GroupData.FlagPos,2);     
 
-%% Initialize empty cell for storing data
-X               =       cell(1, subjectNum);% Actual positions
-DX              =       cell(1, subjectNum);% Distances between subsequent points - segments li
-THETADX         =       cell(1, subjectNum);% These are the angles between two subsequent segments. The angle indicate the rotation from the first segment towards the second, so it s the outer angle of the triangle.
-segments        =       cell(1, subjectNum);
+%% Initialize empty cell for storing output data
+X               =       cell(1, subjectNum); % Actual cone positions
+DX              =       cell(1, subjectNum); % Distances between subsequent locations - e.g. segments li for outbound and inbound path
+THETADX         =       cell(1, subjectNum); % Angles between two subsequent locations. Always the outer angle of the triangle (see Fig1 for a schematic)
+segments        =       cell(1, subjectNum); % Vector differences between subsequent locations
 correctReDist   =       cell(1, subjectNum);
 correctReAngle  =       cell(1, subjectNum);
 DistErr         =       cell(1, subjectNum);
@@ -20,15 +21,15 @@ AngleErr        =       cell(1, subjectNum);
 PropDistErr     =       cell(1, subjectNum);
 PropAngErr      =       cell(1, subjectNum);
 LocationErr     =       cell(1, subjectNum);
-ProjSpeedL1     =       cell(1, subjectNum);% projected speed within detected start-to-end time window at leg 1
-ProjSpeedL2     =       cell(1, subjectNum);% projected speed within detected start-to-end time window at leg 2
-L1Dur           =       cell(1, subjectNum);% walking duration at leg 1
-L2Dur           =       cell(1, subjectNum);% walking duration at leg2
-StandingDur     =       cell(1, subjectNum);% standing duration at cone2
-flagpos         =       cell(1, subjectNum);% flagpos
-flagOoB         =       cell(1, subjectNum);% OoB flag
-GroupParameters =       cell(1, subjectNum);% Output value
-IC              =       cell(1, subjectNum);  
+ProjSpeedL1     =       cell(1, subjectNum); % projected speed within detected start-to-end time window at leg 1
+ProjSpeedL2     =       cell(1, subjectNum); % projected speed within detected start-to-end time window at leg 2
+L1Dur           =       cell(1, subjectNum); % walking duration at leg 1
+L2Dur           =       cell(1, subjectNum); % walking duration at leg2
+StandingDur     =       cell(1, subjectNum); % standing duration at cone2
+flagpos         =       cell(1, subjectNum); % flagpos
+flagOoB         =       cell(1, subjectNum); % OoB flag
+GroupParameters =       cell(1, subjectNum); % The values of the fitted parameters for a given model
+IC              =       cell(1, subjectNum); % Information Criterion (aic, bic and (neg) likelihood) 
 
 %% help function to calculate the angle between two vector
 anglebetween = @(va,vb) atan2d(va(:,1).*vb(:,2) - va(:,2).*vb(:,1), va(:,1).*vb(:,1) + va(:,2).*vb(:,2));

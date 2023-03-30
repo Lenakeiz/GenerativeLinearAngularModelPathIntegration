@@ -12,58 +12,64 @@ subjectNum = size(GroupData.FlagPos,2);
 %% Initialize empty cell for storing output data
 X               =       cell(1, subjectNum); % Actual cone positions
 DX              =       cell(1, subjectNum); % Distances between subsequent locations - e.g. segments li for outbound and inbound path
-THETADX         =       cell(1, subjectNum); % Angles between two subsequent locations. Always the outer angle of the triangle (see Fig1 for a schematic)
-segments        =       cell(1, subjectNum); % Vector differences between subsequent locations
-correctReDist   =       cell(1, subjectNum);
-correctReAngle  =       cell(1, subjectNum);
-DistErr         =       cell(1, subjectNum);
-AngleErr        =       cell(1, subjectNum);
-PropDistErr     =       cell(1, subjectNum);
-PropAngErr      =       cell(1, subjectNum);
-LocationErr     =       cell(1, subjectNum);
-ProjSpeedL1     =       cell(1, subjectNum); % projected speed within detected start-to-end time window at leg 1
-ProjSpeedL2     =       cell(1, subjectNum); % projected speed within detected start-to-end time window at leg 2
-L1Dur           =       cell(1, subjectNum); % walking duration at leg 1
-L2Dur           =       cell(1, subjectNum); % walking duration at leg2
-StandingDur     =       cell(1, subjectNum); % standing duration at cone2
-flagpos         =       cell(1, subjectNum); % flagpos
-flagOoB         =       cell(1, subjectNum); % OoB flag
+THETADX         =       cell(1, subjectNum); % Angles between two subsequent locations. Always the outer angle of the triangle (see Fig1 for a schematic). For the last angle we calculated the egocentric rotation of the participant using the tracking data
+segments        =       cell(1, subjectNum); % Vector differences between subsequent locations (between cones and between triggered position and last cone).
+correctReDist   =       cell(1, subjectNum); % Length of vector cone 3 - 1 - used only locally
+correctReAngle  =       cell(1, subjectNum); % Outer Angle between vector cone 2-3 and vector cone 3-1 (short angle)
+DistErr         =       cell(1, subjectNum); % Difference between correct return distance and walked participant distance (length vector triggered location - cone 3)
+AngleErr        =       cell(1, subjectNum); % Difference between correct return angle and participant rotation at cone 3
+PropDistErr     =       cell(1, subjectNum); % Ratio between length vector cone 3 - triggered position and length vector cone 3 - cone 1
+PropAngErr      =       cell(1, subjectNum); % Ratio between participant s rotation at cone 3 and real returning angle
+LocationErr     =       cell(1, subjectNum); % Length of vector cone 3 - triggered location
+ProjSpeedL1     =       cell(1, subjectNum); % Projected speed within detected start-to-end time window at leg 1
+ProjSpeedL2     =       cell(1, subjectNum); % Projected speed within detected start-to-end time window at leg 2
+L1Dur           =       cell(1, subjectNum); % Walking duration at leg 1
+L2Dur           =       cell(1, subjectNum); % Walking duration at leg2
+StandingDur     =       cell(1, subjectNum); % Standing duration at cone 2
+flagpos         =       cell(1, subjectNum); % Exctracting flag positions from input data
+flagOoB         =       cell(1, subjectNum); % Flagging OoB trials
 GroupParameters =       cell(1, subjectNum); % The values of the fitted parameters for a given model
-IC              =       cell(1, subjectNum); % Information Criterion (aic, bic and (neg) likelihood) 
+IC              =       cell(1, subjectNum); % Information Criterion (aic, bic and (neg) likelihood) after fitting the model
 
 %% help function to calculate the angle between two vector
 anglebetween = @(va,vb) atan2d(va(:,1).*vb(:,2) - va(:,2).*vb(:,1), va(:,1).*vb(:,1) + va(:,2).*vb(:,2));
 
-%%
+% Looping through each of the participant
 for j = 1:subjectNum
 
-    %filter out participants who did short walking, happend in Young and HealthyOld, those out of distribution 
+    % Filter out participants who did short inbound walking, or that
+    % retraced the triangle to get back to cone 1, or that did not have out
+    % of bound location registered from the tracking data. See
+    % preprocessing for details and online methods section.
+
     if ismember(j, GroupData.BadPptIdxs)
-        % set results to nan for later processing
+        % set results 
         GroupParameters{j}  =   NaN(config.NumParams,1);
         IC{j}.aic           =   nan;
         IC{j}.bic           =   nan;
         IC{j}.negll         =   nan;
         IC{j}.likelihood    =   nan;
         flagOoB{j}          =   [];
-        disp(['%%%%%%%%%%%%%%% Skipping PARTICIPANT ' num2str(j) ' ---- because they did a short walk%%%%%%%%%%%%%%%']);
+        disp(['%%%%%%%%%%%%%%% Skipping PARTICIPANT ' num2str(j) ' ---- because excluded after preprocessing%%%%%%%%%%%%%%%']);
         continue
     end
     
     if(TRIAL_FILTER == 0)
-        %merge all three conditions
+        % We don t fit based on the environmental condition
+        % Merging all three environmental conditions
         flagpos{j}  = GroupData.FlagPos{j};
         BadExecutionTrials  = GroupData.Reconstructed{j}.BadExecution;
         realReturnAngles    = GroupData.Reconstructed{j}.RealReturnAngle;
         TrialNum    = size(GroupData.TrigPos{j},1);
         for idx = 1:TrialNum
-            %If not out of bound or out of bound data is not present then take the trigpos
+            % Getting final position based on the fact this is an out of
+            % bound trial or not (please see CalculateErrors for details)
             if(GroupData.CondTable{j}.OutOfBound(idx) == 0 | isnan(GroupData.OutOfBoundPos{1,j}{idx}(1,1)))
                 finalpos{j}(idx) = GroupData.TrigPos{j}(idx);
-                flagOoB{j}(idx) = 0; %OoB flag is 0, i.e., not OoB trial
+                flagOoB{j}(idx) = 0; % not OoB trial
             elseif(GroupData.CondTable{j}.OutOfBound(idx) == 1)
                 finalpos{j}(idx) = GroupData.ReconstructedOOB{j}.ReconstructedOoB(idx);
-                flagOoB{j}(idx) = 1; %OoB flag is 0, i.e., it is OoB trial
+                flagOoB{j}(idx) = 1; % OoB trial
             end
         end   
         Idx_GoodTrials      = BadExecutionTrials == 0;
@@ -165,11 +171,7 @@ for j = 1:subjectNum
             end    
 
             correctReAngle{j}{tr} = anglebetween(vec1, vec2); 
-            %AngleErr{j}{tr} = abs(correctReAngle{j}{tr}-realReturnAngles(tr));
-            %wrap the real return angle to 360
-            %AngleErr{j}{tr} = correctReAngle{j}{tr}-wrapTo360(realReturnAngles(tr));
-            %wrap the angular error to [-180,180] 
-            %AngleErr{j}{tr}   = wrapTo180(correctReAngle{j}{tr}-realReturnAngles(tr));
+            
             AngleErr{j}{tr}   = wrapTo180(realReturnAngles(tr)-correctReAngle{j}{tr});
             PropAngErr{j}{tr} = wrapTo360(realReturnAngles(tr))/correctReAngle{j}{tr};
         else

@@ -13,15 +13,6 @@ if Model_Name == "sigma_nu"      %simple egocentric noise model
     %defining likelihood function
     estFnc = @(FP) Estimate_sigma_nu(FP(1), FP(2), Input, config);
 
-elseif Model_Name == "beta_sigma_nu"      % memory leaky decay + noise
-    %set parameter lower bound and up bound
-    %     1, beta     2-sigma    3-nu
-    lb  = [-1.0,      0.0,       0.0];
-    ub  = [1.0,       3.0,       pi]; 
-
-    %defining likelihood function
-    estFnc = @(FP) Estimate_beta_sigma_nu(FP(1), FP(2), FP(3), Input, config);
-
 elseif Model_Name == "beta_k_sigma_nu"      % memory leaky decay + noise
     %set parameter lower bound and up bound
     %     1, beta     2-k    3-sigma    4-nu

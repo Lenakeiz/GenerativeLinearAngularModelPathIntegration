@@ -14,28 +14,26 @@ if (~isfield(config,'ModelName') | ~isfield(config,'ParamName') | ~isfield(confi
 end
 
 %% Using a dummy variable "Model Selection" to check if we need to run the model only the Healthy elderly
-%% Model fitting for Young Controls
+% Model fitting for Young Controls
 if (isfield(config, 'ModelSelection') == 0)
     disp("%%%%%%%%%%%%%%% Starting fit for young controls %%%%%%%%%%%%%%%");
     YoungControls.Results = getResultsAllConditions(YoungControls, config);
 end
-%% Model fitting for Healthy Controls
+% Model fitting for Healthy Controls
 disp("%%%%%%%%%%%%%%% Starting fit for healthy controls %%%%%%%%%%%%%%%");
 HealthyControls.Results = getResultsAllConditions(HealthyControls, config);
 
-%% Model fitting for MCI Pos
+% Model fitting for MCI Pos
 if (isfield(config, 'ModelSelection') == 0)
     disp("%%%%%%%%%%%%%%% Starting fit for mci pos %%%%%%%%%%%%%%%");
     MCIPos.Results = getResultsAllConditions(MCIPos, config);
 end
-
-%% Model fitting for MCI Neg
+% Model fitting for MCI Neg
 if (isfield(config, 'ModelSelection') == 0)
     disp("%%%%%%%%%%%%%%% Starting fit for mci neg %%%%%%%%%%%%%%%");
     MCINeg.Results = getResultsAllConditions(MCINeg, config);
 end
-
-%% Model fitting for MCI Unk
+% Model fitting for MCI Unk
 if (isfield(config, 'ModelSelection') == 0)
     disp("%%%%%%%%%%%%%%% Starting fit for mci unknown %%%%%%%%%%%%%%%");
     MCIUnk.Results = getResultsAllConditions(MCIUnk, config);

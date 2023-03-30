@@ -32,10 +32,10 @@ OoBLength = zeros(size(triggerPositions,1),1);
 OoBInfo.ReconstructedOoB = OutOfBoundPos;
 OoBInfo.IsRecontructedFromOverallMean = zeros(size(triggerPositions,1),1);
 
-meanReturnSegment = nanmean(AbsWalkedSegment(CondTable.OutOfBound == 0));
-meanReturnSegmentNoChange = nanmean(AbsWalkedSegment(CondTable.Condition == 1 & CondTable.OutOfBound == 0));
-meanReturnSegmentNoDistalCues = nanmean(AbsWalkedSegment(CondTable.Condition == 2 & CondTable.OutOfBound == 0));
-meanReturnSegmentNoOpticFlow = nanmean(AbsWalkedSegment(CondTable.Condition == 3 & CondTable.OutOfBound == 0));
+meanReturnSegment = mean(AbsWalkedSegment(CondTable.OutOfBound == 0),"omitnan");
+meanReturnSegmentNoChange = mean(AbsWalkedSegment(CondTable.Condition == 1 & CondTable.OutOfBound == 0),"omitnan");
+meanReturnSegmentNoDistalCues = mean(AbsWalkedSegment(CondTable.Condition == 2 & CondTable.OutOfBound == 0),"omitnan");
+meanReturnSegmentNoOpticFlow = mean(AbsWalkedSegment(CondTable.Condition == 3 & CondTable.OutOfBound == 0),"omitnan");
 
 idx = find(CondTable.OutOfBound == 1);
 

@@ -16,8 +16,9 @@ Developed using Matlab R2022a.
 Requires the following MATLAB toolboxes:
 
 - [Statistics and machine learning](https://uk.mathworks.com/products/statistics.html)
-- [Optimization Toolbox](https://uk.mathworks.com/products/optimization.html)
-- [Global Optimization Toolbox](https://uk.mathworks.com/products/global-optimization.html?s_tid=srchtitle_Global%20Optimization%20Toolbox_1)
+- [Optimization toolbox](https://uk.mathworks.com/products/optimization.html)
+- [Global Optimization toolbox](https://uk.mathworks.com/products/global-optimization.html?s_tid=srchtitle_Global%20Optimization%20Toolbox_1)
+- [Ecoometric toolbox](https://uk.mathworks.com/products/econometrics.html?s_tid=srchtitle_econometrics%20toolbox_1)
 - [Mapping toolbox](https://uk.mathworks.com/products/mapping.html)
 
 We also used a customised version of [Rob Campbell (2023) sigstar](https://github.com/raacampbell/sigstar) which is included already in the project files.

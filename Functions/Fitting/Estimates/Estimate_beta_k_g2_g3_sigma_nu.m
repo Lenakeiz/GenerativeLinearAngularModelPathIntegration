@@ -66,15 +66,6 @@ for tr = 1:sampleSize
     durationL2  =       L2Dur{tr};
     durationStand =     StandingDur{tr};
     
-    % whether to use weber's law to scaling the noise strength
-    if config.useweber == true
-        scale = sqrt(l1^2+l2^2); %noise scale
-    else
-        scale = 1; %noise scale
-    end
-    sigma_scaled = scale*sigma;
-    nu_scaled = scale*nu;
-
     % Calculation of mental point 1 (l1') 
     % Since we are using a leaky integration over time we considering
     % standing duration at cone 2 as well.
@@ -108,7 +99,7 @@ for tr = 1:sampleSize
     % Angular noise difference
     angluar_diff = theta3-theta3_prime;
 
-    neg_ll_angle = 1/2*log(2*pi) + log(nu_scaled) + (angluar_diff^2)/(2*nu_scaled^2); %Gaussian distribution for angular return
+    neg_ll_angle = 1/2*log(2*pi) + log(nu) + (angluar_diff^2)/(2*nu^2); %Gaussian distribution for angular return
 
     % Distance noise difference
     l3_prime    = h;
@@ -118,7 +109,7 @@ for tr = 1:sampleSize
     % of distance to zero
     if flagOoB(tr)==0
         % not OoB trial
-        neg_ll_dist = 1/2*log(2*pi) + log(sigma_scaled) + (dist_diff^2)/(2*sigma_scaled^2);
+        neg_ll_dist = 1/2*log(2*pi) + log(sigma) + (dist_diff^2)/(2*sigma^2);
     else
         % OoB trial
         neg_ll_dist = 0;

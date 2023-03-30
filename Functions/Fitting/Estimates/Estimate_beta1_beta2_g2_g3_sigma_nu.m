@@ -58,22 +58,12 @@ for tr = 1:sampleSize
     theta2      =       THETAX{tr}(2); 
     theta3      =       THETAX{tr}(3); 
     
-    %% whether to use weber's law to scaling the noise strength
-    if config.useweber == true
-        scale = sqrt(l1^2+l2^2); %noise scale
-    else
-        scale = 1; %noise scale
-    end
-    sigma_scaled = scale*sigma;
-    nu_scaled = scale*nu;
-
     %mental point 1 (asuming a constant speed)
     %considering standing duration or not
     men_length1 = l1*beta1;
     men_p1 = [men_length1,0];
     
     theta2_prime = g2*theta2;
-    %theta2_prime = g2*theta2+mean_ecd_angle*(1-g2);
 
     %mental point 2, (asuming a constant speed)
     men_length2 = l2*beta2;
@@ -94,11 +84,7 @@ for tr = 1:sampleSize
     
     %angular noise difference
     angluar_diff = theta3-theta3_prime;
-    %the negative loglikelihood of angle
-    %neg_ll_angle = log(2*pi) + log(besseli(0,nu_scaled)) -
-    %nu_scaled*cos(angluar_diff); %Von Mises distribution
-
-    neg_ll_angle = 1/2*log(2*pi) + log(nu_scaled) + (angluar_diff^2)/(2*nu_scaled^2); %Gaussian distribution
+    neg_ll_angle = 1/2*log(2*pi) + log(nu) + (angluar_diff^2)/(2*nu^2); %Gaussian distribution
 
     %distance noise difference
     l3_prime    = h;
@@ -107,7 +93,7 @@ for tr = 1:sampleSize
     %     %the negative loglikelihood of distance on non-OoB trials
     if flagOoB(tr)==0
         %this is a non-OoB trial
-        neg_ll_dist = 1/2*log(2*pi) + log(sigma_scaled) + (dist_diff^2)/(2*sigma_scaled^2);
+        neg_ll_dist = 1/2*log(2*pi) + log(sigma) + (dist_diff^2)/(2*sigma^2);
     else
         %this is an OoB trial
         neg_ll_dist = 0;

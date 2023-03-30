@@ -66,15 +66,6 @@ for tr = 1:sampleSize
     durationL2  =       L2Dur{tr};
     durationStand =     StandingDur{tr};
     
-    %% whether to use weber's law to scaling the noise strength
-    if config.useweber == true
-        scale = sqrt(l1^2+l2^2); %noise scale
-    else
-        scale = 1; %noise scale
-    end
-    sigma_scaled = scale*sigma;
-    nu_scaled = scale*nu;
-
     %mental point 1 (asuming a constant speed)
     %considering standing duration or not
     if config.includeStand==true
@@ -104,7 +95,7 @@ for tr = 1:sampleSize
     %angular noise difference
     angluar_diff = theta3-theta3_prime;
     %the negative loglikelihood of angle
-    neg_ll_angle = 1/2*log(2*pi) + log(nu_scaled) + (angluar_diff^2)/(2*nu_scaled^2); %Gaussian distribution
+    neg_ll_angle = 1/2*log(2*pi) + log(nu) + (angluar_diff^2)/(2*nu^2); %Gaussian distribution
 
     %distance noise difference
     l3_prime    = m3*h+mean_distance*(1-m3);    %regress to mean correct return distance
@@ -113,7 +104,7 @@ for tr = 1:sampleSize
     %the negative loglikelihood of distance on non-OoB trials
     if flagOoB(tr)==0
         %this is a non-OoB trial
-        neg_ll_dist = 1/2*log(2*pi) + log(sigma_scaled) + (dist_diff^2)/(2*sigma_scaled^2);
+        neg_ll_dist = 1/2*log(2*pi) + log(sigma) + (dist_diff^2)/(2*sigma^2);
     else
         %this is an OoB trial
         neg_ll_dist = 0;

@@ -30,7 +30,6 @@ config.Speed.velocityCutoff                             = 0.2;    % velocity cut
 config.Speed.timeOffsetForDetectedTemporalWindow        = 0.2;    % time in seconds that will push earlier/ the detected rising edge
 config.TrackedInboundAngularDeltaT                      = 1;      % delta time step to integrate the angular information from the tracking data
 config.includeStand                                     = false;  % set to true if the model should also include for duration of time spent on each segment the time calculate from tracking data while standing at each cone
-config.useweber                                         = false;  % only true when use weber law in simple generative models
 config.useOoBtrials                                     = true;   % Are we using out of bound trials in the model?
 config.useTrialFilter                                   = true;   % when true the model will be fitted for each of the task conditions separately. If false it will discard the
 

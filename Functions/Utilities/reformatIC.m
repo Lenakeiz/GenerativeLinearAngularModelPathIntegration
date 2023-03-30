@@ -1,9 +1,11 @@
 function [AIC, BIC, NLL] = reformatIC(IC, cond)
-%% Reformat IC
+%% reformatIC
+% Zilong Ji, UCL, 2022, zilong.ji@ucl.ac.uk
 % Reformatting information criterion from cell to array for later figure
 % plotting
 % IC: (see Fig_2_ModelSelection)
 % AIC, BIC, NLL: Akaike, Bayesian and negative likelihood 
+% ===================================================================================
     
     if cond=="no change"
         index = 1;

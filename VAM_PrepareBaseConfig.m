@@ -1,8 +1,8 @@
 %% Generative Linear-Angular Model of Path Integration (GLAMPI) Base Configurator
 % Andrea Castegnaro, UCL, 2022 uceeaca@ucl.ac.uk
 % This script loads the Howett et al., 2019 behavioural and MRI data. The
-% dataset contains also the healthy young participants (no MRI data for
-% them). It also set global properties that are used for the preprocecssing
+% dataset contains also the healthy young participants collected elsewhere.
+% It also set global properties that are used for the preprocecssing
 % stage and for fitting the model. Information for the config parameters
 % can be found within the script.
 

@@ -1,3 +1,8 @@
+%% Generative Linear-Angular Model of Path Integration (GLAMPI) Preprocessing stage
+% Andrea Castegnaro, UCL, 2022 uceeaca@ucl.ac.uk
+% This script takes the loaded data and perform the preprocessing stage as
+% described in the online methods for all groups of participants.
+
 %% Preprocessing Young Data
 disp("%%%%%%%%%%%%%%% Preprocessing young controls %%%%%%%%%%%%%%%");
 config.Speed.tresholdForBadParticipantL1Recontruction   = 1.55;    % threshold for escluding participants with the weird shaped trials (on l1). If zero all data will be used.

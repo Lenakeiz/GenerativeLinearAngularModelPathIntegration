@@ -1,7 +1,9 @@
 %% Generative Linear-Angular Model of Path Integration (GLAMPI)
 % Andrea Castegnaro, UCL, 2022 uceeaca@ucl.ac.uk
-% This script is a wrapper for the model fitter written by Zilong Ji
-% It requires that GLAMPI_
+% Entry point for data analysis and modelling. This script should be
+% executed after the preprocessing step and it is a wrapper script. For
+% details on how to use it please refer to any of the script inside the
+% Main folder
 
 if (exist('config','var') == 0)
     ME = MException("MyComponent:noSuchVariable","Config variable not found, please run VAM_PrepareBaseConfig to generate a base one");

@@ -1,6 +1,6 @@
 function [Y, GroupNames, ConditionNames]=GroupAndRemoveNaN(Data,param_idx, groupname)
 %% GroupAndRemoveNaN
-% Zilong Ji, UCL, zilong.ji@ucl.ac.uk
+% Zilong Ji, UCL, 2022, zilong.ji@ucl.ac.uk
 % Group all the group data from three environmental conditions into a long
 % numeric vector for further two-way anova analysis and also output the
 % factor names

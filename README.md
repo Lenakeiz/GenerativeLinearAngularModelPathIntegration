@@ -16,6 +16,7 @@ Developed using Matlab R2022a.
 Requires the following MATLAB toolboxes:
 
 - [Statistics and machine learning](https://uk.mathworks.com/products/statistics.html)
+- [Optimization Toolbox](https://uk.mathworks.com/products/optimization.html)
 - [Mapping toolbox](https://uk.mathworks.com/products/mapping.html)
 
 We also used a customised version of [Rob Campbell (2023) sigstar](https://github.com/raacampbell/sigstar) which is included already in the project files.

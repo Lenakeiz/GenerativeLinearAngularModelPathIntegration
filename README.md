@@ -7,7 +7,6 @@ Generative Linear-Angular Model of Path Integration (GLAMPI)
 This repository contains the full dataset and the scripts for generating the analysis and the figures from _"Dissociating linear and angular path integration in ageing and Alzheimer’s disease"_[^1]  
 The anonymised dataset for healthy elderly and MCI patients is the one from the _"Differentiation of mild cognitive impairment using an entorhinal cortex-based test of virtual reality navigation"_[^2]
 
----
 ## Installation
 Clone the repository anywhere in your machine using `git clone`. 
 Open the folder in Matlab by making sure to add folders and subfolders to the path.
@@ -25,7 +24,6 @@ Requires the following MATLAB toolboxes:
 
 We also used a customised version of [Rob Campbell (2023) sigstar](https://github.com/raacampbell/sigstar) which is included already in the project files.
 
----
 ## Use
 Scripts to reproduce the plots and analysis in the paper can be found into the **Main** folder. 
 Each of the scripts is standalone, meaning it will produce one or more plots from any given figure of the main text/supplementary. 
@@ -44,7 +42,7 @@ Details for the preprocessing of the data is described in the online methods. Th
 
 ### Fitting the model/Behavioural analysis
 
-The entry point for calculating behavioural performances and fitting the model is `GLAMPI`. In `PerformGroupFit` behavioural data is calculated. `FitData` executes the model fitting based on information set in the `config` struct variable.  
+The entry point for calculating behavioural performances and fitting the model is `GLAMPI`. In `PerformGroupFit` behavioural data is calculated. `FitData` executes the model fitting using the specified model (see `config` struct variable) with the limits for each of the fitted parameters. The fitter use `fmincon` Matlab function, but adopts a global search approach to avoid the local minima problem.
 
 ### Visualization
 For visualizing trials you can use the `VisualizeRealtimeTrackingData` function.

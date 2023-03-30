@@ -6,7 +6,7 @@
 % Main folder
 
 if (exist('config','var') == 0)
-    ME = MException("MyComponent:noSuchVariable","Config variable not found, please run VAM_PrepareBaseConfig to generate a base one");
+    ME = MException("MyComponent:noSuchVariable","Config variable not found, please run GLAMPI_PrepareBaseConfig to generate a base one");
     throw(ME);
 end
 

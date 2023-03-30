@@ -4,7 +4,7 @@
 % Tries to link the generated identifier from the extracted data with the
 % one from the behavioural data.
 % Acquiring only data normalized for intracranial volume.
-% This script is called from VAM_PrepareBaseConfig.
+% This script is called from GLAMPI_PrepareBaseConfig.
 
 %% Loading MRI data
 opts = detectImportOptions("./Data/HowettBrain2019_MRI.csv");

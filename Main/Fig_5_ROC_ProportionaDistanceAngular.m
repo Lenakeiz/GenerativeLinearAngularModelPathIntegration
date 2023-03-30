@@ -7,10 +7,10 @@
 % validation has been applied using 1000 repetitions.
 
 % Preparing the data
-VAM_PrepareBaseConfig
+GLAMPI_PrepareBaseConfig
 
 % Preprocessing the data
-VAM_PreprocessData
+GLAMPI_PreprocessData
 
 % Model fitting
 config.useTrialFilter = true;
@@ -18,7 +18,7 @@ config.ModelName        =   "beta_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
 config.NumParams        =   100;
 
-VAM
+GLAMPI
 
 % Preparing output
 config.ResultFolder = pwd + "/Output/Fig5/ProportionalError";

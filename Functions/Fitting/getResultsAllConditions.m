@@ -5,7 +5,7 @@ function Results = getResultsAllConditions(TransformedData, config)
 % Wrapper functions for fitting the model, extracting information from the
 % model and behavioural results.
 % This function should be called after preparing a config file (please see
-% VAM_PrepareBaseConfig for details).
+% GLAMPI_PrepareBaseConfig for details).
 % ===================================================================================
 
 % Decide whether to run the model, extract behavioural data for each

@@ -4,10 +4,10 @@
 % proportion for each separate group
 
 %% Preparing the data
-VAM_PrepareBaseConfig
+GLAMPI_PrepareBaseConfig
 
 %% Preprocessing the data
-VAM_PreprocessData
+GLAMPI_PreprocessData
  
 %% Preparing and fitting the model.
 % For more information see  
@@ -17,7 +17,7 @@ config.ModelName        =   "beta_k_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName); % Set 100 here to avoid producing the model
 % Run the model
-VAM
+GLAMPI
 
 %% Descriptive data
 OutputPreprocessingDescriptive(YoungControls,"Young controls");

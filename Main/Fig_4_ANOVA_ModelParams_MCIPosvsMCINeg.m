@@ -8,17 +8,17 @@
 % conditions
 
 % Preparing the data
-VAM_PrepareBaseConfig;
+GLAMPI_PrepareBaseConfig;
 
 % Preprocessing the data
-VAM_PreprocessData;
+GLAMPI_PreprocessData;
 
 % Model fitting
 config.ModelName        =   "beta_k_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-VAM;
+GLAMPI;
 
 % Preparing the output
 config.ResultFolder     =   pwd + "/Output/Fig4/"+config.ModelName+"/MCIPosvsMCINeg";

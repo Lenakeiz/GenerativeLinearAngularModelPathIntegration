@@ -14,7 +14,7 @@ function [negloglikelihood] = Estimate_g3_m3_sigma_nu(g3, m3, sigma, nu, Input, 
 % Input: contains all the data information for estimating, see PerformGroupFit for how it was generated
 % For schematics about the steps of the generative linear and angular
 % model please refer to Fig. 2 and online methods
-% conif: please refer to VAM_PrepareBaseConfig
+% conif: please refer to GLAMPI_PrepareBaseConfig
 % ===================================================================================
 
 %% information necessary for running parameter estimation

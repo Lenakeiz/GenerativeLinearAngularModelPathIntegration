@@ -8,10 +8,10 @@
 % model taking into account the model complexity.
 
 % Preparing the data
-VAM_PrepareBaseConfig
+GLAMPI_PrepareBaseConfig
 
 % Preprocessing the data
-VAM_PreprocessData
+GLAMPI_PreprocessData
 
 % Instructing the model to run only on healthy elderly
 config.ModelSelection = true;
@@ -21,7 +21,7 @@ config.ModelName        =   "sigma_nu";
 config.ParamName        =   ["sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-VAM
+GLAMPI
 
 sigma_nu_IC             =   HealthyControls.Results.IC;
 
@@ -30,7 +30,7 @@ config.ModelName        =   "beta_k_sigma_nu";
 config.ParamName        =   ["beta", "k", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-VAM
+GLAMPI
 
 beta_k_sigma_nu_IC        =   HealthyControls.Results.IC;
 
@@ -39,7 +39,7 @@ config.ModelName        =   "g2_sigma_nu";
 config.ParamName        =   ["g2", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-VAM
+GLAMPI
 
 g2_sigma_nu_IC        =   HealthyControls.Results.IC;
 
@@ -48,7 +48,7 @@ config.ModelName        =   "g3_sigma_nu";
 config.ParamName        =   ["g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-VAM
+GLAMPI
 
 g3_sigma_nu_IC        =   HealthyControls.Results.IC;
 
@@ -57,7 +57,7 @@ config.ModelName        =   "m3_sigma_nu";
 config.ParamName        =   ["m3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-VAM
+GLAMPI
 
 m3_sigma_nu_IC        =   HealthyControls.Results.IC;
 
@@ -66,7 +66,7 @@ config.ModelName        =   "beta_k_g2_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-VAM
+GLAMPI
 
 beta_k_g2_sigma_nu_IC        =   HealthyControls.Results.IC;
 
@@ -75,7 +75,7 @@ config.ModelName        =   "beta_k_g3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-VAM
+GLAMPI
 
 beta_k_g3_sigma_nu_IC        =   HealthyControls.Results.IC;
 
@@ -84,7 +84,7 @@ config.ModelName        =   "beta_k_m3_sigma_nu";
 config.ParamName        =   ["beta", "k", "m3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-VAM
+GLAMPI
 
 beta_k_m3_sigma_nu_IC        =   HealthyControls.Results.IC;
 
@@ -94,7 +94,7 @@ config.ModelName        =   "g2_g3_sigma_nu";
 config.ParamName        =   ["g2", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-VAM
+GLAMPI
 
 g2_g3_sigma_nu_IC       =   HealthyControls.Results.IC;
 
@@ -103,7 +103,7 @@ config.ModelName        =   "g2_m3_sigma_nu";
 config.ParamName        =   ["g2", "m3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-VAM
+GLAMPI
 
 g2_m3_sigma_nu_IC       =   HealthyControls.Results.IC;
 
@@ -112,7 +112,7 @@ config.ModelName        =   "g3_m3_sigma_nu";
 config.ParamName        =   ["g3", "m3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-VAM
+GLAMPI
 
 g3_m3_sigma_nu_IC       =   HealthyControls.Results.IC;
 
@@ -121,7 +121,7 @@ config.ModelName        =   "beta_k_g2_g3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-VAM
+GLAMPI
 
 beta_k_g2_g3_sigma_nu_IC  =   HealthyControls.Results.IC;
 
@@ -130,7 +130,7 @@ config.ModelName        =   "beta_k_g2_m3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "m3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-VAM
+GLAMPI
 
 beta_k_g2_m3_sigma_nu_IC  =   HealthyControls.Results.IC;
 
@@ -139,7 +139,7 @@ config.ModelName        =   "beta_k_g3_m3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g3", "m3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-VAM
+GLAMPI
 
 beta_k_g3_m3_sigma_nu_IC  =   HealthyControls.Results.IC;
 
@@ -148,7 +148,7 @@ config.ModelName        =   "g2_g3_m3_sigma_nu";
 config.ParamName        =   ["g2", "g3", "m3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-VAM
+GLAMPI
 
 g2_g3_m3_sigma_nu_IC  =   HealthyControls.Results.IC;
 
@@ -157,7 +157,7 @@ config.ModelName        =   "beta_k_g2_g3_m3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "g3", "m3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-VAM
+GLAMPI
 
 beta_k_g2_g3_m3_sigma_nu_IC  =   HealthyControls.Results.IC;
 
@@ -167,7 +167,7 @@ config.ModelName        =   "beta1_beta2_g2_g3_sigma_nu";
 config.ParamName        =   ["beta1", "beta2", "g2", "g3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
-VAM
+GLAMPI
 
 beta1_beta2_g2_g3_sigma_nu_IC  =   HealthyControls.Results.IC;
 

@@ -2,8 +2,9 @@ function [ Errors,  OoBInfo] = CalculateErrors(FlagPos, TrigPos, OutOfBoundPos, 
 %% CalculateErrors 
 % Andrea Castegnaro, UCL, 2022 uceeaca@ucl.ac.uk
 % Calculate absolute distance error for each set of trials divided by
-% environmental condition. If out of bound (OoB) trial calculates the distance
-% from cone 3 to the outbound position.
+% environmental condition. If out of bound (OoB) trial calculates the
+% return distance set as the mean value of all good trials for that
+% environmental condition
 % ===================================================================================
 
 % local variable for quick visualization. 

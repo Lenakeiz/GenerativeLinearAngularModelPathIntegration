@@ -30,10 +30,10 @@ We also used a customised version of [Rob Campbell (2023) sigstar](https://githu
 Scripts to reproduce the plots and analysis in the paper can be found into the **Main** folder. 
 Each of the scripts is standalone, meaning it will produce one or more plots from any given figure of the main text/supplementary. 
 Plots will not be displayed within Matlab but output will be saved inside **Output** folder.
-Some scripts will take longer than others to run (like the one that runs all different types of model).
+Some scripts will take longer than others to run (like the one that runs all different types of model). If you want to run the entire analysis, you can do it with `RunAllAnalysis`. 
 
 ### Preprocessing 
-The preprocessing of the data as described in the 
+Details for the preprocessing of the data is described in the online methods. The script responsible is `GLAMPI_PreprocessData`. Other important functions are `TransformPaths`, `CalculateTrackingPath` and `CalculateErrors`.
 
 ---
 [^1]: Andrea Castegnaro *, Zilong Ji *, Katarzyna Rudzka, Dennis Chan, Neil Burgess _( * ) Equal contributions_

@@ -1,5 +1,10 @@
-%% Loading NeuroPsych data for all of the older participants filtering for only normalized data
-% Script called from VAM_PrepareBaseConfig.
+%% Loading neuropsycholigcal data for elderly participants
+% Andrea Castegnaro, UCL, 2022, uceeaca@ucl.ac.uk
+% Loads neuropsychological tests acquitred in Howett et al., 2019 study.
+% Tries to link the generated identifier from the extracted data with the
+% one from the behavioural data.
+% The data extracted here is not currently used in the present study.
+% This script is called from VAM_PrepareBaseConfig.
 
 %% Loading MRI data
 opts = detectImportOptions("./Data/HowettBrain2019_NeuroPsych.csv");
@@ -19,7 +24,7 @@ function Group = AddNeuroPsychData(Group, neuroPsychData)
     ids = cellstr(neuroPsychData.ID);
     NeuroPsych = table();
 
-    % Extracting 
+    % Extracting specific tests indexed by column within the dataset
     neuroPsychIndices = [15 16 20];
 
     for i = 1:length(Group.Info)

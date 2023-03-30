@@ -1,7 +1,11 @@
-%% Loading processed MRI data for all of the older participants filtering for only normalized data
+%% Loading processed MRI data
+% Andrea Castegnaro, UCL, 2022, uceeaca@ucl.ac.uk
+% Loads the extracted brain volumes from the Howett et al., 2019 study.
+% Tries to link the generated identifier from the extracted data with the
+% one from the behavioural data.
+% Acquiring only data normalized for intracranial volume.
 % This script is called from VAM_PrepareBaseConfig.
-% 
-%
+
 %% Loading MRI data
 opts = detectImportOptions("./Data/HowettBrain2019_MRI.csv");
 opts = setvartype(opts,{'ID','CSF','Sex'},'string');

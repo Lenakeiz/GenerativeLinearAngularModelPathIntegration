@@ -356,27 +356,27 @@ outGroup = Group;
             else
                 demA = 0;
             end
-
+    
             if(x(length(x) - i + 1) == 1)
                 demB = demB + 1;
             else
                 demB = 0;
             end
-
+    
             a(i) = demA;
             b(length(x) - i + 1) = demB;
         end
-
+    
         xStart = find(a == max(a),1);
         xEnd = find(b == max(b),1);
-
+    
         %Cutting before start and after end
         y(1:xStart-1) = 0;
         y(xEnd+1:length(x)) = 0;
-
+    
         idxs.start = xStart;
         idxs.end = xEnd;
-
+    
     end
 
 end

@@ -4,7 +4,7 @@ function [outData] = TransformPaths(Data)
 % Transform all the paths so they are all facing the positive x-axis and
 % starting from (0,0). Mirrors all the right turns in the outbound
 % so that all paths are left turns.
-% Once flipped calculate the errors for each of trial.
+% Once flipped calculate the OoB properties for each of trial.
 % Input structure "Data" is group data loaded from the .mat file in Data
 % folder and is being overriden as an output
 % ===================================================================================
@@ -154,8 +154,7 @@ for npart = 1:sampleSize
 
 end
 
-ErrorInfo = CalculateAllErrors(outData);
-outData.Errors = ErrorInfo.Errors;
-outData.ReconstructedOOB = ErrorInfo.OoBInfo;
+RetInfo = CalculateAllOoBTrials(outData);
+outData.ReconstructedOOB = RetInfo.OoBInfo;
 
 end

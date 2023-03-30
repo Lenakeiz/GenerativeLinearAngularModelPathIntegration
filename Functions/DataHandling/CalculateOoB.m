@@ -1,10 +1,9 @@
-function [ Errors,  OoBInfo] = CalculateErrors(FlagPos, TrigPos, OutOfBoundPos, CondTable)
-%% CalculateErrors 
+function [OoBInfo] = CalculateOoB(FlagPos, TrigPos, OutOfBoundPos, CondTable)
+%% CalculateOoBTrials 
 % Andrea Castegnaro, UCL, 2022 uceeaca@ucl.ac.uk
-% Calculate absolute distance error for each set of trials divided by
-% environmental condition. If out of bound (OoB) trial calculates the
-% return distance set as the mean value of all good trials for that
-% environmental condition
+% Further preprocessing for OoB trials. If out of bound (OoB) trial 
+% we set the return distance as the mean value of all good trials for that
+% environmental condition. Please see Online Methods for details.
 % ===================================================================================
 
 % local variable for quick visualization. 
@@ -24,8 +23,7 @@ triggerPositions = triggerPositions(:,[1,3]);
 outofboundpos = cell2mat(OutOfBoundPos);
 outofboundpos = outofboundpos(:,[1,3]);
 
-% Calculating absolute error distance
-AbsErrorDistance = sqrt(sum((triggerPositions - firstConePositions).^2,2));
+% Calculating the walked distance in the laste segment
 AbsWalkedSegment = sqrt(sum((triggerPositions - thirdConePositions).^2,2));
 OoBLength = zeros(size(triggerPositions,1),1);
 
@@ -72,8 +70,7 @@ for i=1:size(idx,1)
 
     recontructedVert = thirdConePositions(idx(i),:) + directionOoB*inferredOoBLength;
 
-    % For all the OoB trials, replace the leg length with the inferred
-    % One
+    % For all the OoB trials, replace the leg length with the inferred one
     OoBInfo.ReconstructedOoB{idx(i),:} = [recontructedVert(1) 0 recontructedVert(2)];
 
     % Quick debug plot. Will stop execution code. Variable is set at the
@@ -86,9 +83,4 @@ for i=1:size(idx,1)
     end
 end
 
-% Setting output
-Errors.AbsErrorDistance      = AbsErrorDistance;
-Errors.AbsWalkedSegment      = AbsWalkedSegment;
-Errors.OoBLength             = OoBLength;
-Errors.MeanLastWalkedSegment = array2table([meanReturnSegment meanReturnSegmentNoChange meanReturnSegmentNoDistalCues meanReturnSegmentNoOpticFlow],'VariableNames',{'Total', 'NoChange', 'NoDistalCue', 'NoOpticFlow'});
 end

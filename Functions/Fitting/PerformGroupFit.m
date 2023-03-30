@@ -63,7 +63,7 @@ for j = 1:subjectNum
         TrialNum    = size(GroupData.TrigPos{j},1);
         for idx = 1:TrialNum
             % Getting final position based on the fact this is an out of
-            % bound trial or not (please see CalculateErrors for details)
+            % bound trial or not (please see CalculateOoB for details)
             if(GroupData.CondTable{j}.OutOfBound(idx) == 0 | isnan(GroupData.OutOfBoundPos{1,j}{idx}(1,1)))
                 finalpos{j}(idx) = GroupData.TrigPos{j}(idx);
                 flagOoB{j}(idx) = 0; % not OoB trial

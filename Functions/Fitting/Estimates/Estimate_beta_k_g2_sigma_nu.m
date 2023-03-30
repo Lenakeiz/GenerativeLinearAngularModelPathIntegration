@@ -1,13 +1,21 @@
 function [negloglikelihood] = Estimate_beta_k_g2_sigma_nu(beta, k, g2, sigma, nu, Input, config)
-%   find the likelihood of the beta - k- g2 - sigma - nu Model
-%   Args:
-%       beta is the leaky decay factor for the mental distance
-%       k the velocity gain
-%       g2 is the rotation gain for the second turn (measuring encoding error)
-%       sigma is the standard deviation for the Gaussian distribution of the return distance
-%       nu is the standard deviation for the Gaussian distribution of the return angle
-%       Input contains all the data information for estimating, see PerformGroupFit for how it was generated
-%       config: self-explained
+% Zilong Ji, UCL, 2022, zilong.ji@ucl.ac.uk
+% Find the likelihood with parameters specified in the model function name
+% Args (in common between all estimates functions):
+% beta: decay factor for the mental distance (calculation error)
+% k: velocity gain factor for the leaky integrator (encoding error)
+% g2: rotation gain for the second turn (encoding error)
+% g3: regression to the mean effect in return angle (production error)
+% m3: regression to mean effect in return distance (production error)
+% sigma: standard deviation for the Gaussian distribution of the return
+% distance (calculation + unexplained error)
+% nu: standard deviation for the Gaussian distribution of the return angle
+% ((calculation + unexplained error))
+% Input: contains all the data information for estimating, see PerformGroupFit for how it was generated
+% For schematics about the steps of the generative linear and angular
+% model please refer to Fig. 2 and online methods
+% conif: please refer to VAM_PrepareBaseConfig
+% ===================================================================================
 
 %% information necessary for running parameter estimation
 DX              =   Input.DX;

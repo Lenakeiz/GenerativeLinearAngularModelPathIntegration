@@ -3,7 +3,7 @@
 % Entry point for data analysis and modelling. This script should be
 % executed after the preprocessing step and it is a wrapper script. For
 % details on how to use it please refer to any of the script inside the
-% Main folder
+% Main folder.
 
 if (exist('config','var') == 0)
     ME = MException("MyComponent:noSuchVariable","Config variable not found, please run GLAMPI_PrepareBaseConfig to generate a base one");

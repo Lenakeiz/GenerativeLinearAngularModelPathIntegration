@@ -43,9 +43,9 @@ BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, multicomp_t
 
 % Final cleanup to leave workspace as the end of the Preprocessing stage.
 % Remove if you want to take a look at the output data.
-clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
+clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk anova_tab multicomp_tab1 multicomp_tab2 multicomp_tab12
 
-%%
+%% ---------------------------------------------------------------------
 function BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, config)
     
     numConds = 3; % environmental conditions
@@ -218,7 +218,7 @@ function BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, confi
     end
 end
 
-%%
+%% ---------------------------------------------------------------------
 function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, multicomp_tab1, config)
     
     numConds = 3; % environmental conditions

@@ -45,7 +45,11 @@ AllMCIUnkParams     =   MCIUnk.Results.estimatedParams;
 BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams, anova_tab, config);
 BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCIParams, AllMCIParamsStatusIndex, multicomp_tab1, config)
 
-%%
+% Final cleanup to leave workspace as the end of the Preprocessing stage.
+% Remove if you want to take a look at the output data.
+clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk anova_tab multicomp_tab1 multicomp_tab2 multicomp_tab12
+
+%% ---------------------------------------------------------------------
 function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams, anova_tab, config)
     
     numConds = 3; % environmental conditions
@@ -260,7 +264,7 @@ function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
     end
 end
 
-%% Box Plot Of Fitted Parameters by avearaging three paramters from three conditions into one mean value
+%% ---------------------------------------------------------------------
 function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCIParams, AllMCIParamsStatusIndex,multicomp_tab1, config)
     
     numConds = 3; % environmental conditions

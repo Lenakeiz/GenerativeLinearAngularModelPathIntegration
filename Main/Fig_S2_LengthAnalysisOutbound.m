@@ -180,7 +180,11 @@ ax.YAxis.FontSize = plotInfo.axisSize;
 exportgraphics(currFig,config.ResultFolder+"/OutboundPathLength.png",'Resolution',300);
 exportgraphics(currFig,config.ResultFolder+"/OutboundPathLength.pdf",'Resolution',300, 'ContentType','vector');
 
-%%
+% Final cleanup to leave workspace as the end of the Preprocessing stage.
+% Remove if you want to take a look at the output data.
+clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
+
+%% ---------------------------------------------------------------------
 function dataout = extractLengthData(groupData)
 
     dataout = [];

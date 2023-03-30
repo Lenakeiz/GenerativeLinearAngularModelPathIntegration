@@ -551,9 +551,9 @@ function [Physical_Pos, Mental_Pos, L1_Diff, L2_Diff, L1_Ratio, L2_Ratio, T2, T2
     end
 end
 
-%% Visualize mental physical trajectory
+%% ----------------------------------------------------------------------
 function [phy_p3,men_p3_share,  l1_diff, l2_diff, l1_ratio, l2_ratio, theta2, theta2_prime, alpha, theta3_prime]=VisualizeMenPhyTraj(GroupResults, ID, Cond, TrialIdx, doplot, config)
-
+% Visualize mental physical trajectory
     %extract the parameters
     parameters = GroupResults.estimatedParams{Cond}(ID,:);
     cell_params = num2cell(parameters);

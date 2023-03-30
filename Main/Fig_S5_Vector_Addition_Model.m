@@ -46,7 +46,7 @@ BoxPlotOfBeta1Beta2(AllMCIParams, config, "MCI");
 % Remove if you want to take a look at the output data.
 clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
 
-%% Box Plot Of Fitted Parameters by avearaging three paramters from three conditions into one mean value
+%% ---------------------------------------------------------------------
 function BoxPlotOfBeta1Beta2(AllParams, config, name)
     
     numConds = 3; % environmental conditions

@@ -122,9 +122,10 @@ end
 % Remove if you want to take a look at the output data.
 clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
 
-%% get the model parameters, average across the conditions
-% remove nans if the row after mergin still contains nans
+%% ---------------------------------------------------------------------
 function dataout = averageAcrossConditions(data)
+% get the model parameters, average across the conditions
+% remove nans if the row after mergin still contains nans
 
     dataout = [];
     pSize = length(data{1});
@@ -140,8 +141,9 @@ function dataout = averageAcrossConditions(data)
 
 end
 
-%% Creates a unique table between mri and model parameters
+%% ---------------------------------------------------------------------
 function dataout = createLMETable(MRI, GroupParams)
+% Creates a unique table between mri and model parameters
     GroupParamsTable = array2table(GroupParams, "VariableNames", {'beta', 'k', 'g2', 'g3', 'sigma', 'nu'});
     dataout = [GroupParamsTable,MRI];
 end

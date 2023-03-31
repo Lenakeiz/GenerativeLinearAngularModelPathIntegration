@@ -39,9 +39,6 @@ AllMCIUnkParams     =   MCIUnk.Results.estimatedParams;
 % BarScatter Plot for HealthyOld 
 BoxPlotOfBeta1Beta2(AllHealthyOldParams, config, "Elderly");
 
-% BarScatter Plot for MCI 
-BoxPlotOfBeta1Beta2(AllMCIParams, config, "MCI");
-
 % Final cleanup to leave workspace as the end of the Preprocessing stage.
 % Remove if you want to take a look at the output data.
 clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk

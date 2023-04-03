@@ -21,7 +21,7 @@ config.NumParams        =   length(config.ParamName);
 
 GLAMPI;
 
-% Preparing the output
+%% Preparing the output
 config.ResultFolder     =   pwd + "/Output/Fig3/"+config.ModelName+"/VisualizingMentalPhysicalTrajectory";
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
@@ -61,7 +61,7 @@ for tN=1:length(trials)
     [phy_p3,men_p3] = VisualizeMenPhyTraj(AllHealthyOldResults, id, 1, trial_id, true, config); %true means plot the figure
 end
 
-%% Visualizing group scatter plot of real returned point and mental return point
+%% Creating variable of interest
 
 if name == "Young"
     [Physical_Pos, Mental_Pos, L1Diff, L2Diff, L1Ratio, L2Ratio, T2, T2_prime, Alpha, T3_prime] = extractAllFinalPoints(AllYoungResults, config);
@@ -77,7 +77,7 @@ else
     error("Choose correct name!")
 end
 
-% Plotting physical and mental points
+%%  Plotting physical and mental points
 f = figure('visible','off','Position', [100 100 500 500]);
 
 set(0,'DefaultAxesFontName','Arial')
@@ -140,12 +140,12 @@ set(x,'markerfacecolor',[0.9,0.9,0.9])
 hold on
 c = Physical_Dist\Mental_Dist;
 xc = linspace(0,6,10);
-plot(xc,c*xc,'r--', LineWidth=2);
+plot(xc,c*xc,'k--', LineWidth=2);
 
 hold on
 
 x = linspace(0,6,10); y = x; 
-plot(x,y,'k--', LineWidth=2);
+plot(x,y,'r--', LineWidth=2);
 
 xlabel("Actual distance to origin (meters)")
 ylabel("Mental distance to origin (meters)");
@@ -320,12 +320,12 @@ end
 
 % Add reference line
 x = linspace(0,3.5,10); y = x; 
-plot(x,y,'k--', LineWidth=1);
+plot(x,y,'r--', LineWidth=1);
 
 % Add mean data
 meanX = mean(X);
 meanY = mean(Y);
-plot(meanX, meanY, 'Color', config.color_scheme_npg(8,:), 'LineStyle','--','LineWidth',2);
+plot(meanX, meanY, 'Color', config.color_scheme_npg(4,:) * 0.5, 'LineStyle','--','LineWidth',2);
 
 set(gca, ...
 'Box'         , 'off'       , ...

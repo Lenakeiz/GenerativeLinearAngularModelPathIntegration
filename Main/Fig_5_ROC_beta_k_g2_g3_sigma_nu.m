@@ -57,7 +57,7 @@ disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - model parameters estima
 rng("default");
 MCIPosvsMCINegSVMModels_SingleParameters = getSVMModels(MCINegParameters, MCIPosParameters,'MCIneg', 'MCIpos', config, NSamples, KernelFunction, Holdout);
 clear NSamples
-save Data/ROC_SVM_ROC_SVM_ModelParameters_resultsresults.mat HCvsMCISVMModels_SingleParameters MCIPosvsMCINegSVMModels_SingleParameters
+save Data/ROC_SVM_ModelParameters_results.mat HCvsMCISVMModels_SingleParameters MCIPosvsMCINegSVMModels_SingleParameters
 disp("%%%%%%%%%%%%%%% SVM fitting done %%%%%%%%%%%%%%%");
 
 % Plot results

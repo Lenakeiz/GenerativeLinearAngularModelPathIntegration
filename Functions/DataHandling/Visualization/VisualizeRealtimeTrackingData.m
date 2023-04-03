@@ -21,20 +21,6 @@ anglebetween = @(v,w) atan2d(w(:,2).*v(:,1) - v(:,2).*w(:,1), v(:,1).*w(:,1) + v
 % Color pattern for our paper
 ColorPattern;
 
-% Preparing output
-config.ResultFolder = pwd + "/Output/Fig1b";
-
-if ~exist(resultfolder, 'dir')
-   mkdir(resultfolder);
-end
-
-% Creating figure
-figureOpen = figure('visible','off','Position', [100 100 850 500]);
-set(0,'DefaultAxesFontName','Arial')
-set(0,'DefaultTextFontName','Arial')
-set(0,'DefaultAxesFontSize',16)
-set(0,'DefaultTextFontSize',16)  
-
 % Reconstructing a visualization of participants walk and head drection after reaching the third
 % cone
 config.cutFromConeThree = false;
@@ -46,7 +32,9 @@ config.videoplot = true;
 config.cutseconds = -100; 
 % Diplay a legend with all the trial info. Necessary for the manual
 % checking of the data
-config.displayTrialInfo = false; 
+config.displayTrialInfo = false;
+
+config.groupName = "Default";
 
 if exist('varargin','var')
     for i = 1:2:nargin-4
@@ -62,8 +50,25 @@ if exist('varargin','var')
         if(strcmpi(varargin{i},'displaytrialinfo'))
             config.displayTrialInfo = varargin{i+1};
         end
+        if(strcmpi(varargin{i},'groupname'))
+            config.groupName = varargin{i+1};
+        end
     end
 end
+
+% Preparing output
+config.ResultFolder = fullfile(pwd,"Output", "Fig1b", config.groupName);
+
+if ~exist(config.ResultFolder, 'dir')
+   mkdir(config.ResultFolder);
+end
+
+% Creating figure
+figureOpen = figure('visible',config.videoplot,'Position', [100 100 850 500]);
+set(0,'DefaultAxesFontName','Arial')
+set(0,'DefaultTextFontName','Arial')
+set(0,'DefaultAxesFontSize',16)
+set(0,'DefaultTextFontSize',16)  
 
 Cone_pos      = Group.FlagPos{1,pId}{trialId,1};
 Trig_pos      = Group.TrigPos{1,pId}{trialId,1};
@@ -98,6 +103,9 @@ end
 calculatedAngle = Group.Reconstructed{1,pId}.InboundBodyRotation(trialId);
 real_return_angle = Group.Reconstructed{1,pId}.RealReturnAngle(trialId);
 f_return_angle = Group.Reconstructed{1,pId}.InferredReturnAngle(trialId);
+
+% Display real return angle
+fprintf('Participant %d trial %d: real return angle %.2f\n', pId, trialId, real_return_angle);
 
 % Adding information if this is an out of bound trial
 OoB = [nan 0 nan];
@@ -216,14 +224,16 @@ else
     qv.Color = config.color_scheme_npg(5,:);
     qv.LineWidth = 5;
     qv.MaxHeadSize = 2;
-
-    trackDataPlot = plot(Extracted_pos.Pos_X,Extracted_pos.Pos_Z,'Marker','none','LineStyle','-','LineWidth',2.5,'Color',config.color_scheme_npg(4,:));
 end
+
+trackDataPlot = plot(Extracted_pos.Pos_X,Extracted_pos.Pos_Z,'Marker','none','LineStyle','-','LineWidth',2.5,'Color',config.color_scheme_npg(4,:));
 
 if(outofbound == 1)
     leg = legend([pCone1 pCone2 pCone3 pTrigPos pOoB pRecconstructedOoB], 'Cone 1', 'Cone 2', 'Cone 3','Response','Out of Bound(OoB)','Reconstructed OoB','AutoUpdate','off');
+    leg.Location="eastoutside";
 else
     leg = legend([pCone1 pCone2 pCone3 pTrigPos trackDataPlot], 'Cone 1', 'Cone 2', 'Cone 3','Response','Tracking data','AutoUpdate','off');
+    leg.Location="eastoutside";
 end
 leg.Location = 'northeast';
 leg.FontSize = 15;
@@ -240,7 +250,12 @@ ax.LineWidth = 2.0;
 hold off
 
 % Export figure
-exportgraphics(figureOpen,config.ResultFolder+"/ExampleTrackingPath.png",'Resolution',300);
-exportgraphics(figureOpen,config.ResultFolder+"/ExampleTrackingPath.pdf",'Resolution',300, 'ContentType','vector');
+filenamepng = "trackingpath_" + num2str(pId) + "_" + num2str(trialId) + ".png";
+filenamepdf = "trackingpath_" + num2str(pId) + "_" + num2str(trialId) + ".pdf";
+
+savefile = fullfile(config.ResultFolder,filenamepng);
+exportgraphics(figureOpen,savefile,'Resolution',300);
+savefile = fullfile(config.ResultFolder,filenamepdf);
+exportgraphics(figureOpen,savefile,'Resolution',300, 'ContentType','vector');
 disp("Save complete!");
 end

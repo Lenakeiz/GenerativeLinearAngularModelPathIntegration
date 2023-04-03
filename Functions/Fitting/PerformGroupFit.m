@@ -141,7 +141,7 @@ for j = 1:subjectNum
      
         outer_rad        =      [0; anglebetween(segments{j}{tr}(1:end-1,:), segments{j}{tr}(2:end,:))];
         outer_rad(3,1)   =      realReturnAngles(tr);     
-        THETADX{j}{tr}   =      deg2rad(outer_rad);%wrap the angle into (0,2pi)
+        THETADX{j}{tr}   =      deg2rad(outer_rad);
         
         if config.useOoBtrials == true
             

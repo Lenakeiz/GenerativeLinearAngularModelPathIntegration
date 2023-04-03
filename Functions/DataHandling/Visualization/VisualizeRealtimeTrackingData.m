@@ -7,9 +7,11 @@ function VisualizeRealtimeTrackingData(Group, pId, trialId, playbackSpeed, varar
 % pId: identify participant within the group
 % trialId: identify trial within participant
 % playbackSpeed: set the speed for the video
-% varargin: 'cutconethree' - extract data from cone 3 only, 'videoplot' -
-% draw the plot as video or not, 'cutsecbeforecone1' - number of seconds to
-% track before reaching cone 1, 'displaytrialinfo' - plot a legend with 
+% varargin options:
+% 'cutconethree' - extract data from cone 3 only
+% 'videoplot' - draw the plot as video or not
+% 'cutsecbeforecone1' - number of seconds to track before reaching cone 1
+% 'displaytrialinfo' - plot a legend within the figre
 % This function has been used to create Figure 1b.
 % ===================================================================================
 

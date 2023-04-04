@@ -1,5 +1,5 @@
-function [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnovaAllGroups(YoungData, HealthyOldData, MCIPosData, MCINegData, MCIUnkData, config)
-%% TwowayAnovaOnRealData
+function [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_Behavioural_AllGroups(YoungData, HealthyOldData, MCIPosData, MCINegData, MCIUnkData, config)
+%% TwowayAnova_Behavioural_AllGroups
 % Andrea Castegnaro, UCL, 2022 uceeaca@ucl.ac.uk
 % Calculate two way anova between groups of participants
 % five groups:         Young / HealthyOld / MCIPos / MCINeg / MCIUnk

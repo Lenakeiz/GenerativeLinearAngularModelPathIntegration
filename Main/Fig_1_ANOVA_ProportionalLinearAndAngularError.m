@@ -38,11 +38,11 @@ end
 
 % TwowayAnova Analysis
 config.type = "ProportionalDistance";
-[anova_tab_dist,multicomp_tab1_dist,multicomp_tab2_dist, multicomp_tab12_dist]     = TwowayAnovaAllGroups(YoungControlsPropDist, HealthyControlsPropDist, MCIPosPropDist, MCINegPropDist, MCIUnkPropDist, config);
+[anova_tab_dist,multicomp_tab1_dist,multicomp_tab2_dist, multicomp_tab12_dist]     = TwowayAnova_Behavioural_AllGroups(YoungControlsPropDist, HealthyControlsPropDist, MCIPosPropDist, MCINegPropDist, MCIUnkPropDist, config);
 
 % TwowayAnova Analysis
 config.type = "ProportionalAngle";
-[anova_tab_angle,multicomp_tab1_angle,multicomp_tab2_angle, multicomp_tab12_angle] = TwowayAnovaAllGroups(YoungControlsPropAng, HealthyControlsPropAng, MCIPosPropAng, MCINegPropAng, MCIUnkPropAng, config);
+[anova_tab_angle,multicomp_tab1_angle,multicomp_tab2_angle, multicomp_tab12_angle] = TwowayAnova_Behavioural_AllGroups(YoungControlsPropAng, HealthyControlsPropAng, MCIPosPropAng, MCINegPropAng, MCIUnkPropAng, config);
 
 % Display means and std for each group
 disp("%%%%%%%%% Proportional Distance Error %%%%%%%%%");

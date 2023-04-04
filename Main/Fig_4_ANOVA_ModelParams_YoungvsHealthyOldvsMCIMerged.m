@@ -29,7 +29,7 @@ end
 % Generating color scheme for our paper
 ColorPattern; 
 
-% Collecting information from output
+%% Collecting information from output
 AllYoungParams      =   YoungControls.Results.estimatedParams;
 AllHealthyOldParams =   HealthyControls.Results.estimatedParams;
 AllMCIPosParams     =   MCIPos.Results.estimatedParams;

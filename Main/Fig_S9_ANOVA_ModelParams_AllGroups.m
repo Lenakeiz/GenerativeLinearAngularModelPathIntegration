@@ -362,11 +362,14 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         PvalueHealthyOldvsMCIUnk = multicomp_result(5,6); % HealthyOld v.s. MCI unk
         PvalueHealthyOldvsMCINeg = multicomp_result(6,6); % HealthyOld v.s. MCI neg
         PvalueHealthyOldvsMCIPos = multicomp_result(7,6); % HealthyOld v.s. MCI pos
-        PvalueMCINegvsMCIPos     = multicomp_result(10,6); % MCI Neg vs MCI pos
+        PvalueMCINegvsMCIPos     = multicomp_result(10,6);
+        PvalueMCIUnkvsMCIPos     = multicomp_result(9,6); % MCI Unk vs MCI pos
+        PvalueMCIUnkvsMCINeg     = multicomp_result(8,6); % MCI Unk vs MCI neg
+
         
         %% Add significance bars
-        AllP = [PvalueYoungvsHealthyOld,PvalueHealthyOldvsMCIUnk,PvalueHealthyOldvsMCINeg,PvalueHealthyOldvsMCIPos,PvalueMCINegvsMCIPos];
-        Xval = [[1,2];[2,3];[2,4];[2,5];[4,5]];
+        AllP = [PvalueYoungvsHealthyOld,PvalueHealthyOldvsMCIUnk,PvalueHealthyOldvsMCINeg,PvalueHealthyOldvsMCIPos,PvalueMCINegvsMCIPos,PvalueMCIUnkvsMCIPos,PvalueMCIUnkvsMCINeg];
+        Xval = [[1,2];[2,3];[2,4];[2,5];[4,5];[3 5];[3 4]];
         %select those P value smaller than 0.05 (only add line when p<0.05)
         % * represents p<=0.05
         % ** represents p<=1E-2

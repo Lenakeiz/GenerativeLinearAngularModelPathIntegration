@@ -26,9 +26,9 @@ We also used a customised version of [Rob Campbell (2023) sigstar](https://githu
 
 ## Use
 Scripts to reproduce the plots and analysis in the paper can be found into the **Main** folder. 
-Each of the scripts is standalone, meaning it will produce one or more plots from any given figure of the main text/supplementary. 
+Each of the scripts is standalone, meaning that will perform the entire stages of the analysis (i.e. data loading, pre-processing, behavioural analyisis, model fitting, plotting) and it will produce one or more plots from any given figure of the main text/supplementary as specified in the script name. 
 Plots will not be displayed within Matlab but output will be saved inside **Output** folder.
-Some scripts will take longer than others to run (like the one that runs all different types of model). If you want to run the entire analysis, you can do it with `RunAllAnalysis`. 
+Please be aware that some scripts will take longer times than others to complete. If you want to run the entire analysis, you can do it with `RunAllAnalysis`. 
 
 Below you can find some more information about the analysis process with some references to relevant scripts/functions.
 

@@ -30,7 +30,7 @@ end
 % Generating color scheme for our paper
 ColorPattern; 
 
-% Collecting information from output
+%% Collecting information from output
 YoungControlsParameters   = averageAcrossConditions(YoungControls.Results.estimatedParams);
 HealthyControlsParameters = averageAcrossConditions(HealthyControls.Results.estimatedParams);
 MCIUnkParameters          = averageAcrossConditions(MCIUnk.Results.estimatedParams);
@@ -58,7 +58,7 @@ disp("Removed positive = " + (height(MCIPosParameters) - sum(MRIModelParamsDataT
 disp("Removed negative = " + (height(MCINegParameters) - sum(MRIModelParamsDataTable.CSF == "Negative")) ); 
 
 clear filter
-
+%%
 close all;
 clc;
 

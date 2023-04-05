@@ -89,7 +89,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         MCINegParamMean        = mean(MCINegParamAllConds, 2);
         MCIPosParamMean        = mean(MCIPosParamAllConds, 2);
     
-        f = figure('visible','off','Position', [100 100 500 500]);
+        f = figure('visible','on','Position', [100 100 360 360]);
 
         set(0,'DefaultAxesFontName','Arial')
         set(0,'DefaultTextFontName','Arial')

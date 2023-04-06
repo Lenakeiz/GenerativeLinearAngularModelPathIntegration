@@ -1,5 +1,5 @@
-%% Script to create output for Fig. S8 - parameter comparisons between Young, healthy Elderly, MCI negative
-% Zilong Ji, UCL, 2022 zilong.ji@ucl.ac.uk
+%% Script to create output for Fig. 1 - parameter comparisons between Young, healthy Elderly, MCI negative, MCI positive 
+% Andrea Castegnaro, UCL, 2022 uceeaca@ucl.ac.uk
 % Fits the model on all of the groups and run a two-way Anova
 % (group*condition) on Young Controls, Elderly Controls and MCI negative
 % Output: for each parameter fitted by the model output one boxplot with

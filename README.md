@@ -12,7 +12,7 @@ Clone the repository anywhere in your machine using `git clone`.
 Open the folder in Matlab by making sure to add folders and subfolders to the path.
 
 ## Package dependency
-Developed using Matlab R2022a.
+Developed using Matlab R2021b.
 
 Requires the following MATLAB toolboxes:
 

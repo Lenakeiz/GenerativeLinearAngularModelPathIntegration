@@ -24,7 +24,7 @@ config.NumParams        =   length(config.ParamName);
 
 GLAMPI;
 
-% Preparing output
+%% Preparing output
 config.ResultFolder     =   pwd + "/Output/Fig4/"+config.ModelName+"/Young_HealthyOld_MCICombined";
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
@@ -33,7 +33,7 @@ end
 % Generating color scheme for our paper
 ColorPattern; 
 
-%% Collecting information from output
+% Collecting information from output
 AllYoungParams      =   YoungControls.Results.estimatedParams;
 AllHealthyOldParams =   HealthyControls.Results.estimatedParams;
 AllMCIPosParams     =   MCIPos.Results.estimatedParams;

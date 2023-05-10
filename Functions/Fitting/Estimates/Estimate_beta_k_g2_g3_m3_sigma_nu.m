@@ -51,9 +51,9 @@ for tr = 1:sampleSize
     %calculate the actuall return angle
     ActualAlphas(tr) = THETAX{tr}(3);
 
-    beta    = norm(phy_p2);
+    beta_1    = norm(phy_p2);
     
-    Betas(tr) = beta;
+    Betas(tr) = beta_1;
     ActualBetas(tr) = DX{tr}(3); 
 end
 %mean_angle = mean(Alphas);

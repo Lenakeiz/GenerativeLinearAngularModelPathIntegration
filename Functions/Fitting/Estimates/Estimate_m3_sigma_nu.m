@@ -47,8 +47,8 @@ for tr = 1:sampleSize
     alpha   = mod(alpha, 2*pi);  %wrap to (0,2pi)  
     Alphas(tr) = alpha;
 
-    beta    = norm(phy_p2);
-    Betas(tr) = beta;
+    beta_1    = norm(phy_p2);
+    Betas(tr) = beta_1;
     ActualBetas(tr) = DX{tr}(3); 
 end
 mean_angle = mean(Alphas);

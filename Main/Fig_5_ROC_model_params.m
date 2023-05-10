@@ -15,14 +15,14 @@ GLAMPI_PreprocessData
 % Model fitting
 rng("default");
 config.useTrialFilter = true;
-config.ModelName        =   "beta_k_g2_g3_sigma_nu";
-config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
+config.ModelName        =   "beta_k_g2_g3_m3_sigma_nu";
+config.ParamName        =   ["beta", "k", "g2", "g3", "m3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
 GLAMPI
 
 % Preparing output
-config.ResultFolder = pwd + "/Output/Fig5/ModelParameters/beta_k_g2_g3_sigma_nu";
+config.ResultFolder = pwd + "/Output/Fig5/ModelParameters/beta_k_g2_g3_m3_sigma_nu";
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
 end
@@ -30,6 +30,7 @@ end
 % Generating color scheme for our paper
 ColorPattern;
 
+%%
 % Collecting information from output
 YoungControlsParameters   = averageAcrossConditions(YoungControls.Results.estimatedParams);
 HealthyControlsParameters = averageAcrossConditions(HealthyControls.Results.estimatedParams);
@@ -73,7 +74,7 @@ plotInfo.lineAlpha = 0.6;
 plotInfo.YLabel = "True positive rate";
 plotInfo.XLabel = "False positive rate";
 plotInfo.Title = "Healthy controls / pooled MCI";
-plotInfo.visible = "off";
+plotInfo.visible = "on";
 plotInfo.figurePosition = [200 200 250 200];
 
 disp("%%%%%%%%%%%%%%% Plotting ROC HC vs MCI model %%%%%%%%%%%%%%%");
@@ -192,8 +193,8 @@ end
 %%
 function plotSVMResults(params1, params2, params1groupName, params2groupName, config, plotInfo, SVMModels)
     %
-    parametersName = [{'\beta'}, {'k'}, {'g_2'}, {'g_3'}, {'\sigma'}, {'\nu'}];
-    colors = config.color_scheme_npg([4 8 2 3 5 9],:);
+    parametersName = [{'\beta'}, {'k'}, {'g_2'}, {'g_3'}, {'m_3'}, {'\sigma'}, {'\nu'}];
+    colors = config.color_scheme_npg([4 8 2 3 5 9 7],:);
     
     f = figure('visible', plotInfo.visible, 'Position', plotInfo.figurePosition);
 

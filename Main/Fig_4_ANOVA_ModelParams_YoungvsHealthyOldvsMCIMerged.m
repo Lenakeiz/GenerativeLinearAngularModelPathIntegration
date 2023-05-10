@@ -14,8 +14,12 @@ GLAMPI_PrepareBaseConfig;
 GLAMPI_PreprocessData;
 
 % Model fitting
-config.ModelName        =   "beta_k_g2_g3_sigma_nu";
-config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
+% config.ModelName        =   "beta_k_g2_g3_sigma_nu";
+% config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
+
+config.ModelName        =   "beta_k_g2_g3_m3_sigma_nu";
+config.ParamName        =   ["beta", "k", "g2", "g3", "m3", "sigma", "nu"];
+
 config.NumParams        =   length(config.ParamName);
 
 GLAMPI;

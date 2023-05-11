@@ -15,8 +15,8 @@ GLAMPI_PrepareBaseConfig;
 GLAMPI_PreprocessData;
 
 % Model fitting
-config.ModelName        =   "beta_k_g2_g3_sigma_nu";
-config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
+config.ModelName        =   "beta_k_g2_g3_m3_sigma_nu";
+config.ParamName        =   ["beta", "k", "g2", "g3", "m3", "sigma", "nu"];
 config.NumParams        =   length(config.ParamName);
 
 GLAMPI;
@@ -77,7 +77,7 @@ plotInfo.ResultFolder = config.ResultFolder;
 plotInfo.color_scheme_group = config.color_scheme_group;
 plotInfo.figurePosition = [200 200 210 210];
 
-parameters_label = [{'\beta'}, {'k'}, {'g_2'}, {'g_3'}, {'\sigma'}, {'\nu'}];
+parameters_label = [{'\beta'}, {'k'}, {'g_2'}, {'g_3'}, {'m_3'}, {'\sigma'}, {'\nu'}];
 
 % Labels selected ROI regions, see paper methods for details 
 mri_indeces = ["norm_ErC"...
@@ -89,7 +89,7 @@ mri_indeces_label = ["Entorhinal Cortex"...
 
 % Controlling if we should add a reference line when plotting the GLAMPI
 % parameter
-addLine = [0, 1, 1, 1, 0, 0];
+addLine = [0, 1, 1, 1, 1, 0, 0];
 
 for param_i = 1:length(config.ParamName)    
     for mri_i = 1:length(mri_indeces)
@@ -120,7 +120,7 @@ end
 
 % Final cleanup to leave workspace as the end of the Preprocessing stage.
 % Remove if you want to take a look at the output data.
-clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
+%clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
 
 %% ---------------------------------------------------------------------
 function dataout = averageAcrossConditions(data)
@@ -144,7 +144,7 @@ end
 %% ---------------------------------------------------------------------
 function dataout = createLMETable(MRI, GroupParams)
 % Creates a unique table between mri and model parameters
-    GroupParamsTable = array2table(GroupParams, "VariableNames", {'beta', 'k', 'g2', 'g3', 'sigma', 'nu'});
+    GroupParamsTable = array2table(GroupParams, "VariableNames", {'beta', 'k', 'g2', 'g3', 'm3', 'sigma', 'nu'});
     dataout = [GroupParamsTable,MRI];
 end
 

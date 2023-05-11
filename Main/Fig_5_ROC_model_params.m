@@ -74,7 +74,7 @@ plotInfo.lineAlpha = 0.6;
 plotInfo.YLabel = "True positive rate";
 plotInfo.XLabel = "False positive rate";
 plotInfo.Title = "Healthy controls / pooled MCI";
-plotInfo.visible = "on";
+plotInfo.visible = "off";
 plotInfo.figurePosition = [200 200 250 200];
 
 disp("%%%%%%%%%%%%%%% Plotting ROC HC vs MCI model %%%%%%%%%%%%%%%");

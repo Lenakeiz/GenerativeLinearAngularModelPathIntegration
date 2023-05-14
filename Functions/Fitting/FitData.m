@@ -151,6 +151,14 @@ elseif Model_Name == "beta1_beta2_g2_g3_sigma_nu"      %regressing to correct me
     ub  = [2.5,           2.5,             3,       3,       3.0,         pi];  
     %defining likelihood function
     estFnc = @(FP) Estimate_beta1_beta2_g2_g3_sigma_nu(FP(1),FP(2),FP(3),FP(4),FP(5), FP(6),Input, config);  
+elseif Model_Name == "beta1_beta2_g2_g3_m3_sigma_nu"      %regressing to correct mean return angle
+    %set parameter lower bound and up bound
+    %     1, beta1       beta2             2-g2     3-g3     3-m3    4-sigma      5-nu
+    lb  = [0.2,           0.2,             0,       0,       0.0,    0.0,         0.0];
+    ub  = [2.5,           2.5,             3,       3,       3.0,    3.0,         pi];  
+    %defining likelihood function
+    estFnc = @(FP) Estimate_beta1_beta2_g2_g3_m3_sigma_nu(FP(1),FP(2),FP(3),FP(4),FP(5),FP(6),FP(7),Input,config); 
+
 else
     error("Please set the correct name of model!");
 end

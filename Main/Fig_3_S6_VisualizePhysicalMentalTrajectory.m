@@ -15,8 +15,12 @@ GLAMPI_PrepareBaseConfig;
 GLAMPI_PreprocessData;
 
 % Model fitting
-config.ModelName        =   "beta_k_g2_g3_sigma_nu";
-config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
+% config.ModelName        =   "beta_k_g2_g3_sigma_nu";
+% config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
+
+config.ModelName        =   "beta_k_g2_g3_m3_sigma_nu";
+config.ParamName        =   ["beta", "k", "g2", "g3", "m3", "sigma", "nu"];
+
 config.NumParams        =   length(config.ParamName);
 
 GLAMPI;
@@ -39,9 +43,9 @@ AllMCIUnkResults        =   MCIUnk.Results;
 
 %% Starting visualization
 % Can select a different groups by selecting different names (creates Fig S6, S7)
-% name = "Young";
-name = "HealthyOld";
-% name = "MCIMerged";
+%name = "Young";
+%name = "HealthyOld";
+name = "MCIMerged";
 
 %% Visualizing trials (Healthy elderly only)
 id = 13; % participant Id
@@ -64,13 +68,13 @@ end
 %% Creating variable of interest
 
 if name == "Young"
-    [Physical_Pos, Mental_Pos, L1Diff, L2Diff, L1Ratio, L2Ratio, T2, T2_prime, Alpha, T3_prime] = extractAllFinalPoints(AllYoungResults, config);
+    [Physical_Pos, Mental_Pos, L1Diff, L2Diff, L1Ratio, L2Ratio, T2, T2_prime, Alpha, T3_prime, H, L3_prime] = extractAllFinalPoints(AllYoungResults, config);
 elseif name=="HealthyOld"
-    [Physical_Pos, Mental_Pos, L1Diff, L2Diff,  L1Ratio, L2Ratio, T2, T2_prime, Alpha, T3_prime] = extractAllFinalPoints(AllHealthyOldResults, config);
+    [Physical_Pos, Mental_Pos, L1Diff, L2Diff,  L1Ratio, L2Ratio, T2, T2_prime, Alpha, T3_prime, H, L3_prime] = extractAllFinalPoints(AllHealthyOldResults, config);
 elseif name=="MCIMerged"
-    [Physical_Pos1, Mental_Pos1, L1Diff1, L2Diff1, L1Ratio1, L2Ratio1, T2_1, T2_prime1, Alpha1, T3_prime1] = extractAllFinalPoints(AllMCIPosResults, config);
-    [Physical_Pos2, Mental_Pos2, L1Diff2, L2Diff2, L1Ratio2, L2Ratio2, T2_2, T2_prime2, Alpha2, T3_prime2] = extractAllFinalPoints(AllMCINegResults, config);
-    [Physical_Pos3, Mental_Pos3, L1Diff3, L2Diff3, L1Ratio3, L2Ratio3, T2_3, T2_prime3, Alpha3, T3_prime3] = extractAllFinalPoints(AllMCIUnkResults, config);
+    [Physical_Pos1, Mental_Pos1, L1Diff1, L2Diff1, L1Ratio1, L2Ratio1, T2_1, T2_prime1, Alpha1, T3_prime1, H, L3_prime] = extractAllFinalPoints(AllMCIPosResults, config);
+    [Physical_Pos2, Mental_Pos2, L1Diff2, L2Diff2, L1Ratio2, L2Ratio2, T2_2, T2_prime2, Alpha2, T3_prime2, H, L3_prime] = extractAllFinalPoints(AllMCINegResults, config);
+    [Physical_Pos3, Mental_Pos3, L1Diff3, L2Diff3, L1Ratio3, L2Ratio3, T2_3, T2_prime3, Alpha3, T3_prime3, H, L3_prime] = extractAllFinalPoints(AllMCIUnkResults, config);
     Physical_Pos = [Physical_Pos1;Physical_Pos2;Physical_Pos3];
     Mental_Pos = [Mental_Pos1;Mental_Pos2;Mental_Pos3];
 else
@@ -117,7 +121,7 @@ set(gca, ...
 exportgraphics(f,config.ResultFolder+"/"+name+".png",'Resolution',300);
 exportgraphics(f,config.ResultFolder+"/"+name+".pdf",'Resolution',300, 'ContentType','vector');
 
-%% Plotting regression to the mean distance effect (m3)
+%% Plotting regression to the mean
 f = figure('visible','off','Position', [100 100 500 500]);
 
 set(0,'DefaultAxesFontName','Arial')
@@ -220,7 +224,7 @@ set(gca, ...
 'XColor'      , [.1 .1 .1]  , ...
 'YColor'      , [.1 .1 .1]  , ...
 'XLim'        , [0.5, 2.5] ,...
-'YLim'        , [0,1.6],...
+'YLim'        , [0,1.5],...
 'XTick'       , [1,2]    ,...
 'YTick'       , [0,0.5,1.0,1.5] ,...
 'XTickLabel'   , {'Leg 1', 'Leg 2'},...
@@ -344,8 +348,67 @@ set(gca, ...
 xlabel("Intended angle (radians)")
 ylabel("Produced agnle (radians)")
 
-exportgraphics(f,config.ResultFolder+"/"+name+"_rgmean.png",'Resolution',300);
-exportgraphics(f,config.ResultFolder+"/"+name+"_rgmean.pdf",'Resolution',300, 'ContentType','vector');
+exportgraphics(f,config.ResultFolder+"/"+name+"_rgmean_g3.png",'Resolution',300);
+exportgraphics(f,config.ResultFolder+"/"+name+"_rgmean_g3.pdf",'Resolution',300, 'ContentType','vector');
+
+%% regression to the angular mean effect (m3)
+f = figure('visible','off','Position', [100 100, 500, 400]);
+set(0,'DefaultAxesFontName','Arial')
+set(0,'DefaultTextFontName','Arial')
+set(0,'DefaultAxesFontSize',12)
+set(0,'DefaultTextFontSize',12) 
+
+cmap = config.color_scheme_npg([3,4,6,7,9,10],:);
+
+CMs = [];
+for i=1:length(H)
+    if ~isempty(H{i})
+        mapidx = mod(i, length(cmap))+1;
+        scatter(H{i}, L3_prime{i}, 'MarkerEdgeColor',cmap(mapidx,:), 'MarkerFaceColor', cmap(mapidx,:), ...
+            'MarkerFaceAlpha', 0., 'MarkerEdgeAlpha', 0.);
+        CMs = [CMs;cmap(mapidx,:)];
+    end
+    hold on
+end
+
+ls = lsline;
+X = [];
+Y = [];
+for i=1:length(ls)
+    set(ls(i),'color', [0, 0, 0, 0.2], 'linewidth', 1);
+    x = ls(i).XData; X = [X; x];
+    y = ls(i).YData; Y = [Y; y];
+end
+
+% Add reference line
+x = linspace(0,5.5,10); y = x; 
+plot(x,y,'r--', LineWidth=1);
+
+% Add mean data
+meanX = mean(X);
+meanY = mean(Y);
+plot(meanX, meanY, 'Color', config.color_scheme_npg(4,:) * 0.5, 'LineStyle','--','LineWidth',2);
+
+set(gca, ...
+'Box'         , 'off'       , ...
+'TickDir'     , 'out'       , ...
+'TickLength'  , [.01 .01]   , ...
+'XColor'      , [.1 .1 .1]  , ...
+'YColor'      , [.1 .1 .1]  , ...
+'XLim'        , [0, 5.5]     ,...
+'YLim'        , [0, 5.5]     ,...
+'XTick'       , [0,1,2,3,4,5]    ,...
+'YTick'       , [0,1,2,3,4,5]    ,...
+'LineWidth'   , .5          ,...
+'XAxisLocation', 'origin'   ,...
+'YAxisLocation', 'origin');
+
+xlabel("Intended distance (meters)")
+ylabel("Produced distance (meters)")
+
+exportgraphics(f,config.ResultFolder+"/"+name+"_rgmean_m3.png",'Resolution',300);
+exportgraphics(f,config.ResultFolder+"/"+name+"_rgmean_m3.pdf",'Resolution',300, 'ContentType','vector');
+
 
 %% Plotting the distribution of the single parameters (Fig. S7) 
 Parameters = AllHealthyOldResults.estimatedParams;
@@ -392,18 +455,18 @@ for ParamIndx=1:length(ParamName)
                 'positions', 1);
     set(bp1,'linewidth',box_lineWidth);
 
-    %% Boxplot visual changes
+    % Boxplot visual changes
     h = findobj(gca,'Tag','Box'); 
     patch(get(h(1),'XData'),get(h(1),'YData'),color,'FaceAlpha',box_color_transparency);
 
-    %% Median visual changes
+    % Median visual changes
     h=findobj(gca,'tag','Median');
     for i = 1:length(h)
         h(i).LineWidth = median_lineWidth;
         h(i).Color = median_color;
     end
 
-    %% Scatter plot for data and mean (MCI positive)
+    % Scatter plot for data and mean (MCI positive)
     num_points = length(ParamMean);
     hold on
     x = ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
@@ -426,13 +489,13 @@ for ParamIndx=1:length(ParamName)
             'MarkerFaceColor','w', ...
             'LineWidth',scatter_marker_edgeWidth);
 
-    %% Figure post-processing
+    % Figure post-processing
     % calculate the Y limits
     alldata = ParamMean;
     maxdata = max(alldata,[],'all');
     mindata = min(alldata, [], 'all');
     
-    if ParamName(ParamIndx)=="g2" | ParamName(ParamIndx)=="g3" | ParamName(ParamIndx)=="nu" 
+    if ParamName(ParamIndx)=="g2" | ParamName(ParamIndx)=="g3" | ParamName(ParamIndx)=="m3" |ParamName(ParamIndx)=="nu" 
         lowupYlim = [0, 2];
         yticks = [0,1,2,3];
     elseif ParamName(ParamIndx)=="beta"
@@ -480,6 +543,10 @@ for ParamIndx=1:length(ParamName)
         [h,p,~,stat]=ttest(ParamMean,1,"Tail","left");
         yline(1,Color='r',LineStyle='--',LineWidth=2);
         text(1.05*xL(1),1.05*yL(2),"t("+num2str(stat.df)+")="+num2str(round(stat.tstat,2))+", p="+num2str(p), 'FontSize', 15)
+    elseif ParamName(ParamIndx)=="m3"
+        [h,p,~,stat]=ttest(ParamMean,1,"Tail","left");
+        yline(1,Color='r',LineStyle='--',LineWidth=2);
+        text(1.05*xL(1),1.05*yL(2),"t("+num2str(stat.df)+")="+num2str(round(stat.tstat,2))+", p="+num2str(p), 'FontSize', 15)
     end
 
     exportgraphics(f,config.ResultFolder+"/Box_"+ParamName(ParamIndx)+".png",'Resolution',300);
@@ -489,10 +556,10 @@ end
 
 % Final cleanup to leave workspace as the end of the Preprocessing stage.
 % Remove if you want to take a look at the output data.
-clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
+% clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
 
 %% ---------------------------------------------------------------------- 
-function [Physical_Pos, Mental_Pos, L1_Diff, L2_Diff, L1_Ratio, L2_Ratio, T2, T2_prime, Alpha, T3_prime] = extractAllFinalPoints(GroupResults, config)
+function [Physical_Pos, Mental_Pos, L1_Diff, L2_Diff, L1_Ratio, L2_Ratio, T2, T2_prime, Alpha, T3_prime, H, L3_prime] = extractAllFinalPoints(GroupResults, config)
     % Function helper to extract all relevant data from the output
     % structure
     Physical_Pos = [];
@@ -505,6 +572,8 @@ function [Physical_Pos, Mental_Pos, L1_Diff, L2_Diff, L1_Ratio, L2_Ratio, T2, T2
     T2_prime = [];
     Alpha = {};
     T3_prime = {};
+    H = [];
+    L3_prime = {};
     numID = length(GroupResults.DX{1});
     for ID =1:numID
         L1DiffID = [];
@@ -514,12 +583,14 @@ function [Physical_Pos, Mental_Pos, L1_Diff, L2_Diff, L1_Ratio, L2_Ratio, T2, T2
         T2ID = [];
         T2_primeID = [];
         AlphaID = [];
-        T3_primeID = [];    
+        T3_primeID = [];   
+        HID = [];
+        L3_primeID = [];
         for cond=1:3
             if ~isempty(GroupResults.DX{cond}{ID}) && ~isnan(GroupResults.estimatedParams{cond}(ID,1))
                 numTrails = length(GroupResults.DX{cond}{ID});
                 for trial=1:numTrails
-                    [phy_p3,men_p3,l1_diff, l2_diff, l1_ratio, l2_ratio, t2, t2_prime, alpha, t3_prime] = VisualizeMenPhyTraj(GroupResults, ID, cond, trial, false, config);
+                    [phy_p3,men_p3,l1_diff, l2_diff, l1_ratio, l2_ratio, t2, t2_prime, alpha, t3_prime, h, l3_prime] = VisualizeMenPhyTraj(GroupResults, ID, cond, trial, false, config);
 
                     Physical_Pos = [Physical_Pos; phy_p3];
                     Mental_Pos = [Mental_Pos; men_p3];
@@ -533,6 +604,8 @@ function [Physical_Pos, Mental_Pos, L1_Diff, L2_Diff, L1_Ratio, L2_Ratio, T2, T2
                     T2_primeID = [T2_primeID; t2_prime];
                     AlphaID = [AlphaID; alpha];
                     T3_primeID = [T3_primeID; t3_prime];
+                    HID = [HID; h];
+                    L3_primeID = [L3_primeID; l3_prime];
                 end
             end
         end
@@ -548,19 +621,30 @@ function [Physical_Pos, Mental_Pos, L1_Diff, L2_Diff, L1_Ratio, L2_Ratio, T2, T2
 
         Alpha{ID} = AlphaID;
         T3_prime{ID} = T3_primeID;
+        H{ID} = HID;
+        L3_prime{ID} = L3_primeID;
+
     end
 end
 
 %% ----------------------------------------------------------------------
-function [phy_p3,men_p3_share,  l1_diff, l2_diff, l1_ratio, l2_ratio, theta2, theta2_prime, alpha, theta3_prime]=VisualizeMenPhyTraj(GroupResults, ID, Cond, TrialIdx, doplot, config)
+function [phy_p3, men_p3, l1_diff, l2_diff, l1_ratio, l2_ratio, theta2, theta2_prime, alpha, theta3_prime, h, l3_prime]=VisualizeMenPhyTraj(GroupResults, ID, Cond, TrialIdx, doplot, config)
 % Visualize mental physical trajectory
     %extract the parameters
     parameters = GroupResults.estimatedParams{Cond}(ID,:);
+    flagOoB = GroupResults.flagOoB{Cond}{ID};
     cell_params = num2cell(parameters);
-    [beta, k, g2, g3, ~, ~] = deal(cell_params{:});
+    [beta, k, g2, g3, m3, ~, ~] = deal(cell_params{:});
 
     if isnan(beta)
         error("beta cannot be nan for this plot!")
+    else
+        if beta<-0.03
+            beta=-0.03; %this is just for visualization, several betas (1 or 2) are smaller than this threshold 
+                        % so the l1_ratio will be a large positive number,
+                        % which is bad for visualization. This won'r change
+                        % the statitistics, don't worry
+        end 
     end 
 
     % extract X
@@ -575,31 +659,20 @@ function [phy_p3,men_p3_share,  l1_diff, l2_diff, l1_ratio, l2_ratio, theta2, th
     % extract theta
     Theta           =       GroupResults.THETADX{Cond}{ID}{TrialIdx};
     theta2          =       Theta(2); 
-    theta3          =       Theta(3); 
 
-    % find the correct mean return angle based on all trials 
-    sampleSize  =   length(GroupResults.DX{1}{ID})+length(GroupResults.DX{2}{ID})+length(GroupResults.DX{3}{ID});
+    % find the correct mean return angle/distance based on all trials in a condition
+    sampleSize  =   length(GroupResults.DX{Cond}{ID});
     Alphas      =   zeros(sampleSize,1);
-    index       =   0;
-    for condddd = 1:3
-        trial_num = length(GroupResults.DX{condddd}{ID});
-        for trial_id = 1:trial_num
-            index = index+1;
-            lll_1 = GroupResults.DX{condddd}{ID}{trial_id}(1);
-            lll_2 = GroupResults.DX{condddd}{ID}{trial_id}(2);
-            thetaaa_2 = GroupResults.THETADX{condddd}{ID}{trial_id}(2);
-            
-            %calculate the correct return angle
-            phy_p1  = [lll_1,0];
-            phy_p2  = [lll_1+lll_2*cos(thetaaa_2),lll_2*sin(thetaaa_2)];
-            vec1    = phy_p2-phy_p1; vec2 = [0,0]-phy_p2;
-            alpha   = atan2d(vec1(1)*vec2(2)-vec1(2)*vec2(1),vec1(1)*vec2(1)+vec1(2)*vec2(2));
-            alpha   = deg2rad(alpha);%transfer from degree to radians
-            alpha   = mod(alpha, 2*pi);  %wrap to (0,2pi)  
-            Alphas(index) = alpha;           
-        end
+    Betas       =   zeros(sampleSize,1);
+
+    trial_num = length(GroupResults.DX{Cond}{ID});
+    for trial_id = 1:trial_num          
+        Alphas(trial_id) = GroupResults.THETADX{Cond}{ID}{trial_id}(3);   
+        Betas(trial_id) = GroupResults.DX{Cond}{ID}{trial_id}(3);
     end
+
     mean_angle = mean(Alphas);
+    mean_distance = mean(Betas(flagOoB==0)); %using data from only the non-oob trials...
 
     % extract duration
     durationL1      =       GroupResults.L1Dur{Cond}{ID}{TrialIdx};
@@ -616,6 +689,10 @@ function [phy_p3,men_p3_share,  l1_diff, l2_diff, l1_ratio, l2_ratio, theta2, th
 
     %calculate length of mental vector 3
     h               =       norm(men_p2);
+
+    %regression to mean in distance
+    l3_prime = m3*h+mean_distance*(1-m3); 
+
     %calculate turn angle of mental vector 3
     vec1            =       men_p2-men_p1; 
     vec2            =       [0,0]-men_p2;
@@ -628,12 +705,12 @@ function [phy_p3,men_p3_share,  l1_diff, l2_diff, l1_ratio, l2_ratio, theta2, th
     theta3_prime    =       sign_alpha*theta3_prime;
         
     
-    x3 = h*cos(theta2_prime)*cos(theta3_prime) - h*sin(theta2_prime)*sin(theta3_prime);
-    y3 = h*cos(theta2_prime)*sin(theta3_prime) + h*sin(theta2_prime)*cos(theta3_prime);
+    x3 = l3_prime*cos(theta2_prime)*cos(theta3_prime) - l3_prime*sin(theta2_prime)*sin(theta3_prime);
+    y3 = l3_prime*cos(theta2_prime)*sin(theta3_prime) + l3_prime*sin(theta2_prime)*cos(theta3_prime);
     men_p3          =       [men_p2(1)+x3, men_p2(2)+y3];
     
-    x3_share = h*cos(theta2)*cos(theta3_prime) - h*sin(theta2)*sin(theta3_prime);
-    y3_share = h*cos(theta2)*sin(theta3_prime) + h*sin(theta2)*cos(theta3_prime);
+    x3_share = l3_prime*cos(theta2)*cos(theta3_prime) - l3_prime*sin(theta2)*sin(theta3_prime);
+    y3_share = l3_prime*cos(theta2)*sin(theta3_prime) + l3_prime*sin(theta2)*cos(theta3_prime);
     men_p3_share    =       [X(3,1)+x3_share, X(3,2)+y3_share];
 
     %calculate normalized distance difference

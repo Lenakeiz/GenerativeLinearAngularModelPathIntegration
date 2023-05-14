@@ -14,8 +14,13 @@ GLAMPI_PrepareBaseConfig;
 GLAMPI_PreprocessData;
 
 % Model fitting
-config.ModelName        =   "beta1_beta2_g2_g3_sigma_nu";
-config.ParamName        =   ["beta1", "beta2", "g2", "g3", "sigma", "nu"];
+% config.ModelName        =   "beta1_beta2_g2_g3_sigma_nu";
+% config.ParamName        =   ["beta1", "beta2", "g2", "g3", "sigma", "nu"];
+% config.ParamName        =   ["beta1", "beta2", "g2", "g3", "sigma", "nu"];
+
+config.ModelName        =   "beta1_beta2_g2_g3_m3_sigma_nu";
+config.ParamName        =   ["beta1", "beta2", "g2", "g3", "m3", "sigma", "nu"];
+
 config.NumParams        =   length(config.ParamName);
 
 GLAMPI;
@@ -41,7 +46,7 @@ BoxPlotOfBeta1Beta2(AllHealthyOldParams, config, "Elderly");
 
 % Final cleanup to leave workspace as the end of the Preprocessing stage.
 % Remove if you want to take a look at the output data.
-clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
+% clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
 
 %% ---------------------------------------------------------------------
 function BoxPlotOfBeta1Beta2(AllParams, config, name)

@@ -14,8 +14,6 @@ GLAMPI_PrepareBaseConfig;
 GLAMPI_PreprocessData;
 
 % Model fitting
-% config.ModelName        =   "beta_k_g2_g3_sigma_nu";
-% config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
 
 config.ModelName        =   "beta_k_g2_g3_m3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "g3", "m3", "sigma", "nu"];
@@ -41,8 +39,9 @@ AllMCINegParams     =   MCINeg.Results.estimatedParams;
 % TwowayAnova Analysis
 [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_MCIPosMCINeg(AllMCIPosParams, AllMCINegParams, config);
 
-% Plot results
-BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, config);
+%% Plot results
+BoxPlotOfFittedParam_conditionfirst(AllMCIPosParams, AllMCINegParams, anova_tab, config);
+BoxPlotOfFittedParam_groupfirst(AllMCIPosParams, AllMCINegParams, anova_tab, config);
 BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, multicomp_tab1, config)
 
 % Final cleanup to leave workspace as the end of the Preprocessing stage.
@@ -50,7 +49,7 @@ BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, multicomp_t
 % clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk anova_tab multicomp_tab1 multicomp_tab2 multicomp_tab12
 
 %% ---------------------------------------------------------------------
-function BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, config)
+function BoxPlotOfFittedParam_conditionfirst(AllMCIPosParams, AllMCINegParams, anova_tab, config)
     
     numConds = 3; % environmental conditions
     ParamName = config.ParamName;
@@ -216,8 +215,182 @@ function BoxPlotOfFittedParam(AllMCIPosParams, AllMCINegParams, anova_tab, confi
               ['    Interaction P = ',sprintf('%.2g',interaction_pvalue)]))
 
         %% Export figure
-        exportgraphics(f,config.ResultFolder+"/Box_"+ParamName(ParamIndx)+".png",'Resolution',300);
-        exportgraphics(f,config.ResultFolder+"/Box_"+ParamName(ParamIndx)+".pdf",'Resolution',300, 'ContentType','vector');
+        exportgraphics(f,config.ResultFolder+"/Box_"+ParamName(ParamIndx)+"_conditionfirst.png",'Resolution',300);
+        exportgraphics(f,config.ResultFolder+"/Box_"+ParamName(ParamIndx)+"_conditionfirst.pdf",'Resolution',300, 'ContentType','vector');
+
+    end
+end
+
+%% ---------------------------------------------------------------------
+function BoxPlotOfFittedParam_groupfirst(AllMCIPosParams, AllMCINegParams, anova_tab, config)
+    
+    numConds = 3; % environmental conditions
+    ParamName = config.ParamName;
+    for ParamIndx=1:length(ParamName)
+
+        MCIPosParamAllConds = []; 
+        MCINegParamAllConds = [];
+        for TRIAL_FILTER=1:numConds
+            %% extract data for each condition
+            MCIPosParam = AllMCIPosParams{TRIAL_FILTER}(:,ParamIndx);
+            MCIPosParamAllConds = [MCIPosParamAllConds,MCIPosParam];
+
+            MCINegParam = AllMCINegParams{TRIAL_FILTER}(:,ParamIndx);
+            MCINegParamAllConds = [MCINegParamAllConds,MCINegParam];
+        end
+
+        % remove Nan rows (because of 1) removing participants with short walking length; 2) not enough trials for parameter estimation)
+        nonNAN_MCIPosParamAllConds = removeNanRows(MCIPosParamAllConds);
+        nonNAN_MCINegParamAllConds = removeNanRows(MCINegParamAllConds);
+    
+        f = figure('visible','off','Position', [100 100 1000 500]);
+
+        set(0,'DefaultAxesFontName','Arial')
+        set(0,'DefaultTextFontName','Arial')
+        set(0,'DefaultAxesFontSize',12)
+        set(0,'DefaultTextFontSize',12)     
+
+        colorForMCIPos = config.color_scheme_npg(6,:);
+        colorForMCINeg = config.color_scheme_npg(3,:);
+
+        % parameters set for controlling visual output
+        whisker_value               =   1.5;
+        box_lineWidth               =   0.3;
+        box_widths_value            =   0.2;
+        box_color_transparency      =   0.5;   
+        %center of box (three conditions)
+        shift_value                 =   0.2;        
+        %box shift from center
+        median_lineWidth            =   2;
+        median_color                =   'k';
+        scatter_jitter_value        =   0.1;
+        scatter_markerSize          =   30;
+        scatter_marker_edgeColor    =   'k';
+        scatter_marker_edgeWidth    =   0.5;
+        scatter_color_transparency  =   0.7;     
+
+        %% Boxplot for each column in MCI positive
+        bp1 = boxplot(MCIPosParamAllConds, ...
+                    'Whisker',whisker_value, ...
+                    'symbol','', ...
+                    'Color','k', ...
+                    'Notch','on', ...
+                    'widths',box_widths_value,...
+                    'positions', [0.8,1.0,1.2]);
+        set(bp1,'linewidth',box_lineWidth);
+
+        hold on
+        
+        %% Boxplot for each column in MCI negative
+        bp2 = boxplot(MCINegParamAllConds, ...
+                    'Whisker',whisker_value, ...
+                    'symbol','', ...
+                    'Color','k', ...
+                    'Notch','on', ...
+                    'widths',box_widths_value,...
+                    'positions', [1.8,2.0,2.2]);
+        set(bp2,'linewidth',box_lineWidth);
+
+        %% Boxplot visual changes
+        h = findobj(gca,'Tag','Box'); 
+        for i = 1:length(h)
+            if i<4  %get the MCINeg box
+                patch(get(h(i),'XData'),get(h(i),'YData'),colorForMCINeg,'FaceAlpha',box_color_transparency);
+            else %get the MCIPos box
+                patch(get(h(i),'XData'),get(h(i),'YData'),colorForMCIPos,'FaceAlpha',box_color_transparency);
+            end
+        end
+
+        %% Median visual changes
+        h=findobj(gca,'tag','Median');
+        for i = 1:length(h)
+            h(i).LineWidth = median_lineWidth;
+            h(i).Color = median_color;
+        end
+
+        %% Scatter plot for data and mean (MCI positive)
+        num_points = size(MCIPosParamAllConds,1);
+        xaxis = [0.8,1.0,1.2];
+        for i=1:size(MCIPosParamAllConds,2)
+            hold on
+            x = xaxis(i)*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
+            scatter(x, MCIPosParamAllConds(:,i), scatter_markerSize, ...
+                    'filled','MarkerEdgeColor',scatter_marker_edgeColor, ...
+                    'MarkerFaceColor',colorForMCIPos, ...
+                    'MarkerFaceAlpha',scatter_color_transparency,...
+                    'LineWidth',scatter_marker_edgeWidth); 
+            hold on
+            %add errorbar
+            mean_MCIPos = mean(nonNAN_MCIPosParamAllConds(:,i));
+            sem_MCIPos = std(nonNAN_MCIPosParamAllConds(:,i))./sqrt(length(nonNAN_MCIPosParamAllConds(:,i)));
+            errorbar(xaxis(i),mean_MCIPos,sem_MCIPos,'k','LineStyle','None', 'LineWidth', 2,  'CapSize', 14);    
+            hold on
+            %add mean point
+            scatter(xaxis(i), mean_MCIPos, 4*scatter_markerSize, 'd',...
+                    'filled','MarkerEdgeColor','k', ...
+                    'MarkerFaceColor','w', ...
+                    'LineWidth',scatter_marker_edgeWidth);
+        end
+
+        %% Scatter plot for data and mean (MCI negative)
+        num_points = size(MCINegParamAllConds,1);
+        xaxis = [1.8,2.0,2.2];
+        for i=1:size(MCINegParamAllConds,2)
+            hold on
+            x = xaxis(i)*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
+            scatter(x, MCINegParamAllConds(:,i), scatter_markerSize, ...
+                    'filled','MarkerEdgeColor',scatter_marker_edgeColor, ...
+                    'MarkerFaceColor',colorForMCINeg, ...
+                    'MarkerFaceAlpha',scatter_color_transparency,...
+                    'LineWidth',scatter_marker_edgeWidth); 
+            hold on
+            %add errorbar
+            mean_MCI = mean(nonNAN_MCINegParamAllConds(:,i));
+            sem_MCI = std(nonNAN_MCINegParamAllConds(:,i))./sqrt(length(nonNAN_MCINegParamAllConds(:,i)));
+            errorbar(xaxis(i),mean_MCI,sem_MCI,'k','LineStyle','None', 'LineWidth', 2,  'CapSize', 14); 
+            hold on
+            %add mean point
+            scatter(xaxis(i), mean_MCI, 4*scatter_markerSize, 'd',...
+                    'filled','MarkerEdgeColor','k', ...
+                    'MarkerFaceColor','w', ...
+                    'LineWidth',scatter_marker_edgeWidth);
+        end
+
+        %% Figure post-processing
+        % calculate the Y limits
+        alldata = [MCIPosParamAllConds;MCINegParamAllConds];
+        maxdata = max(alldata,[],'all');
+        mindata = min(alldata, [], 'all');
+        lowupYlim = [mindata-.1*(maxdata-mindata)-eps, maxdata+.1*(maxdata-mindata)+eps]; 
+
+        set(gca, ...
+            'Box'         , 'off'     , ...
+            'TickDir'     , 'out'     , ...
+            'TickLength'  , [.01 .01] , ...
+            'XColor'      , [.0 .0 .0], ...
+            'YColor'      , [.0 .0 .0], ...
+            'XTick'       , (1:3),... 
+            'XLim'        , [0.5, 2.5],...
+            'YLim'        , lowupYlim,...   
+            'XTickLabel'  , {'MCI+','MCI-'},...
+            'LineWidth'   , 1.0        );
+        ylabel(ParamName(ParamIndx));
+        allpatches = findall(gca,'type','Patch');
+        legend(allpatches(1:3:end), {'MCIPos' 'MCINeg'}, 'Location','northeast', 'NumColumns',2);
+
+        %extract pvalue for group, conditino and interaction
+        anova_result = anova_tab{ParamIndx};
+        group_pvalue = anova_result{2,7};
+        condition_pvalue = anova_result{3,7};
+        interaction_pvalue = anova_result{4,7};
+
+        title(strcat(['Group P = ',sprintf('%.2g',group_pvalue)],...
+              ['    Condition P = ',sprintf('%.2g',condition_pvalue)],...
+              ['    Interaction P = ',sprintf('%.2g',interaction_pvalue)]))
+
+        %% Export figure
+        exportgraphics(f,config.ResultFolder+"/Box_"+ParamName(ParamIndx)+"_groupfirst.png",'Resolution',300);
+        exportgraphics(f,config.ResultFolder+"/Box_"+ParamName(ParamIndx)+"_groupfirst.pdf",'Resolution',300, 'ContentType','vector');
 
     end
 end

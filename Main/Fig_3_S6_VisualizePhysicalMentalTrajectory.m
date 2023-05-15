@@ -15,9 +15,6 @@ GLAMPI_PrepareBaseConfig;
 GLAMPI_PreprocessData;
 
 % Model fitting
-% config.ModelName        =   "beta_k_g2_g3_sigma_nu";
-% config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
-
 config.ModelName        =   "beta_k_g2_g3_m3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "g3", "m3", "sigma", "nu"];
 
@@ -44,8 +41,8 @@ AllMCIUnkResults        =   MCIUnk.Results;
 %% Starting visualization
 % Can select a different groups by selecting different names (creates Fig S6, S7)
 %name = "Young";
-%name = "HealthyOld";
-name = "MCIMerged";
+name = "HealthyOld";
+%name = "MCIMerged";
 
 %% Visualizing trials (Healthy elderly only)
 id = 13; % participant Id
@@ -121,7 +118,7 @@ set(gca, ...
 exportgraphics(f,config.ResultFolder+"/"+name+".png",'Resolution',300);
 exportgraphics(f,config.ResultFolder+"/"+name+".pdf",'Resolution',300, 'ContentType','vector');
 
-%% Plotting regression to the mean
+%% Plotting regression to the mean distribution (not presented on the paper)
 f = figure('visible','off','Position', [100 100 500 500]);
 
 set(0,'DefaultAxesFontName','Arial')
@@ -224,15 +221,20 @@ set(gca, ...
 'XColor'      , [.1 .1 .1]  , ...
 'YColor'      , [.1 .1 .1]  , ...
 'XLim'        , [0.5, 2.5] ,...
-'YLim'        , [0,1.5],...
+'YLim'        , [0,2.0],...
 'XTick'       , [1,2]    ,...
-'YTick'       , [0,0.5,1.0,1.5] ,...
+'YTick'       , [0,0.5,1.0,1.5,2.0] ,...
 'XTickLabel'   , {'Leg 1', 'Leg 2'},...
 'LineWidth'   , .5          ,...
 'XAxisLocation', 'origin'   ,...
 'YAxisLocation', 'origin');
 
 ylabel("Encoded distance / actual distance");
+
+xL=xlim;
+yL=ylim;
+
+text(1.05*xL(1),1.05*yL(2),"t("+num2str(stats.df)+")="+num2str(round(stats.tstat,2))+", p="+num2str(round(p,3)), 'FontSize', 15)
 
 exportgraphics(f,config.ResultFolder+"/"+name+"_legratio.png",'Resolution',300);
 exportgraphics(f,config.ResultFolder+"/"+name+"_legratio.pdf",'Resolution',300, 'ContentType','vector');
@@ -411,7 +413,16 @@ exportgraphics(f,config.ResultFolder+"/"+name+"_rgmean_m3.pdf",'Resolution',300,
 
 
 %% Plotting the distribution of the single parameters (Fig. S7) 
+%Parameters = AllYoungResults.estimatedParams;
+
 Parameters = AllHealthyOldResults.estimatedParams;
+
+% AllMCIPosParams     =   MCIPos.Results.estimatedParams;
+% AllMCINegParams     =   MCINeg.Results.estimatedParams;
+% AllMCIUnkParams     =   MCIUnk.Results.estimatedParams;
+% [Parameters, AllMCIParamsStatusIndex]= MergeMCI(AllMCIPosParams, AllMCINegParams, AllMCIUnkParams);
+
+
 ParamName = config.ParamName;
 for ParamIndx=1:length(ParamName)
 
@@ -639,8 +650,8 @@ function [phy_p3, men_p3, l1_diff, l2_diff, l1_ratio, l2_ratio, theta2, theta2_p
     if isnan(beta)
         error("beta cannot be nan for this plot!")
     else
-        if beta<-0.03
-            beta=-0.03; %this is just for visualization, several betas (1 or 2) are smaller than this threshold 
+        if beta<-0.2
+            beta=-0.2; %this is just for visualization, several betas (1 or 2) are smaller than this threshold 
                         % so the l1_ratio will be a large positive number,
                         % which is bad for visualization. This won'r change
                         % the statitistics, don't worry

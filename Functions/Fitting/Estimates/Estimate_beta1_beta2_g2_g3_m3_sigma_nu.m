@@ -25,16 +25,16 @@ flagOoB         =   Input.flagOoB;
 sampleSize          =   size(DX,2);
 negloglikelihood    =   0;
 
-%% find the correct mean return angle based on all trials 
+%% find the correct mean return angle/distance based on all trials 
 Alphas = zeros(sampleSize,1);
 ActualAlphas = zeros(sampleSize,1);
 Betas = zeros(sampleSize,1);
+ActualBetas = zeros(sampleSize,1);
 for tr = 1:sampleSize
     %extract the physical data info
     l1      = DX{tr}(1);
     l2      = DX{tr}(2);
     theta2  = THETAX{tr}(2);
-    Betas(tr) = theta2;
 
     %calculate the correct return angle
     phy_p1  = [l1,0];
@@ -44,11 +44,20 @@ for tr = 1:sampleSize
     alpha   = deg2rad(alpha);%transfer from degree to radians
     alpha   = mod(alpha, 2*pi);  %wrap to (0,2pi)  
     Alphas(tr) = alpha;
-    
+
     %calculate the actuall return angle
     ActualAlphas(tr) = THETAX{tr}(3);
+
+    beta_1    = norm(phy_p2);
+    
+    Betas(tr) = beta_1;
+    ActualBetas(tr) = DX{tr}(3); 
 end
+%mean_angle = mean(Alphas);
 mean_angle = mean(ActualAlphas);
+%mean_distance = mean(Betas);
+%mean_distance = mean(ActualBetas);
+mean_distance = mean(ActualBetas(flagOoB==0)); %using data from only the non-oob trials...
 
 for tr = 1:sampleSize
     %% extract the physical data info

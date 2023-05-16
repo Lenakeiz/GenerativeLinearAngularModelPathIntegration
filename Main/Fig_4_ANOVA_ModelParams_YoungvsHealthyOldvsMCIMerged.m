@@ -14,8 +14,6 @@ GLAMPI_PrepareBaseConfig;
 GLAMPI_PreprocessData;
 
 % Model fitting
-% config.ModelName        =   "beta_k_g2_g3_sigma_nu";
-% config.ParamName        =   ["beta", "k", "g2", "g3", "sigma", "nu"];
 
 config.ModelName        =   "beta_k_g2_g3_m3_sigma_nu";
 config.ParamName        =   ["beta", "k", "g2", "g3", "m3", "sigma", "nu"];
@@ -51,7 +49,7 @@ BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCIPa
 
 % Final cleanup to leave workspace as the end of the Preprocessing stage.
 % Remove if you want to take a look at the output data.
-clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk anova_tab multicomp_tab1 multicomp_tab2 multicomp_tab12
+% clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk anova_tab multicomp_tab1 multicomp_tab2 multicomp_tab12
 
 %% ---------------------------------------------------------------------
 function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams, anova_tab, config)

@@ -14,8 +14,13 @@ GLAMPI_PrepareBaseConfig;
 GLAMPI_PreprocessData;
 
 % Model fitting
-config.ModelName        =   "beta1_beta2_g2_g3_sigma_nu";
-config.ParamName        =   ["beta1", "beta2", "g2", "g3", "sigma", "nu"];
+% config.ModelName        =   "beta1_beta2_g2_g3_sigma_nu";
+% config.ParamName        =   ["beta1", "beta2", "g2", "g3", "sigma", "nu"];
+% config.ParamName        =   ["beta1", "beta2", "g2", "g3", "sigma", "nu"];
+
+config.ModelName        =   "beta1_beta2_g2_g3_m3_sigma_nu";
+config.ParamName        =   ["beta1", "beta2", "g2", "g3", "m3", "sigma", "nu"];
+
 config.NumParams        =   length(config.ParamName);
 
 GLAMPI;
@@ -36,12 +41,14 @@ AllMCIPosParams     =   MCIPos.Results.estimatedParams;
 AllMCINegParams     =   MCINeg.Results.estimatedParams;
 AllMCIUnkParams     =   MCIUnk.Results.estimatedParams;
 
-% BarScatter Plot for HealthyOld 
+%% BarScatter Plot for HealthyOld 
+%BoxPlotOfBeta1Beta2(AllYoungParams, config, "Young");
+%BoxPlotOfBeta1Beta2(AllMCIPosParams, config, "MCIPos");
 BoxPlotOfBeta1Beta2(AllHealthyOldParams, config, "Elderly");
 
 % Final cleanup to leave workspace as the end of the Preprocessing stage.
 % Remove if you want to take a look at the output data.
-clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
+% clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
 
 %% ---------------------------------------------------------------------
 function BoxPlotOfBeta1Beta2(AllParams, config, name)
@@ -74,7 +81,7 @@ function BoxPlotOfBeta1Beta2(AllParams, config, name)
     Beta2 = mean(ParamAllConds, 2);
 
     % Calculating difference between groups
-    [h,pValue, stats] = ttest(Beta1, Beta2, "Tail", "left")
+    [h,pValue,ci, stat] = ttest(Beta1, Beta2, "Tail", "left")
 
     f = figure('visible','off','Position', [100 100, 400, 600]);
 
@@ -145,7 +152,12 @@ function BoxPlotOfBeta1Beta2(AllParams, config, name)
 
     yline(1,Color='r',LineStyle='--',LineWidth=2);
 
+    xL=xlim;
+    yL=ylim;
+
+    text(1.05*xL(1),1.05*yL(2),"t("+num2str(stat.df)+")="+num2str(round(stat.tstat,2))+", p="+num2str(pValue), 'FontSize', 15)
+
     %% Export figure
-    exportgraphics(f,config.ResultFolder+"/MergeCondsBox_beta1beta2.png",'Resolution',300);
-    exportgraphics(f,config.ResultFolder+"/MergeCondsBox_beta1beta2.pdf",'Resolution',300, 'ContentType','vector');
+    exportgraphics(f,config.ResultFolder+"/MergeCondsBox_beta1beta2_"+name+"_.png",'Resolution',300);
+    exportgraphics(f,config.ResultFolder+"/MergeCondsBox_beta1beta2_"+name+"_.pdf",'Resolution',300, 'ContentType','vector');
 end

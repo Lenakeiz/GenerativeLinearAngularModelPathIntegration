@@ -1,4 +1,4 @@
-function [negloglikelihood] = Estimate_beta1_beta2_g2_g3_sigma_nu(beta1, beta2, g2, g3, sigma, nu, Input, config)
+function [negloglikelihood] = Estimate_beta1_beta2_g2_g3_m3_sigma_nu(beta1, beta2, g2, g3, m3, sigma, nu, Input, config)
 % Zilong Ji, UCL, 2022, zilong.ji@ucl.ac.uk
 % Find the likelihood with parameters specified in the model function name
 % Args (in common between all estimates functions):
@@ -96,7 +96,7 @@ for tr = 1:sampleSize
     neg_ll_angle = 1/2*log(2*pi) + log(nu) + (angluar_diff^2)/(2*nu^2); %Gaussian distribution
 
     %distance noise difference
-    l3_prime    = h;
+    l3_prime    = m3*h+mean_distance*(1-m3);    %regress to mean correct return distance
     dist_diff   = l3-l3_prime;
 
     %     %the negative loglikelihood of distance on non-OoB trials

@@ -39,11 +39,12 @@ end
 % TwowayAnova Analysis
 [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_ModelParams_AllGroups(YoungParams, HealthyParams, MCIUnkParams, MCINegParams, MCIPosParams, config);
 
+%%
 BoxPlotOfFittedParamMergeCondition(YoungParams, HealthyParams, MCIUnkParams, MCINegParams, MCIPosParams,multicomp_tab1, config)
 
 % Final cleanup to leave workspace as the end of the Preprocessing stage.
 % Remove if you want to take a look at the output data.
-clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk anova_tab multicomp_tab1 multicomp_tab2 multicomp_tab12
+% clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk anova_tab multicomp_tab1 multicomp_tab2 multicomp_tab12
 
 %% ---------------------------------------------------------------------
 function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCIUnkParams, AllMCINegParams, AllMCIPosParams, multicomp_tab1, config)
@@ -89,7 +90,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         MCINegParamMean        = mean(MCINegParamAllConds, 2);
         MCIPosParamMean        = mean(MCIPosParamAllConds, 2);
     
-        f = figure('visible','on','Position', [100 100 360 360]);
+        f = figure('visible','on','Position', [100 100 400 300]);
 
         set(0,'DefaultAxesFontName','Arial')
         set(0,'DefaultTextFontName','Arial')
@@ -113,7 +114,8 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         scatter_markerSize          =   50;
         scatter_marker_edgeColor    =   'k';
         scatter_marker_edgeWidth    =   0.5;
-        scatter_color_transparency  =   0.7; %faceAlpha        
+        scatter_color_transparency  =   0.7; %faceAlpha
+        mean_scatter_multiplier     =   1.5;
 
         hold on
         %% Boxplot for each column in Young
@@ -210,7 +212,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         errorbar(1,mean_Young,sem_Young,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 18); 
         hold on
         %add mean point
-        scatter(1, mean_Young, 3*scatter_markerSize, 'd',...
+        scatter(1, mean_Young, mean_scatter_multiplier*scatter_markerSize, 'd',...
                 'filled','MarkerEdgeColor','k', ...
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);    
@@ -233,7 +235,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         errorbar(2,mean_Hold,sem_Hold,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 18);    
         hold on
         %add mean point
-        scatter(2, mean_Hold, 3*scatter_markerSize, 'd',...
+        scatter(2, mean_Hold, mean_scatter_multiplier*scatter_markerSize, 'd',...
                 'filled','MarkerEdgeColor','k', ...
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);    
@@ -256,7 +258,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         errorbar(3,mean_MCI,sem_MCI,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 18); 
         hold on
         %add mean point
-        scatter(3, mean_MCI, 3*scatter_markerSize, 'd',...
+        scatter(3, mean_MCI, mean_scatter_multiplier*scatter_markerSize, 'd',...
                 'filled','MarkerEdgeColor','k', ...
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);     
@@ -279,7 +281,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         errorbar(4,mean_MCI,sem_MCI,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 18); 
         hold on
         %add mean point
-        scatter(4, mean_MCI, 3*scatter_markerSize, 'd',...
+        scatter(4, mean_MCI, mean_scatter_multiplier*scatter_markerSize, 'd',...
                 'filled','MarkerEdgeColor','k', ...
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);     
@@ -302,7 +304,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         errorbar(5,mean_MCI,sem_MCI,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 18); 
         hold on
         %add mean point
-        scatter(5, mean_MCI, 3*scatter_markerSize, 'd',...
+        scatter(5, mean_MCI, mean_scatter_multiplier*scatter_markerSize, 'd',...
                 'filled','MarkerEdgeColor','k', ...
                 'MarkerFaceColor','w', ...
                 'LineWidth',scatter_marker_edgeWidth);     

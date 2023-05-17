@@ -45,6 +45,7 @@ AllMCIUnkParams     =   MCIUnk.Results.estimatedParams;
 
 % Plot results
 BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams, anova_tab, config);
+%%
 BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCIParams, AllMCIParamsStatusIndex, multicomp_tab1, config)
 
 % Final cleanup to leave workspace as the end of the Preprocessing stage.

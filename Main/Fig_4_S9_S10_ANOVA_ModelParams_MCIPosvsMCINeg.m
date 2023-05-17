@@ -23,7 +23,7 @@ config.NumParams        =   length(config.ParamName);
 GLAMPI;
 
 %% Preparing the output
-config.ResultFolder     =   pwd + "/Output/Fig4/"+config.ModelName+"/MCIPosvsMCINeg";
+config.ResultFolder     =   pwd + "/Output/FigS8_S9/"+config.ModelName+"/MCIPosvsMCINeg";
 
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
@@ -41,7 +41,9 @@ AllMCINegParams     =   MCINeg.Results.estimatedParams;
 
 %% Plot results
 BoxPlotOfFittedParam_conditionfirst(AllMCIPosParams, AllMCINegParams, anova_tab, config);
+%%
 BoxPlotOfFittedParam_groupfirst(AllMCIPosParams, AllMCINegParams, anova_tab, config);
+%%
 BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, multicomp_tab1, config)
 
 % Final cleanup to leave workspace as the end of the Preprocessing stage.
@@ -267,7 +269,9 @@ function BoxPlotOfFittedParam_groupfirst(AllMCIPosParams, AllMCINegParams, anova
         scatter_markerSize          =   30;
         scatter_marker_edgeColor    =   'k';
         scatter_marker_edgeWidth    =   0.5;
-        scatter_color_transparency  =   0.7;     
+        scatter_color_transparency  =   0.7;
+
+        condition_axis_position = [0.75, 1.0, 1.25];
 
         %% Boxplot for each column in MCI positive
         bp1 = boxplot(MCIPosParamAllConds, ...
@@ -276,7 +280,7 @@ function BoxPlotOfFittedParam_groupfirst(AllMCIPosParams, AllMCINegParams, anova
                     'Color','k', ...
                     'Notch','on', ...
                     'widths',box_widths_value,...
-                    'positions', [0.8,1.0,1.2]);
+                    'positions', condition_axis_position);
         set(bp1,'linewidth',box_lineWidth);
 
         hold on
@@ -288,7 +292,7 @@ function BoxPlotOfFittedParam_groupfirst(AllMCIPosParams, AllMCINegParams, anova
                     'Color','k', ...
                     'Notch','on', ...
                     'widths',box_widths_value,...
-                    'positions', [1.8,2.0,2.2]);
+                    'positions',1 + condition_axis_position);
         set(bp2,'linewidth',box_lineWidth);
 
         %% Boxplot visual changes
@@ -310,7 +314,7 @@ function BoxPlotOfFittedParam_groupfirst(AllMCIPosParams, AllMCINegParams, anova
 
         %% Scatter plot for data and mean (MCI positive)
         num_points = size(MCIPosParamAllConds,1);
-        xaxis = [0.8,1.0,1.2];
+        xaxis = condition_axis_position;
         for i=1:size(MCIPosParamAllConds,2)
             hold on
             x = xaxis(i)*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
@@ -334,7 +338,7 @@ function BoxPlotOfFittedParam_groupfirst(AllMCIPosParams, AllMCINegParams, anova
 
         %% Scatter plot for data and mean (MCI negative)
         num_points = size(MCINegParamAllConds,1);
-        xaxis = [1.8,2.0,2.2];
+        xaxis = 1.0 + condition_axis_position;
         for i=1:size(MCINegParamAllConds,2)
             hold on
             x = xaxis(i)*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x

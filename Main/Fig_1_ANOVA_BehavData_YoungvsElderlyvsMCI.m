@@ -36,29 +36,28 @@ end
 [MCINegPropDist, MCINegPropAng]                   = getProportionalLinearAndAngularError(MCINeg);
 [MCIPosPropDist, MCIPosPropAng]                   = getProportionalLinearAndAngularError(MCIPos);
 
+% MergeMCI
+MCIMergedPropDist = MergeMCI(MCIUnkPropDist, MCINegPropDist, MCIPosPropDist);
+MCIMergedPropAng  = MergeMCI(MCIUnkPropAng, MCINegPropAng, MCIPosPropAng);
 
 %% TwowayAnova Analysis
 config.type = "ProportionalDistance";
-[anova_tab_dist,multicomp_tab1_dist,multicomp_tab2_dist, multicomp_tab12_dist]     = TwowayAnova_Behavioural_AllGroups(YoungControlsPropDist, HealthyControlsPropDist, MCIPosPropDist, MCINegPropDist, MCIUnkPropDist, config);
+[anova_tab_dist,multicomp_tab1_dist,multicomp_tab2_dist, multicomp_tab12_dist]     = TwowayAnova_Behavioural_YoungvsElderlyvsMCI(YoungControlsPropDist, HealthyControlsPropDist, MCIMergedPropDist, config);
 
 % TwowayAnova Analysis
 config.type = "ProportionalAngle";
-[anova_tab_angle,multicomp_tab1_angle,multicomp_tab2_angle, multicomp_tab12_angle] = TwowayAnova_Behavioural_AllGroups(YoungControlsPropAng, HealthyControlsPropAng, MCIPosPropAng, MCINegPropAng, MCIUnkPropAng, config);
+[anova_tab_angle,multicomp_tab1_angle,multicomp_tab2_angle, multicomp_tab12_angle] = TwowayAnova_Behavioural_YoungvsElderlyvsMCI(YoungControlsPropAng, HealthyControlsPropAng, MCIMergedPropAng, config);
 
 % Display means and std for each group
 disp("%%%%%%%%% Proportional Distance Error %%%%%%%%%");
 disp(["Young : " num2str(mean(mean(YoungControlsPropDist,1,"omitnan"),"omitnan")) " +- " std(mean(YoungControlsPropDist,1,"omitnan"),"omitnan")]);
 disp(["Elderly : " num2str(mean(mean(HealthyControlsPropDist,1,"omitnan"),"omitnan")) " +- " std(mean(HealthyControlsPropDist,1,"omitnan"),"omitnan")]);
-disp(["MCINeg : " num2str(mean(mean(MCIUnkPropDist,1,"omitnan"),"omitnan")) " +- " std(mean(MCIUnkPropDist,1,"omitnan"),"omitnan")]);
-disp(["MCIUnk : " num2str(mean(mean(MCINegPropDist,1,"omitnan"),"omitnan")) " +- " std(mean(MCINegPropDist,1,"omitnan"),"omitnan")]);
-disp(["MCIPos : " num2str(mean(mean(MCIPosPropDist,1,"omitnan"),"omitnan")) " +- " std(mean(MCIPosPropDist,1,"omitnan"),"omitnan")]);
+disp(["MCIMerged : " num2str(mean(mean(MCIMergedPropDist,1,"omitnan"),"omitnan")) " +- " std(mean(MCIMergedPropDist,1,"omitnan"),"omitnan")]);
 
 disp("%%%%%%%%% Proportional Angular Error %%%%%%%%%");
 disp(["Young : " num2str(mean(mean(YoungControlsPropAng,1,"omitnan"),"omitnan")) " +- " std(mean(YoungControlsPropAng,1,"omitnan"),"omitnan")]);
 disp(["Elderly : " num2str(mean(mean(HealthyControlsPropAng,1,"omitnan"),"omitnan")) " +- " std(mean(HealthyControlsPropAng,1,"omitnan"),"omitnan")]);
-disp(["MCINeg : " num2str(mean(mean(MCIUnkPropAng,1,"omitnan"),"omitnan")) " +- " std(mean(MCIUnkPropAng,1,"omitnan"),"omitnan")]);
-disp(["MCIUnk : " num2str(mean(mean(MCINegPropAng,1,"omitnan"),"omitnan")) " +- " std(mean(MCINegPropAng,1,"omitnan"),"omitnan")]);
-disp(["MCIPos : " num2str(mean(mean(MCIPosPropAng,1,"omitnan"),"omitnan")) " +- " std(mean(MCIPosPropAng,1,"omitnan"),"omitnan")]);
+disp(["MCIMerged : " num2str(mean(mean(MCIMergedPropAng,1,"omitnan"),"omitnan")) " +- " std(mean(MCIMergedPropAng,1,"omitnan"),"omitnan")]);
 
 % Proportional Distance Error
 plotInfo.defaultTextSize = 20;
@@ -131,6 +130,37 @@ plotMergedBarScatter(mean(YoungControlsPropAng,1,'omitnan'), mean(HealthyControl
 % Remove if you want to take a look at the output data.
 clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk anova_tab_angle anova_tab_dist multicomp_tab1_dist multicomp_tab2_dist multicomp_tab12_dist multicomp_tab1_angle multicomp_tab2_angle multicomp_tab12_angle
 
+%% ---------------------------------------------------------------------
+function BoxPlotOfFittedParamMergeCondition(YoungData, HealthyData, MCIData, multicomp_tab1, config)
+
+numConds = 3; % environmental conditions
+
+YoungParamAllConds = [];
+HealthyOldParamAllConds = [];
+MCIUnkParamAllConds = [];
+MCINegParamAllConds = [];
+MCIPosParamAllConds = [];
+
+for TRIAL_FILTER=1:numConds
+    %% extract data
+    YoungParam          = AllYoungParams{TRIAL_FILTER}(:,ParamIndx);
+    YoungParamAllConds  = [YoungParamAllConds,YoungParam];
+
+    HealthyOldParam     = AllHealthyOldParams{TRIAL_FILTER}(:,ParamIndx);
+    HealthyOldParamAllConds = [HealthyOldParamAllConds,HealthyOldParam];
+
+    MCIUnkParams            = AllMCIUnkParams{TRIAL_FILTER}(:,ParamIndx);
+    MCIUnkParamAllConds    = [MCIUnkParamAllConds,MCIUnkParams];
+
+    MCINegParams            = AllMCINegParams{TRIAL_FILTER}(:,ParamIndx);
+    MCINegParamAllConds    = [MCINegParamAllConds,MCINegParams];
+
+    MCIPosParams            = AllMCIPosParams{TRIAL_FILTER}(:,ParamIndx);
+    MCIPosParamAllConds    = [MCIPosParamAllConds,MCIPosParams];
+end
+
+end
+
 %% --------------------------------------------------------------------- 
 function [PropDist, PropAng] = getProportionalLinearAndAngularError(Group)
 % Get the proportiona distance and angular error for all particpants.
@@ -158,7 +188,10 @@ function [PropDist, PropAng] = getProportionalLinearAndAngularError(Group)
     
     end    
 end
-
+%% --------------------------------------------------------------------- 
+function merged = MergeMCI(MCIUnkData, MCINegData, MCIPosData)
+    merged = [MCIUnkData MCINegData MCIPosData];
+end
 %% ---------------------------------------------------------------------
 function plotMergedBarScatter(YoungData, HealthyOldData, MCIPosData, MCINegData, MCIUnkData, ANOVA_tab, ANOVA_multcomp_group, config, plotInfo)
 % plot Bar scatter of data provided

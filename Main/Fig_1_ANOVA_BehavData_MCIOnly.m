@@ -24,40 +24,31 @@ GLAMPI;
 ColorPattern;
 
 %% Preparing output
-config.ResultFolder = pwd + "/Output/Fig1/YoungvsHealthyOldvsMCIMerged";
+config.ResultFolder = pwd + "/Output/Fig1/MCI_Only";
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
 end
 
 % Collecting information from output
-[YoungControlsPropDist, YoungControlsPropAng]     = getProportionalLinearAndAngularError(YoungControls);
-[HealthyControlsPropDist, HealthyControlsPropAng] = getProportionalLinearAndAngularError(HealthyControls);
-[MCIUnkPropDist, MCIUnkPropAng]                   = getProportionalLinearAndAngularError(MCIUnk);
 [MCINegPropDist, MCINegPropAng]                   = getProportionalLinearAndAngularError(MCINeg);
 [MCIPosPropDist, MCIPosPropAng]                   = getProportionalLinearAndAngularError(MCIPos);
 
-% MergeMCI
-MCIMergedPropDist = MergeMCI(MCIUnkPropDist, MCINegPropDist, MCIPosPropDist);
-MCIMergedPropAng  = MergeMCI(MCIUnkPropAng, MCINegPropAng, MCIPosPropAng);
-
 % TwowayAnova Analysis
 config.type = "ProportionalDistance";
-[anova_tab_dist,multicomp_tab1_dist,multicomp_tab2_dist, multicomp_tab12_dist]     = TwowayAnova_Behavioural_YoungvsElderlyvsMCI(YoungControlsPropDist, HealthyControlsPropDist, MCIMergedPropDist, config);
+[anova_tab_dist,multicomp_tab1_dist,multicomp_tab2_dist, multicomp_tab12_dist]     = TwowayAnova_Behavioural_MCIOnly(MCIPosPropDist, MCINegPropDist, config);
 
 % TwowayAnova Analysis
 config.type = "ProportionalAngle";
-[anova_tab_angle,multicomp_tab1_angle,multicomp_tab2_angle, multicomp_tab12_angle] = TwowayAnova_Behavioural_YoungvsElderlyvsMCI(YoungControlsPropAng, HealthyControlsPropAng, MCIMergedPropAng, config);
+[anova_tab_angle,multicomp_tab1_angle,multicomp_tab2_angle, multicomp_tab12_angle] = TwowayAnova_Behavioural_MCIOnly(MCIPosPropAng, MCINegPropAng, config);
 
 % Display means and std for each group
 disp("%%%%%%%%% Proportional Distance Error %%%%%%%%%");
-disp(["Young : " num2str(mean(mean(YoungControlsPropDist,1,"omitnan"),"omitnan")) " +- " std(mean(YoungControlsPropDist,1,"omitnan"),"omitnan")]);
-disp(["Elderly : " num2str(mean(mean(HealthyControlsPropDist,1,"omitnan"),"omitnan")) " +- " std(mean(HealthyControlsPropDist,1,"omitnan"),"omitnan")]);
-disp(["MCIMerged : " num2str(mean(mean(MCIMergedPropDist,1,"omitnan"),"omitnan")) " +- " std(mean(MCIMergedPropDist,1,"omitnan"),"omitnan")]);
+disp(["MCI Positive : " num2str(mean(mean(MCIPosPropDist,1,"omitnan"),"omitnan")) " +- " std(mean(MCIPosPropDist,1,"omitnan"),"omitnan")]);
+disp(["MCI Negative : " num2str(mean(mean(MCINegPropDist,1,"omitnan"),"omitnan")) " +- " std(mean(MCINegPropDist,1,"omitnan"),"omitnan")]);
 
 disp("%%%%%%%%% Proportional Angular Error %%%%%%%%%");
-disp(["Young : " num2str(mean(mean(YoungControlsPropAng,1,"omitnan"),"omitnan")) " +- " std(mean(YoungControlsPropAng,1,"omitnan"),"omitnan")]);
-disp(["Elderly : " num2str(mean(mean(HealthyControlsPropAng,1,"omitnan"),"omitnan")) " +- " std(mean(HealthyControlsPropAng,1,"omitnan"),"omitnan")]);
-disp(["MCIMerged : " num2str(mean(mean(MCIMergedPropAng,1,"omitnan"),"omitnan")) " +- " std(mean(MCIMergedPropAng,1,"omitnan"),"omitnan")]);
+disp(["MCI Positive : " num2str(mean(mean(MCIPosPropAng,1,"omitnan"),"omitnan")) " +- " std(mean(MCIPosPropAng,1,"omitnan"),"omitnan")]);
+disp(["MCI Negative : " num2str(mean(mean(MCINegPropAng,1,"omitnan"),"omitnan")) " +- " std(mean(MCINegPropAng,1,"omitnan"),"omitnan")]);
 
 % Proportional Distance Error
 plotInfo.defaultTextSize = 20;
@@ -77,7 +68,7 @@ plotInfo.YLabel = "Actual distance / correct distance";
 plotInfo.yLim = [0 1.75];
 plotInfo.ticksStep = 0.5;
 
-BoxPlotOfFittedParamMergeCondition(YoungControlsPropDist, HealthyControlsPropDist, MCIMergedPropDist, anova_tab_dist, multicomp_tab1_dist, config, plotInfo);
+BoxPlotOfFittedParamMergeCondition(MCIPosPropDist, MCINegPropDist, anova_tab_dist, multicomp_tab1_dist, config, plotInfo);
 
 % Proportional Angular Error
 plotInfo.defaultTextSize = 20;
@@ -92,18 +83,17 @@ plotInfo.type = "ProportionalAngle";
 plotInfo.YLabel = "Actual angle / correct angle";
 
 plotInfo.yLim = [0 2.5];
-BoxPlotOfFittedParamMergeCondition(YoungControlsPropAng, HealthyControlsPropAng, MCIMergedPropAng, anova_tab_angle, multicomp_tab1_angle, config, plotInfo);
+BoxPlotOfFittedParamMergeCondition(MCIPosPropAng, MCINegPropAng, anova_tab_angle, multicomp_tab1_dist, config, plotInfo);
 
 % Final cleanup to leave workspace as the end of the Preprocessing stage.
 % Remove if you want to take a look at the output data.
 % clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk anova_tab_angle anova_tab_dist multicomp_tab1_dist multicomp_tab2_dist multicomp_tab12_dist multicomp_tab1_angle multicomp_tab2_angle multicomp_tab12_angle
 
 %% ---------------------------------------------------------------------
-function BoxPlotOfFittedParamMergeCondition(YoungData, HealthyData, MCIData, ANOVA_tab, ANOVA_multcomp_group, config, plotInfo)
+function BoxPlotOfFittedParamMergeCondition(MCIPos, MCINeg, ANOVA_tab, ANOVA_multcomp_group, config, plotInfo)
 
-YoungParamMean      = mean(YoungData, 1, "omitnan")';
-HealthyOldParamMean = mean(HealthyData, 1, "omitnan")';
-MCIParamMean        = mean(MCIData, 1, "omitnan")';
+MCIPosMean = mean(MCIPos, 1, "omitnan")';
+MCINegMean = mean(MCINeg, 1, "omitnan")';
 
 f = figure('visible', plotInfo.visible,'Position', plotInfo.dimensions);
 
@@ -112,9 +102,8 @@ set(0,'DefaultTextFontName','Arial')
 set(0,'DefaultAxesFontSize',12)
 set(0,'DefaultTextFontSize',12)
 
-colorForYoung = config.color_scheme_npg(3,:);
-colorForElderly = config.color_scheme_npg(5,:);
-colorForMCI = config.color_scheme_npg(2,:);
+colorForMCIPos = config.color_scheme_npg(6,:);
+colorForMCINeg = config.color_scheme_npg(3,:);
 
 % parameters set for controlling visual output
 whisker_value               =   1.5;
@@ -131,8 +120,8 @@ scatter_color_transparency  =   plotInfo.scatterFaceAlpha; %faceAlpha
 mean_scatter_multiplier     =   2.0;
 
 hold on
-%% Boxplot for each column in Young
-bp1 = boxplot(YoungParamMean, ...
+%% Boxplot for each column in MCIPos
+bp1 = boxplot(MCIPosMean, ...
     'Whisker',whisker_value, ...
     'symbol','', ... %symbol ='' making outlier invisible
     'Color','k', ...
@@ -142,8 +131,8 @@ bp1 = boxplot(YoungParamMean, ...
 set(bp1,'linewidth',box_lineWidth);
 
 hold on
-%% Boxplot for each column in Healthy Elderly
-bp2 = boxplot(HealthyOldParamMean, ...
+%% Boxplot for each column in MCI Neg
+bp2 = boxplot(MCINegMean, ...
     'Whisker',whisker_value, ...
     'symbol','', ... %symbol ='' making outlier invisible
     'Color','k', ...
@@ -152,26 +141,13 @@ bp2 = boxplot(HealthyOldParamMean, ...
     'positions', 2);
 set(bp2,'linewidth',box_lineWidth);
 
-hold on
-%% Boxplot for each column in MCI negative
-bp3 = boxplot(MCIParamMean, ...
-    'Whisker',whisker_value, ...
-    'symbol','', ... %symbol ='' making outlier invisible
-    'Color','k', ...
-    'Notch','on', ...
-    'widths',box_widths_value,...
-    'positions', 3);
-set(bp3,'linewidth',box_lineWidth);
-
 %% Boxplot visual changes
 % matlab has a lifo system for these
 h = findobj(gca,'Tag','Box');
-%get the Young box
-patch(get(h(3),'XData'),get(h(3),'YData'),colorForYoung,'FaceAlpha',box_color_transparency);
-%get the HelthyOld box
-patch(get(h(2),'XData'),get(h(2),'YData'),colorForElderly,'FaceAlpha',box_color_transparency);
-%get the MCI box
-patch(get(h(1),'XData'),get(h(1),'YData'),colorForMCI,'FaceAlpha',box_color_transparency);
+%get the MCI pos box
+patch(get(h(2),'XData'),get(h(2),'YData'),colorForMCIPos,'FaceAlpha',box_color_transparency);
+%get the MCI neg box
+patch(get(h(1),'XData'),get(h(1),'YData'),colorForMCINeg,'FaceAlpha',box_color_transparency);
 
 %% Median visual change
 h=findobj(gca,'tag','Median');
@@ -180,22 +156,22 @@ for i = 1:length(h)
     h(i).Color = median_color;
 end
 
-%% Scatter plot for data and mean (Young)
-num_points = size(YoungParamMean,1);
+%% Scatter plot for data and mean (MCIPos)
+num_points = size(MCIPosMean,1);
 hold on
 x = 1*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
-scatter(x, YoungParamMean, scatter_markerSize, ...
+scatter(x, MCIPosMean, scatter_markerSize, ...
     'filled', ...
     'o', ...
     'MarkerEdgeColor',scatter_marker_edgeColor, ...
-    'MarkerFaceColor',colorForYoung, ...
+    'MarkerFaceColor',colorForMCIPos, ...
     'MarkerFaceAlpha',scatter_color_transparency,...
     'LineWidth',scatter_marker_edgeWidth);
 
 hold on
 %add errorbar
-mean_Young = mean(YoungParamMean, "omitnan");
-sem_Young = std(YoungParamMean,"omitnan")./sqrt(length(YoungParamMean(~isnan(YoungParamMean))));
+mean_Young = mean(MCIPosMean, "omitnan");
+sem_Young = std(MCIPosMean,"omitnan")./sqrt(length(MCIPosMean(~isnan(MCIPosMean))));
 errorbar(1,mean_Young,sem_Young,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 18);
 hold on
 %add mean point
@@ -204,48 +180,25 @@ scatter(1, mean_Young, mean_scatter_multiplier*scatter_markerSize, 'd',...
     'MarkerFaceColor','w', ...
     'LineWidth',scatter_marker_edgeWidth);
 
-%% Scatter plot for data and mean (Healthy Elderly)
-num_points = length(HealthyOldParamMean);
+%% Scatter plot for data and mean (MCI neg)
+num_points = length(MCINegMean);
 hold on
 x = 2*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
-scatter(x, HealthyOldParamMean, scatter_markerSize, ...
+scatter(x, MCINegMean, scatter_markerSize, ...
     'filled', ...
     'o', ...
     'MarkerEdgeColor',scatter_marker_edgeColor, ...
-    'MarkerFaceColor',colorForElderly, ...
+    'MarkerFaceColor',colorForMCINeg, ...
     'MarkerFaceAlpha',scatter_color_transparency,...
     'LineWidth',scatter_marker_edgeWidth);
 
 %add errorbar
-mean_Hold = mean(HealthyOldParamMean, "omitnan");
-sem_Hold = std(HealthyOldParamMean, "omitnan")./sqrt(length(HealthyOldParamMean(~isnan(HealthyOldParamMean))));
+mean_Hold = mean(MCINegMean, "omitnan");
+sem_Hold = std(MCINegMean, "omitnan")./sqrt(length(MCINegMean(~isnan(MCINegMean))));
 errorbar(2,mean_Hold,sem_Hold,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 18);
 hold on
 %add mean point
 scatter(2, mean_Hold, mean_scatter_multiplier*scatter_markerSize, 'd',...
-    'filled','MarkerEdgeColor','k', ...
-    'MarkerFaceColor','w', ...
-    'LineWidth',scatter_marker_edgeWidth);
-
-%% Scatter plot for data and mean (MCI unknown)
-num_points = length(MCIParamMean);
-hold on
-x = 3*ones(num_points,1)+scatter_jitter_value*(rand(num_points,1)-0.5); %jitter x
-scatter(x, MCIParamMean, scatter_markerSize, ...
-    'filled', ...
-    'o', ...
-    'MarkerEdgeColor',scatter_marker_edgeColor, ...
-    'MarkerFaceColor',colorForMCI, ...
-    'MarkerFaceAlpha',scatter_color_transparency,...
-    'LineWidth',scatter_marker_edgeWidth);
-
-%add mean + errorbar
-mean_MCI = mean(MCIParamMean, "omitnan");
-sem_MCI = std(MCIParamMean, "omitnan")./sqrt(length(MCIParamMean(~isnan(MCIParamMean))));
-errorbar(3,mean_MCI,sem_MCI,'k','LineStyle','None', 'LineWidth', 2, 'CapSize', 18);
-hold on
-%add mean point
-scatter(3, mean_MCI, mean_scatter_multiplier*scatter_markerSize, 'd',...
     'filled','MarkerEdgeColor','k', ...
     'MarkerFaceColor','w', ...
     'LineWidth',scatter_marker_edgeWidth);
@@ -260,9 +213,9 @@ set(gca, ...
     'TickLength'  , [.01 .01] , ...
     'XColor'      , [.0 .0 .0], ...
     'YColor'      , [.0 .0 .0], ...
-    'XTick'       , (1:3),...
-    'XLim'        , [0.5, 3.5],...
-    'XTickLabel'  , {'Young','Elderly','MCI'},...
+    'XTick'       , (1:2),...
+    'XLim'        , [0.5, 2.5],...
+    'XTickLabel'  , {'MCI+','MCI-'},...
     'LineWidth'   , 1.0        );
 
 ylabel(plotInfo.YLabel);
@@ -274,14 +227,11 @@ yticks(0:plotInfo.ticksStep:plotInfo.yLim(2));
 multicomp_result = ANOVA_multcomp_group;
 % 1       2             3      
 % Young   HealthyOld    MCI
-PvalueYoungvsHealthyOld = multicomp_result(1,6); % Young vs. HealthyOld
-PvalueHealthyOldvsMCI = multicomp_result(3,6); % HealthyOld v.s. MCI unk
-PvalueYoungvsMCI = multicomp_result(2,6);
-
+PvalueMCIPosvsMCINeg = multicomp_result(1,6); % MCIPos vs. MCINeg
 
 %% Add significance bars
-AllP = [PvalueYoungvsMCI,PvalueYoungvsHealthyOld,PvalueHealthyOldvsMCI];
-Xval = [[1,3];[1,2];[2,3]];
+AllP = [PvalueMCIPosvsMCINeg];
+Xval = [[1,2]];
 %select those P value smaller than 0.05 (only add line when p<0.05)
 % * represents p<=0.05
 % ** represents p<=1E-2

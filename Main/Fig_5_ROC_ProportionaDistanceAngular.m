@@ -14,9 +14,11 @@ GLAMPI_PreprocessData
 
 % Model fitting
 config.useTrialFilter = true;
-config.ModelName        =   "beta_g2_g3_sigma_nu";
-config.ParamName        =   ["beta", "g2", "g3", "sigma", "nu"];
-config.NumParams        =   100;
+config.ModelName        =   "beta_k_g2_g3_m3_sigma_nu";
+config.ParamName        =   ["beta", "k", "g2", "g3", "m3", "sigma", "nu"];
+% We are still fitting the model, as to allow fair comparisons we remove
+% participants that do not have fitted params.
+config.NumParams        =   length(config.ParamName);
 
 GLAMPI
 
@@ -29,17 +31,21 @@ end
 % Generating color scheme for our paper
 ColorPattern;
 
-% Collecting information from output
-HealthyControlsDistanceError = averageAcrossConditions(HealthyControls.Results.PropDistErr);
-MCIUnkDistanceError          = averageAcrossConditions(MCIUnk.Results.PropDistErr);
-MCINegDistanceError          = averageAcrossConditions(MCINeg.Results.PropDistErr);
-MCIPosDistanceError          = averageAcrossConditions(MCIPos.Results.PropDistErr);
-MCIAllDistanceError          = [MCIUnkDistanceError; MCINegDistanceError; MCIPosDistanceError]; 
+%% Collecting information from output
+% To allow fair comparisons wer are going to remove participants for which
+% our model did not fit. See Methods for details on participants were excluded from the analysis.
 
-HealthyControlsAngErr        = averageAcrossConditions(HealthyControls.Results.PropAngErr);
-MCIUnkAngErr                 = averageAcrossConditions(MCIUnk.Results.PropAngErr);
-MCINegAngErr                 = averageAcrossConditions(MCINeg.Results.PropAngErr);
-MCIPosAngErr                 = averageAcrossConditions(MCIPos.Results.PropAngErr);
+HealthyControlsDistanceError = averageAcrossConditions(HealthyControls.Results.PropDistErr, HealthyControls.Results.estimatedParams);
+MCIUnkDistanceError          = averageAcrossConditions(MCIUnk.Results.PropDistErr, MCIUnk.Results.estimatedParams);
+MCINegDistanceError          = averageAcrossConditions(MCINeg.Results.PropDistErr, MCINeg.Results.estimatedParams);
+MCIPosDistanceError          = averageAcrossConditions(MCIPos.Results.PropDistErr, MCIPos.Results.estimatedParams);
+
+MCIAllDistanceError          = [MCIUnkDistanceError; MCINegDistanceError; MCIPosDistanceError];
+
+HealthyControlsAngErr        = averageAcrossConditions(HealthyControls.Results.PropAngErr, HealthyControls.Results.estimatedParams);
+MCIUnkAngErr                 = averageAcrossConditions(MCIUnk.Results.PropAngErr, MCIUnk.Results.estimatedParams);
+MCINegAngErr                 = averageAcrossConditions(MCINeg.Results.PropAngErr, MCINeg.Results.estimatedParams);
+MCIPosAngErr                 = averageAcrossConditions(MCIPos.Results.PropAngErr, MCIPos.Results.estimatedParams);
 MCIAllAngErr                 = [MCIUnkAngErr; MCINegAngErr; MCIPosAngErr];
 
 allParamsHC        = [HealthyControlsDistanceError HealthyControlsAngErr];
@@ -47,9 +53,9 @@ allParamsPooledMCI = [MCIAllDistanceError MCIAllAngErr];
 allParamsMCIPos    = [MCIPosDistanceError MCIPosAngErr];
 allParamsMCINeg    = [MCINegDistanceError MCINegAngErr];
 
-% Fitting SVM and plotting roc curves
-% HC vs pooled MCI 
 
+%% Fitting SVM and plotting roc curves
+% HC vs pooled MCI 
 % Plotting variables
 close all;
 
@@ -63,14 +69,14 @@ plotInfo.lineAlpha = 0.6;
 plotInfo.YLabel = "True positive rate";
 plotInfo.XLabel = "False positive rate";
 plotInfo.Title = "Healthy elder / MCI";
-plotInfo.visible = "off";
+plotInfo.visible = "on";
 parametersName = ["Linear", "Angular"];
 
 disp("%%%%%%%%%%%%%%% ROC Curve pooled MCI vs HC - behavioural data %%%%%%%%%%%%%%%")
 rng("default");
 generateROCCurve(allParamsHC, allParamsPooledMCI,'HC', 'MCI', parametersName, config, plotInfo);
 
-% MCI negative vs MCI positive
+%% MCI negative vs MCI positive
 plotInfo.Title = "MCI negative / MCI positive";
 disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - behavioural data %%%%%%%%%%%%%%%");
 rng("default");
@@ -80,7 +86,7 @@ disp("%%%%%%%%%%%%%%% SVM fitting completed %%%%%%%%%%%%%%%");
 
 % Final cleanup to leave workspace as the end of the Preprocessing stage.
 % Remove if you want to take a look at the output data.
-clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
+%clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
 
 %%
 function generateROCCurve(params1, params2, params1groupName, params2groupName, parametersName, config, plotInfo)
@@ -225,7 +231,7 @@ function AUCOut = plotsingleROCCurveSVM(param1, param2, param1Label, param2Label
 end
 
 %% 
-function dataout = averageAcrossConditions(data)
+function dataout = averageAcrossConditions(data, glampi_data)
     % average across the conditions, assuming a specific structure to this
     % data
     dataout = [];
@@ -242,6 +248,27 @@ function dataout = averageAcrossConditions(data)
     end
 
     % remove nans if the row after merging data
-    dataout = removeNanRows(dataout);
+    % dataout = removeNanRows(dataout);
+    % remove participants for which we were unable to fit the model
+    excludedParticipants = removeExcludedParticipants(glampi_data);
+    dataout = dataout(excludedParticipants,:);
+end
+
+%% ---------------------------------------------------------------------
+% Remove participants based on the ability of the GLAMPI model to fit the parameters
+function logicalResults = removeExcludedParticipants(groupDataParams)
+
+numConds = 3; % environmental conditions
+
+groupDataParamsAllConds = [];
+
+for trial_filter=1:numConds
+    %% extract data
+    tempParams = groupDataParams{trial_filter}(:,1); %Can use any of the fitted params
+    groupDataParamsAllConds = [groupDataParamsAllConds,tempParams];
+end
+
+isnanMatrix = isnan(groupDataParamsAllConds);  % create a logical matrix indicating NaNs
+logicalResults = ~all(isnanMatrix, 2);  % find rows with all NaNs
 
 end

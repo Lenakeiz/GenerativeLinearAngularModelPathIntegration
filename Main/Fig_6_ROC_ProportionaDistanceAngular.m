@@ -68,7 +68,7 @@ plotInfo.lineAlpha = 0.6;
 plotInfo.YLabel = "True positive rate";
 plotInfo.XLabel = "False positive rate";
 plotInfo.Title = "Healthy elder / MCI";
-plotInfo.visible = "on";
+plotInfo.visible = "off";
 parametersName = ["Linear", "Angular"];
 
 disp("%%%%%%%%%%%%%%% ROC Curve pooled MCI vs HC - behavioural data %%%%%%%%%%%%%%%")
@@ -103,7 +103,8 @@ hold on;
 
 for i = 1:length(parametersName)
     AUC = plotsingleROCCurveSVM(params1(:,i), params2(:,i), params1groupName, params2groupName, colors(i,:));
-    legendText{1,i} = "AUC(" + parametersName(i) + ") = "+num2str(round(AUC.mean,2));
+    numStr = sprintf('%.2f', round(AUC.mean,2));
+    legendText{1,i} = "AUC(" + parametersName(i) + ") = "+num2str(numStr);
     disp("AUC std: " + num2str(AUC.std));
     drawnow;
 end

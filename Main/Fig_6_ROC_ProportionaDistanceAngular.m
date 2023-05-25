@@ -23,7 +23,7 @@ config.NumParams        =   length(config.ParamName);
 GLAMPI
 
 % Preparing output
-config.ResultFolder = pwd + "/Output/Fig5/ProportionalError";
+config.ResultFolder = pwd + "/Output/Fig6/ProportionalError";
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
 end

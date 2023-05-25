@@ -24,7 +24,7 @@ GLAMPI;
 ColorPattern;
 
 %% Preparing output
-config.ResultFolder = pwd + "/Output/FigS9/"+config.ModelName+"/Young_HealthyOld_MCIUnk_MCINeg_MCIPos";
+config.ResultFolder = pwd + "/Output/FigS6/"+config.ModelName+"/Young_HealthyOld_MCIUnk_MCINeg_MCIPos";
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
 end

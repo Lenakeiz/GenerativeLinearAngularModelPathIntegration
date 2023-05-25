@@ -22,7 +22,7 @@ config.NumParams        =   length(config.ParamName);
 GLAMPI
 
 % Preparing output
-config.ResultFolder = pwd + "/Output/Fig5/ModelParameters/beta_k_g2_g3_m3_sigma_nu";
+config.ResultFolder = pwd + "/Output/Fig6/ModelParameters/beta_k_g2_g3_m3_sigma_nu";
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
 end

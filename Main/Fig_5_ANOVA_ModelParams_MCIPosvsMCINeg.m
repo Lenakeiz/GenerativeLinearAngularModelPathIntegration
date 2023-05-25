@@ -23,7 +23,7 @@ config.NumParams        =   length(config.ParamName);
 GLAMPI;
 
 %% Preparing the output
-config.ResultFolder     =   pwd + "/Output/FigS8_S9/"+config.ModelName+"/MCIPosvsMCINeg";
+config.ResultFolder     =   pwd + "/Output/Fig_5/"+config.ModelName+"/MCIPosvsMCINeg";
 
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);

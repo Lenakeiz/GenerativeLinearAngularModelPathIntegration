@@ -39,7 +39,7 @@ AllMCINegResults        =   MCINeg.Results;
 AllMCIUnkResults        =   MCIUnk.Results;
 
 %% Starting visualization
-% Can select a different groups by selecting different names (creates Fig S6, S7)
+% Can select a different groups by selecting different names (creates Fig S4)
 %name = "Young";
 name = "HealthyOld";
 %name = "MCIMerged";
@@ -412,7 +412,7 @@ exportgraphics(f,config.ResultFolder+"/"+name+"_rgmean_m3.png",'Resolution',300)
 exportgraphics(f,config.ResultFolder+"/"+name+"_rgmean_m3.pdf",'Resolution',300, 'ContentType','vector');
 
 
-%% Plotting the distribution of the single parameters (Fig. S7) 
+%% Plotting the distribution of the single parameters (Fig. S5) 
 %Parameters = AllYoungResults.estimatedParams;
 
 Parameters = AllHealthyOldResults.estimatedParams;

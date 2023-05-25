@@ -31,10 +31,10 @@ if ~exist(config.ResultFolder, 'dir')
 end
 
 % Collecting information from output
-[MCINegPropDist, MCINegPropAng]                   = getProportionalLinearAndAngularError(MCINeg);
-[MCIPosPropDist, MCIPosPropAng]                   = getProportionalLinearAndAngularError(MCIPos);
+[MCINegPropDist, MCINegPropAng]                   = getProportionalLinearAndAngularError(MCINeg, MCINeg.Results.estimatedParams);
+[MCIPosPropDist, MCIPosPropAng]                   = getProportionalLinearAndAngularError(MCIPos, MCIPos.Results.estimatedParams);
 
-% TwowayAnova Analysis
+%% TwowayAnova Analysis
 config.type = "ProportionalDistance";
 [anova_tab_dist,multicomp_tab1_dist,multicomp_tab2_dist, multicomp_tab12_dist]     = TwowayAnova_Behavioural_MCIOnly(MCIPosPropDist, MCINegPropDist, config);
 
@@ -47,11 +47,17 @@ disp("%%%%%%%%% Proportional Distance Error %%%%%%%%%");
 disp(["MCI Positive : " num2str(mean(mean(MCIPosPropDist,1,"omitnan"),"omitnan")) " +- " std(mean(MCIPosPropDist,1,"omitnan"),"omitnan")]);
 disp(["MCI Negative : " num2str(mean(mean(MCINegPropDist,1,"omitnan"),"omitnan")) " +- " std(mean(MCINegPropDist,1,"omitnan"),"omitnan")]);
 
+TTest_NominalValue(mean(MCIPosPropDist,1,"omitnan")',1,'MCI positive', 'both');
+TTest_NominalValue(mean(MCINegPropDist,1,"omitnan")',1,'MCI negative', 'both');
+
 disp("%%%%%%%%% Proportional Angular Error %%%%%%%%%");
 disp(["MCI Positive : " num2str(mean(mean(MCIPosPropAng,1,"omitnan"),"omitnan")) " +- " std(mean(MCIPosPropAng,1,"omitnan"),"omitnan")]);
 disp(["MCI Negative : " num2str(mean(mean(MCINegPropAng,1,"omitnan"),"omitnan")) " +- " std(mean(MCINegPropAng,1,"omitnan"),"omitnan")]);
 
-% Proportional Distance Error
+TTest_NominalValue(mean(MCIPosPropAng, 1, "omitnan")', 1, 'MCI positive', 'both');
+TTest_NominalValue(mean(MCINegPropAng, 1, "omitnan")', 1, 'MCI negative', 'both');
+
+%% Proportional Distance Error
 plotInfo.defaultTextSize = 20;
 plotInfo.defaultLineSize = 2;
 plotInfo.barFaceAlpha = 0.5;
@@ -61,7 +67,7 @@ plotInfo.scatterFaceAlpha = 0.5;
 plotInfo.scatterEdgeAlpha = 0.8;
 plotInfo.scatterDataSize = 32;
 plotInfo.errorBarWidth = 2.0;
-plotInfo.visible = "off";
+plotInfo.visible = "on";
 plotInfo.dimensions = [100 100 250 250];
 
 plotInfo.type = "ProportionalDistance";
@@ -257,7 +263,7 @@ exportgraphics(f,config.ResultFolder+"/MergeCondsBox_"+plotInfo.type+".pdf",'Res
 end
 
 %% --------------------------------------------------------------------- 
-function [PropDist, PropAng] = getProportionalLinearAndAngularError(Group)
+function [PropDist, PropAng] = getProportionalLinearAndAngularError(Group, Glampi_data)
 % Get the proportiona distance and angular error for all particpants.
 % Each value is the mean value per participant per environmental condition
 
@@ -281,10 +287,40 @@ function [PropDist, PropAng] = getProportionalLinearAndAngularError(Group)
         PropDist = [PropDist;CondPropDistMeanSubjs];
         PropAng  = [PropAng;CondPropAngleMeanSubjs];
     
-    end    
+    end
+
+    % remove nans if the row after merging data
+    % dataout = removeNanRows(dataout);
+    % remove participants for which we were unable to fit the model
+    excludedParticipants = removeExcludedParticipants(Glampi_data);
+
+    % In this data format each participant is a column and the
+    % environmental conditions are per rows.
+
+    PropDist = PropDist(:,excludedParticipants);
+    PropAng  = PropAng(:, excludedParticipants);
 end
 
 %% --------------------------------------------------------------------- 
 function merged = MergeMCI(MCIUnkData, MCINegData, MCIPosData)
     merged = [MCIUnkData MCINegData MCIPosData];
+end
+
+%% ---------------------------------------------------------------------
+% Remove participants based on the ability of the GLAMPI model to fit the parameters
+function logicalResults = removeExcludedParticipants(groupDataParams)
+
+numConds = 3; % environmental conditions
+
+groupDataParamsAllConds = [];
+
+for trial_filter=1:numConds
+    %% extract data
+    tempParams = groupDataParams{trial_filter}(:,1); %Can use any of the fitted params
+    groupDataParamsAllConds = [groupDataParamsAllConds,tempParams];
+end
+
+isnanMatrix = isnan(groupDataParamsAllConds);  % create a logical matrix indicating NaNs
+logicalResults = ~all(isnanMatrix, 2);  % find rows with all NaNs
+
 end

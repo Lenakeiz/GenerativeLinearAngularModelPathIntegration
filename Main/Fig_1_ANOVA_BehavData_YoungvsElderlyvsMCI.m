@@ -31,11 +31,11 @@ if ~exist(config.ResultFolder, 'dir')
 end
 
 % Collecting information from output
-[YoungControlsPropDist, YoungControlsPropAng]     = getProportionalLinearAndAngularError(YoungControls);
-[HealthyControlsPropDist, HealthyControlsPropAng] = getProportionalLinearAndAngularError(HealthyControls);
-[MCIUnkPropDist, MCIUnkPropAng]                   = getProportionalLinearAndAngularError(MCIUnk);
-[MCINegPropDist, MCINegPropAng]                   = getProportionalLinearAndAngularError(MCINeg);
-[MCIPosPropDist, MCIPosPropAng]                   = getProportionalLinearAndAngularError(MCIPos);
+[YoungControlsPropDist, YoungControlsPropAng]     = getProportionalLinearAndAngularError(YoungControls, YoungControls.Results.estimatedParams);
+[HealthyControlsPropDist, HealthyControlsPropAng] = getProportionalLinearAndAngularError(HealthyControls, HealthyControls.Results.estimatedParams);
+[MCIUnkPropDist, MCIUnkPropAng]                   = getProportionalLinearAndAngularError(MCIUnk, MCIUnk.Results.estimatedParams);
+[MCINegPropDist, MCINegPropAng]                   = getProportionalLinearAndAngularError(MCINeg, MCINeg.Results.estimatedParams);
+[MCIPosPropDist, MCIPosPropAng]                   = getProportionalLinearAndAngularError(MCIPos, MCIPos.Results.estimatedParams);
 
 % MergeMCI
 MCIMergedPropDist = MergeMCI(MCIUnkPropDist, MCINegPropDist, MCIPosPropDist);
@@ -55,12 +55,20 @@ disp(["Young : " num2str(mean(mean(YoungControlsPropDist,1,"omitnan"),"omitnan")
 disp(["Elderly : " num2str(mean(mean(HealthyControlsPropDist,1,"omitnan"),"omitnan")) " +- " std(mean(HealthyControlsPropDist,1,"omitnan"),"omitnan")]);
 disp(["MCIMerged : " num2str(mean(mean(MCIMergedPropDist,1,"omitnan"),"omitnan")) " +- " std(mean(MCIMergedPropDist,1,"omitnan"),"omitnan")]);
 
+TTest_NominalValue(mean(YoungControlsPropDist,1,"omitnan")',1,'Young', 'both');
+TTest_NominalValue(mean(HealthyControlsPropDist,1,"omitnan")',1,'Elderly', 'both');
+TTest_NominalValue(mean(MCIMergedPropDist,1,"omitnan")',1,'MCI', 'both');
+
 disp("%%%%%%%%% Proportional Angular Error %%%%%%%%%");
 disp(["Young : " num2str(mean(mean(YoungControlsPropAng,1,"omitnan"),"omitnan")) " +- " std(mean(YoungControlsPropAng,1,"omitnan"),"omitnan")]);
 disp(["Elderly : " num2str(mean(mean(HealthyControlsPropAng,1,"omitnan"),"omitnan")) " +- " std(mean(HealthyControlsPropAng,1,"omitnan"),"omitnan")]);
 disp(["MCIMerged : " num2str(mean(mean(MCIMergedPropAng,1,"omitnan"),"omitnan")) " +- " std(mean(MCIMergedPropAng,1,"omitnan"),"omitnan")]);
 
-% Proportional Distance Error
+TTest_NominalValue(mean(YoungControlsPropAng,1,"omitnan")',1,'Young', 'both');
+TTest_NominalValue(mean(HealthyControlsPropAng,1,"omitnan")',1,'Elderly', 'both');
+TTest_NominalValue(mean(MCIMergedPropAng,1,"omitnan")',1,'MCI', 'both');
+
+%% Proportional Distance Error
 plotInfo.defaultTextSize = 20;
 plotInfo.defaultLineSize = 2;
 plotInfo.barFaceAlpha = 0.5;
@@ -307,7 +315,7 @@ exportgraphics(f,config.ResultFolder+"/MergeCondsBox_"+plotInfo.type+".pdf",'Res
 end
 
 %% --------------------------------------------------------------------- 
-function [PropDist, PropAng] = getProportionalLinearAndAngularError(Group)
+function [PropDist, PropAng] = getProportionalLinearAndAngularError(Group, Glampi_data)
 % Get the proportiona distance and angular error for all particpants.
 % Each value is the mean value per participant per environmental condition
 
@@ -331,10 +339,41 @@ function [PropDist, PropAng] = getProportionalLinearAndAngularError(Group)
         PropDist = [PropDist;CondPropDistMeanSubjs];
         PropAng  = [PropAng;CondPropAngleMeanSubjs];
     
-    end    
+    end
+
+    % remove nans if the row after merging data
+    % dataout = removeNanRows(dataout);
+    % remove participants for which we were unable to fit the model
+    excludedParticipants = removeExcludedParticipants(Glampi_data);
+
+    % In this data format each participant is a column and the
+    % environmental conditions are per rows.
+
+    PropDist = PropDist(:,excludedParticipants);
+    PropAng  = PropAng(:, excludedParticipants);
+
 end
 
 %% --------------------------------------------------------------------- 
 function merged = MergeMCI(MCIUnkData, MCINegData, MCIPosData)
     merged = [MCIUnkData MCINegData MCIPosData];
+end
+
+%% ---------------------------------------------------------------------
+% Remove participants based on the ability of the GLAMPI model to fit the parameters
+function logicalResults = removeExcludedParticipants(groupDataParams)
+
+numConds = 3; % environmental conditions
+
+groupDataParamsAllConds = [];
+
+for trial_filter=1:numConds
+    %% extract data
+    tempParams = groupDataParams{trial_filter}(:,1); %Can use any of the fitted params
+    groupDataParamsAllConds = [groupDataParamsAllConds,tempParams];
+end
+
+isnanMatrix = isnan(groupDataParamsAllConds);  % create a logical matrix indicating NaNs
+logicalResults = ~all(isnanMatrix, 2);  % find rows with all NaNs
+
 end

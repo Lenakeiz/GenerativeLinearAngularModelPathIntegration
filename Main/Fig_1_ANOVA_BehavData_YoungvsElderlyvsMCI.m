@@ -68,7 +68,7 @@ TTest_NominalValue(mean(YoungControlsPropAng,1,"omitnan")',1,'Young', 'both');
 TTest_NominalValue(mean(HealthyControlsPropAng,1,"omitnan")',1,'Elderly', 'both');
 TTest_NominalValue(mean(MCIMergedPropAng,1,"omitnan")',1,'MCI', 'both');
 
-%% Proportional Distance Error
+% Proportional Distance Error
 plotInfo.defaultTextSize = 20;
 plotInfo.defaultLineSize = 2;
 plotInfo.barFaceAlpha = 0.5;
@@ -132,7 +132,7 @@ box_widths_value            =   plotInfo.barWidth;
 box_color_transparency      =   plotInfo.barFaceAlpha; %faceAlpha
 median_lineWidth            =   2;
 median_color                =   'k';
-scatter_jitter_value        =   0.2;
+scatter_jitter_value        =   0.3;
 scatter_markerSize          =   plotInfo.scatterDataSize;
 scatter_marker_edgeColor    =   'k';
 scatter_marker_edgeWidth    =   0.5;

@@ -34,7 +34,7 @@ end
 [MCINegPropDist, MCINegPropAng]                   = getProportionalLinearAndAngularError(MCINeg, MCINeg.Results.estimatedParams);
 [MCIPosPropDist, MCIPosPropAng]                   = getProportionalLinearAndAngularError(MCIPos, MCIPos.Results.estimatedParams);
 
-%% TwowayAnova Analysis
+% TwowayAnova Analysis
 config.type = "ProportionalDistance";
 [anova_tab_dist,multicomp_tab1_dist,multicomp_tab2_dist, multicomp_tab12_dist]     = TwowayAnova_Behavioural_MCIOnly(MCIPosPropDist, MCINegPropDist, config);
 
@@ -119,7 +119,7 @@ box_widths_value            =   plotInfo.barWidth;
 box_color_transparency      =   plotInfo.barFaceAlpha; %faceAlpha
 median_lineWidth            =   2;
 median_color                =   'k';
-scatter_jitter_value        =   0.2;
+scatter_jitter_value        =   0.4;
 scatter_markerSize          =   plotInfo.scatterDataSize;
 scatter_marker_edgeColor    =   'k';
 scatter_marker_edgeWidth    =   0.5;

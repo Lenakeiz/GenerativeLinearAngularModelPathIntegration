@@ -53,7 +53,6 @@ allParamsPooledMCI = [MCIAllDistanceError MCIAllAngErr];
 allParamsMCIPos    = [MCIPosDistanceError MCIPosAngErr];
 allParamsMCINeg    = [MCINegDistanceError MCINegAngErr];
 
-
 %% Fitting SVM and plotting roc curves
 % HC vs pooled MCI 
 % Plotting variables
@@ -76,7 +75,7 @@ disp("%%%%%%%%%%%%%%% ROC Curve pooled MCI vs HC - behavioural data %%%%%%%%%%%%
 rng("default");
 generateROCCurve(allParamsHC, allParamsPooledMCI,'HC', 'MCI', parametersName, config, plotInfo);
 
-%% MCI negative vs MCI positive
+% MCI negative vs MCI positive
 plotInfo.Title = "MCI negative / MCI positive";
 disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - behavioural data %%%%%%%%%%%%%%%");
 rng("default");

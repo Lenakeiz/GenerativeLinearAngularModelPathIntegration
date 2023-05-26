@@ -23,7 +23,7 @@ config.NumParams        =   length(config.ParamName);
 GLAMPI;
 
 %% Preparing the output
-config.ResultFolder     =   pwd + "/Output/Fig_5/"+config.ModelName+"/MCIPosvsMCINeg";
+config.ResultFolder     =   pwd + "/Output/Fig5/"+config.ModelName+"/MCIPosvsMCINeg";
 
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
@@ -41,9 +41,9 @@ AllMCINegParams     =   MCINeg.Results.estimatedParams;
 
 %% Plot results
 BoxPlotOfFittedParam_conditionfirst(AllMCIPosParams, AllMCINegParams, anova_tab, config);
-%%
+%
 BoxPlotOfFittedParam_groupfirst(AllMCIPosParams, AllMCINegParams, anova_tab, config);
-%%
+%
 BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, multicomp_tab1, config)
 
 % Final cleanup to leave workspace as the end of the Preprocessing stage.
@@ -68,11 +68,17 @@ function BoxPlotOfFittedParam_conditionfirst(AllMCIPosParams, AllMCINegParams, a
             MCINegParamAllConds = [MCINegParamAllConds,MCINegParam];
         end
 
+        %replace MCIPos #2 nochange condition NAN value with mean value (This
+        % is just for visualization, for ANOVA, we treate it as NAN), to
+        % keep consistency with other plots in the paper
+        MCIPos_column_mean = mean(MCIPosParamAllConds, 1, 'omitnan');
+        MCIPosParamAllConds(2,1) = MCIPos_column_mean(1,1);
+
         % remove Nan rows (because of 1) removing participants with short walking length; 2) not enough trials for parameter estimation)
         nonNAN_MCIPosParamAllConds = removeNanRows(MCIPosParamAllConds);
         nonNAN_MCINegParamAllConds = removeNanRows(MCINegParamAllConds);
     
-        f = figure('visible','off','Position', [100 100 1000 500]);
+        f = figure('visible','off','Position', [100 100 600 300]);
 
         set(0,'DefaultAxesFontName','Arial')
         set(0,'DefaultTextFontName','Arial')
@@ -94,7 +100,7 @@ function BoxPlotOfFittedParam_conditionfirst(AllMCIPosParams, AllMCINegParams, a
         median_lineWidth            =   2;
         median_color                =   'k';
         scatter_jitter_value        =   0.1;
-        scatter_markerSize          =   30;
+        scatter_markerSize          =   40;
         scatter_marker_edgeColor    =   'k';
         scatter_marker_edgeWidth    =   0.5;
         scatter_color_transparency  =   0.7;     
@@ -201,10 +207,13 @@ function BoxPlotOfFittedParam_conditionfirst(AllMCIPosParams, AllMCINegParams, a
             'XLim'        , [0.5, 3.5],...
             'YLim'        , lowupYlim,...   
             'XTickLabel'  , {'No Change','No Distal Cue', 'No Optical Flow'},...
+            'FontSize'    , 12,...
             'LineWidth'   , 1.0        );
         ylabel(ParamName(ParamIndx));
+        %xtickangle(45);
+
         allpatches = findall(gca,'type','Patch');
-        legend(allpatches(1:3:end), {'MCIPos' 'MCINeg'}, 'Location','northeast', 'NumColumns',2);
+        legend(allpatches(1:3:end), {'MCI+' 'MCI-'}, 'Location','northeast', 'NumColumns',2);
 
         %extract pvalue for group, conditino and interaction
         anova_result = anova_tab{ParamIndx};
@@ -241,11 +250,17 @@ function BoxPlotOfFittedParam_groupfirst(AllMCIPosParams, AllMCINegParams, anova
             MCINegParamAllConds = [MCINegParamAllConds,MCINegParam];
         end
 
+        %replace MCIPos #2 nochange condition NAN value with mean value (This
+        % is just for visualization, for ANOVA, we treate it as NAN), to
+        % keep consistency with other plots in the paper
+        MCIPos_column_mean = mean(MCIPosParamAllConds, 1, 'omitnan');
+        MCIPosParamAllConds(2,1) = MCIPos_column_mean(1,1);
+
         % remove Nan rows (because of 1) removing participants with short walking length; 2) not enough trials for parameter estimation)
         nonNAN_MCIPosParamAllConds = removeNanRows(MCIPosParamAllConds);
         nonNAN_MCINegParamAllConds = removeNanRows(MCINegParamAllConds);
     
-        f = figure('visible','off','Position', [100 100 1000 500]);
+        f = figure('visible','off','Position', [100 100 600 300]);
 
         set(0,'DefaultAxesFontName','Arial')
         set(0,'DefaultTextFontName','Arial')
@@ -266,7 +281,7 @@ function BoxPlotOfFittedParam_groupfirst(AllMCIPosParams, AllMCINegParams, anova
         median_lineWidth            =   2;
         median_color                =   'k';
         scatter_jitter_value        =   0.1;
-        scatter_markerSize          =   30;
+        scatter_markerSize          =   40;
         scatter_marker_edgeColor    =   'k';
         scatter_marker_edgeWidth    =   0.5;
         scatter_color_transparency  =   0.7;
@@ -377,10 +392,13 @@ function BoxPlotOfFittedParam_groupfirst(AllMCIPosParams, AllMCINegParams, anova
             'XLim'        , [0.5, 2.5],...
             'YLim'        , lowupYlim,...   
             'XTickLabel'  , {'MCI+','MCI-'},...
+            'FontSize'    , 12,...
             'LineWidth'   , 1.0        );
         ylabel(ParamName(ParamIndx));
+        %xtickangle(45);
+
         allpatches = findall(gca,'type','Patch');
-        legend(allpatches(1:3:end), {'MCIPos' 'MCINeg'}, 'Location','northeast', 'NumColumns',2);
+        legend(allpatches(1:3:end), {'MCI+' 'MCI-'}, 'Location','northeast', 'NumColumns',2);
 
         %extract pvalue for group, conditino and interaction
         anova_result = anova_tab{ParamIndx};
@@ -418,6 +436,12 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
             MCINegParamAllConds = [MCINegParamAllConds,MCINegParam];
         end
 
+        %replace MCIPos #2 nochange condition NAN value with mean value (This
+        % is just for visualization, for ANOVA, we treate it as NAN), to
+        % keep consistency with other plots in the paper
+        MCIPos_column_mean = mean(MCIPosParamAllConds, 1, 'omitnan');
+        MCIPosParamAllConds(2,1) = MCIPos_column_mean(1,1);
+
         % remove Nan rows (because of 1) removing participants with short walking length; 2) not enough trials for parameter estimation)
         MCIPosParamAllConds = removeNanRows(MCIPosParamAllConds);
         MCINegParamAllConds = removeNanRows(MCINegParamAllConds);
@@ -425,7 +449,7 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
         MCIPosParamMean = mean(MCIPosParamAllConds, 2);
         MCINegParamMean = mean(MCINegParamAllConds, 2);
 
-        f = figure('visible','off','Position', [100 100 500 500]);
+        f = figure('visible','off','Position', [100 100 300 300]);
 
         set(0,'DefaultAxesFontName','Arial')
         set(0,'DefaultTextFontName','Arial')
@@ -443,7 +467,7 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
         median_lineWidth            =   2;
         median_color                =   'k';
         scatter_jitter_value        =   0.2;
-        scatter_markerSize          =   50;
+        scatter_markerSize          =   40;
         scatter_marker_edgeColor    =   'k';
         scatter_marker_edgeWidth    =   0.5;
         scatter_color_transparency  =   0.7;         
@@ -570,16 +594,18 @@ function BoxPlotOfFittedParamMergeCondition(AllMCIPosParams, AllMCINegParams, mu
             'XLim'        , [0.5, 2.5],...
             'YLim'        , lowupYlim,...   
             'YTick'       , yticks,...
-            'XTickLabel'  , {'MCIPos','MCINeg'},...
+            'XTickLabel'  , {'MCI+','MCI-'},...
+            'FontSize'    , 12,...
             'LineWidth'   , 1.0        );
         ylabel(ParamName(ParamIndx));
+        xtickangle(45);
 
         % Extract pvalues from multiple comparison of group effect. Adding
         % it to the figure
         multicomp_result = multicomp_tab1{ParamIndx};
         Pvalue = multicomp_result(1,6); % MCIPos vs. MCINeg see Two-way anova for details
 
-        title(['P value = ',sprintf('%.2g',Pvalue)])
+        %title(['P value = ',sprintf('%.2g',Pvalue)])
 
         %% Add significance bars
         if Pvalue<0.05

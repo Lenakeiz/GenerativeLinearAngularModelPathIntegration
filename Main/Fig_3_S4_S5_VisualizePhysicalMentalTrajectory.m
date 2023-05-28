@@ -41,8 +41,8 @@ AllMCIUnkResults        =   MCIUnk.Results;
 %% Starting visualization
 % Can select a different groups by selecting different names (creates Fig S6, S7)
 %name = "Young";
-%name = "HealthyOld";
-name = "MCIMerged";
+name = "HealthyOld";
+%name = "MCIMerged";
 
 %% Visualizing trials (Healthy elderly only)
 id = 13; % participant Id
@@ -96,7 +96,7 @@ set(0,'DefaultAxesFontSize',12)
 set(0,'DefaultTextFontSize',12) 
 
 MenColor = config.color_scheme_npg(1,:);
-PhyColor = config.color_scheme_npg(2,:);\
+PhyColor = config.color_scheme_npg(2,:);
 
 % Plotting real positions
 scatter(Physical_Pos(:,1), Physical_Pos(:,2), 'MarkerEdgeColor',PhyColor, ...
@@ -424,12 +424,12 @@ exportgraphics(f,config.ResultFolder+"/"+name+"_rgmean_m3.pdf",'Resolution',300,
 %% Plotting the distribution of the single parameters (Fig. S7) 
 %Parameters = AllYoungResults.estimatedParams;
 
-Parameters = AllHealthyOldResults.estimatedParams;
+%Parameters = AllHealthyOldResults.estimatedParams;
 
-% AllMCIPosParams     =   MCIPos.Results.estimatedParams;
-% AllMCINegParams     =   MCINeg.Results.estimatedParams;
-% AllMCIUnkParams     =   MCIUnk.Results.estimatedParams;
-% [Parameters, AllMCIParamsStatusIndex]= MergeMCI(AllMCIPosParams, AllMCINegParams, AllMCIUnkParams);
+AllMCIPosParams     =   MCIPos.Results.estimatedParams;
+AllMCINegParams     =   MCINeg.Results.estimatedParams;
+AllMCIUnkParams     =   MCIUnk.Results.estimatedParams;
+[Parameters, AllMCIParamsStatusIndex]= MergeMCI(AllMCIPosParams, AllMCINegParams, AllMCIUnkParams);
 
 
 ParamName = config.ParamName;

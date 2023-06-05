@@ -43,9 +43,9 @@ AllMCIUnkParams     =   MCIUnk.Results.estimatedParams;
 % TwowayAnova Analysis
 [anova_tab,multicomp_tab1,multicomp_tab2, multicomp_tab12] = TwowayAnova_YoungHealthyOldMCICombined(AllYoungParams, AllHealthyOldParams, AllMCIParams, config);
 
-% Plot results
+%% Plot results
 BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams, anova_tab, config);
-%%
+%
 BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams, AllMCIParams, AllMCIParamsStatusIndex, multicomp_tab1, config)
 
 % Final cleanup to leave workspace as the end of the Preprocessing stage.
@@ -75,12 +75,20 @@ function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
             MCIParamAllConds    = [MCIParamAllConds,MCIParam];            
         end
         
+        %replace MCI #2 nochange condition NAN value, and MCI #30 no distal
+        %cue condition NAN value with mean value (This is just for visualization, 
+        % for ANOVA, we treate it as NAN), to keep consistency with other plots in the paper
+        MCI_column_mean = mean(MCIParamAllConds, 1, 'omitnan');
+        MCIParamAllConds(2,1) = MCI_column_mean(1,1);
+        MCIParamAllConds(30,2) = MCI_column_mean(1,2);
+
+
         % remove Nan rows (because of 1) removing participants with short walking length; 2) not enough trials for parameter estimation)
         YoungParamAllConds      = removeNanRows(YoungParamAllConds);
         HealthyOldParamAllConds = removeNanRows(HealthyOldParamAllConds);
         MCIParamAllConds        = removeNanRows(MCIParamAllConds);
     
-        f = figure('visible','off','Position', [100 100 1000 500]);
+        f = figure('visible','off','Position', [100 100 600 300]);
         
         set(0,'DefaultAxesFontName','Arial')
         set(0,'DefaultTextFontName','Arial')
@@ -103,7 +111,7 @@ function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
         median_lineWidth = 2;
         median_color = 'k';
         scatter_jitter_value = 0.1;
-        scatter_markerSize=30;
+        scatter_markerSize=40;
         scatter_marker_edgeColor = 'k';
         scatter_marker_edgeWidth = 0.5;
         scatter_color_transparency = 0.7;
@@ -245,8 +253,11 @@ function BoxPlotOfFittedParam(AllYoungParams, AllHealthyOldParams, AllMCIParams,
             'XTickLabel'  , {'No Change','No Distal Cue', 'No Optical Flow'},...
             'XLim'        , [0.5, 3.5],...
             'YLim'        , lowupYlim,... 
+            'FontSize'    , 12,...
             'LineWidth'   , 1.0        );
         ylabel(ParamName(ParamIndx));
+        xtickangle(45);
+
         allpatches = findall(gca,'type','Patch');
         legend(allpatches(1:3:end), {'Young', 'HealthyOld', 'MCIMerged'}, 'Location','northeast', 'NumColumns',3);
 
@@ -290,6 +301,13 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
             MCIParamAllConds    = [MCIParamAllConds,MCIParam];         
         end
 
+        %replace MCI #2 nochange condition NAN value, and MCI #30 no distal
+        %cue condition NAN value with mean value (This is just for visualization, 
+        % for ANOVA, we treate it as NAN), to keep consistency with other plots in the paper
+        MCI_column_mean = mean(MCIParamAllConds, 1, 'omitnan');
+        MCIParamAllConds(2,1) = MCI_column_mean(1,1);
+        MCIParamAllConds(30,2) = MCI_column_mean(1,2);
+
         % remove Nan rows (because of 1) removing participants with short walking length; 2) not enough trials for parameter estimation)
         YoungParamAllConds      = removeNanRows(YoungParamAllConds);
         HealthyOldParamAllConds = removeNanRows(HealthyOldParamAllConds);
@@ -300,7 +318,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         HealthyOldParamMean = mean(HealthyOldParamAllConds, 2);
         MCIParamMean        = mean(MCIParamAllConds, 2);
 
-        f = figure('visible','off','Position', [100 100 500 500]);
+        f = figure('visible','off','Position', [100 100 300 300]);
 
         set(0,'DefaultAxesFontName','Arial')
         set(0,'DefaultTextFontName','Arial')
@@ -321,7 +339,7 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         median_lineWidth            =   2;
         median_color                =   'k';
         scatter_jitter_value        =   0.2;
-        scatter_markerSize          =   50;
+        scatter_markerSize          =   40;
         scatter_marker_edgeColor    =   'k';
         scatter_marker_edgeWidth    =   0.5;
         scatter_color_transparency  =   0.7;
@@ -510,9 +528,11 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
             'YLim'        , lowupYlim,...
             'YTick'       , yticks,...
             'XTickLabel'  , {'Young','Elderly','MCI'},...
+            'FontSize'    , 12,...
             'LineWidth'   , 1.0        );
 
         ylabel(ParamName(ParamIndx));
+        xtickangle(45);
 
         % Extract pvalues from multiple comparison of group effect. Adding
         % it to the figure
@@ -523,9 +543,9 @@ function BoxPlotOfFittedParamMergeCondition(AllYoungParams, AllHealthyOldParams,
         PvalueHealthyOldvsMCI = multicomp_result(1,6); % HealthyOld v.s. MCI vs.  see Two-way anova for details
         PvalueYoungvsMCI = multicomp_result(2,6); % Young vs. MCI see Two-way anova for details 
 
-        title(strcat(['P12 = ',sprintf('%.2g',PvalueYoungvsHealthyOld)],...
-              ['    P23 = ',sprintf('%.2g',PvalueHealthyOldvsMCI)],...
-              ['    P13 = ',sprintf('%.2g',PvalueYoungvsMCI)]))
+%         title(strcat(['P12 = ',sprintf('%.2g',PvalueYoungvsHealthyOld)],...
+%               ['    P23 = ',sprintf('%.2g',PvalueHealthyOldvsMCI)],...
+%               ['    P13 = ',sprintf('%.2g',PvalueYoungvsMCI)]))
         
         %% Add significance bars 
         AllP = [PvalueYoungvsHealthyOld,PvalueHealthyOldvsMCI,PvalueYoungvsMCI];

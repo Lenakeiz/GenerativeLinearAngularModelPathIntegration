@@ -86,14 +86,14 @@ function varargout=adjustablesigstar(groups,stats,nosort,sigstaroptions)
     end
     if nargin<3
         nosort=0;
-        sigstaroptions.textSize  = 12;
+        sigstaroptions.textSize  = 16;
         sigstaroptions.lineWidth = 1.5;
-        sigstaroptions.barSeparation = 0.05;
+        sigstaroptions.barSeparation = 0.08;
     end
     if nargin<4
-        sigstaroptions.textSize  = 12;
+        sigstaroptions.textSize  = 16;
         sigstaroptions.lineWidth = 1.5;
-        sigstaroptions.barSeparation = 0.05;
+        sigstaroptions.barSeparation = 0.08;
     end
 
     %Check the inputs are of the right sort

@@ -422,14 +422,14 @@ exportgraphics(f,config.ResultFolder+"/"+name+"_rgmean_m3.pdf",'Resolution',300,
 
 
 %% Plotting the distribution of the single parameters (Fig. S7) 
-%Parameters = AllYoungResults.estimatedParams;
+% Parameters = AllYoungResults.estimatedParams;
 
-%Parameters = AllHealthyOldResults.estimatedParams;
+Parameters = AllHealthyOldResults.estimatedParams;
 
-AllMCIPosParams     =   MCIPos.Results.estimatedParams;
-AllMCINegParams     =   MCINeg.Results.estimatedParams;
-AllMCIUnkParams     =   MCIUnk.Results.estimatedParams;
-[Parameters, AllMCIParamsStatusIndex]= MergeMCI(AllMCIPosParams, AllMCINegParams, AllMCIUnkParams);
+% AllMCIPosParams     =   MCIPos.Results.estimatedParams;
+% AllMCINegParams     =   MCINeg.Results.estimatedParams;
+% AllMCIUnkParams     =   MCIUnk.Results.estimatedParams;
+% [Parameters, AllMCIParamsStatusIndex]= MergeMCI(AllMCIPosParams, AllMCINegParams, AllMCIUnkParams);
 
 
 ParamName = config.ParamName;
@@ -548,11 +548,11 @@ for ParamIndx=1:length(ParamName)
 
     %Adding reference line and reporting t-tests
     if ParamName(ParamIndx)=="beta"
-        [h,p,~,stat]=ttest(ParamMean,0,"Tail","right");
+        [h,p,~,stat]=ttest(ParamMean,0);
         yline(0,Color='r',LineStyle='--',LineWidth=2);
         text(1.05*xL(1),1.05*yL(2),"t("+num2str(stat.df)+")="+num2str(round(stat.tstat,2))+", p="+num2str(p), 'FontSize', 15)
     elseif ParamName(ParamIndx)=="k"
-        [h,p,~,stat]=ttest(ParamMean,1,"Tail","right");
+        [h,p,~,stat]=ttest(ParamMean,1);
         yline(1,Color='r',LineStyle='--',LineWidth=2); 
         text(1.05*xL(1),1.05*yL(2),"t("+num2str(stat.df)+")="+num2str(round(stat.tstat,2))+", p="+num2str(p), 'FontSize', 15)
     elseif ParamName(ParamIndx)=="g2"
@@ -560,11 +560,11 @@ for ParamIndx=1:length(ParamName)
         yline(1,Color='r',LineStyle='--',LineWidth=2);
         text(1.05*xL(1),1.05*yL(2),"t("+num2str(stat.df)+")="+num2str(round(stat.tstat,2))+", p="+num2str(p), 'FontSize', 15)
     elseif ParamName(ParamIndx)=="g3"
-        [h,p,~,stat]=ttest(ParamMean,1,"Tail","left");
+        [h,p,~,stat]=ttest(ParamMean,1);
         yline(1,Color='r',LineStyle='--',LineWidth=2);
         text(1.05*xL(1),1.05*yL(2),"t("+num2str(stat.df)+")="+num2str(round(stat.tstat,2))+", p="+num2str(p), 'FontSize', 15)
     elseif ParamName(ParamIndx)=="m3"
-        [h,p,~,stat]=ttest(ParamMean,1,"Tail","left");
+        [h,p,~,stat]=ttest(ParamMean,1);
         yline(1,Color='r',LineStyle='--',LineWidth=2);
         text(1.05*xL(1),1.05*yL(2),"t("+num2str(stat.df)+")="+num2str(round(stat.tstat,2))+", p="+num2str(p), 'FontSize', 15)
     end

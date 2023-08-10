@@ -25,17 +25,17 @@ GLAMPI;
 ColorPattern;
 
 %% Preparing output
-config.ResultFolder = pwd + "/Output/Fig1/YoungvsHealthyOldvsMCIMerged";
+config.ResultFolder = pwd + "/Output/Fig1/YoungvsHealthyOldvsMCIMerged_Cut9trial";
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
 end
 
 % Collecting information from output
-[YoungControlsPropDist, YoungControlsPropAng]     = getProportionalLinearAndAngularError(YoungControls, YoungControls.Results.estimatedParams);
-[HealthyControlsPropDist, HealthyControlsPropAng] = getProportionalLinearAndAngularError(HealthyControls, HealthyControls.Results.estimatedParams);
-[MCIUnkPropDist, MCIUnkPropAng]                   = getProportionalLinearAndAngularError(MCIUnk, MCIUnk.Results.estimatedParams);
-[MCINegPropDist, MCINegPropAng]                   = getProportionalLinearAndAngularError(MCINeg, MCINeg.Results.estimatedParams);
-[MCIPosPropDist, MCIPosPropAng]                   = getProportionalLinearAndAngularError(MCIPos, MCIPos.Results.estimatedParams);
+[YoungControlsPropDist, YoungControlsPropAng]     = getProportionalLinearAndAngularError(YoungControls, YoungControls.Results.estimatedParams, true);
+[HealthyControlsPropDist, HealthyControlsPropAng] = getProportionalLinearAndAngularError(HealthyControls, HealthyControls.Results.estimatedParams, false);
+[MCIUnkPropDist, MCIUnkPropAng]                   = getProportionalLinearAndAngularError(MCIUnk, MCIUnk.Results.estimatedParams, false);
+[MCINegPropDist, MCINegPropAng]                   = getProportionalLinearAndAngularError(MCINeg, MCINeg.Results.estimatedParams, false);
+[MCIPosPropDist, MCIPosPropAng]                   = getProportionalLinearAndAngularError(MCIPos, MCIPos.Results.estimatedParams, false);
 
 % MergeMCI
 MCIMergedPropDist = MergeMCI(MCIUnkPropDist, MCINegPropDist, MCIPosPropDist);
@@ -315,7 +315,7 @@ exportgraphics(f,config.ResultFolder+"/MergeCondsBox_"+plotInfo.type+".pdf",'Res
 end
 
 %% --------------------------------------------------------------------- 
-function [PropDist, PropAng] = getProportionalLinearAndAngularError(Group, Glampi_data)
+function [PropDist, PropAng] = getProportionalLinearAndAngularError(Group, Glampi_data, cuttrial)
 % Get the proportiona distance and angular error for all particpants.
 % Each value is the mean value per participant per environmental condition
 
@@ -332,8 +332,17 @@ function [PropDist, PropAng] = getProportionalLinearAndAngularError(Group, Glamp
         CondPropAngleMeanSubjs = zeros(1,subjectSize);
         
         for subj=1:subjectSize
-            CondPropDistMeanSubjs(1,subj)  = mean(cell2mat(CondPropDist{1,subj}),"omitnan");
-            CondPropAngleMeanSubjs(1,subj) = mean(cell2mat(CondPropAng{1,subj}),"omitnan");
+            if cuttrial & ~isempty(CondPropDist{1,subj})
+                cpd = cell2mat(CondPropDist{1,subj});
+                cpd = cpd(1:9);
+                cpa = cell2mat(CondPropAng{1,subj});
+                cpa = cpa(1:9);
+                CondPropDistMeanSubjs(1,subj)  = mean(cpd,"omitnan");
+                CondPropAngleMeanSubjs(1,subj) = mean(cpa,"omitnan");
+            else
+                CondPropDistMeanSubjs(1,subj)  = mean(cell2mat(CondPropDist{1,subj}),"omitnan");
+                CondPropAngleMeanSubjs(1,subj) = mean(cell2mat(CondPropAng{1,subj}),"omitnan");
+            end
         end
 
         PropDist = [PropDist;CondPropDistMeanSubjs];

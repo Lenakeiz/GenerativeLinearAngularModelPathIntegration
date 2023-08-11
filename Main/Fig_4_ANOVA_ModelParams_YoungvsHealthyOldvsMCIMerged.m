@@ -22,8 +22,13 @@ config.NumParams        =   length(config.ParamName);
 
 GLAMPI;
 
+%%
+%rerun model on young with cut9trials
+config.cut9trials = true;
+YoungControls.Results = getResultsAllConditions(YoungControls, config);
+
 %% Preparing output
-config.ResultFolder     =   pwd + "/Output/Fig4/"+config.ModelName+"/Young_HealthyOld_MCICombined";
+config.ResultFolder     =   pwd + "/Output/Fig4/"+config.ModelName+"/Young_HealthyOld_MCICombined_Cut9trial";
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
 end

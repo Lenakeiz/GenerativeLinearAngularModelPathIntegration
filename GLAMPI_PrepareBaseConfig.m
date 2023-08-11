@@ -24,5 +24,5 @@ config.TrackedInboundAngularDeltaT                      = 1;      % delta time s
 config.includeStand                                     = false;  % set to true if the model should also include for duration of time spent on each segment the time calculate from tracking data while standing at each cone
 config.useOoBtrials                                     = true;   % Are we using out of bound trials in the model?
 config.useTrialFilter                                   = true;   % when true the model will be fitted for each of the task conditions separately. If false it will discard the
-
+config.cut9trials                                       = false;  %whether to cut 9 trials for young participants
 disp('%%%%%%%%%%%%%%% Data loading complete... %%%%%%%%%%%%%%%');

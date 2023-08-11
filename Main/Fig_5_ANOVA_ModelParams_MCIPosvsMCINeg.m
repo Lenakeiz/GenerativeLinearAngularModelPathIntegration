@@ -8,10 +8,10 @@
 % conditions
 
 % Preparing the data
-GLAMPI_PrepareBaseConfig;
+%GLAMPI_PrepareBaseConfig;
 
 % Preprocessing the data
-GLAMPI_PreprocessData;
+%GLAMPI_PreprocessData;
 
 % Model fitting
 

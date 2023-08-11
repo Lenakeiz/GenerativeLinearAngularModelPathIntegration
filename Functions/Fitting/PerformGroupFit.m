@@ -109,6 +109,16 @@ for j = 1:subjectNum
         end
         
         Idx_GoodTrials      = BadExecutionTrials == 0;
+        %make sure we cut the last 3 trials for young groups to
+        %match the number of trials to other groups. In
+        %response to one of the reviewers' comments
+        
+        if config.cut9trials
+            if length(Idx_GoodTrials)>=10
+                Idx_GoodTrials(10:end) = 0;
+            end
+        end
+
         flagpos{j}          = flagpos{j}(Idx_GoodTrials);
         realReturnAngles    = realReturnAngles(Idx_GoodTrials);
         finalpos{j}         = finalpos{j}(Idx_GoodTrials);

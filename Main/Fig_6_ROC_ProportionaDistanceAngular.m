@@ -73,13 +73,13 @@ parametersName = ["Linear", "Angular"];
 
 disp("%%%%%%%%%%%%%%% ROC Curve pooled MCI vs HC - behavioural data %%%%%%%%%%%%%%%")
 rng("default");
-generateROCCurve(allParamsHC, allParamsPooledMCI,'HC', 'MCI', parametersName, config, plotInfo);
+generateROCCurve(allParamsHC, allParamsPooledMCI,'HC', 'MCI', parametersName, config, plotInfo, "HOMCI");
 
 % MCI negative vs MCI positive
 plotInfo.Title = "MCI negative / MCI positive";
 disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - behavioural data %%%%%%%%%%%%%%%");
 rng("default");
-generateROCCurve(allParamsMCINeg, allParamsMCIPos,'MCI-', 'MCI+', parametersName, config, plotInfo);
+generateROCCurve(allParamsMCINeg, allParamsMCIPos,'MCI-', 'MCI+', parametersName, config, plotInfo, "MCI");
 
 disp("%%%%%%%%%%%%%%% SVM fitting completed %%%%%%%%%%%%%%%");
 
@@ -88,7 +88,7 @@ disp("%%%%%%%%%%%%%%% SVM fitting completed %%%%%%%%%%%%%%%");
 %clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
 
 %%
-function generateROCCurve(params1, params2, params1groupName, params2groupName, parametersName, config, plotInfo)
+function generateROCCurve(params1, params2, params1groupName, params2groupName, parametersName, config, plotInfo, type)
 
 colors = config.color_scheme_npg([8 3 6 9 2 4],:);
 
@@ -102,7 +102,7 @@ set(0,'DefaultTextFontSize',plotInfo.axisSize)
 hold on;
 
 for i = 1:length(parametersName)
-    AUC = plotsingleROCCurveSVM(params1(:,i), params2(:,i), params1groupName, params2groupName, colors(i,:));
+    AUC = plotsingleROCCurveSVM(params1(:,i), params2(:,i), params1groupName, params2groupName, colors(i,:), type, parametersName(i));
     numStr = sprintf('%.2f', round(AUC.mean,2));
     legendText{1,i} = "AUC(" + parametersName(i) + ") = "+num2str(numStr);
     disp("AUC std: " + num2str(AUC.std));
@@ -155,7 +155,7 @@ clear parametersName filesName i colors f ll legendText
 end
 
 %%
-function AUCOut = plotsingleROCCurveSVM(param1, param2, param1Label, param2Label, paramColor)
+function AUCOut = plotsingleROCCurveSVM(param1, param2, param1Label, param2Label, paramColor, type, paramname)
     
     AUCOut=struct;
     
@@ -177,6 +177,13 @@ function AUCOut = plotsingleROCCurveSVM(param1, param2, param1Label, param2Label
     warning('off',"all");
 
     % Cross-validation
+    if type=="HOMCI"
+        Ratings = zeros(1000,28);
+    else
+        Ratings = zeros(1000,9);
+    end
+
+    % Cross-validation
     for i = 1:M
 
         mdl  = fitcsvm(allData,allLabels,ClassNames=[{param1Label},{param2Label}],Standardize=false, CrossVal="on", Holdout=holdout, KernelFunction="linear");
@@ -196,6 +203,8 @@ function AUCOut = plotsingleROCCurveSVM(param1, param2, param1Label, param2Label
         [X,Y,~,AUC] = perfcurve(Ytest, post_probabilities(:,2), {param2Label});
         N = length(Ytest);
 
+        Ratings(i,:) = post_probabilities(:,1)';
+
         if size(X,1)<N
             % pad 1 to make all of the repetition of the same length
             X = [X;ones(N-size(X,1),size(X,2))];
@@ -214,6 +223,24 @@ function AUCOut = plotsingleROCCurveSVM(param1, param2, param1Label, param2Label
         AUC_All(i) = AUC(1);
 
     end
+
+    if type == "HOMCI"
+        class1 = Ratings(:,1:13);
+        class1 = class1(:);
+        class2 = Ratings(:,14:28);
+        class2 = class2(:);
+        sample.ratings = [class1',class2'];
+        sample.spsizes = [13000, 15000];
+    else
+        class1 = Ratings(:,1:6);
+        class1 = class1(:);
+        class2 = Ratings(:,7:9);
+        class2 = class2(:);
+        sample.ratings = [class1',class2'];
+        sample.spsizes = [6000, 3000];
+    end
+
+    save("Data/Delong_Data_"+type+"_"+paramname+".mat", "sample")
 
     X_mean = mean(cell2mat(X_All),2,"omitnan");
     Y_mean = mean(cell2mat(Y_All),2,"omitnan"); 

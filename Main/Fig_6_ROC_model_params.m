@@ -53,10 +53,10 @@ Holdout = 0.4;
 disp("%%%%%%%%%%%%%%% Fitting SVM on parameters %%%%%%%%%%%%%%%");
 disp("%%%%%%%%%%%%%%% ROC MCI pooled vs HC - model parameters estimation %%%%%%%%%%%%%%%")
 rng("default");
-HCvsMCISVMModels_SingleParameters = getSVMModels(HealthyControlsParameters,MCIAllParameters,'HC', 'MCI', config,  NSamples, KernelFunction, Holdout);
+HCvsMCISVMModels_SingleParameters = getSVMModels(HealthyControlsParameters,MCIAllParameters,'HC', 'MCI', config,  NSamples, KernelFunction, Holdout, "HOMCI");
 disp("%%%%%%%%%%%%%%% ROC MCI positive vs MCI negative - model parameters estimation %%%%%%%%%%%%%%%")
 rng("default");
-MCIPosvsMCINegSVMModels_SingleParameters = getSVMModels(MCINegParameters, MCIPosParameters,'MCIneg', 'MCIpos', config, NSamples, KernelFunction, Holdout);
+MCIPosvsMCINegSVMModels_SingleParameters = getSVMModels(MCINegParameters, MCIPosParameters,'MCIneg', 'MCIpos', config, NSamples, KernelFunction, Holdout, "MCI");
 clear NSamples
 save Data/ROC_SVM_ModelParameters_results.mat HCvsMCISVMModels_SingleParameters MCIPosvsMCINegSVMModels_SingleParameters
 disp("%%%%%%%%%%%%%%% SVM fitting done %%%%%%%%%%%%%%%");
@@ -90,7 +90,7 @@ plotSVMResults(MCINegParameters, MCIPosParameters,'MCIneg', 'MCIpos', config, pl
 clearvars -except config YoungControls HealthyControls MCINeg MCIPos MCIUnk
 
 %%
-function SVM_out = getSVMModels(param1, param2, param1Label, param2Label, config, NSamples, kernelFunction, Holdout)
+function SVM_out = getSVMModels(param1, param2, param1Label, param2Label, config, NSamples, kernelFunction, Holdout, type)
     
     % Preparing data for the svm input
     allData = [param1; param2];
@@ -118,6 +118,7 @@ function SVM_out = getSVMModels(param1, param2, param1Label, param2Label, config
     end
 
     % Looping through each of the parameters
+    Delong_all = cell(7,1);
     for i_params = 1:n_params
 
         M = NSamples;
@@ -130,6 +131,12 @@ function SVM_out = getSVMModels(param1, param2, param1Label, param2Label, config
         warning('off');
 
         % Cross-validation
+        if type=="HOMCI"
+            Ratings = zeros(1000,28);
+        else
+            Ratings = zeros(1000,9);
+        end
+
         for i_cross_valid = 1:M
 
             mdl  = fitcsvm(curr_filtered_all_data,allLabels,ClassNames=[{param1Label},{param2Label}], Standardize=true, CrossVal="on", Holdout=holdout, KernelFunction=kernelFunction);
@@ -145,10 +152,12 @@ function SVM_out = getSVMModels(param1, param2, param1Label, param2Label, config
 
             comp_mdl_post = fitPosterior(compactModel,Xtraining,Ytraining);
             [predicted_labels,post_probabilities] = predict(comp_mdl_post,Xtest);
-
-            [X,Y,~,AUC] = perfcurve(Ytest, post_probabilities(:,2), {param2Label});
+            
+            [X,Y,~,AUC, ~, subY] = perfcurve(Ytest, post_probabilities(:,2), {param2Label});
             AUC_All(i_cross_valid) = AUC(1);
             N = length(Ytest);
+
+            Ratings(i_cross_valid,:) = post_probabilities(:,1)';
 
             if size(X,1)<N
                 % pad 1 to make all of the repetition of the same length
@@ -166,6 +175,15 @@ function SVM_out = getSVMModels(param1, param2, param1Label, param2Label, config
             Y_All{:,i_cross_valid} = Y(:,1);
 
         end
+        
+        if type == "HOMCI"
+            class1 = Ratings(:,1:13);
+            class2 = Ratings(:,14:28);
+        else
+            class1 = Ratings(:,1:6);
+            class2 = Ratings(:,7:9);
+        end
+        Delong_all{i_params} = [class1(:)', class2(:)'];
 
         warning("on");
         X_mean = mean(cell2mat(X_All),2,"omitnan");
@@ -184,9 +202,20 @@ function SVM_out = getSVMModels(param1, param2, param1Label, param2Label, config
             ' AUC = ',...
             sprintf('%.3f,', SVM_out.models{i_params,1}.mean),...
             ]);
-
     end
     warning('on')
+    
+    Delong_all = cell2mat(Delong_all);
+    %save for later Delong test
+    if type == "HOMCI"
+        sample.ratings = Delong_all;
+        sample.spsizes = [13000,15000];
+    else
+        sample.ratings = Delong_all;
+        sample.spsizes = [6000,3000]; 
+    end
+    save("Data/Delong_Model_"+type+".mat", "sample")
+
 
 end
 

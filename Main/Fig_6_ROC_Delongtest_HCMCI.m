@@ -21,15 +21,6 @@ config.NumParams        =   length(config.ParamName);
 
 GLAMPI
 
-% Preparing output
-config.ResultFolder = pwd + "/Output/Fig6/ModelParameters/beta_k_g2_g3_m3_sigma_nu";
-if ~exist(config.ResultFolder, 'dir')
-   mkdir(config.ResultFolder);
-end
-
-% Generating color scheme for our paper
-ColorPattern;
-
 %% Collecting behavioral information from output
 % To allow fair comparisons wer are going to remove participants for which
 % our model did not fit. See Methods for details on participants were excluded from the analysis.
@@ -61,7 +52,7 @@ MCIAllParameters          = [MCIUnkParameters; MCINegParameters; MCIPosParameter
 disp("%%%%%%%%%%%%%%% ROC MCI pooled vs HC - model parameters estimation %%%%%%%%%%%%%%%")
 rng("default");
 
-param_idx = 1;
+param_idx = 7;
 Model_dat = [HealthyControlsParameters(:,param_idx);MCIAllParameters(:,param_idx)];
 label1     = cell(height(HealthyControlsParameters(:,param_idx)),1);label1(:)  = {'HC'};
 label2     = cell(height(MCIAllParameters(:,param_idx)),1);label2(:)  = {'MCI'};
@@ -73,7 +64,13 @@ label1     = cell(height(allBehavHC(:,data_idx)),1);label1(:)  = {'HC'};
 label2     = cell(height(allBehavPooledMCI(:,data_idx)),1);label2(:)  = {'MCI'};
 Behav_label  = [label1;label2];
 
-HCvsMCISVMModels_SingleParameters = DelongtestwithSVM(Model_dat, Model_label, Behav_dat, Behav_label, 'HC', 'MCI');
+Delong_output = DelongtestwithSVM(Model_dat, Model_label, Behav_dat, Behav_label, 'HC', 'MCI');
+
+%carry out a two sample Kolmogorov-Smirnov test
+
+% norm_vector1 = (Delong_output.AUCbehav - mean(Delong_output.AUCbehav)) / std(Delong_output.AUCbehav);
+% norm_vector2 = (Delong_output.AUCmodel - mean(Delong_output.AUCmodel)) / std(Delong_output.AUCmodel);
+% [h, p, ksstat] = kstest2(norm_vector1, norm_vector2);
 
 
 %%
@@ -89,8 +86,12 @@ function Delong_output = DelongtestwithSVM(Model_dat, Model_label, Behav_dat, Be
     AUC_All_behav = zeros(1,M);
 
     allPvalue = cell(1,M);
-
+    NUMHC = zeros(1,M);
+    
     warning('off');
+
+    postp_model = zeros(72,1000);
+    postp_behav = zeros(72,1000);
 
     for i_cross_valid = 1:M
         %model
@@ -108,10 +109,12 @@ function Delong_output = DelongtestwithSVM(Model_dat, Model_label, Behav_dat, Be
         comp_mdl_post = fitPosterior(compactModel,Xtraining,Ytraining);
         [~,post_probabilities_model] = predict(comp_mdl_post,Xtest);
         
-        [X,Y,~,AUC] = perfcurve(Ytest, post_probabilities_model(:,2), {param2Label});
-        AUC_All_model(i_cross_valid) = AUC(1);
+        [X,Y,~,AUC_model] = perfcurve(Ytest, post_probabilities_model(:,2), {param2Label});
+        AUC_All_model(i_cross_valid) = AUC_model(1);
         N = length(Ytest);
+        postp_model(testingIDs,i_cross_valid) = post_probabilities_model(:,1);
 
+        NUMHC(i_cross_valid) =sum(Ytest == "HC");
         if size(X,1)<N
             % pad 1 to make all of the repetition of the same length
             X = [X;ones(N-size(X,1),size(X,2))];
@@ -128,21 +131,21 @@ function Delong_output = DelongtestwithSVM(Model_dat, Model_label, Behav_dat, Be
         Y_All_model{:,i_cross_valid} = Y(:,1);
         
         %data
-        mdl_behav  = fitcsvm(Behav_dat,Behav_label,ClassNames=[{param1Label},{param2Label}],Standardize=true, CrossVal="on", Holdout=0.4, KernelFunction="linear");
-        trainingIDs = training(mdl_behav.Partition);
         Xtraining = Behav_dat(trainingIDs,:);
         Ytraining = Behav_label(trainingIDs);
-
-        testingIDs = test(mdl_behav.Partition);
         Xtest = Behav_dat(testingIDs,:);
         Ytest = Behav_label(testingIDs);
-        compactModel = mdl_behav.Trained{1};
 
-        comp_mdl_post = fitPosterior(compactModel,Xtraining,Ytraining);
+        mdl_behav  = fitcsvm(Xtraining,Ytraining,ClassNames=[{param1Label},{param2Label}],Standardize=true, KernelFunction="linear");
+        comp_mdl_post = fitPosterior(mdl_behav,Xtraining,Ytraining);
         
         [~,post_probabilities_data] = predict(comp_mdl_post,Xtest);
-        [X,Y,~,AUC] = perfcurve(Ytest, post_probabilities_data(:,2), {param2Label});
-        N = length(Ytest);
+        [X,Y,~,AUC_behav] = perfcurve(Ytest, post_probabilities_data(:,2), {param2Label});
+        N = length(Ytest);       
+
+        postp_behav(testingIDs,i_cross_valid) = post_probabilities_data(:,1);
+
+        AUC_All_behav(i_cross_valid) = AUC_behav(1);
 
         if size(X,1)<N
             % pad 1 to make all of the repetition of the same length
@@ -159,7 +162,7 @@ function Delong_output = DelongtestwithSVM(Model_dat, Model_label, Behav_dat, Be
         X_All_behav{:,i_cross_valid} = X(:,1);
         Y_All_behav{:,i_cross_valid} = Y(:,1);
 
-        AUC_All_behav(i_cross_valid) = AUC(1);
+
         
         %Delong test
         %make the sample
@@ -191,8 +194,30 @@ function Delong_output = DelongtestwithSVM(Model_dat, Model_label, Behav_dat, Be
     AUCOut_behav.std  = std(AUC_All_behav,0,"omitnan");
 
     allP = cell2mat(allPvalue);
-    p005 = sum(allP<0.05);
+    p005ratio = sum(allP<0.05)/length(allP);
 
+    Delong_output.pvalueratio = p005ratio;
+    Delong_output.AUCmodel = AUC_All_model;
+    Delong_output.AUCbehav = AUC_All_behav;
+
+
+    %AUC on mean posterior values
+    mean_post_model = mean(postp_model,2);
+    %[X,Y,~,AUC_model] = perfcurve(Model_label, mean_post_model, {param1Label});
+
+    mean_post_behav = mean(postp_behav,2);
+    %[X,Y,~,AUC_behav] = perfcurve(Model_label, mean_post_behav, {param1Label});
+
+    countHC = sum(cellfun(@(x) strcmp(x, 'HC'), Model_label));
+    countMCI = sum(cellfun(@(x) strcmp(x, 'MCI'), Model_label));
+    sample.spsizes = [countHC, countMCI];
+    sample.ratings = [mean_post_model';mean_post_behav'];
+
+    [aucs, delongcov] = fastDeLong(sample);
+    meanpost_pvalue = calpvalue(aucs, delongcov);
+    Delong_output.meanpost_pvalue = meanpost_pvalue;
+    Delong_output.delongcov = delongcov;
+ 
 end
 
 

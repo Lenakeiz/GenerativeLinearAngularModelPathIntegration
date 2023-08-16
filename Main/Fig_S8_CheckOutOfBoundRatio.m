@@ -1,8 +1,13 @@
 %% Script to check the out-of-bound ratio in different groups of data
 % Zilong Ji, UCL, 2022 zilong.ji@ucl.ac.uk
 
-%to save time, make sure all the data all alrealy loaded
-%otherwise load the data first
+% Preparing the data
+GLAMPI_PrepareBaseConfig
+
+% Preprocessing the data
+GLAMPI_PreprocessData
+
+%%
 
 %get the out-of-bound ratio for each participant under each condition
 OoBratioYoung = getOoBRatio(YoungControls);
@@ -11,7 +16,7 @@ OoBratioMCIUnk = getOoBRatio(MCIUnk);
 OoBratioMCIPos = getOoBRatio(MCIPos);
 OoBratioMCINeg = getOoBRatio(MCINeg);
 
-config.ResultFolder = pwd + "/Output/DataFigures/OoBRatio";
+config.ResultFolder = pwd + "/Output/FigS8";
 if ~exist(config.ResultFolder, 'dir')
    mkdir(config.ResultFolder);
 end
@@ -250,6 +255,8 @@ function BoxPlotOfMergeCondition(Young, HO, MCIUnk, MCIPos, MCINeg, multicomp_ta
     %% Add significance bars 
     AllP = [PvalueYoungvsHealthyOld,PvalueYoungvsMCIUnk,PvalueYoungvsMCIPos, PvalueYoungvsMCINeg];
     Xval = [[1,2];[1,3];[1,4];[1,5]];
+    %AllP = PvalueYoungvsHealthyOld;
+    %Xval = [1,2];
     %select those P value smaller than 0.05 (only add line when p<0.05)
     % * represents p<=0.05
     % ** represents p<=1E-2

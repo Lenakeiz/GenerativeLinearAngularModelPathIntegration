@@ -1,8 +1,15 @@
 %% Script to check the age and education difference in MCI+ and MCI-
 % Zilong Ji, UCL, 2022 zilong.ji@ucl.ac.uk
 
+% Preparing the data
+GLAMPI_PrepareBaseConfig
+
+% Preprocessing the data
+GLAMPI_PreprocessData
+
 %load('Data/HowettBrain2019_Dataset.mat');
 
+%%
 ColorPattern; 
 
 MCINeg_ID = {'A093863_13', 'A093863_35', 'A093863_42', 'A093863_47', 'A093863_53', 'A093863_55', 'A093863_56', 'A093863_66', 'A093863_69', 'A093863_75', 'A093863_81', 'A093863_08', 'A093863_04', 'A093863_50'};
@@ -48,7 +55,7 @@ for i=1:size(HO_ID,2)
 end
 
 %make dir
-ResultFolder = pwd + "/Output/FigS10";
+ResultFolder = pwd + "/Output/FigS7";
 
 if ~exist(ResultFolder, 'dir')
    mkdir(ResultFolder);
@@ -94,7 +101,7 @@ hold on;
 histogram(mcipos_ed, 'BinEdges', linspace(min([mcipos_ed, mcipos_ed])-5, max([mcipos_ed, mcipos_ed])+5, numBins), 'DisplayName', 'MCIPos', FaceColor=[0.3020    0.7333    0.8353]);
 hold off;
 
-xlabel('Education in years');
+xlabel('Years in education');
 ylabel('Counts');
 legend;
 

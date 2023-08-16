@@ -41,12 +41,14 @@ if ~exist(config.ResultFolder, 'dir')
 end
 
 %%
-histgramplot(YoungL1, HOL1, MCIUnkL1, MCIPosL1, MCINegL1, 'Leg 1', config)
+histgramplot(YoungL1, HOL1, MCIUnkL1, MCIPosL1, MCINegL1, "Leg 1", config)
+histgramplot(YoungL2, HOL2, MCIUnkL2, MCIPosL2, MCINegL2, "Leg 2", config)
+histgramplot(YoungA2, HOA2, MCIUnkA2, MCIPosA2, MCINegA2, "Angle", config)
 
 %%
 function histgramplot(Young, HO, MCIUnk, MCIPos, MCINeg, type, config)
 
-    f = figure('visible','on','Position', [100 100 500 500]);
+    f = figure('visible','off','Position', [100 100 500 700]);
 
     set(0,'DefaultAxesFontName','Arial')
     set(0,'DefaultTextFontName','Arial')
@@ -61,18 +63,59 @@ function histgramplot(Young, HO, MCIUnk, MCIPos, MCINeg, type, config)
 
     subplot(5,1,1)
     histogram(Young, 50, 'FaceColor', colorY);
+    title('Young');
+    box off; 
+    if strcmp(type, "Leg 1") || strcmp(type, "Leg 2")
+        xlim([1,5]);
+    else
+        xlim([0,3]);
+    end
 
     subplot(5,1,2)
     histogram(HO, 50, 'FaceColor', colorH);
+    title('Healthy Elderly');
+    box off; 
+    if strcmp(type, "Leg 1") || strcmp(type, "Leg 2")
+        xlim([1,5]);
+    else
+        xlim([0,3]);
+    end
 
     subplot(5,1,3)
     histogram(MCIUnk, 50, 'FaceColor', colorU);
+    title('MCIUnk');
+    box off; 
+    if strcmp(type, "Leg 1") || strcmp(type, "Leg 2")
+        xlim([1,5]);
+    else
+        xlim([0,3]);
+    end
 
     subplot(5,1,4)
     histogram(MCIPos, 50, 'FaceColor', colorP);
+    title('MCIPos');
+    box off; 
+    if strcmp(type, "Leg 1") || strcmp(type, "Leg 2")
+        xlim([1,5]);
+    else
+        xlim([0,3]);
+    end
 
     subplot(5,1,5)
     histogram(MCINeg, 50, 'FaceColor', colorN);
+    title('MCINeg');
+    box off; 
+    if strcmp(type, "Leg 1") || strcmp(type, "Leg 2")
+        xlim([1,5]);
+    else
+        xlim([0,3]);
+    end
+    
+    if strcmp(type, "Leg 1") || strcmp(type, "Leg 2")
+        xlabel(type+" (meters)");
+    else
+        xlabel(type+" (radians)");
+    end
     
     exportgraphics(f,config.ResultFolder+"/"+type+".png",'Resolution',300);
 end

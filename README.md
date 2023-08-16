@@ -1,4 +1,5 @@
-Generative Linear-Angular Model of Path Integration (GLAMPI)  
+Generative Linear-Angular Model of Path Integration (GLAMPI)
+[![DOI](https://zenodo.org/badge/457836867.svg)](https://zenodo.org/badge/latestdoi/457836867)
 ======
 
 ![Figure 1](https://github.com/Lenakeiz/GenerativeLinearAngularModelPathIntegration/blob/main/Images/Fig1a.png)

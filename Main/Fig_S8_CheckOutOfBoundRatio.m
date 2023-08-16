@@ -34,28 +34,42 @@ function OoBRatio_all = getOoBRatio(Group)
     OoBRatio_all = zeros(num-length(bpids),3);
 
     ind = 1;
+    num_oob = 0;
+    num_total = 0;
     for i = 1:num
         if ismember(i, bpids)
             continue;
         end
         participant_i = Group.CondTable{i};
+        BadExecution_i = Group.Reconstructed{i}.BadExecution;
 
         conditions_i = participant_i.Condition;
         oob_i = participant_i.OutOfBound;
         for cond = 1:3
             oob_i_c = oob_i(conditions_i == cond);
+            bexc_i_c = BadExecution_i(conditions_i == cond);
+
             %select the first 9 trials for young
             if length(oob_i_c)>10
                 oob_i_c = oob_i_c(1:9);
+                bexc_i_c = bexc_i_c(1:9);
             end
+            %filter oob_i_c with BadExecution=0
+            oob_i_c = oob_i_c(bexc_i_c==0);
             %each participant, under condition cond, calculate the OoB
             %ratio under that condition
             oob_i_c_ratio = sum(oob_i_c==1)/length(oob_i_c);
 
             OoBRatio_all(ind, cond) = oob_i_c_ratio;
+
+            num_oob = num_oob + sum(oob_i_c==1);
+            num_total = num_total + length(oob_i_c);
         end
         ind = ind +1;
     end
+    num_oob
+    num_total
+    num_oob/num_total
 end
 
 %%

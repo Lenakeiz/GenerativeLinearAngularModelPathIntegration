@@ -22,7 +22,9 @@ Requires the following MATLAB toolboxes:
 - [Ecoometric toolbox](https://uk.mathworks.com/products/econometrics.html?s_tid=srchtitle_econometrics%20toolbox_1)
 - [Mapping toolbox](https://uk.mathworks.com/products/mapping.html)
 
-We also used a customised version of [Rob Campbell (2023) sigstar](https://github.com/raacampbell/sigstar) which is included already in the project files.
+We use a customised version of [Rob Campbell (2023) sigstar](https://github.com/raacampbell/sigstar) which is included already in the project files.
+
+We use a fast version of the [DeLong algorithm](https://github.com/PamixSun/DeLongUI) (Sun and Xu, 2014) whcih is already included in the project files. 
 
 ## Use
 Scripts to reproduce the plots and analysis in the paper can be found into the **Main** folder. 
